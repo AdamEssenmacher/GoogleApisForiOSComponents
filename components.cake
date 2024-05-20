@@ -28,7 +28,7 @@ Artifact GOOGLE_SIGN_IN_ARTIFACT      = new Artifact ("Google.SignIn",          
 Artifact GOOGLE_TAG_MANAGER_ARTIFACT  = new Artifact ("Google.TagManager",            "7.4.0.2",  "11.0", ComponentGroup.Google, csprojName: "TagManager");
 
 // MLKit artifacts available to be built. These artifacts generate NuGets.
-Artifact MLKIT_CORE_ARTIFACT                     = new Artifact ("MLKit.Core",                        "5.0.0",    "10.0", ComponentGroup.MLKit, csprojName: "Core");
+Artifact MLKIT_CORE_ARTIFACT                     = new Artifact ("MLKit.Core",                        "11.0.0-alpha1",   "12.0", ComponentGroup.MLKit, csprojName: "Core");
 Artifact MLKIT_TEXT_RECOGNITION                  = new Artifact ("MLKit.TextRecognition",             "1.0.0.3",  "10.0", ComponentGroup.MLKit, csprojName: "TextRecognition");
 Artifact MLKIT_VISION                            = new Artifact ("MLKit.Vision",                      "3.0.0",    "10.0", ComponentGroup.MLKit, csprojName: "Vision");
 Artifact MLKIT_TEXT_RECOGNITION_LATIN            = new Artifact ("MLKit.TextRecognition.Latin",       "1.4.0.3",  "10.0", ComponentGroup.MLKit, csprojName: "TextRecognitionLatin");
@@ -37,7 +37,7 @@ Artifact MLKIT_TEXT_RECOGNITION_DEVANAGARI       = new Artifact ("MLKit.TextReco
 Artifact MLKIT_TEXT_RECOGNITION_JAPANESE         = new Artifact ("MLKit.TextRecognition.Japanese",    "1.0.0.3",  "10.0", ComponentGroup.MLKit, csprojName: "TextRecognitionJapanese");
 Artifact MLKIT_TEXT_RECOGNITION_KOREAN           = new Artifact ("MLKit.TextRecognition.Korean",      "1.0.0.3",  "10.0", ComponentGroup.MLKit, csprojName: "TextRecognitionKorean");
 Artifact MLKIT_FACE_DETECTION                    = new Artifact ("MLKit.FaceDetection",               "1.5.0",    "10.0", ComponentGroup.MLKit, csprojName: "FaceDetection");
-Artifact MLKIT_BARCODE_SCANNING                  = new Artifact ("MLKit.BarcodeScanning",             "1.6.0",    "10.0", ComponentGroup.MLKit, csprojName: "BarcodeScanning");
+Artifact MLKIT_BARCODE_SCANNING                  = new Artifact ("MLKit.BarcodeScanning",             "5.0.0-alpha1",    "12.0", ComponentGroup.MLKit, csprojName: "BarcodeScanning");
 Artifact MLKIT_DIGITAL_INK_RECOGNITION           = new Artifact ("MLKit.DigitalInkRecognition",       "1.5.0",    "10.0", ComponentGroup.MLKit, csprojName: "DigitalInkRecognition");
 Artifact MLKIT_IMAGE_LABELING                    = new Artifact ("MLKit.ImageLabeling",               "1.5.0",    "10.0", ComponentGroup.MLKit, csprojName: "ImageLabeling");
 Artifact MLKIT_OBJECT_DETECTION                  = new Artifact ("MLKit.ObjectDetection",             "1.5.0",    "10.0", ComponentGroup.MLKit, csprojName: "ObjectDetection");
@@ -70,7 +70,7 @@ var ARTIFACTS = new Dictionary<string, Artifact> {
 	{ "Google.SignIn",                GOOGLE_SIGN_IN_ARTIFACT },
 	{ "Google.TagManager",            GOOGLE_TAG_MANAGER_ARTIFACT },
 
-	// { "MLKit.Core",                       MLKIT_CORE_ARTIFACT },
+	{ "MLKit.Core",                       MLKIT_CORE_ARTIFACT },
 	// { "MLKit.TextRecognition",            MLKIT_TEXT_RECOGNITION },
 	// { "MLKit.Vision",                     MLKIT_VISION },
 	// { "MLKit.TextRecognition.Latin",      MLKIT_TEXT_RECOGNITION_LATIN },
@@ -79,7 +79,7 @@ var ARTIFACTS = new Dictionary<string, Artifact> {
 	// { "MLKit.TextRecognition.Japanese",   MLKIT_TEXT_RECOGNITION_JAPANESE },
 	// { "MLKit.TextRecognition.Korean",     MLKIT_TEXT_RECOGNITION_KOREAN },
 	// { "MLKit.FaceDetection",              MLKIT_FACE_DETECTION },
-	// { "MLKit.BarcodeScanning",            MLKIT_BARCODE_SCANNING },
+	{ "MLKit.BarcodeScanning",            MLKIT_BARCODE_SCANNING },
 	// { "MLKit.ImageLabeling",              MLKIT_IMAGE_LABELING },
 	// { "MLKit.ObjectDetection",            MLKIT_OBJECT_DETECTION },
 	// { "MLKit.DigitalInkRecognition",      MLKIT_DIGITAL_INK_RECOGNITION },
@@ -237,10 +237,10 @@ void SetArtifactsPodSpecs ()
 
 	// MLKit components
 	MLKIT_CORE_ARTIFACT.PodSpecs = new [] { 
-		PodSpec.Create ("MLKitCore",                       "5.0.0"),
-		PodSpec.Create ("MLKitVision",                     "3.0.0"),
-		PodSpec.Create ("MLImage",                         "1.0.0-beta2"),
-		PodSpec.Create ("MLKitMDD",                        "3.0.0"),
+		PodSpec.Create ("MLKitCore",                       "11.0.0"),
+		PodSpec.Create ("MLKitVision",                     "7.0.0"),
+		PodSpec.Create ("MLImage",                         "1.0.0-beta5"),
+		PodSpec.Create ("MLKitMDD",                        "7.0.0"),
 		PodSpec.Create ("SSZipArchive",                    "2.4.2",       frameworkSource: FrameworkSource.Pods),
 	};
 	MLKIT_TEXT_RECOGNITION.PodSpecs = new [] { 
@@ -268,7 +268,7 @@ void SetArtifactsPodSpecs ()
 		PodSpec.Create ("MLKitFaceDetection",              "1.5.0")
 	};
 	MLKIT_BARCODE_SCANNING.PodSpecs = new [] { 
-		PodSpec.Create ("MLKitBarcodeScanning",            "1.6.0")
+		PodSpec.Create ("MLKitBarcodeScanning",            "5.0.0")
 	};
 	MLKIT_DIGITAL_INK_RECOGNITION.PodSpecs = new [] { 
 		PodSpec.Create ("MLKitDigitalInkRecognition",      "1.5.0")
