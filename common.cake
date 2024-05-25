@@ -241,7 +241,7 @@ void BuildXcodeFatLibrary (FilePath xcodeProject, string target, Platform [] pla
 			Sdk = sdk,
 			Arch = arch,
 			Configuration = "Release",
-			Verbose = true
+			Verbose = false
 		});
 
 		var outputPath = workingDirectory.Combine("build").Combine($"Release-{sdk}").Combine (target).CombineWithFilePath($"lib{libraryTitle}.a");
@@ -281,7 +281,7 @@ void BuildXcodeFatFramework (FilePath xcodeProject, string target, Platform [] p
 			Sdk = sdk,
 			Arch = arch,
 			Configuration = "Release",
-			Verbose = true
+			Verbose = false
 		});
 
 		var outputPath = workingDirectory.Combine ("build").Combine ($"Release-{sdk}").Combine (target).Combine (fatFramework);
@@ -341,7 +341,7 @@ void BuildXcodeFatFramework (FilePath xcodeProject, PodSpec [] podSpecs, Platfor
 				Sdk = sdk,
 				Arch = arch,
 				Configuration = "Release",
-				Verbose = true,
+				Verbose = false,
 				BuildSettings = buildSettingsCopy
 			});
 
@@ -425,7 +425,7 @@ void BuildXcodeXcframework (FilePath xcodeProject, PodSpec [] podSpecs, Platform
 				Archive = true,
 				ArchivePath = archiveDirectory.ToString (),
 				Sdk = sdk.Value,
-				Verbose = true,
+				Verbose = false,
 				BuildSettings = buildSettingsCopy
 			};
 

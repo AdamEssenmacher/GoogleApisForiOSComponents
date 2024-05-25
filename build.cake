@@ -40,7 +40,7 @@ void BuildCake (string target)
 	var cakeSettings = new CakeSettings { 
 		ToolPath = GetCakeToolPath (),
 		Arguments = new Dictionary<string, string> { { "target", target }, { "names", NAMES } },
-		Verbosity = Verbosity.Diagnostic
+		Verbosity = Verbosity.Normal
 	};
 
 	// Run the script from the subfolder
@@ -166,7 +166,7 @@ Task ("libs")
 	var msBuildSettings = new DotNetCoreMSBuildSettings ();
 	var dotNetCoreBuildSettings = new DotNetCoreBuildSettings { 
 		Configuration = "Release",
-		Verbosity = DotNetCoreVerbosity.Diagnostic,
+		Verbosity = DotNetCoreVerbosity.Normal,
 		MSBuildSettings = msBuildSettings
 	};
 	
@@ -183,7 +183,7 @@ Task ("samples")
 	var msBuildSettings = new DotNetCoreMSBuildSettings ();
 	var dotNetCoreBuildSettings = new DotNetCoreBuildSettings { 
 		Configuration = "Release",
-		Verbosity = DotNetCoreVerbosity.Diagnostic,
+		Verbosity = DotNetCoreVerbosity.Normal,
 		MSBuildSettings = msBuildSettings
 	};
 	
@@ -204,7 +204,7 @@ Task ("nuget")
 		NoRestore = true,
 		NoBuild = true,
 		OutputDirectory = "./output/",
-		Verbosity = DotNetCoreVerbosity.Diagnostic,
+		Verbosity = DotNetCoreVerbosity.Normal,
 	};
 
 	foreach (var target in SOURCES_TARGETS)
