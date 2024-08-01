@@ -86,7 +86,24 @@ Even with that Visual Studio can still be very temperamental with long file path
 
 1. Close Visual Studio
 2. Make sure you didn't skip step 1.
-3. Clear your local NuGet cache AND your local XamarinBuildDownload cache.
+3. Clear your local NuGet cache AND your local XamarinBuildDownload cache:
+   - In your Windows Terminal (Powershell):
+     ```ps
+     dotnet nuget locals all -c # Clear all Nuget cache
+     cd $env:localappdata # Go to your AppData\Local folder
+     Get-ChildItem -Filter "*Xamarin*" # Check for your XamarinBuildDownloadCache folder
+     rm -Force -Recurse XamarinBuildDownloadCache # Delete that folder
+     Get-ChildItem -Filter "*Xamarin*" # Confirm that it has been deleted
+     ```
+   - In your Mac Terminal:
+     ```zsh
+     setopt interactive_comments
+     # Now comment is enabled
+     cd ~/Library/Caches # Go to your Caches folder
+     ls -d *Xamarin* # Check for your XamarinBuildDownload folder
+     rm -rf XamarinBuildDownload # Delete that folder
+     ls -d *Xamarin* # Confirm that it has been deleted
+     ```
 4. Make sure you didn't skip step 3.
 5. Delete your project `bin` and `obj` folders.
 6. Make sure you didn't skip step 5.
