@@ -15,6 +15,13 @@
   <Target Name="_FCrDownloadedItems">
     <ItemGroup Condition="'$(FirebaseWithoutAdIdSupport)'!='True'">
       <!-- From https://dl.google.com/firebase/ios/analytics/cc4d75392af34c62/GoogleAppMeasurement-10.24.0.tar.gz -->
+      <NativeReference Include="$(_GoogleAppMeasurementSDKBaseFolder)GoogleAppMeasurement.xcframework">
+        <Kind>Framework</Kind>
+        <SmartLink>True</SmartLink>
+        <ForceLoad>True</ForceLoad>
+        <LinkerFlags>-ObjC -lc++ -lsqlite3 -lz</LinkerFlags>
+        <Frameworks>StoreKit</Frameworks>
+      </NativeReference>
       <NativeReference Include="$(_GoogleAppMeasurementSDKBaseFolder)GoogleAppMeasurementIdentitySupport.xcframework">
         <Kind>Framework</Kind>
         <SmartLink>True</SmartLink>
@@ -23,7 +30,7 @@
         <Frameworks>StoreKit</Frameworks>
       </NativeReference>
     </ItemGroup>
-    <ItemGroup>
+    <ItemGroup Condition="'$(FirebaseWithoutAdIdSupport)'=='True'">
       <!-- From https://dl.google.com/firebase/ios/analytics/cc4d75392af34c62/GoogleAppMeasurement-10.24.0.tar.gz -->
       <NativeReference Include="$(_GoogleAppMeasurementSDKBaseFolder)GoogleAppMeasurement.xcframework">
         <Kind>Framework</Kind>
