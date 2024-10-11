@@ -179,6 +179,11 @@ namespace Google.Maps
 
 			return resultArray;
 		}
+
+		// FOUNDATION_EXPORT NSUInteger GMSStyleHashForString (NSString * _Nonnull string);
+		[DllImport ("__Internal", EntryPoint = "GMSStyleHashForString")]
+		extern internal static nuint _StyleHashForString(NSString @string);
+		public static nuint StyleHashForString(NSString @string) => _StyleHashForString(@string);
 	}
 }
 

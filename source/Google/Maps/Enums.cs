@@ -76,4 +76,14 @@ namespace Google.Maps
 		RequiredAndHidesOptional,
 		OptionalAndHidesLowerPriority
 	}
+
+	[Flags]
+	[Native]
+	public enum MapCapabilityFlags : ulong
+	{
+		None = 0x0,
+		AdvancedMarkers = 1uL << 0,
+		DataDrivenStyling = 1uL << 1,
+		SpritePolylines = 1uL << 2
+	}
 }

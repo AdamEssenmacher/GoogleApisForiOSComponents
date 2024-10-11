@@ -20,7 +20,7 @@ Artifact FIREBASE_STORAGE_ARTIFACT                 = new Artifact ("Firebase.Sto
 // Google artifacts available to be built. These artifacts generate NuGets.
 Artifact GOOGLE_ANALYTICS_ARTIFACT    = new Artifact ("Google.Analytics",             "3.20.0.2", "11.0",  ComponentGroup.Google, csprojName: "Analytics");
 Artifact GOOGLE_CAST_ARTIFACT         = new Artifact ("Google.Cast",                  "4.7.0.1",  "12.0", ComponentGroup.Google, csprojName: "Cast");
-Artifact GOOGLE_MAPS_ARTIFACT         = new Artifact ("Google.Maps",                  "6.0.1.1",  "12.0", ComponentGroup.Google, csprojName: "Maps");
+Artifact GOOGLE_MAPS_ARTIFACT         = new Artifact ("Google.Maps",                  "9.1.1.0",  "15.0", ComponentGroup.Google, csprojName: "Maps");
 Artifact GOOGLE_MOBILE_ADS_ARTIFACT   = new Artifact ("Google.MobileAds",             "8.13.0.3", "11.0", ComponentGroup.Google, csprojName: "MobileAds");
 Artifact GOOGLE_UMP_ARTIFACT          = new Artifact ("Google.UserMessagingPlatform", "1.1.0.1",  "11.0", ComponentGroup.Google, csprojName: "UserMessagingPlatform");
 Artifact GOOGLE_PLACES_ARTIFACT       = new Artifact ("Google.Places",                "6.0.0.1",  "12.0", ComponentGroup.Google, csprojName: "Places");
