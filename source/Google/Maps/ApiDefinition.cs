@@ -139,27 +139,27 @@ namespace Google.Maps
 		CLLocationCoordinate2D Coordinate { get; }
 
 		[NullAllowed]
-		[Export ("thoroughfare")]
+		[Export ("thoroughfare", ArgumentSemantic.Copy)]
 		string Thoroughfare { get; }
 
 		[NullAllowed]
-		[Export ("locality")]
+		[Export ("locality", ArgumentSemantic.Copy)]
 		string Locality { get; }
 
 		[NullAllowed]
-		[Export ("subLocality")]
+		[Export ("subLocality", ArgumentSemantic.Copy)]
 		string SubLocality { get; }
 
 		[NullAllowed]
-		[Export ("administrativeArea")]
+		[Export ("administrativeArea", ArgumentSemantic.Copy)]
 		string AdministrativeArea { get; }
 
 		[NullAllowed]
-		[Export ("postalCode")]
+		[Export ("postalCode", ArgumentSemantic.Copy)]
 		string PostalCode { get; }
 
 		[NullAllowed]
-		[Export ("country")]
+		[Export ("country", ArgumentSemantic.Copy)]
 		string Country { get; }
 
 		[NullAllowed]
@@ -235,15 +235,15 @@ namespace Google.Maps
 		[New]
 		CLLocationCoordinate2D Target { get; set; }
 
-		[Export ("zoom")]
+		[Export ("zoom", ArgumentSemantic.Assign)]
 		[New]
 		float Zoom { get; set; }
 
-		[Export ("bearing")]
+		[Export ("bearing", ArgumentSemantic.Assign)]
 		[New]
 		double Bearing { get; set; }
 
-		[Export ("viewingAngle")]
+		[Export ("viewingAngle", ArgumentSemantic.Assign)]
 		[New]
 		double ViewingAngle { get; set; }
 
@@ -298,18 +298,18 @@ namespace Google.Maps
 		[Export ("position", ArgumentSemantic.Assign)]
 		CLLocationCoordinate2D Position { get; set; }
 
-		[Export ("radius")]
+		[Export ("radius", ArgumentSemantic.Assign)]
 		double Radius { get; set; }
 
-		[Export ("strokeWidth")]
+		[Export ("strokeWidth", ArgumentSemantic.Assign)]
 		nfloat StrokeWidth { get; set; }
 
 		[NullAllowed]
-		[Export ("strokeColor", ArgumentSemantic.Assign)]
+		[Export ("strokeColor")]
 		UIColor StrokeColor { get; set; }
 
 		[NullAllowed]
-		[Export ("fillColor", ArgumentSemantic.Assign)]
+		[Export ("fillColor")]
 		UIColor FillColor { get; set; }
 
 		[Static, Export ("circleWithPosition:radius:")]
@@ -384,14 +384,14 @@ namespace Google.Maps
 	interface GroundOverlay
 	{
 
-		[Export ("position", ArgumentSemantic.Assign)]
+		[Export ("position")]
 		CLLocationCoordinate2D Position { get; set; }
 
-		[Export ("anchor", ArgumentSemantic.Assign)]
+		[Export ("anchor")]
 		CGPoint Anchor { get; set; }
 
 		[NullAllowed]
-		[Export ("icon", ArgumentSemantic.Assign)]
+		[Export ("icon")]
 		UIImage Icon { get; set; }
 
 		// @property(nonatomic, assign) float opacity;
@@ -402,7 +402,7 @@ namespace Google.Maps
 		double Bearing { get; set; }
 
 		[NullAllowed]
-		[Export ("bounds", ArgumentSemantic.Assign)]
+		[Export ("bounds")]
 		CoordinateBounds Bounds { get; set; }
 
 		[Static]
@@ -654,18 +654,18 @@ namespace Google.Maps
 		CLLocation MyLocation { get; }
 
 		[NullAllowed]
-		[Export ("selectedMarker", ArgumentSemantic.Assign)]
+		[Export ("selectedMarker")]
 		Marker SelectedMarker { get; set; }
 
 		[Export ("trafficEnabled")]
 		bool TrafficEnabled { [Bind ("isTrafficEnabled")] get; set; }
 
-		[Export ("mapType", ArgumentSemantic.Assign)]
+		[Export ("mapType")]
 		MapViewType MapType { get; set; }
 
 		// @property(nonatomic, strong, nullable) GMSMapStyle *mapStyle;
 		[NullAllowed]
-		[Export ("mapStyle", ArgumentSemantic.Assign)]
+		[Export ("mapStyle")]
 		MapStyle MapStyle { get; set; }
 
 		// @property (nonatomic) UIUserInterfaceStyle overrideUserInterfaceStyle;
@@ -691,10 +691,10 @@ namespace Google.Maps
 		[Export ("settings")]
 		UISettings Settings { get; }
 
-		[Export ("padding", ArgumentSemantic.Assign)]
+		[Export ("padding")]
 		UIEdgeInsets Padding { get; set; }
 
-		[Export ("paddingAdjustmentBehavior", ArgumentSemantic.Assign)]
+		[Export ("paddingAdjustmentBehavior")]
 		MapViewPaddingAdjustmentBehavior PaddingAdjustmentBehavior { get; set; }
 
 		[Export ("accessibilityElementsHidden")]
@@ -706,12 +706,12 @@ namespace Google.Maps
 		MapLayer Layer { get; }
 
 		// @property(nonatomic, assign) GMSFrameRate preferredFrameRate;
-		[Export ("preferredFrameRate", ArgumentSemantic.Assign)]
+		[Export ("preferredFrameRate")]
 		FrameRate PreferredFrameRate { get; set; }
 
 		// @property(nonatomic, nullable) GMSCoordinateBounds *cameraTargetBounds;
 		[NullAllowed]
-		[Export ("cameraTargetBounds", ArgumentSemantic.Assign)]
+		[Export ("cameraTargetBounds")]
 		CoordinateBounds CameraTargetBounds { get; set; }
 
 		// @property (readonly, nonatomic) GMSMapCapabilityFlags mapCapabilities;
@@ -812,20 +812,20 @@ namespace Google.Maps
 	interface Marker
 	{
 
-		[Export ("position", ArgumentSemantic.Assign)]
+		[Export ("position")]
 		CLLocationCoordinate2D Position { get; set; }
 
 		[NullAllowed]
-		[Export ("snippet")]
+		[Export ("snippet", ArgumentSemantic.Copy)]
 		string Snippet { get; set; }
 
 		[NullAllowed]
-		[Export ("icon", ArgumentSemantic.Assign)]
+		[Export ("icon")]
 		UIImage Icon { get; set; }
 
 		// @property(nonatomic, strong) UIView *iconView;
 		[NullAllowed]
-		[Export ("iconView", ArgumentSemantic.Assign)]
+		[Export ("iconView")]
 		UIView IconView { get; set; }
 
 		// @property(nonatomic, assign) BOOL tracksViewChanges;
@@ -836,13 +836,13 @@ namespace Google.Maps
 		[Export ("tracksInfoWindowChanges")]
 		bool TracksInfoWindowChanges { get; set; }
 
-		[Export ("groundAnchor", ArgumentSemantic.Assign)]
+		[Export ("groundAnchor")]
 		CGPoint GroundAnchor { get; set; }
 
-		[Export ("infoWindowAnchor", ArgumentSemantic.Assign)]
+		[Export ("infoWindowAnchor")]
 		CGPoint InfoWindowAnchor { get; set; }
 
-		[Export ("appearAnimation", ArgumentSemantic.Assign)]
+		[Export ("appearAnimation")]
 		MarkerAnimation AppearAnimation { get; set; }
 
 		[Export ("draggable")]
@@ -930,11 +930,11 @@ namespace Google.Maps
 	interface Overlay : INSCopying
 	{
 		[NullAllowed]
-		[Export ("title")]
+		[Export ("title", ArgumentSemantic.Copy)]
 		string Title { get; set; }
 
 		[NullAllowed]
-		[Export ("map", ArgumentSemantic.Weak)]
+		[Export ("map")]
 		MapView Map { get; set; }
 
 		[Export ("tappable")]
@@ -945,7 +945,7 @@ namespace Google.Maps
 
 		// @property(nonatomic, strong, nullable) id userData;
 		[NullAllowed]
-		[Export ("userData", ArgumentSemantic.Assign)]
+		[Export ("userData")]
 		NSObject UserData { get; set; }
 	}
 
@@ -1049,7 +1049,7 @@ namespace Google.Maps
 		[Export ("heading")]
 		nfloat Heading { get; set; }
 
-		[Export ("panoramaID")]
+		[Export ("panoramaID", ArgumentSemantic.Copy)]
 		string PanoramaId { get; set; }
 	}
 
@@ -1136,7 +1136,7 @@ namespace Google.Maps
 	{
 
 		[NullAllowed]
-		[Export ("panorama", ArgumentSemantic.Assign)]
+		[Export ("panorama")]
 		Panorama Panorama { get; set; }
 
 		[NullAllowed]
@@ -1161,7 +1161,7 @@ namespace Google.Maps
 		[Export ("streetNamesHidden")]
 		bool StreetNamesHidden { get; set; }
 
-		[Export ("camera", ArgumentSemantic.Assign)]
+		[Export ("camera")]
 		PanoramaCamera Camera { get; set; }
 
 		[Export ("layer", ArgumentSemantic.Retain)]
@@ -1268,11 +1268,11 @@ namespace Google.Maps
 		nfloat StrokeWidth { get; set; }
 
 		[NullAllowed]
-		[Export ("strokeColor", ArgumentSemantic.Assign)]
+		[Export ("strokeColor")]
 		UIColor StrokeColor { get; set; }
 
 		[NullAllowed]
-		[Export ("fillColor", ArgumentSemantic.Assign)]
+		[Export ("fillColor")]
 		UIColor FillColor { get; set; }
 
 		[Export ("geodesic")]
@@ -1308,7 +1308,7 @@ namespace Google.Maps
 
 		// @property (assign, nonatomic) CGColorRef _Nullable strokeColor;
 		[NullAllowed]
-		[Export ("strokeColor", ArgumentSemantic.Assign)]
+		[Export ("strokeColor")]
 		CGColor StrokeColor { get; set; }
 
 		// @property (assign, nonatomic) CGColorRef _Nullable fillColor;
@@ -1327,7 +1327,7 @@ namespace Google.Maps
 		[Export ("strokeWidth")]
 		nfloat StrokeWidth { get; set; }
 
-		[Export ("strokeColor", ArgumentSemantic.Assign)]
+		[Export ("strokeColor")]
 		UIColor StrokeColor { get; set; }
 
 		[Export ("geodesic")]
@@ -1408,8 +1408,8 @@ namespace Google.Maps
 	[BaseType(typeof(NSObject), Name = "GMSStrokeStyle")]
 	interface StrokeStyle
 	{
-		// @property (nonatomic, strong) GMSStampStyle * _Nullable stampStyle;
-		[NullAllowed, Export ("stampStyle", ArgumentSemantic.Strong)]
+		// @property(nonatomic, strong, nullable) GMSStampStyle *stampStyle;
+		[Export ("stampStyle")]
 		StampStyle StampStyle { get; }
 
 		[Static]
@@ -1557,7 +1557,7 @@ namespace Google.Maps
 		UrlTileLayer FromUrlConstructor (TileUrlConstructorHandler constructor);
 
 		[NullAllowed]
-		[Export ("userAgent")]
+		[Export ("userAgent", ArgumentSemantic.Copy)]
 		string UserAgent { get; set; }
 	}
 
