@@ -57,6 +57,9 @@ namespace Google.Maps
 		[Field ("kGMSTileLayerNoTile", "__Internal")]
 		IntPtr _TileLayerNoTile { get; }
 
+		[Field ("kGMSLayerPanoramaFOVKey", "__Internal")]
+		NSString LayerPanoramaFOVKey { get; }
+
 		[Field ("kGMSLayerPanoramaHeadingKey", "__Internal")]
 		NSString LayerPanoramaHeadingKey { get; }
 
@@ -65,9 +68,6 @@ namespace Google.Maps
 
 		[Field ("kGMSLayerPanoramaZoomKey", "__Internal")]
 		NSString LayerPanoramaZoomKey { get; }
-
-		[Field ("kGMSLayerPanoramaFOVKey", "__Internal")]
-		NSString LayerPanoramaFOVKey { get; }
 
 		[Field ("kGMSMarkerLayerLatitude", "__Internal")]
 		NSString MarkerLayerLatitude { get; }
@@ -1723,11 +1723,11 @@ namespace Google.Maps
 
 		// @property (readonly, nonatomic) NSString * _Nonnull placeID;
 		[Export ("placeID")]
-		string PlaceID { get; }
+		string PlaceId { get; }
 
 		// -(instancetype _Nonnull)initWithFeatureType:(GMSFeatureType _Nonnull)featureType placeID:(NSString * _Nonnull)placeID;
 		[Export ("initWithFeatureType:placeID:")]
-		NativeHandle Constructor (string featureType, string placeID);
+		NativeHandle Constructor (string featureType, string placeId);
 	}
 
 	// @interface GMSPinImage : UIImage
