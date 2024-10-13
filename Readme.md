@@ -133,7 +133,7 @@ Here's a table that shows in which Nuget package version is located each sdk of 
 | Firebase Installations          |    **10.27.0**    | [![NuGet Version](https://img.shields.io/nuget/v/AdamE.Firebase.iOS.Installations)](https://nuget.org/packages/AdamE.Firebase.iOS.Installations) |
 | Firebase RemoteConfig           |    **10.27.0**    | [![NuGet Version](https://img.shields.io/nuget/v/AdamE.Firebase.iOS.RemoteConfig)](https://nuget.org/packages/AdamE.Firebase.iOS.RemoteConfig) |
 | Firebase Storage                |    **10.27.0**    | [![NuGet Version](https://img.shields.io/nuget/v/AdamE.Firebase.iOS.Storage)](https://nuget.org/packages/AdamE.Firebase.iOS.Storage) |
-| Google Maps                     |    **9.1.1**      | insert badge here |
+| Google Maps                     |    **9.1.1**      | [![NuGet Version](https://img.shields.io/nuget/v/AdamE.Google.iOS.Maps)](https://www.nuget.org/packages/AdamE.Google.iOS.Maps) |
 
 
 ### SDKs net yet updates from where Microsoft left them:
