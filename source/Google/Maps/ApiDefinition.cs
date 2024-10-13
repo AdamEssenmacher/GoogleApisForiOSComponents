@@ -85,10 +85,10 @@ namespace Google.Maps
 		NSString AccessibilityCompass { get; }
 
 		[Field ("kGMSAccessibilityMyLocation", "__Internal")]
-		NSString AccessibilityOutOfQuota { get; }
+		NSString AccessibilityMyLocation { get; }
 
 		[Field ("kGMSAccessibilityOutOfQuota", "__Internal")]
-		NSString AccessiblityOutOfQuota { get; }
+		NSString AccessibilityOutOfQuota { get; }
 
 		[Field ("kGMSEquatorProjectedMeter", "__Internal")]
 		double EquatorProjectedMeter { get; }
@@ -623,7 +623,7 @@ namespace Google.Maps
 
 		// @property (nonatomic) GMSMapID * _Nullable mapID;
 		[NullAllowed, Export ("mapID", ArgumentSemantic.Assign)]
-		MapID MapID { get; set; }
+		MapId MapId { get; set; }
 
 		// @property (nonatomic) UIColor * _Nullable backgroundColor;
 		[NullAllowed, Export ("backgroundColor", ArgumentSemantic.Assign)]
@@ -738,7 +738,7 @@ namespace Google.Maps
 		[Obsolete ("Use constructor with MapViewOptions instead.")]
 		[Static]
 		[Export ("mapWithFrame:mapID:camera:")]
-		MapView FromCamera (CGRect frame, MapID mapID, CameraPosition camera);
+		MapView FromCamera (CGRect frame, MapId mapId, CameraPosition camera);
 
 		// -(instancetype _Nonnull)initWithFrame:(CGRect)frame camera:(GMSCameraPosition * _Nonnull)camera __attribute__((deprecated("Use -init or -initWithOptions: instead.")));
 		[Obsolete ("Use constructor with MapViewOptions instead.")]
@@ -748,7 +748,7 @@ namespace Google.Maps
 		// -(instancetype _Nonnull)initWithFrame:(CGRect)frame mapID:(GMSMapID * _Nonnull)mapID camera:(GMSCameraPosition * _Nonnull)camera __attribute__((deprecated("Use -init or -initWithOptions: instead.")));
 		[Obsolete ("Use constructor with MapViewOptions instead.")]
 		[Export ("initWithFrame:mapID:camera:")]
-		NativeHandle Constructor (CGRect frame, MapID mapID, CameraPosition camera);
+		NativeHandle Constructor (CGRect frame, MapId mapId, CameraPosition camera);
 
 		[Obsolete ("This method is obsolete and will be removed in a future release.")]
 		[Export ("startRendering")]
@@ -781,7 +781,7 @@ namespace Google.Maps
 
 		// -(GMSDatasetFeatureLayer * _Nonnull)datasetFeatureLayerOfDatasetID:(NSString * _Nonnull)datasetID __attribute__((swift_name("datasetFeatureLayer(of:)")));
 		[Export ("datasetFeatureLayerOfDatasetID:")]
-		DatasetFeatureLayer DatasetFeatureLayerOf (string datasetID);
+		DatasetFeatureLayer DatasetFeatureLayerOf (string datasetId);
 	}
 
 	[BaseType (typeof (MapView))]
@@ -1388,7 +1388,7 @@ namespace Google.Maps
 		// + (void)setAbnormalTerminationReportingEnabled:(BOOL)enabled;
 		[Static]
 		[Export ("setAbnormalTerminationReportingEnabled:")]
-		bool SetAbnormalTerminationReportingEnabled (bool enabled);
+		bool AbnormalTerminationReportingEnabled (bool enabled);
 
 		[Static]
 		[Export ("openSourceLicenseInfo")]
@@ -1423,7 +1423,7 @@ namespace Google.Maps
 		// +(instancetype _Nonnull)transparentStrokeWithStampStyle:(GMSStampStyle * _Nonnull)stampStyle;
 		[Static]
 		[Export ("transparentStrokeWithStampStyle:")]
-		StrokeStyle GetTransparentStrokee (StampStyle stampStyle);
+		StrokeStyle GetTransparentStroke (StampStyle stampStyle);
 	}
 
 	[DisableDefaultCtor]
@@ -1623,7 +1623,7 @@ namespace Google.Maps
 	interface DatasetFeature : Feature {
 		// @property (readonly, nonatomic) NSString * _Nonnull datasetID;
 		[Export ("datasetID")]
-		string DatasetID { get; }
+		string DatasetId { get; }
 
 		// @property (readonly, nonatomic) NSDictionary<NSString *,NSString *> * _Nonnull datasetAttributes;
 		[Export ("datasetAttributes")]
@@ -1632,7 +1632,7 @@ namespace Google.Maps
 		// -(instancetype _Nonnull)initWithDatasetID:(NSString * _Nonnull)datasetID datasetAttributes:(NSDictionary<NSString *,NSString *> * _Nonnull)datasetAttributes __attribute__((objc_designated_initializer));
 		[Export ("initWithDatasetID:datasetAttributes:")]
 		[DesignatedInitializer]
-		NativeHandle Constructor (string datasetID, NSDictionary<NSString, NSString> datasetAttributes);
+		NativeHandle Constructor (string datasetId, NSDictionary<NSString, NSString> datasetAttributes);
 	}
 
 	// audit-objc-generics: @interface GMSFeatureLayer<__covariant T : id<GMSFeature>> : NSObject
@@ -1661,7 +1661,7 @@ namespace Google.Maps
 	interface DatasetFeatureLayer {
 		// @property (readonly, nonatomic) NSString * datasetID;
 		[Export ("datasetID")]
-		string DatasetID { get; }
+		string DatasetId { get; }
 	}
 
 	// @interface GMSFeatureStyle : NSObject <NSCopying, NSMutableCopying>
@@ -1792,7 +1792,7 @@ namespace Google.Maps
 	// @interface GMSMapID : NSObject <NSCopying>
 	[DisableDefaultCtor]
 	[BaseType (typeof (NSObject), Name = "GMSMapID")]
-	interface MapID : INSCopying {
+	interface MapId : INSCopying {
 		// -(instancetype _Nonnull)initWithIdentifier:(NSString * _Nonnull)identifier __attribute__((objc_designated_initializer));
 		[Export ("initWithIdentifier:")]
 		[DesignatedInitializer]
@@ -1801,11 +1801,11 @@ namespace Google.Maps
 		// +(instancetype _Nonnull)mapIDWithIdentifier:(NSString * _Nonnull)identifier __attribute__((availability(swift, unavailable)));
 		[Static]
 		[Export ("mapIDWithIdentifier:")]
-		MapID MapIdWithIdentifier (string identifier);
+		MapId MapIdWithIdentifier (string identifier);
 
 		// @property (readonly, nonatomic, class) NS_SWIFT_NAME(demoMapID) GMSMapID * demoMapID __attribute__((swift_name("demoMapID")));
 		[Static]
 		[Export ("demoMapID")]
-		MapID DemoMapID { get; }
+		MapId DemoMapId { get; }
 	}
 }
