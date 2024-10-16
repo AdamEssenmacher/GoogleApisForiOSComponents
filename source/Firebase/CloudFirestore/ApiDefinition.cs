@@ -818,6 +818,7 @@ namespace Firebase.CloudFirestore
 		bool IsFromCache { get; }
 	}
 
+	// TODO: [11] Moved to Core
 	// @interface FIRTimestamp : NSObject <NSCopying>
 	[DisableDefaultCtor]
 	[BaseType (typeof (NSObject), Name = "FIRTimestamp")]

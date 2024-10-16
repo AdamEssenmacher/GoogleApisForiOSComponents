@@ -1,11 +1,11 @@
 ﻿<Project>
   <PropertyGroup>
     <_MLKitCoreAssemblyName>MLKit.Core, Version=6.0.0.0, Culture=neutral, PublicKeyToken=null</_MLKitCoreAssemblyName>
-    <_MLKitCommonItemsFolder>MLKCommon-11.0.0</_MLKitCommonItemsFolder>
+    <_MLKitCommonItemsFolder>MLKCommon-12.0.0</_MLKitCommonItemsFolder>
     <_MLKitCommonSDKBaseFolder>$(XamarinBuildDownloadDir)$(_MLKitCommonItemsFolder)\Frameworks\</_MLKitCommonSDKBaseFolder>
-    <_MLKitVisionItemsFolder>MLKVision-7.0.0</_MLKitVisionItemsFolder>
+    <_MLKitVisionItemsFolder>MLKVision-8.0.0</_MLKitVisionItemsFolder>
     <_MLKitVisionSDKBaseFolder>$(XamarinBuildDownloadDir)$(_MLKitVisionItemsFolder)\Frameworks\</_MLKitVisionSDKBaseFolder>
-    <_MLImageItemsFolder>MLImage-1.0.0-beta5</_MLImageItemsFolder>
+    <_MLImageItemsFolder>MLImage-1.0.0-beta6</_MLImageItemsFolder>
     <_MLImageSDKBaseFolder>$(XamarinBuildDownloadDir)$(_MLImageItemsFolder)\Frameworks\</_MLImageSDKBaseFolder>
     <_MLKitImgLblCommonItemsFolder>MLKImgLblCommon-7.0.0</_MLKitImgLblCommonItemsFolder>
     <_MLKitImgLblCommonSDKBaseFolder>$(XamarinBuildDownloadDir)$(_MLKitImgLblCommonItemsFolder)\Frameworks\</_MLKitImgLblCommonSDKBaseFolder>
@@ -15,15 +15,18 @@
   </PropertyGroup>
   <ItemGroup Condition="('$(OutputType)'!='Library' OR '$(IsAppExtension)'=='True')">
     <XamarinBuildDownload Include="$(_MLKitCommonItemsFolder)">
-      <Url>https://dl.google.com/dl/cpdc/85bda285a1954024/MLKitCommon-11.0.0.tar.gz</Url>
+      <!-- https://github.com/CocoaPods/Specs/tree/master/Specs/c/c/6/MLKitCommon -->
+      <Url>https://dl.google.com/dl/cpdc/dfc218b809638814/MLKitCommon-12.0.0.tar.gz</Url>
       <Kind>Tgz</Kind>
     </XamarinBuildDownload>
     <XamarinBuildDownload Include="$(_MLKitVisionItemsFolder)">
-      <Url>https://dl.google.com/dl/cpdc/a82625c72bbef814/MLKitVision-7.0.0.tar.gz</Url>
+      <!-- https://github.com/CocoaPods/Specs/tree/master/Specs/8/1/e/MLKitVision -->
+      <Url>https://dl.google.com/dl/cpdc/f23a8a29f3f18f80/MLKitVision-8.0.0.tar.gz</Url>
       <Kind>Tgz</Kind>
     </XamarinBuildDownload>
     <XamarinBuildDownload Include="$(_MLImageItemsFolder)">
-      <Url>https://dl.google.com/dl/cpdc/10ddbf30d0514f6d/MLImage-1.0.0-beta5.tar.gz</Url>
+      <!-- https://github.com/CocoaPods/Specs/tree/master/Specs/0/a/c/MLImage -->
+      <Url>https://dl.google.com/dl/cpdc/c33566c366901937/MLImage-1.0.0-beta6.tar.gz</Url>
       <Kind>Tgz</Kind>
     </XamarinBuildDownload>
     <XamarinBuildDownload Include="$(_MLKitImgLblCommonItemsFolder)">
