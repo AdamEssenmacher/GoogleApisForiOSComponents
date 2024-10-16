@@ -1,8 +1,8 @@
 ﻿<Project>
   <PropertyGroup>
     <_FirebaseAnalyticsAssemblyName>Firebase.Analytics, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null</_FirebaseAnalyticsAssemblyName>
-    <_FirebaseAnalyticsItemsFolder>FAnlytcs-10.27.0</_FirebaseAnalyticsItemsFolder>
-    <_FirebaseAnalyticsSDKBaseFolder>$(XamarinBuildDownloadDir)$(_FirebaseAnalyticsItemsFolder)\FirebaseAnalytics-10.27.0\Frameworks\</_FirebaseAnalyticsSDKBaseFolder>
+    <_FirebaseAnalyticsItemsFolder>FAnlytcs-10.28.0</_FirebaseAnalyticsItemsFolder>
+    <_FirebaseAnalyticsSDKBaseFolder>$(XamarinBuildDownloadDir)$(_FirebaseAnalyticsItemsFolder)\FirebaseAnalytics-10.28.0\Frameworks\</_FirebaseAnalyticsSDKBaseFolder>
   </PropertyGroup>
   <!-- Framework names to strip bitcode -->
   <ItemGroup Condition="('$(OutputType)'!='Library' OR '$(IsAppExtension)'=='True')">
@@ -11,14 +11,14 @@
   <!-- *.tar.gz URLs can be found in the podspec: https://github.com/CocoaPods/Specs/tree/master/Specs/e/2/1/FirebaseAnalytics -->
   <ItemGroup Condition="('$(OutputType)'!='Library' OR '$(IsAppExtension)'=='True')">
     <XamarinBuildDownload Include="$(_FirebaseAnalyticsItemsFolder)">
-      <Url>https://dl.google.com/firebase/ios/analytics/069659a8d012c35e/FirebaseAnalytics-10.27.0.tar.gz</Url>
+      <Url>https://dl.google.com/firebase/ios/analytics/83850700831975be/FirebaseAnalytics-10.28.0.tar.gz</Url>
       <Kind>Tgz</Kind>
     </XamarinBuildDownload>
     <XamarinBuildRestoreResources Include="_FAnlytcsDownloadedItems" />
   </ItemGroup>
   <Target Name="_FAnlytcsDownloadedItems">
     <ItemGroup>
-      <!-- https://dl.google.com/firebase/ios/analytics/069659a8d012c35e/FirebaseAnalytics-10.27.0.tar.gz -->
+      <!-- https://dl.google.com/firebase/ios/analytics/83850700831975be/FirebaseAnalytics-10.28.0.tar.gz -->
       <NativeReference Include="$(_FirebaseAnalyticsSDKBaseFolder)FirebaseAnalytics.xcframework">
         <Kind>Framework</Kind>
         <SmartLink>True</SmartLink>

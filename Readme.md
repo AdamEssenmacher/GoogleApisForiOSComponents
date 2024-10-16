@@ -118,22 +118,22 @@ Now you should be able to build and debug your iOS app in Visual Studio. It will
 Here's a table that shows in which Nuget package version is located each sdk of Firebase:
 
 
-| SDK Name                        |  SDK Version      |   Nuget Package Version   |
-| ------------------------------- | :---------------: | :----------------: |
-| Firebase A/B Testing            |    **10.27.0**    | [![NuGet Version](https://img.shields.io/nuget/v/AdamE.Firebase.iOS.ABTesting)](https://nuget.org/packages/AdamE.Firebase.iOS.ABTesting) |
-| Firebase Analytics              |    **10.27.0**    | [![NuGet Version](https://img.shields.io/nuget/v/AdamE.Firebase.iOS.Analytics)](https://nuget.org/packages/AdamE.Firebase.iOS.Analytics) |
-| Firebase Auth                   |    **10.27.0**    | [![NuGet Version](https://img.shields.io/nuget/v/AdamE.Firebase.iOS.Auth)](https://nuget.org/packages/AdamE.Firebase.iOS.Auth) |
-| Firebase Firestore              |    **10.27.0**    | [![NuGet Version](https://img.shields.io/nuget/v/AdamE.Firebase.iOS.CloudFirestore)](https://nuget.org/packages/AdamE.Firebase.iOS.CloudFirestore) |
-| Firebase Functions              |    **10.27.0**    | [![NuGet Version](https://img.shields.io/nuget/v/AdamE.Firebase.iOS.CloudFunctions)](https://nuget.org/packages/AdamE.Firebase.iOS.CloudFunctions) |
-| Firebase Messaging              |    **10.27.0**    | [![NuGet Version](https://img.shields.io/nuget/v/AdamE.Firebase.iOS.CloudMessaging)](https://nuget.org/packages/AdamE.Firebase.iOS.CloudMessaging) |
-| Firebase Core                   |    **10.27.0**    | [![NuGet Version](https://img.shields.io/nuget/v/AdamE.Firebase.iOS.Core)](https://nuget.org/packages/AdamE.Firebase.iOS.Core) |
-| Firebase Crashlytics            |    **10.27.0**    | [![NuGet Version](https://img.shields.io/nuget/v/AdamE.Firebase.iOS.Crashlytics)](https://nuget.org/packages/AdamE.Firebase.iOS.Crashlytics)  
-| Firebase Database               |    **10.27.0**    | [![NuGet Version](https://img.shields.io/nuget/v/AdamE.Firebase.iOS.Database)](https://nuget.org/packages/AdamE.Firebase.iOS.Database) |
-| Firebase Dynamic Links          |    **10.27.0**    | [![NuGet Version](https://img.shields.io/nuget/v/AdamE.Firebase.iOS.DynamicLinks)](https://nuget.org/packages/AdamE.Firebase.iOS.DynamicLinks) |
-| Firebase Installations          |    **10.27.0**    | [![NuGet Version](https://img.shields.io/nuget/v/AdamE.Firebase.iOS.Installations)](https://nuget.org/packages/AdamE.Firebase.iOS.Installations) |
-| Firebase RemoteConfig           |    **10.27.0**    | [![NuGet Version](https://img.shields.io/nuget/v/AdamE.Firebase.iOS.RemoteConfig)](https://nuget.org/packages/AdamE.Firebase.iOS.RemoteConfig) |
-| Firebase Storage                |    **10.27.0**    | [![NuGet Version](https://img.shields.io/nuget/v/AdamE.Firebase.iOS.Storage)](https://nuget.org/packages/AdamE.Firebase.iOS.Storage) |
-| Google Maps                     |    **9.1.1**      | [![NuGet Version](https://img.shields.io/nuget/v/AdamE.Google.iOS.Maps)](https://www.nuget.org/packages/AdamE.Google.iOS.Maps) |
+| SDK Name                        | SDK Version |   Nuget Package Version   |
+| ------------------------------- |:-----------:| :----------------: |
+| Firebase A/B Testing            | **10.28.0** | [![NuGet Version](https://img.shields.io/nuget/v/AdamE.Firebase.iOS.ABTesting)](https://nuget.org/packages/AdamE.Firebase.iOS.ABTesting) |
+| Firebase Analytics              | **10.28.0** | [![NuGet Version](https://img.shields.io/nuget/v/AdamE.Firebase.iOS.Analytics)](https://nuget.org/packages/AdamE.Firebase.iOS.Analytics) |
+| Firebase Auth                   | **10.28.0** | [![NuGet Version](https://img.shields.io/nuget/v/AdamE.Firebase.iOS.Auth)](https://nuget.org/packages/AdamE.Firebase.iOS.Auth) |
+| Firebase Firestore              | **10.28.0** | [![NuGet Version](https://img.shields.io/nuget/v/AdamE.Firebase.iOS.CloudFirestore)](https://nuget.org/packages/AdamE.Firebase.iOS.CloudFirestore) |
+| Firebase Functions              | **10.28.0** | [![NuGet Version](https://img.shields.io/nuget/v/AdamE.Firebase.iOS.CloudFunctions)](https://nuget.org/packages/AdamE.Firebase.iOS.CloudFunctions) |
+| Firebase Messaging              | **10.28.0** | [![NuGet Version](https://img.shields.io/nuget/v/AdamE.Firebase.iOS.CloudMessaging)](https://nuget.org/packages/AdamE.Firebase.iOS.CloudMessaging) |
+| Firebase Core                   | **10.28.0** | [![NuGet Version](https://img.shields.io/nuget/v/AdamE.Firebase.iOS.Core)](https://nuget.org/packages/AdamE.Firebase.iOS.Core) |
+| Firebase Crashlytics            | **10.28.1** | [![NuGet Version](https://img.shields.io/nuget/v/AdamE.Firebase.iOS.Crashlytics)](https://nuget.org/packages/AdamE.Firebase.iOS.Crashlytics)  
+| Firebase Database               | **10.28.0** | [![NuGet Version](https://img.shields.io/nuget/v/AdamE.Firebase.iOS.Database)](https://nuget.org/packages/AdamE.Firebase.iOS.Database) |
+| Firebase Dynamic Links          | **10.28.0** | [![NuGet Version](https://img.shields.io/nuget/v/AdamE.Firebase.iOS.DynamicLinks)](https://nuget.org/packages/AdamE.Firebase.iOS.DynamicLinks) |
+| Firebase Installations          | **10.28.0** | [![NuGet Version](https://img.shields.io/nuget/v/AdamE.Firebase.iOS.Installations)](https://nuget.org/packages/AdamE.Firebase.iOS.Installations) |
+| Firebase RemoteConfig           | **10.28.0** | [![NuGet Version](https://img.shields.io/nuget/v/AdamE.Firebase.iOS.RemoteConfig)](https://nuget.org/packages/AdamE.Firebase.iOS.RemoteConfig) |
+| Firebase Storage                | **10.28.0** | [![NuGet Version](https://img.shields.io/nuget/v/AdamE.Firebase.iOS.Storage)](https://nuget.org/packages/AdamE.Firebase.iOS.Storage) |
+| Google Maps                     |  **9.1.1**  | [![NuGet Version](https://img.shields.io/nuget/v/AdamE.Google.iOS.Maps)](https://www.nuget.org/packages/AdamE.Google.iOS.Maps) |
 
 
 ### SDKs net yet updates from where Microsoft left them:
