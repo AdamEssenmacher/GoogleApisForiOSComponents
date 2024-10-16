@@ -10,7 +10,7 @@
     <RootNamespace>Firebase.Analytics</RootNamespace>
     <AssemblyName>Firebase.Analytics</AssemblyName>
     <AssemblyVersion>1.0.0.0</AssemblyVersion>
-    <FileVersion>10.29.0.3</FileVersion>
+    <FileVersion>11.0.0.0</FileVersion>
     <IPhoneResourcePrefix>Resources</IPhoneResourcePrefix>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <ProcessEnums>true</ProcessEnums>
@@ -27,7 +27,7 @@
     <PackageProjectUrl>https://github.com/AdamEssenmacher/GoogleApisForiOSComponents</PackageProjectUrl>
     <PackageLicenseFile>License.md</PackageLicenseFile>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-    <PackageVersion>10.29.0.3</PackageVersion>
+    <PackageVersion>11.0.0.0</PackageVersion>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="..\..\AssemblyInfo.cs" />
@@ -50,7 +50,7 @@
     <ObjcBindingApiDefinition Include="Enums.cs" Condition=" '$(EnableDefaultCompileItems)' == 'true'" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Xamarin.Build.Download" Version="0.11.4" PrivateAssets="None" />
+    <PackageReference Include="Xamarin.Build.Download" Version="0.11.0" PrivateAssets="None" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Core\Core.csproj" PrivateAssets="None" />
