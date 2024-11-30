@@ -5,7 +5,7 @@
     <_FirebaseCrashlyticsSDKBaseFolder>$(XamarinBuildDownloadDir)$(_FirebaseCrashlyticsItemsFolder)\</_FirebaseCrashlyticsSDKBaseFolder>
     <!-- Requires a file extension, otherwise XDB will complain  -->
     <_FirebaseScriptName>upload-symbols.sh</_FirebaseScriptName>
-
+    
     <_FirebaseCrashlyticsUploadSymbolsContinueOnError Condition="'$(FirebaseCrashlyticsUploadSymbolsContinueOnError)'=='True'">True</_FirebaseCrashlyticsUploadSymbolsContinueOnError>
     <_FirebaseCrashlyticsUploadSymbolsContinueOnError Condition="'$(FirebaseCrashlyticsUploadSymbolsContinueOnError)'!='True'">False</_FirebaseCrashlyticsUploadSymbolsContinueOnError>
 
