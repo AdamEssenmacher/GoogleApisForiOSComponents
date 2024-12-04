@@ -97,7 +97,7 @@ namespace Firebase.Core
 		// @property (readonly, copy, nonatomic) NSString * APIKey;
 		[NullAllowed]
 		[Export ("APIKey")]
-		string ApiKey { get; set; }
+		string ApiKey { get; }
 
 		// @property(nonatomic, copy) NSString *bundleID;
 		[NullAllowed]
@@ -107,35 +107,35 @@ namespace Firebase.Core
 		// @property (readonly, copy, nonatomic) NSString * clientID;
 		[NullAllowed]
 		[Export ("clientID")]
-		string ClientId { get; set; }
+		string ClientId { get; }
 
 		// @property (readonly, copy, nonatomic) NSString * trackingID;
 		[NullAllowed]
 		[Export ("trackingID")]
-		string TrackingId { get; set; }
+		string TrackingId { get; }
 
 		// @property (readonly, copy, nonatomic) NSString * GCMSenderID;
 		[Export ("GCMSenderID")]
-		string GcmSenderId { get; set; }
+		string GcmSenderId { get; }
 
 		// @property(nonatomic, readonly, copy) NSString *projectID;
 		[NullAllowed]
 		[Export ("projectID")]
-		string ProjectId { get; set; }
+		string ProjectId { get; }
 
 		// @property (readonly, copy, nonatomic) NSString * androidClientID;
 		[NullAllowed]
 		[Export ("androidClientID")]
-		string AndroidClientId { get; set; }
+		string AndroidClientId { get; }
 
 		// @property (readonly, copy, nonatomic) NSString * googleAppID;
 		[Export ("googleAppID")]
-		string GoogleAppId { get; set; }
+		string GoogleAppId { get; }
 
 		// @property (readonly, copy, nonatomic) NSString * databaseURL;
 		[NullAllowed]
 		[Export ("databaseURL")]
-		string DatabaseUrl { get; set; }
+		string DatabaseUrl { get; }
 
 		// @property (readwrite, copy, nonatomic) NSString * deepLinkURLScheme;
 		[NullAllowed]
@@ -145,7 +145,7 @@ namespace Firebase.Core
 		// @property (readonly, copy, nonatomic) NSString * storageBucket;
 		[NullAllowed]
 		[Export ("storageBucket")]
-		string StorageBucket { get; set; }
+		string StorageBucket { get; }
 
 		// @property(nonatomic, copy, nullable) NSString *appGroupID;
 		[NullAllowed]
@@ -159,5 +159,46 @@ namespace Firebase.Core
 		// - (instancetype)initWithGoogleAppID:(NSString *)googleAppID GCMSenderID:(NSString*) GCMSenderID;
 		[Export ("initWithGoogleAppID:GCMSenderID:")]
 		NativeHandle Constructor (string googleAppId, string gcmSenderId);
+	}
+
+	// @interface FIRTimestamp : NSObject <NSCopying>
+	[DisableDefaultCtor]
+	[BaseType(typeof(NSObject), Name = "FIRTimestamp")]
+	interface Timestamp : INSCopying
+	{
+		// - (instancetype)initWithSeconds:(int64_t)seconds nanoseconds:(int32_t)nanoseconds;
+		[Export("initWithSeconds:nanoseconds:")]
+		NativeHandle Constructor(long seconds, int nanoseconds);
+
+		// + (instancetype)timestampWithSeconds:(int64_t)seconds nanoseconds:(int32_t)nanoseconds;
+		[Static]
+		[Export("timestampWithSeconds:nanoseconds:")]
+		Timestamp From(long seconds, int nanoseconds);
+
+		// + (instancetype)timestampWithDate:(NSDate *)date;
+		[Static]
+		[Export("timestampWithDate:")]
+		Timestamp From(NSDate date);
+
+		// + (instancetype)timestamp;
+		[Static]
+		[Export("timestamp")]
+		Timestamp Create();
+
+		// - (NSDate *)dateValue;
+		[Export("dateValue")]
+		NSDate DateValue { get; }
+
+		// - (NSComparisonResult)compare:(FIRTimestamp *)other;
+		[Export("compare:")]
+		NSComparisonResult Compare(Timestamp other);
+
+		// @property(nonatomic, assign, readonly) int64_t seconds;
+		[Export("seconds")]
+		long Seconds { get; }
+
+		// @property(nonatomic, assign, readonly) int32_t nanoseconds;
+		[Export("nanoseconds")]
+		int Nanoseconds { get; }
 	}
 }

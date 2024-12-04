@@ -1,25 +1,25 @@
 ﻿<Project>
   <PropertyGroup>
-    <_MLKitBarcodeAssemblyName>MLKit.BarcodeScanning, Version=5.0.0.0, Culture=neutral, PublicKeyToken=null</_MLKitBarcodeAssemblyName>
-    <_MLKitBarcodeItemsFolder>MLKitBarcodeScanning-5.0.0</_MLKitBarcodeItemsFolder>
+    <_MLKitBarcodeAssemblyName>MLKit.BarcodeScanning, Version=6.0.0.0, Culture=neutral, PublicKeyToken=null</_MLKitBarcodeAssemblyName>
+    <_MLKitBarcodeItemsFolder>MLKitBarcodeScanning-6.0.0</_MLKitBarcodeItemsFolder>
     <_MLKitBarcodeSDKBaseFolder>$(XamarinBuildDownloadDir)$(_MLKitBarcodeItemsFolder)\</_MLKitBarcodeSDKBaseFolder>
   </PropertyGroup>
   <ItemGroup Condition="('$(OutputType)'!='Library' OR '$(IsAppExtension)'=='True')">
     <XamarinBuildDownload Include="$(_MLKitBarcodeItemsFolder)">
-      <Url>https://dl.google.com/dl/cpdc/a0171fe6f0004baf/MLKitBarcodeScanning-5.0.0.tar.gz</Url>
+      <Url>https://dl.google.com/dl/cpdc/c01604ca1e6db404/MLKitBarcodeScanning-6.0.0.tar.gz</Url>
       <Kind>Tgz</Kind>
     </XamarinBuildDownload>
     <XamarinBuildRestoreResources Include="_MLKitBarcodeDownloadedItems" />
   </ItemGroup>
   <Target Name="_MLKitBarcodeDownloadedItems">
     <ItemGroup>
-      <!-- From https://dl.google.com/dl/cpdc/a0171fe6f0004baf/MLKitBarcodeScanning-5.0.0.tar.gz -->
+      <!-- From https://dl.google.com/dl/cpdc/c01604ca1e6db404/MLKitBarcodeScanning-6.0.0.tar.gz -->
       <NativeReference Include="$(_MLKitBarcodeSDKBaseFolder)Frameworks\MLKitBarcodeScanning.framework">
         <Kind>Framework</Kind>
         <SmartLink>True</SmartLink>
         <ForceLoad>True</ForceLoad>
         <LinkerFlags>-lc++</LinkerFlags>
-        <Frameworks>AVFoundation Accelerate CoreGraphics CoreImage CoreMedia CoreVideo Foundation LocalAuthentication UIKit</Frameworks>
+        <Frameworks>Accelerate CoreGraphics CoreImage CoreMedia CoreVideo Foundation UIKit</Frameworks>
       </NativeReference>
     </ItemGroup>
   </Target>

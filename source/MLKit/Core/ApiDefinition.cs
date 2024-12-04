@@ -120,9 +120,10 @@ namespace MLKit.Core {
 	}
 
 	// @interface GMLImage : NSObject
-	[BaseType (typeof (CompatibleImage), Name = "GMLImage")]
+	[BaseType(typeof(NSObject), Name = "GMLImage")]
 	[DisableDefaultCtor]
-	interface MLImage {
+	interface MLImage : IMLKitCompatibleImage
+	{
 		// @property (readonly, nonatomic) CGFloat width;
 		[Export ("width")]
 		nfloat Width { get; }
@@ -176,17 +177,19 @@ namespace MLKit.Core {
 		nfloat Z { get; }
 	}
 
-	interface ICompatibleImage { }
 
 	[Protocol]
+	[Model]
 	[BaseType (typeof (NSObject), Name = "MLKCompatibleImage")]
-	interface CompatibleImage {
+	interface IMLKitCompatibleImage
+	{
 	}
 
 	// @interface MLKVisionImage : NSObject <MLKCompatibleImage>
-	[BaseType (typeof (CompatibleImage), Name = "MLKVisionImage")]
+	[BaseType(typeof(NSObject), Name = "MLKVisionImage")]
 	[DisableDefaultCtor]
-	interface VisionImage {
+	interface VisionImage : IMLKitCompatibleImage
+	{
 		// @property (nonatomic) UIImageOrientation orientation;
 		[Export ("orientation", ArgumentSemantic.Assign)]
 		UIImageOrientation Orientation { get; set; }

@@ -376,11 +376,11 @@ namespace MLKit.BarcodeScanning {
 
 		// -(void)processImage:(id<MLKCompatibleImage> _Nonnull)image completion:(MLKBarcodeScanningCallback _Nonnull)completion __attribute__((swift_name("process(_:completion:)")));
 		[Export ("processImage:completion:")]
-		void ProcessImage (ICompatibleImage image, BarcodeScanningCallback completion);
+		void ProcessImage(IMLKitCompatibleImage image, BarcodeScanningCallback completion);
 
 		// -(NSArray<MLKBarcode *> * _Nullable)resultsInImage:(id<MLKCompatibleImage> _Nonnull)image error:(NSError * _Nullable * _Nullable)error;
 		[Export ("resultsInImage:error:")]
 		[return: NullAllowed]
-		Barcode [] ResultsInImage (ICompatibleImage image, [NullAllowed] out NSError error);
+		Barcode[] ResultsInImage(IMLKitCompatibleImage image, [NullAllowed] out NSError error);
 	}
 }

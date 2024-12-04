@@ -10,7 +10,7 @@
     <RootNamespace>MLKit.Core</RootNamespace>
     <AssemblyName>MLKit.Core</AssemblyName>
     <AssemblyVersion>6.0.0.0</AssemblyVersion>
-    <FileVersion>11.0.0</FileVersion>
+    <FileVersion>12.0.0-alpha2</FileVersion>
     <IPhoneResourcePrefix>Resources</IPhoneResourcePrefix>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
@@ -26,7 +26,7 @@
     <PackageProjectUrl>https://github.com/AdamEssenmacher/GoogleApisForiOSComponents</PackageProjectUrl>
     <PackageLicenseFile>License.md</PackageLicenseFile>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-    <PackageVersion>11.0.0</PackageVersion>
+    <PackageVersion>12.0.0-alpha2</PackageVersion>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="..\..\AssemblyInfo.cs" />
@@ -52,9 +52,9 @@
     <_NativeReference Include="..\..\..\externals\GoogleToolboxForMac.xcframework">
       <_Id>$(_GoogleToolboxForMacId)</_Id>
     </_NativeReference>
-    <_NativeReference Include="..\..\..\externals\GoogleUtilitiesComponents.xcframework">
+    <!-- <_NativeReference Include="..\..\..\externals\GoogleUtilitiesComponents.xcframework">
       <_Id>$(_GoogleUtilitiesComponentsId)</_Id>
-    </_NativeReference>
+    </_NativeReference> -->
 <!--    <_NativeReference Include="..\..\..\externals\SSZipArchive.xcframework">-->
 <!--      <_Id>$(_SSZipArchiveId)</_Id>-->
 <!--    </_NativeReference>-->
