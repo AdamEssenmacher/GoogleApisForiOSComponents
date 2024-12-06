@@ -6,40 +6,34 @@
     <ImplicitUsings>true</ImplicitUsings>
     <IsBindingProject>true</IsBindingProject>
     <NoBindingEmbedding>true</NoBindingEmbedding>
-    <SupportedOSPlatformVersion>11.0</SupportedOSPlatformVersion>
-    <RootNamespace>Firebase.Installations</RootNamespace>
-    <AssemblyName>Firebase.Installations</AssemblyName>
-    <AssemblyVersion>1.0.0.0</AssemblyVersion>
-    <FileVersion>10.29.0.3</FileVersion>
+    <SupportedOSPlatformVersion>9.0</SupportedOSPlatformVersion>
+    <RootNamespace>Google.Nanopb</RootNamespace>
+    <AssemblyName>Google.Nanopb</AssemblyName>
+    <AssemblyVersion>2.30910.0.0</AssemblyVersion>
+    <FileVersion>2.30910.0</FileVersion>
     <IPhoneResourcePrefix>Resources</IPhoneResourcePrefix>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup>
-    <PackageId>AdamE.Firebase.iOS.Installations</PackageId>
-    <Title>Firebase APIs Installations iOS Library</Title>
-    <Summary>C# bindings for Firebase APIs Installations iOS Library</Summary>
-    <Description>C# bindings for Firebase APIs Installations iOS Library</Description>
+    <PackageId>AdamE.Google.iOS.Nanopb</PackageId>
+    <Title>Nanopb</Title>
+    <Summary>Nanopb packed for .NET for iOS</Summary>
+    <Description>Nanopb packed for .NET for iOS</Description>
     <Authors>Microsoft, Adam Essenmacher</Authors>
     <Owners>Adam Essenmacher</Owners>
     <Copyright>© Microsoft Corporation. All rights reserved. © 2024, Adam Essenmacher.</Copyright>
-    <PackageIcon>firebaseiosinstallations_128x128.png</PackageIcon>
     <PackageProjectUrl>https://github.com/AdamEssenmacher/GoogleApisForiOSComponents</PackageProjectUrl>
     <PackageLicenseFile>License.md</PackageLicenseFile>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-    <PackageVersion>10.29.0.3</PackageVersion>
+    <PackageVersion>2.30910.0</PackageVersion>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="..\..\AssemblyInfo.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Resources\" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Installations.targets" Pack="True" PackagePath="build/AdamE.Firebase.iOS.Installations.targets" />
-    <None Include="Installations.targets" Pack="True" PackagePath="buildTransitive/AdamE.Firebase.iOS.Installations.targets" />
-    <None Include="External-Dependency-Info.txt" Pack="True" PackagePath="THIRD-PARTY-NOTICES.txt" />
+  <ItemGroup>    
+    <None Include="Nanopb.targets" Pack="True" PackagePath="build/AdamE.Google.iOS.Nanopb.targets" />
+    <None Include="Nanopb.targets" Pack="True" PackagePath="buildTransitive/AdamE.Google.iOS.Nanopb.targets" />
     <None Include="License.md" Pack="True" PackagePath="License.md" />
-    <None Include="../../../icons/firebaseiosinstallations_128x128.png" Pack="True" PackagePath="firebaseiosinstallations_128x128.png" />
   </ItemGroup>
   <!-- An iOS app project cannot find Xcframeworks within a NuGet if a TFM
        previous than net6.0-ios is used.
@@ -48,27 +42,17 @@
        project so sidecar can work properly. -->
   <!-- This workaround was designed like this to have the same
        NativeReference tag for the iOS binding and for the .targets file -->
-  <Import Project="Installations.targets" />
+  <Import Project="Nanopb.targets" />
   <ItemGroup>
-    <_NativeReference Include="..\..\..\externals\FirebaseInstallations.xcframework">
-      <_Id>$(_FirebaseInstallationsId)</_Id>
+    <_NativeReference Include="..\..\..\externals\nanopb.xcframework">
+      <_Id>$(_nanopbId)</_Id>
     </_NativeReference>
   </ItemGroup>
   <!-- End of workaround -->
   <ItemGroup Condition="'$(TargetFramework)' == 'xamarin.ios10'">
     <Compile Remove="ApiDefinition.cs" />
-    <Compile Remove="Enums.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ObjcBindingCoreSource Include="Enums.cs" Condition=" '$(EnableDefaultCompileItems)' == 'true'" />
   </ItemGroup>
   <ItemGroup>
     <ObjcBindingApiDefinition Include="ApiDefinition.cs" Condition=" '$(EnableDefaultCompileItems)' == 'true'" />
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="Xamarin.Build.Download" Version="0.11.4" PrivateAssets="None" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Core\Core.csproj" PrivateAssets="None" />
   </ItemGroup>
 </Project>

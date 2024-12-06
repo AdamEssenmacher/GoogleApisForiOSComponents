@@ -1,0 +1,26 @@
+﻿<Project>
+  <PropertyGroup>
+    <_GoogleUtilitiesAssemblyName>Google.GoogleUtilities, Version=7.13.3.0, Culture=neutral, PublicKeyToken=null</_GoogleUtilitiesAssemblyName>
+  </PropertyGroup>
+  <PropertyGroup>
+	  <_GoogleUtilitiesId>GoogleUtilities</_GoogleUtilitiesId>
+  </PropertyGroup>
+  <ItemGroup Condition="('$(OutputType)' != 'Library' OR '$(IsAppExtension)' == 'True') AND ('$(TargetFrameworks)' == '' AND '$(TargetFramework)' == '')">
+	  <_NativeReference Include="$(MSBuildThisFileDirectory)..\lib\xamarinios10\Google.GoogleUtilities.resources\GoogleUtilities.xcframework">
+		  <_Id>$(_GoogleUtilitiesId)</_Id>
+	  </_NativeReference>
+  </ItemGroup>
+  <Target Name="_ResolveNativeReferencesForGoogleUtilities" 
+          BeforeTargets="ResolveNativeReferences"
+          Condition="('$(TargetFrameworks)' == '' AND '$(TargetFramework)' == '') OR '$(IsBindingProject)' == 'true'">
+    <ItemGroup>
+		<_NativeReference Update="@(_NativeReference)" Condition="'%(_NativeReference._Id)' == '$(_GoogleUtilitiesId)'">
+			<Kind>Framework</Kind>
+			<SmartLink>True</SmartLink>
+			<ForceLoad>True</ForceLoad>
+			<Frameworks>Security SystemConfiguration</Frameworks>
+		</_NativeReference>
+      <NativeReference Include="@(_NativeReference)" />
+    </ItemGroup>
+  </Target>
+</Project>

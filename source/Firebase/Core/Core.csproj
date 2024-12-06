@@ -10,7 +10,7 @@
     <RootNamespace>Firebase.Core</RootNamespace>
     <AssemblyName>Firebase.Core</AssemblyName>
     <AssemblyVersion>1.0.0.0</AssemblyVersion>
-    <FileVersion>10.29.0.1</FileVersion>
+    <FileVersion>10.29.0.3</FileVersion>
     <IPhoneResourcePrefix>Resources</IPhoneResourcePrefix>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
@@ -26,7 +26,7 @@
     <PackageProjectUrl>https://github.com/AdamEssenmacher/GoogleApisForiOSComponents</PackageProjectUrl>
     <PackageLicenseFile>License.md</PackageLicenseFile>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-    <PackageVersion>10.29.0.1</PackageVersion>
+    <PackageVersion>10.29.0.3</PackageVersion>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="..\..\AssemblyInfo.cs" />
@@ -52,21 +52,6 @@
   <ItemGroup>
     <_NativeReference Include="..\..\..\externals\FirebaseCore.xcframework">
       <_Id>$(_FirebaseCoreId)</_Id>
-    </_NativeReference>
-    <_NativeReference Include="..\..\..\externals\GTMSessionFetcher.xcframework">
-      <_Id>$(_GTMSessionFetcherId)</_Id>
-    </_NativeReference>
-    <_NativeReference Include="..\..\..\externals\GoogleDataTransport.xcframework">
-      <_Id>$(_GoogleDataTransportId)</_Id>
-    </_NativeReference>
-    <_NativeReference Include="..\..\..\externals\FBLPromises.xcframework">
-      <_Id>$(_FBLPromisesId)</_Id>
-    </_NativeReference>
-    <_NativeReference Include="..\..\..\externals\GoogleUtilities.xcframework">
-      <_Id>$(_GoogleUtilitiesId)</_Id>
-    </_NativeReference>
-    <_NativeReference Include="..\..\..\externals\nanopb.xcframework">
-      <_Id>$(_nanopbId)</_Id>
     </_NativeReference>
     <_NativeReference Include="..\..\..\externals\leveldb.xcframework">
       <_Id>$(_leveldbId)</_Id>
@@ -112,5 +97,10 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Xamarin.Build.Download" Version="0.11.4" PrivateAssets="None" />
+    <PackageReference Include="AdamE.Google.iOS.GoogleDataTransport" Version="[9.4.1,10.0.0)" />
+    <PackageReference Include="AdamE.Google.iOS.GoogleUtilities" Version="[7.13.3,8.0.0)" />
+    <PackageReference Include="AdamE.Google.iOS.GTMSessionFetcher" Version="[3.5.0,4.0.0)" />
+    <PackageReference Include="AdamE.Google.iOS.Nanopb" Version="[2.30910.0,3.0.0)" />
+    <PackageReference Include="AdamE.Google.iOS.PromisesObjC" Version="[2.4.0,3.0.0)" />
   </ItemGroup>
 </Project>

@@ -1,0 +1,25 @@
+﻿<Project>
+  <PropertyGroup>
+    <_NanopbAssemblyName>Google.Nanopb, Version=2.30910.0.0, Culture=neutral, PublicKeyToken=null</_NanopbAssemblyName>
+  </PropertyGroup>
+  <PropertyGroup>
+    <_nanopbId>nanopb</_nanopbId>
+  </PropertyGroup>
+  <ItemGroup Condition="('$(OutputType)' != 'Library' OR '$(IsAppExtension)' == 'True') AND ('$(TargetFrameworks)' == '' AND '$(TargetFramework)' == '')">
+    <_NativeReference Include="$(MSBuildThisFileDirectory)..\lib\xamarinios10\Google.Nanopb.resources\nanopb.xcframework">
+	  <_Id>$(_nanopbId)</_Id>
+    </_NativeReference>
+  </ItemGroup>
+  <Target Name="_ResolveNativeReferencesForNanopb" 
+          BeforeTargets="ResolveNativeReferences"
+          Condition="('$(TargetFrameworks)' == '' AND '$(TargetFramework)' == '') OR '$(IsBindingProject)' == 'true'">
+    <ItemGroup>
+	  <_NativeReference Update="@(_NativeReference)" Condition="'%(_NativeReference._Id)' == '$(_nanopbId)'">
+		<Kind>Framework</Kind>
+		<SmartLink>True</SmartLink>
+		<ForceLoad>True</ForceLoad>
+	  </_NativeReference>
+      <NativeReference Include="@(_NativeReference)" />
+    </ItemGroup>
+  </Target>
+</Project>

@@ -1,0 +1,25 @@
+﻿<Project>
+  <PropertyGroup>
+    <_GTMSessionFetcherAssemblyName>Google.GTMSessionFetcher, Version=3.5.0.0, Culture=neutral, PublicKeyToken=null</_GTMSessionFetcherAssemblyName>
+  </PropertyGroup>
+  <PropertyGroup>
+    <_GTMSessionFetcherId>GTMSessionFetcher</_GTMSessionFetcherId>
+  </PropertyGroup>
+  <ItemGroup Condition="('$(OutputType)' != 'Library' OR '$(IsAppExtension)' == 'True') AND ('$(TargetFrameworks)' == '' AND '$(TargetFramework)' == '')">
+    <_NativeReference Include="$(MSBuildThisFileDirectory)..\lib\xamarinios10\Google.GTMSessionFetcher.resources\GTMSessionFetcher.xcframework">
+      <_Id>$(_GTMSessionFetcherId)</_Id>
+    </_NativeReference>
+  </ItemGroup>
+  <Target Name="_ResolveNativeReferencesForGTMSessionFetcher" 
+          BeforeTargets="ResolveNativeReferences"
+          Condition="('$(TargetFrameworks)' == '' AND '$(TargetFramework)' == '') OR '$(IsBindingProject)' == 'true'">
+    <ItemGroup>
+      <_NativeReference Update="@(_NativeReference)" Condition="'%(_NativeReference._Id)' == '$(_GTMSessionFetcherId)'">
+        <Kind>Framework</Kind>
+        <SmartLink>True</SmartLink>
+        <ForceLoad>True</ForceLoad>
+      </_NativeReference>
+      <NativeReference Include="@(_NativeReference)" />
+    </ItemGroup>
+  </Target>
+</Project>

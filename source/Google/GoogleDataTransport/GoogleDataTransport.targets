@@ -1,0 +1,26 @@
+﻿<Project>
+  <PropertyGroup>
+    <_GoogleDataTransportAssemblyName>Google.GoogleDataTransport, Version=9.4.1.0, Culture=neutral, PublicKeyToken=null</_GoogleDataTransportAssemblyName>
+  </PropertyGroup>
+  <PropertyGroup>
+    <_GoogleDataTransportId>GoogleDataTransport</_GoogleDataTransportId>
+  </PropertyGroup>
+  <ItemGroup Condition="('$(OutputType)' != 'Library' OR '$(IsAppExtension)' == 'True') AND ('$(TargetFrameworks)' == '' AND '$(TargetFramework)' == '')">
+    <_NativeReference Include="$(MSBuildThisFileDirectory)..\lib\xamarinios10\Google.GoogleDataTransport.resources\GoogleDataTransport.xcframework">
+      <_Id>$(_GoogleDataTransportId)</_Id>
+    </_NativeReference>
+  </ItemGroup>
+  <Target Name="_ResolveNativeReferencesForGoogleDataTransport" 
+          BeforeTargets="ResolveNativeReferences"
+          Condition="('$(TargetFrameworks)' == '' AND '$(TargetFramework)' == '') OR '$(IsBindingProject)' == 'true'">
+    <ItemGroup>
+      <_NativeReference Update="@(_NativeReference)" Condition="'%(_NativeReference._Id)' == '$(_GoogleDataTransportId)'">
+        <Kind>Framework</Kind>
+        <SmartLink>True</SmartLink>
+        <ForceLoad>True</ForceLoad>
+        <Frameworks>SystemConfiguration CoreTelephony</Frameworks>
+      </_NativeReference>
+      <NativeReference Include="@(_NativeReference)" />
+    </ItemGroup>
+  </Target>
+</Project>

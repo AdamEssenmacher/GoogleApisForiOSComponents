@@ -6,40 +6,34 @@
     <ImplicitUsings>true</ImplicitUsings>
     <IsBindingProject>true</IsBindingProject>
     <NoBindingEmbedding>true</NoBindingEmbedding>
-    <SupportedOSPlatformVersion>11.0</SupportedOSPlatformVersion>
-    <RootNamespace>Firebase.RemoteConfig</RootNamespace>
-    <AssemblyName>Firebase.RemoteConfig</AssemblyName>
-    <AssemblyVersion>1.0.0.0</AssemblyVersion>
-    <FileVersion>10.29.0.3</FileVersion>
+    <SupportedOSPlatformVersion>10.0</SupportedOSPlatformVersion>
+    <RootNamespace>Google.GoogleDataTransport</RootNamespace>
+    <AssemblyName>Google.GoogleDataTransport</AssemblyName>
+    <AssemblyVersion>9.4.1.0</AssemblyVersion>
+    <FileVersion>9.4.1</FileVersion>
     <IPhoneResourcePrefix>Resources</IPhoneResourcePrefix>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup>
-    <PackageId>AdamE.Firebase.iOS.RemoteConfig</PackageId>
-    <Title>Firebase APIs Remote Config iOS Library</Title>
-    <Summary>C# bindings for Firebase APIs Remote Config iOS Library</Summary>
-    <Description>C# bindings for Firebase APIs Remote Config iOS Library</Description>
+    <PackageId>AdamE.Google.iOS.GoogleDataTransport</PackageId>
+    <Title>GoogleDataTransport</Title>
+    <Summary>GoogleDataTransport packed for .NET for iOS</Summary>
+    <Description>GoogleDataTransport packed for .NET for iOS</Description>
     <Authors>Microsoft, Adam Essenmacher</Authors>
     <Owners>Adam Essenmacher</Owners>
     <Copyright>© Microsoft Corporation. All rights reserved. © 2024, Adam Essenmacher.</Copyright>
-    <PackageIcon>firebaseiosremoteconfig_128x128.png</PackageIcon>
     <PackageProjectUrl>https://github.com/AdamEssenmacher/GoogleApisForiOSComponents</PackageProjectUrl>
     <PackageLicenseFile>License.md</PackageLicenseFile>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-    <PackageVersion>10.29.0.3</PackageVersion>
+    <PackageVersion>9.4.1</PackageVersion>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="..\..\AssemblyInfo.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Resources\" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="RemoteConfig.targets" Pack="True" PackagePath="build/AdamE.Firebase.iOS.RemoteConfig.targets" />
-    <None Include="RemoteConfig.targets" Pack="True" PackagePath="buildTransitive/AdamE.Firebase.iOS.RemoteConfig.targets" />
-    <None Include="External-Dependency-Info.txt" Pack="True" PackagePath="THIRD-PARTY-NOTICES.txt" />
+  <ItemGroup>    
+    <None Include="GoogleDataTransport.targets" Pack="True" PackagePath="build/AdamE.Google.iOS.GoogleDataTransport.targets" />
+    <None Include="GoogleDataTransport.targets" Pack="True" PackagePath="buildTransitive/AdamE.Google.iOS.GoogleDataTransport.targets" />
     <None Include="License.md" Pack="True" PackagePath="License.md" />
-    <None Include="../../../icons/firebaseiosremoteconfig_128x128.png" Pack="True" PackagePath="firebaseiosremoteconfig_128x128.png" />
   </ItemGroup>
   <!-- An iOS app project cannot find Xcframeworks within a NuGet if a TFM
        previous than net6.0-ios is used.
@@ -48,29 +42,22 @@
        project so sidecar can work properly. -->
   <!-- This workaround was designed like this to have the same
        NativeReference tag for the iOS binding and for the .targets file -->
-  <Import Project="RemoteConfig.targets" />
+  <Import Project="GoogleDataTransport.targets" />
   <ItemGroup>
-    <_NativeReference Include="..\..\..\externals\FirebaseRemoteConfig.xcframework">
-      <_Id>$(_FirebaseRemoteConfigId)</_Id>
+    <_NativeReference Include="..\..\..\externals\GoogleDataTransport.xcframework">
+      <_Id>$(_GoogleDataTransportId)</_Id>
     </_NativeReference>
   </ItemGroup>
   <!-- End of workaround -->
   <ItemGroup Condition="'$(TargetFramework)' == 'xamarin.ios10'">
     <Compile Remove="ApiDefinition.cs" />
-    <Compile Remove="Enums.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ObjcBindingCoreSource Include="Enums.cs" Condition=" '$(EnableDefaultCompileItems)' == 'true'" />
   </ItemGroup>
   <ItemGroup>
     <ObjcBindingApiDefinition Include="ApiDefinition.cs" Condition=" '$(EnableDefaultCompileItems)' == 'true'" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Xamarin.Build.Download" Version="0.11.4" PrivateAssets="None" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Core\Core.csproj" PrivateAssets="None" />
-    <ProjectReference Include="..\Installations\Installations.csproj" PrivateAssets="None" />
-    <ProjectReference Include="..\ABTesting\ABTesting.csproj" PrivateAssets="None" />
+    <PackageReference Include="AdamE.Google.iOS.GoogleUtilities" Version="[7.7,8.0)" />
+    <PackageReference Include="AdamE.Google.iOS.Nanopb" Version="[2.30908.0,2.30911.0)" />
+    <PackageReference Include="AdamE.Google.iOS.PromisesObjC" Version="[1.2,3.0)" />
   </ItemGroup>
 </Project>

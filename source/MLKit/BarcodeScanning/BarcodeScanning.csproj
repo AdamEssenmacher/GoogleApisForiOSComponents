@@ -10,7 +10,7 @@
     <RootNamespace>MLKit.BarcodeScanning</RootNamespace>
     <AssemblyName>MLKit.BarcodeScanning</AssemblyName>
     <AssemblyVersion>5.0.0.0</AssemblyVersion>
-    <FileVersion>5.0.0</FileVersion>
+    <FileVersion>5.0.0.1</FileVersion>
     <IPhoneResourcePrefix>Resources</IPhoneResourcePrefix>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
@@ -26,7 +26,7 @@
     <PackageProjectUrl>https://github.com/AdamEssenmacher/GoogleApisForiOSComponents</PackageProjectUrl>
     <PackageLicenseFile>License.md</PackageLicenseFile>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-    <PackageVersion>5.0.0</PackageVersion>
+    <PackageVersion>5.0.0.1</PackageVersion>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="..\..\AssemblyInfo.cs" />
