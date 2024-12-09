@@ -9,8 +9,8 @@
     <SupportedOSPlatformVersion>10.0</SupportedOSPlatformVersion>
     <RootNamespace>Google.GoogleUtilities</RootNamespace>
     <AssemblyName>Google.GoogleUtilities</AssemblyName>
-    <AssemblyVersion>7.13.3.0</AssemblyVersion>
-    <FileVersion>7.13.3</FileVersion>
+    <AssemblyVersion>8.0.2.0</AssemblyVersion>
+    <FileVersion>8.0.2</FileVersion>
     <IPhoneResourcePrefix>Resources</IPhoneResourcePrefix>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
@@ -25,7 +25,7 @@
     <PackageProjectUrl>https://github.com/AdamEssenmacher/GoogleApisForiOSComponents</PackageProjectUrl>
     <PackageLicenseFile>License.md</PackageLicenseFile>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-    <PackageVersion>7.13.3</PackageVersion>
+    <PackageVersion>8.0.2</PackageVersion>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="..\..\AssemblyInfo.cs" />
@@ -54,8 +54,5 @@
   </ItemGroup>
   <ItemGroup>
     <ObjcBindingApiDefinition Include="ApiDefinition.cs" Condition=" '$(EnableDefaultCompileItems)' == 'true'" />
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="AdamE.Google.iOS.PromisesObjC" Version="[1.2,3.0)" />
   </ItemGroup>
 </Project>

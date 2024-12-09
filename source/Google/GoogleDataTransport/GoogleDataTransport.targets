@@ -1,6 +1,6 @@
 ﻿<Project>
   <PropertyGroup>
-    <_GoogleDataTransportAssemblyName>Google.GoogleDataTransport, Version=9.4.1.0, Culture=neutral, PublicKeyToken=null</_GoogleDataTransportAssemblyName>
+    <_GoogleDataTransportAssemblyName>Google.GoogleDataTransport, Version=10.1.0.0, Culture=neutral, PublicKeyToken=null</_GoogleDataTransportAssemblyName>
   </PropertyGroup>
   <PropertyGroup>
     <_GoogleDataTransportId>GoogleDataTransport</_GoogleDataTransportId>

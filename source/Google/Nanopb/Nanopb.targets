@@ -1,6 +1,6 @@
 ﻿<Project>
   <PropertyGroup>
-    <_NanopbAssemblyName>Google.Nanopb, Version=2.30910.0.0, Culture=neutral, PublicKeyToken=null</_NanopbAssemblyName>
+    <_NanopbAssemblyName>Google.Nanopb, Version=3.30910.0.0, Culture=neutral, PublicKeyToken=null</_NanopbAssemblyName>
   </PropertyGroup>
   <PropertyGroup>
     <_nanopbId>nanopb</_nanopbId>

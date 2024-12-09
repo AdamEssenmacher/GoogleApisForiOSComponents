@@ -1,6 +1,6 @@
 ﻿<Project>
   <PropertyGroup>
-    <_GoogleUtilitiesAssemblyName>Google.GoogleUtilities, Version=7.13.3.0, Culture=neutral, PublicKeyToken=null</_GoogleUtilitiesAssemblyName>
+    <_GoogleUtilitiesAssemblyName>Google.GoogleUtilities, Version=8.0.2.0, Culture=neutral, PublicKeyToken=null</_GoogleUtilitiesAssemblyName>
   </PropertyGroup>
   <PropertyGroup>
 	  <_GoogleUtilitiesId>GoogleUtilities</_GoogleUtilitiesId>

@@ -6,11 +6,11 @@
     <ImplicitUsings>true</ImplicitUsings>
     <IsBindingProject>true</IsBindingProject>
     <NoBindingEmbedding>true</NoBindingEmbedding>
-    <SupportedOSPlatformVersion>10.0</SupportedOSPlatformVersion>
+    <SupportedOSPlatformVersion>12.0</SupportedOSPlatformVersion>
     <RootNamespace>Google.GoogleDataTransport</RootNamespace>
     <AssemblyName>Google.GoogleDataTransport</AssemblyName>
-    <AssemblyVersion>9.4.1.0</AssemblyVersion>
-    <FileVersion>9.4.1</FileVersion>
+    <AssemblyVersion>10.1.0.0</AssemblyVersion>
+    <FileVersion>10.1.0</FileVersion>
     <IPhoneResourcePrefix>Resources</IPhoneResourcePrefix>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
@@ -25,7 +25,7 @@
     <PackageProjectUrl>https://github.com/AdamEssenmacher/GoogleApisForiOSComponents</PackageProjectUrl>
     <PackageLicenseFile>License.md</PackageLicenseFile>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-    <PackageVersion>9.4.1</PackageVersion>
+    <PackageVersion>10.1.0</PackageVersion>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="..\..\AssemblyInfo.cs" />
@@ -56,8 +56,7 @@
     <ObjcBindingApiDefinition Include="ApiDefinition.cs" Condition=" '$(EnableDefaultCompileItems)' == 'true'" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="AdamE.Google.iOS.GoogleUtilities" Version="[7.7,8.0)" />
-    <PackageReference Include="AdamE.Google.iOS.Nanopb" Version="[2.30908.0,2.30911.0)" />
-    <PackageReference Include="AdamE.Google.iOS.PromisesObjC" Version="[1.2,3.0)" />
+    <PackageReference Include="AdamE.Google.iOS.Nanopb" Version="[3.30910.0,4.0)" />
+    <PackageReference Include="AdamE.Google.iOS.PromisesObjC" Version="[2.4,3.0)" />
   </ItemGroup>
 </Project>

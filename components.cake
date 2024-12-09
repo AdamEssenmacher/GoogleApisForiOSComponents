@@ -29,9 +29,9 @@ Artifact GOOGLE_TAG_MANAGER_ARTIFACT           = new Artifact ("Google.TagManage
 
 Artifact GOOGLE_PROMISES_OBJC_ARTIFACT         = new Artifact ("Google.PromisesObjC",          "2.4.0",     "10.0", ComponentGroup.Google, csprojName: "PromisesObjC");
 Artifact GOOGLE_GTM_SESSION_FETCHER_ARTIFACT   = new Artifact ("Google.GTMSessionFetcher",     "3.5.0",     "10.0", ComponentGroup.Google, csprojName: "GTMSessionFetcher");
-Artifact GOOGLE_NANOPB_ARTIFACT                = new Artifact ("Google.Nanopb",                "2.30910.0", "10.0", ComponentGroup.Google, csprojName: "Nanopb");
-Artifact GOOGLE_GOOGLE_UTILITIES_ARTIFACT      = new Artifact ("Google.GoogleUtilities",       "7.13.3",    "10.0", ComponentGroup.Google, csprojName: "GoogleUtilities");
-Artifact GOOGLE_GOOGLE_DATA_TRANSPORT_ARTIFACT = new Artifact ("Google.GoogleDataTransport",   "9.4.1",     "10.0", ComponentGroup.Google, csprojName: "GoogleDataTransport");
+Artifact GOOGLE_NANOPB_ARTIFACT                = new Artifact ("Google.Nanopb",                "3.30910.0", "12.0", ComponentGroup.Google, csprojName: "Nanopb");
+Artifact GOOGLE_GOOGLE_UTILITIES_ARTIFACT      = new Artifact ("Google.GoogleUtilities",       "8.0.2",     "12.0", ComponentGroup.Google, csprojName: "GoogleUtilities");
+Artifact GOOGLE_GOOGLE_DATA_TRANSPORT_ARTIFACT = new Artifact ("Google.GoogleDataTransport",   "10.1.0",    "12.0", ComponentGroup.Google, csprojName: "GoogleDataTransport");
 
 // MLKit artifacts available to be built. These artifacts generate NuGets.
 Artifact MLKIT_CORE_ARTIFACT                     = new Artifact ("MLKit.Core",                        "11.0.0.1", "12.0", ComponentGroup.MLKit, csprojName: "Core");
@@ -127,8 +127,8 @@ void SetArtifactsDependencies ()
 	GOOGLE_PROMISES_OBJC_ARTIFACT.Dependencies         = null;
 	GOOGLE_GTM_SESSION_FETCHER_ARTIFACT.Dependencies   = null;
 	GOOGLE_NANOPB_ARTIFACT.Dependencies                = null;
-	GOOGLE_GOOGLE_UTILITIES_ARTIFACT.Dependencies      = new [] { GOOGLE_PROMISES_OBJC_ARTIFACT };
-	GOOGLE_GOOGLE_DATA_TRANSPORT_ARTIFACT.Dependencies = new [] { GOOGLE_NANOPB_ARTIFACT, GOOGLE_PROMISES_OBJC_ARTIFACT, GOOGLE_GOOGLE_UTILITIES_ARTIFACT };
+	GOOGLE_GOOGLE_UTILITIES_ARTIFACT.Dependencies      = null;
+	GOOGLE_GOOGLE_DATA_TRANSPORT_ARTIFACT.Dependencies = new [] { GOOGLE_NANOPB_ARTIFACT, GOOGLE_PROMISES_OBJC_ARTIFACT };
 
 	MLKIT_CORE_ARTIFACT.Dependencies                = new [] { FIREBASE_CORE_ARTIFACT };
 	MLKIT_TEXT_RECOGNITION.Dependencies             = new [] { FIREBASE_CORE_ARTIFACT, MLKIT_CORE_ARTIFACT };
@@ -252,13 +252,13 @@ void SetArtifactsPodSpecs ()
         PodSpec.Create ("GTMSessionFetcher", "3.5.0", frameworkSource: FrameworkSource.Pods, subSpecs: new [] { "Full" }),
     };
     GOOGLE_NANOPB_ARTIFACT.PodSpecs = new [] {
-        PodSpec.Create ("nanopb", "2.30910.0", frameworkSource: FrameworkSource.Pods),
+        PodSpec.Create ("nanopb", "3.30910.0", frameworkSource: FrameworkSource.Pods),
     };
     GOOGLE_GOOGLE_UTILITIES_ARTIFACT.PodSpecs = new [] {
-        PodSpec.Create ("GoogleUtilities", "7.13.3", frameworkSource: FrameworkSource.Pods, subSpecs: new [] { "AppDelegateSwizzler", "Environment", "Logger", "ISASwizzler", "MethodSwizzler", "Network", "NSData+zlib", "Privacy", "Reachability", "UserDefaults", }),
+        PodSpec.Create ("GoogleUtilities", "8.0.2", frameworkSource: FrameworkSource.Pods, subSpecs: new [] { "AppDelegateSwizzler", "Environment", "Logger", "MethodSwizzler", "Network", "NSData+zlib", "Privacy", "Reachability", "UserDefaults", }),
     };
 	GOOGLE_GOOGLE_DATA_TRANSPORT_ARTIFACT.PodSpecs = new [] {
-        PodSpec.Create ("GoogleDataTransport", "9.4.1", frameworkSource: FrameworkSource.Pods),
+        PodSpec.Create ("GoogleDataTransport", "10.1.0", frameworkSource: FrameworkSource.Pods),
     };
 
 	// MLKit components
