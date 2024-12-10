@@ -29,6 +29,10 @@
       <Url>https://dl.google.com/dl/cpdc/c33566c366901937/MLImage-1.0.0-beta6.tar.gz</Url>
       <Kind>Tgz</Kind>
     </XamarinBuildDownload>
+    <XamarinBuildDownload Include="$(_MLKitImgLblCommonItemsFolder)">
+      <Url>https://dl.google.com/dl/cpdc/32805ca33739d2ef/MLKitImageLabelingCommon-7.0.0.tar.gz</Url>
+      <Kind>Tgz</Kind>
+    </XamarinBuildDownload>
 <!--    <XamarinBuildDownload Include="$(_MLKitImgLblCommonItemsFolder)">-->
 <!--      <Url>https://dl.google.com/dl/cpdc/32805ca33739d2ef/MLKitImageLabelingCommon-7.0.0.tar.gz</Url>-->
 <!--      <Kind>Tgz</Kind>-->
