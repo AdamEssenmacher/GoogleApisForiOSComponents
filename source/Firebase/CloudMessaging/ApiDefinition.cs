@@ -9,7 +9,6 @@ using UserNotifications;
 using NativeHandle = System.IntPtr;
 #endif
 
-// TODO: [11] NSSecureCoding?
 namespace Firebase.CloudMessaging
 {
 	// typedef void(^FIRMessagingFCMTokenFetchCompletion)(NSString * _Nullable FCMToken, NSError* _Nullable error) FIR_SWIFT_NAME(MessagingFCMTokenFetchCompletion);

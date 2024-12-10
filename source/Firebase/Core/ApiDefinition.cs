@@ -160,4 +160,45 @@ namespace Firebase.Core
 		[Export ("initWithGoogleAppID:GCMSenderID:")]
 		NativeHandle Constructor (string googleAppId, string gcmSenderId);
 	}
+
+	// @interface FIRTimestamp : NSObject <NSCopying>
+	[DisableDefaultCtor]
+	[BaseType (typeof (NSObject), Name = "FIRTimestamp")]
+	interface Timestamp : INSCopying {
+		// -(instancetype _Nonnull)initWithSeconds:(int64_t)seconds nanoseconds:(int32_t)nanoseconds __attribute__((objc_designated_initializer));
+		[Export ("initWithSeconds:nanoseconds:")]
+		[DesignatedInitializer]
+		NativeHandle Constructor (long seconds, int nanoseconds);
+
+		// +(instancetype _Nonnull)timestampWithSeconds:(int64_t)seconds nanoseconds:(int32_t)nanoseconds;
+		[Static]
+		[Export ("timestampWithSeconds:nanoseconds:")]
+		Timestamp Create (long seconds, int nanoseconds);
+
+		// +(instancetype _Nonnull)timestampWithDate:(NSDate * _Nonnull)date;
+		[Static]
+		[Export ("timestampWithDate:")]
+		Timestamp Create (NSDate date);
+
+		// +(instancetype _Nonnull)timestamp;
+		[Static]
+		[Export ("timestamp")]
+		Timestamp Create ();
+
+		// -(NSDate * _Nonnull)dateValue;
+		[Export ("dateValue")]
+		NSDate DateValue { get; }
+
+		// -(NSComparisonResult)compare:(FIRTimestamp * _Nonnull)other;
+		[Export ("compare:")]
+		NSComparisonResult Compare (Timestamp other);
+
+		// @property (readonly, assign, nonatomic) int64_t seconds;
+		[Export ("seconds")]
+		long Seconds { get; }
+
+		// @property (readonly, assign, nonatomic) int32_t nanoseconds;
+		[Export ("nanoseconds")]
+		int Nanoseconds { get; }
+	}
 }

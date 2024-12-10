@@ -29,10 +29,6 @@
       <Url>https://dl.google.com/dl/cpdc/c33566c366901937/MLImage-1.0.0-beta6.tar.gz</Url>
       <Kind>Tgz</Kind>
     </XamarinBuildDownload>
-    <XamarinBuildDownload Include="$(_MLKitImgLblCommonItemsFolder)">
-      <Url>https://dl.google.com/dl/cpdc/32805ca33739d2ef/MLKitImageLabelingCommon-7.0.0.tar.gz</Url>
-      <Kind>Tgz</Kind>
-    </XamarinBuildDownload>
 <!--    <XamarinBuildDownload Include="$(_MLKitImgLblCommonItemsFolder)">-->
 <!--      <Url>https://dl.google.com/dl/cpdc/32805ca33739d2ef/MLKitImageLabelingCommon-7.0.0.tar.gz</Url>-->
 <!--      <Kind>Tgz</Kind>-->
@@ -99,15 +95,11 @@
   </Target>
   <PropertyGroup>
     <_GoogleToolboxForMacId>GoogleToolboxForMac</_GoogleToolboxForMacId>
-    <_GoogleUtilitiesComponentsId>GoogleUtilitiesComponents</_GoogleUtilitiesComponentsId>
     <_SSZipArchiveId>SSZipArchive</_SSZipArchiveId>
   </PropertyGroup>
   <ItemGroup Condition="('$(OutputType)' != 'Library' OR '$(IsAppExtension)' == 'True') AND ('$(TargetFrameworks)' == '' AND '$(TargetFramework)' == '')">
     <_NativeReference Include="$(MSBuildThisFileDirectory)..\lib\xamarinios10\MLKit.Core.resources\GoogleToolboxForMac.xcframework">
       <_Id>$(_GoogleToolboxForMacId)</_Id>
-    </_NativeReference>
-    <_NativeReference Include="$(MSBuildThisFileDirectory)..\lib\xamarinios10\MLKit.Core.resources\GoogleUtilitiesComponents.xcframework">
-      <_Id>$(_GoogleUtilitiesComponentsId)</_Id>
     </_NativeReference>
 <!--    <_NativeReference Include="$(MSBuildThisFileDirectory)..\lib\xamarinios10\MLKit.Core.resources\SSZipArchive.xcframework">-->
 <!--      <_Id>$(_SSZipArchiveId)</_Id>-->
@@ -122,11 +114,6 @@
         <SmartLink>True</SmartLink>
         <ForceLoad>True</ForceLoad>
         <LinkerFlags>-lz</LinkerFlags>
-      </_NativeReference>
-      <_NativeReference Update="@(_NativeReference)" Condition="'%(_NativeReference._Id)' == '$(_GoogleUtilitiesComponentsId)'">
-        <Kind>Framework</Kind>
-        <SmartLink>True</SmartLink>
-        <ForceLoad>True</ForceLoad>
       </_NativeReference>
 <!--      <_NativeReference Update="@(_NativeReference)" Condition="'%(_NativeReference._Id)' == '$(_SSZipArchiveId)'">-->
 <!--        <Kind>Framework</Kind>-->

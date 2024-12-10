@@ -6,11 +6,11 @@
     <ImplicitUsings>true</ImplicitUsings>
     <IsBindingProject>true</IsBindingProject>
     <NoBindingEmbedding>true</NoBindingEmbedding>
-    <SupportedOSPlatformVersion>12.0</SupportedOSPlatformVersion>
+    <SupportedOSPlatformVersion>16.0</SupportedOSPlatformVersion>
     <RootNamespace>MLKit.Core</RootNamespace>
     <AssemblyName>MLKit.Core</AssemblyName>
-    <AssemblyVersion>6.0.0.0</AssemblyVersion>
-    <FileVersion>11.0.0.1</FileVersion>
+    <AssemblyVersion>12.0.0.0</AssemblyVersion>
+    <FileVersion>12.0.0.0</FileVersion>
     <IPhoneResourcePrefix>Resources</IPhoneResourcePrefix>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
@@ -26,7 +26,7 @@
     <PackageProjectUrl>https://github.com/AdamEssenmacher/GoogleApisForiOSComponents</PackageProjectUrl>
     <PackageLicenseFile>License.md</PackageLicenseFile>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-    <PackageVersion>11.0.0.1</PackageVersion>
+    <PackageVersion>12.0.0.0</PackageVersion>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="..\..\AssemblyInfo.cs" />
@@ -52,9 +52,6 @@
     <_NativeReference Include="..\..\..\externals\GoogleToolboxForMac.xcframework">
       <_Id>$(_GoogleToolboxForMacId)</_Id>
     </_NativeReference>
-    <_NativeReference Include="..\..\..\externals\GoogleUtilitiesComponents.xcframework">
-      <_Id>$(_GoogleUtilitiesComponentsId)</_Id>
-    </_NativeReference>
 <!--    <_NativeReference Include="..\..\..\externals\SSZipArchive.xcframework">-->
 <!--      <_Id>$(_SSZipArchiveId)</_Id>-->
 <!--    </_NativeReference>-->
@@ -74,8 +71,7 @@
     <PackageReference Include="Xamarin.Build.Download" Version="0.11.4" PrivateAssets="None" />
     <PackageReference Include="AdamE.Google.iOS.GTMSessionFetcher" Version="[3.5.0,4.0.0)" />
     <PackageReference Include="AdamE.Google.iOS.PromisesObjC" Version="[2.4.0,3.0.0)" />
-    <PackageReference Include="AdamE.Google.iOS.GoogleDataTransport" Version="[9.4.1,10.0.0)" />
-    <PackageReference Include="AdamE.Google.iOS.GoogleUtilities" Version="[7.13.3, 8.0.0)" />
-    <PackageReference Include="AdamE.Google.iOS.Nanopb" Version="[2.30910.0, 3.0.0)" />
+    <PackageReference Include="AdamE.Google.iOS.GoogleDataTransport" Version="[10.1.0,11.0.0)" />
+    <PackageReference Include="AdamE.Google.iOS.Nanopb" Version="[3.30910.0, 4.0.0)" />
   </ItemGroup>
 </Project>

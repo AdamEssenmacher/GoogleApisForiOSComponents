@@ -125,19 +125,19 @@ Here's a table that shows in which Nuget package version is located each sdk of 
 
 | SDK Name                        | SDK Version |   Nuget Package Version   |
 | ------------------------------- |:-----------:| :----------------: |
-| Firebase A/B Testing            | **10.29.0** | [![NuGet Version](https://img.shields.io/nuget/v/AdamE.Firebase.iOS.ABTesting)](https://nuget.org/packages/AdamE.Firebase.iOS.ABTesting) |
-| Firebase Analytics              | **10.29.0** | [![NuGet Version](https://img.shields.io/nuget/v/AdamE.Firebase.iOS.Analytics)](https://nuget.org/packages/AdamE.Firebase.iOS.Analytics) |
-| Firebase Auth                   | **10.29.0** | [![NuGet Version](https://img.shields.io/nuget/v/AdamE.Firebase.iOS.Auth)](https://nuget.org/packages/AdamE.Firebase.iOS.Auth) |
-| Firebase Firestore              | **10.29.0** | [![NuGet Version](https://img.shields.io/nuget/v/AdamE.Firebase.iOS.CloudFirestore)](https://nuget.org/packages/AdamE.Firebase.iOS.CloudFirestore) |
-| Firebase Functions              | **10.29.0** | [![NuGet Version](https://img.shields.io/nuget/v/AdamE.Firebase.iOS.CloudFunctions)](https://nuget.org/packages/AdamE.Firebase.iOS.CloudFunctions) |
-| Firebase Messaging              | **10.29.0** | [![NuGet Version](https://img.shields.io/nuget/v/AdamE.Firebase.iOS.CloudMessaging)](https://nuget.org/packages/AdamE.Firebase.iOS.CloudMessaging) |
-| Firebase Core                   | **10.29.0** | [![NuGet Version](https://img.shields.io/nuget/v/AdamE.Firebase.iOS.Core)](https://nuget.org/packages/AdamE.Firebase.iOS.Core) |
-| Firebase Crashlytics            | **10.29.0** | [![NuGet Version](https://img.shields.io/nuget/v/AdamE.Firebase.iOS.Crashlytics)](https://nuget.org/packages/AdamE.Firebase.iOS.Crashlytics)  
-| Firebase Database               | **10.29.0** | [![NuGet Version](https://img.shields.io/nuget/v/AdamE.Firebase.iOS.Database)](https://nuget.org/packages/AdamE.Firebase.iOS.Database) |
-| Firebase Dynamic Links          | **10.29.0** | [![NuGet Version](https://img.shields.io/nuget/v/AdamE.Firebase.iOS.DynamicLinks)](https://nuget.org/packages/AdamE.Firebase.iOS.DynamicLinks) |
-| Firebase Installations          | **10.29.0** | [![NuGet Version](https://img.shields.io/nuget/v/AdamE.Firebase.iOS.Installations)](https://nuget.org/packages/AdamE.Firebase.iOS.Installations) |
-| Firebase RemoteConfig           | **10.29.0** | [![NuGet Version](https://img.shields.io/nuget/v/AdamE.Firebase.iOS.RemoteConfig)](https://nuget.org/packages/AdamE.Firebase.iOS.RemoteConfig) |
-| Firebase Storage                | **10.29.0** | [![NuGet Version](https://img.shields.io/nuget/v/AdamE.Firebase.iOS.Storage)](https://nuget.org/packages/AdamE.Firebase.iOS.Storage) |
+| Firebase A/B Testing            | **11.0.0**  | [![NuGet Version](https://img.shields.io/nuget/v/AdamE.Firebase.iOS.ABTesting)](https://nuget.org/packages/AdamE.Firebase.iOS.ABTesting) |
+| Firebase Analytics              | **11.0.0**  | [![NuGet Version](https://img.shields.io/nuget/v/AdamE.Firebase.iOS.Analytics)](https://nuget.org/packages/AdamE.Firebase.iOS.Analytics) |
+| Firebase Auth                   | **11.0.0**  | [![NuGet Version](https://img.shields.io/nuget/v/AdamE.Firebase.iOS.Auth)](https://nuget.org/packages/AdamE.Firebase.iOS.Auth) |
+| Firebase Firestore              | **11.0.0**  | [![NuGet Version](https://img.shields.io/nuget/v/AdamE.Firebase.iOS.CloudFirestore)](https://nuget.org/packages/AdamE.Firebase.iOS.CloudFirestore) |
+| Firebase Functions              | **11.0.0**  | [![NuGet Version](https://img.shields.io/nuget/v/AdamE.Firebase.iOS.CloudFunctions)](https://nuget.org/packages/AdamE.Firebase.iOS.CloudFunctions) |
+| Firebase Messaging              | **11.0.0**  | [![NuGet Version](https://img.shields.io/nuget/v/AdamE.Firebase.iOS.CloudMessaging)](https://nuget.org/packages/AdamE.Firebase.iOS.CloudMessaging) |
+| Firebase Core                   | **11.0.0**  | [![NuGet Version](https://img.shields.io/nuget/v/AdamE.Firebase.iOS.Core)](https://nuget.org/packages/AdamE.Firebase.iOS.Core) |
+| Firebase Crashlytics            | **11.0.0**  | [![NuGet Version](https://img.shields.io/nuget/v/AdamE.Firebase.iOS.Crashlytics)](https://nuget.org/packages/AdamE.Firebase.iOS.Crashlytics) |
+| Firebase Database               | **11.0.0**  | [![NuGet Version](https://img.shields.io/nuget/v/AdamE.Firebase.iOS.Database)](https://nuget.org/packages/AdamE.Firebase.iOS.Database) |
+| Firebase Dynamic Links          | **11.0.0**  | [![NuGet Version](https://img.shields.io/nuget/v/AdamE.Firebase.iOS.DynamicLinks)](https://nuget.org/packages/AdamE.Firebase.iOS.DynamicLinks) |
+| Firebase Installations          | **11.0.0**  | [![NuGet Version](https://img.shields.io/nuget/v/AdamE.Firebase.iOS.Installations)](https://nuget.org/packages/AdamE.Firebase.iOS.Installations) |
+| Firebase RemoteConfig           | **11.0.0**  | [![NuGet Version](https://img.shields.io/nuget/v/AdamE.Firebase.iOS.RemoteConfig)](https://nuget.org/packages/AdamE.Firebase.iOS.RemoteConfig) |
+| Firebase Storage                | **11.0.0**  | [![NuGet Version](https://img.shields.io/nuget/v/AdamE.Firebase.iOS.Storage)](https://nuget.org/packages/AdamE.Firebase.iOS.Storage) |
 | Google Maps                     |  **9.1.1**  | [![NuGet Version](https://img.shields.io/nuget/v/AdamE.Google.iOS.Maps)](https://www.nuget.org/packages/AdamE.Google.iOS.Maps) |
 
 
@@ -208,7 +208,7 @@ The following steps are not required for consuming the published Nugets. These a
 
 ## Prerequisites
 
-Before building the libraries and samples in this repository, you will need to install [.NET Core][30] and the [Cake .NET Core Tool][32]:
+Before building the libraries and samples in this repository, you will need to install .NET Core] and the Cake .NET Core Tool]:
 
 Currently requires a version of Cake less than 1.0 (due to dependencies).
 
@@ -216,7 +216,7 @@ Currently requires a version of Cake less than 1.0 (due to dependencies).
 dotnet tool install -g cake.tool --version 0.38.5
 ```
 
-When building on macOS, you may also need to install [CocoaPods][31]:
+When building on macOS, you may also need to install CocoaPods:
 
 ```sh
 # Homebrew
