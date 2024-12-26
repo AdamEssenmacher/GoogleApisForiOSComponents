@@ -6,40 +6,34 @@
     <ImplicitUsings>true</ImplicitUsings>
     <IsBindingProject>true</IsBindingProject>
     <NoBindingEmbedding>true</NoBindingEmbedding>
-    <SupportedOSPlatformVersion>13.0</SupportedOSPlatformVersion>
-    <RootNamespace>Firebase.Database</RootNamespace>
-    <AssemblyName>Firebase.Database</AssemblyName>
-    <AssemblyVersion>11.4.0.1</AssemblyVersion>
-    <FileVersion>11.4.0.1</FileVersion>
+    <SupportedOSPlatformVersion>12.0</SupportedOSPlatformVersion>
+    <RootNamespace>Google.GoogleAppMeasurement</RootNamespace>
+    <AssemblyName>Google.GoogleAppMeasurement</AssemblyName>
+    <AssemblyVersion>11.4.0.0</AssemblyVersion>
+    <FileVersion>11.4.0</FileVersion>
     <IPhoneResourcePrefix>Resources</IPhoneResourcePrefix>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup>
-    <PackageId>AdamE.Firebase.iOS.Database</PackageId>
-    <Title>Firebase APIs Database iOS Library</Title>
-    <Summary>C# bindings for Firebase APIs Database iOS Library</Summary>
-    <Description>C# bindings for Firebase APIs Database iOS Library</Description>
+    <PackageId>AdamE.Google.iOS.GoogleAppMeasurement</PackageId>
+    <Title>GoogleAppMeasurement</Title>
+    <Summary>GoogleAppMeasurement packed for .NET for iOS</Summary>
+    <Description>GoogleAppMeasurement packed for .NET for iOS</Description>
     <Authors>Microsoft, Adam Essenmacher</Authors>
     <Owners>Adam Essenmacher</Owners>
     <Copyright>© Microsoft Corporation. All rights reserved. © 2024, Adam Essenmacher.</Copyright>
-    <PackageIcon>firebaseiosdatabase_128x128.png</PackageIcon>
     <PackageProjectUrl>https://github.com/AdamEssenmacher/GoogleApisForiOSComponents</PackageProjectUrl>
     <PackageLicenseFile>License.md</PackageLicenseFile>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-    <PackageVersion>11.4.0.1</PackageVersion>
+    <PackageVersion>11.4.0</PackageVersion>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="..\..\AssemblyInfo.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Resources\" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Database.targets" Pack="True" PackagePath="build/AdamE.Firebase.iOS.Database.targets" />
-    <None Include="Database.targets" Pack="True" PackagePath="buildTransitive/AdamE.Firebase.iOS.Database.targets" />
-    <None Include="External-Dependency-Info.txt" Pack="True" PackagePath="THIRD-PARTY-NOTICES.txt" />
+  <ItemGroup>    
+    <None Include="GoogleAppMeasurement.targets" Pack="True" PackagePath="build/AdamE.Google.iOS.GoogleAppMeasurement.targets" />
+    <None Include="GoogleAppMeasurement.targets" Pack="True" PackagePath="buildTransitive/AdamE.Google.iOS.GoogleAppMeasurement.targets" />
     <None Include="License.md" Pack="True" PackagePath="License.md" />
-    <None Include="../../../icons/firebaseiosdatabase_128x128.png" Pack="True" PackagePath="firebaseiosdatabase_128x128.png" />
   </ItemGroup>
   <!-- An iOS app project cannot find Xcframeworks within a NuGet if a TFM
        previous than net6.0-ios is used.
@@ -48,27 +42,15 @@
        project so sidecar can work properly. -->
   <!-- This workaround was designed like this to have the same
        NativeReference tag for the iOS binding and for the .targets file -->
-  <Import Project="Database.targets" />
-  <ItemGroup>
-    <_NativeReference Include="..\..\..\externals\FirebaseDatabase.xcframework">
-      <_Id>$(_FirebaseDatabaseId)</_Id>
-    </_NativeReference>
-  </ItemGroup>
+  <Import Project="GoogleAppMeasurement.targets" />
   <!-- End of workaround -->
   <ItemGroup Condition="'$(TargetFramework)' == 'xamarin.ios10'">
     <Compile Remove="ApiDefinition.cs" />
-    <Compile Remove="Enums.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ObjcBindingCoreSource Include="Enums.cs" Condition=" '$(EnableDefaultCompileItems)' == 'true'" />
   </ItemGroup>
   <ItemGroup>
     <ObjcBindingApiDefinition Include="ApiDefinition.cs" Condition=" '$(EnableDefaultCompileItems)' == 'true'" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Xamarin.Build.Download" Version="0.11.4" PrivateAssets="None" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Core\Core.csproj" PrivateAssets="None" />
   </ItemGroup>
 </Project>

@@ -1,37 +1,7 @@
 ﻿<Project>
   <PropertyGroup>
-    <_FirebaseCoreAssemblyName>Firebase.Core, Version=11.3.0.0, Culture=neutral, PublicKeyToken=null</_FirebaseCoreAssemblyName>
-    <_GoogleAppMeasurementItemsFolder>GAppM-11.3.0</_GoogleAppMeasurementItemsFolder>
-    <_GoogleAppMeasurementSDKBaseFolder>$(XamarinBuildDownloadDir)$(_GoogleAppMeasurementItemsFolder)\GoogleAppMeasurement-11.3.0\Frameworks\</_GoogleAppMeasurementSDKBaseFolder>
+    <_FirebaseCoreAssemblyName>Firebase.Core, Version=11.4.0.0, Culture=neutral, PublicKeyToken=null</_FirebaseCoreAssemblyName>
   </PropertyGroup>
-  <!-- *.tar.gz URLs can be found in the podspec: https://github.com/CocoaPods/Specs/tree/master/Specs/e/3/b/GoogleAppMeasurement -->	
-  <ItemGroup Condition="('$(OutputType)'!='Library' OR '$(IsAppExtension)'=='True')">
-    <XamarinBuildDownload Include="$(_GoogleAppMeasurementItemsFolder)">
-      <Url>https://dl.google.com/firebase/ios/analytics/d86efe4f4164be5a/GoogleAppMeasurement-11.3.0.tar.gz</Url>
-      <Kind>Tgz</Kind>
-    </XamarinBuildDownload>
-    <XamarinBuildRestoreResources Include="_FCrDownloadedItems" />
-  </ItemGroup>
-  <Target Name="_FCrDownloadedItems">
-    <ItemGroup Condition="'$(FirebaseWithoutAdIdSupport)'!='True'">
-      <NativeReference Include="$(_GoogleAppMeasurementSDKBaseFolder)GoogleAppMeasurementIdentitySupport.xcframework">
-        <Kind>Framework</Kind>
-        <SmartLink>True</SmartLink>
-        <ForceLoad>True</ForceLoad>
-        <LinkerFlags>-ObjC -lc++ -lsqlite3 -lz</LinkerFlags>
-        <Frameworks>StoreKit</Frameworks>
-      </NativeReference>
-    </ItemGroup>
-    <ItemGroup>
-      <NativeReference Include="$(_GoogleAppMeasurementSDKBaseFolder)GoogleAppMeasurement.xcframework">
-        <Kind>Framework</Kind>
-        <SmartLink>True</SmartLink>
-        <ForceLoad>True</ForceLoad>
-        <LinkerFlags>-ObjC -lc++ -lsqlite3 -lz</LinkerFlags>
-        <Frameworks>StoreKit</Frameworks>
-      </NativeReference>
-    </ItemGroup>
-  </Target>
   <PropertyGroup>
     <_FirebaseCoreId>FirebaseCore</_FirebaseCoreId>
     <_leveldbId>leveldb</_leveldbId>

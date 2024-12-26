@@ -1,52 +1,53 @@
 // Firebase artifacts available to be built. These artifacts generate NuGets.
-Artifact FIREBASE_AB_TESTING_ARTIFACT              = new Artifact ("Firebase.ABTesting",              "11.4.0",        "13.0", ComponentGroup.Firebase, csprojName: "ABTesting");
-Artifact FIREBASE_ANALYTICS_ARTIFACT               = new Artifact ("Firebase.Analytics",              "11.4.0",        "13.0", ComponentGroup.Firebase, csprojName: "Analytics");
-Artifact FIREBASE_AUTH_ARTIFACT                    = new Artifact ("Firebase.Auth",                   "11.4.0",        "13.0", ComponentGroup.Firebase, csprojName: "Auth");
-Artifact FIREBASE_CLOUD_FIRESTORE_ARTIFACT         = new Artifact ("Firebase.CloudFirestore",         "11.4.0",        "13.0", ComponentGroup.Firebase, csprojName: "CloudFirestore");
-Artifact FIREBASE_CLOUD_FUNCTIONS_ARTIFACT         = new Artifact ("Firebase.CloudFunctions",         "11.4.0",        "13.0", ComponentGroup.Firebase, csprojName: "CloudFunctions");
-Artifact FIREBASE_CLOUD_MESSAGING_ARTIFACT         = new Artifact ("Firebase.CloudMessaging",         "11.4.0",        "13.0", ComponentGroup.Firebase, csprojName: "CloudMessaging");
-Artifact FIREBASE_CORE_ARTIFACT                    = new Artifact ("Firebase.Core",                   "11.4.2",        "13.0", ComponentGroup.Firebase, csprojName: "Core");
-Artifact FIREBASE_CRASHLYTICS_ARTIFACT             = new Artifact ("Firebase.Crashlytics",            "11.4.0",        "13.0", ComponentGroup.Firebase, csprojName: "Crashlytics");
-Artifact FIREBASE_DATABASE_ARTIFACT                = new Artifact ("Firebase.Database",               "11.4.0",        "13.0", ComponentGroup.Firebase, csprojName: "Database");
-Artifact FIREBASE_DYNAMIC_LINKS_ARTIFACT           = new Artifact ("Firebase.DynamicLinks",           "11.4.0",        "13.0", ComponentGroup.Firebase, csprojName: "DynamicLinks");
-Artifact FIREBASE_IN_APP_MESSAGING_ARTIFACT        = new Artifact ("Firebase.InAppMessaging",         "8.10.0.3",      "11.0", ComponentGroup.Firebase, csprojName: "InAppMessaging");
-Artifact FIREBASE_INSTALLATIONS_ARTIFACT           = new Artifact ("Firebase.Installations",          "11.4.0",        "13.0", ComponentGroup.Firebase, csprojName: "Installations");
-Artifact FIREBASE_PERFORMANCE_MONITORING_ARTIFACT  = new Artifact ("Firebase.PerformanceMonitoring",  "8.10.0.3",      "11.0", ComponentGroup.Firebase, csprojName: "PerformanceMonitoring");
-Artifact FIREBASE_REMOTE_CONFIG_ARTIFACT           = new Artifact ("Firebase.RemoteConfig",           "11.4.0",        "13.0", ComponentGroup.Firebase, csprojName: "RemoteConfig");
-Artifact FIREBASE_STORAGE_ARTIFACT                 = new Artifact ("Firebase.Storage",                "11.4.0",        "13.0", ComponentGroup.Firebase, csprojName: "Storage");
-// Artifact FIREBASE_APP_DISTRIBUTION_ARTIFACT        = new Artifact ("Firebase.AppDistribution",        "8.10.0.1",   "10.0", ComponentGroup.Firebase, csprojName: "AppDistribution");
-// Artifact FIREBASE_APP_CHECK_ARTIFACT               = new Artifact ("Firebase.AppCheck",               "8.10.0.1",   "11.0", ComponentGroup.Firebase, csprojName: "AppCheck");
+Artifact FIREBASE_AB_TESTING_ARTIFACT              = new Artifact ("Firebase.ABTesting",              "11.4.0.1",  "13.0", ComponentGroup.Firebase, csprojName: "ABTesting");
+Artifact FIREBASE_ANALYTICS_ARTIFACT               = new Artifact ("Firebase.Analytics",              "11.4.0.1",  "13.0", ComponentGroup.Firebase, csprojName: "Analytics");
+Artifact FIREBASE_AUTH_ARTIFACT                    = new Artifact ("Firebase.Auth",                   "11.4.0.1",  "13.0", ComponentGroup.Firebase, csprojName: "Auth");
+Artifact FIREBASE_CLOUD_FIRESTORE_ARTIFACT         = new Artifact ("Firebase.CloudFirestore",         "11.4.0.1",  "13.0", ComponentGroup.Firebase, csprojName: "CloudFirestore");
+Artifact FIREBASE_CLOUD_FUNCTIONS_ARTIFACT         = new Artifact ("Firebase.CloudFunctions",         "11.4.0.1",  "13.0", ComponentGroup.Firebase, csprojName: "CloudFunctions");
+Artifact FIREBASE_CLOUD_MESSAGING_ARTIFACT         = new Artifact ("Firebase.CloudMessaging",         "11.4.0.1",  "13.0", ComponentGroup.Firebase, csprojName: "CloudMessaging");
+Artifact FIREBASE_CORE_ARTIFACT                    = new Artifact ("Firebase.Core",                   "11.4.2.1",  "13.0", ComponentGroup.Firebase, csprojName: "Core");
+Artifact FIREBASE_CRASHLYTICS_ARTIFACT             = new Artifact ("Firebase.Crashlytics",            "11.4.0.1",  "13.0", ComponentGroup.Firebase, csprojName: "Crashlytics");
+Artifact FIREBASE_DATABASE_ARTIFACT                = new Artifact ("Firebase.Database",               "11.4.0.1",  "13.0", ComponentGroup.Firebase, csprojName: "Database");
+Artifact FIREBASE_DYNAMIC_LINKS_ARTIFACT           = new Artifact ("Firebase.DynamicLinks",           "11.4.0.1",  "13.0", ComponentGroup.Firebase, csprojName: "DynamicLinks");
+//Artifact FIREBASE_IN_APP_MESSAGING_ARTIFACT      = new Artifact ("Firebase.InAppMessaging",         "8.10.0.3",  "11.0", ComponentGroup.Firebase, csprojName: "InAppMessaging");
+Artifact FIREBASE_INSTALLATIONS_ARTIFACT           = new Artifact ("Firebase.Installations",          "11.4.0.1",  "13.0", ComponentGroup.Firebase, csprojName: "Installations");
+//Artifact FIREBASE_PERFORMANCE_MONITORING_ARTIFACT=new Artifact ("Firebase.PerformanceMonitoring",   "8.10.0.3",  "11.0", ComponentGroup.Firebase, csprojName: "PerformanceMonitoring");
+Artifact FIREBASE_REMOTE_CONFIG_ARTIFACT           = new Artifact ("Firebase.RemoteConfig",           "11.4.0.1",  "13.0", ComponentGroup.Firebase, csprojName: "RemoteConfig");
+Artifact FIREBASE_STORAGE_ARTIFACT                 = new Artifact ("Firebase.Storage",                "11.4.0.1",  "13.0", ComponentGroup.Firebase, csprojName: "Storage");
+//Artifact FIREBASE_APP_DISTRIBUTION_ARTIFACT      = new Artifact ("Firebase.AppDistribution",        "8.10.0.1",  "10.0", ComponentGroup.Firebase, csprojName: "AppDistribution");
+//Artifact FIREBASE_APP_CHECK_ARTIFACT             = new Artifact ("Firebase.AppCheck",               "8.10.0.1",  "11.0", ComponentGroup.Firebase, csprojName: "AppCheck");
 
 // Google artifacts available to be built. These artifacts generate NuGets.
-Artifact GOOGLE_ANALYTICS_ARTIFACT             = new Artifact ("Google.Analytics",             "3.20.0.2",  "11.0", ComponentGroup.Google, csprojName: "Analytics");
-Artifact GOOGLE_CAST_ARTIFACT                  = new Artifact ("Google.Cast",                  "4.7.0.1",   "12.0", ComponentGroup.Google, csprojName: "Cast");
-Artifact GOOGLE_MAPS_ARTIFACT                  = new Artifact ("Google.Maps",                  "9.2.0.5",   "15.0", ComponentGroup.Google, csprojName: "Maps");
-Artifact GOOGLE_MOBILE_ADS_ARTIFACT            = new Artifact ("Google.MobileAds",             "8.13.0.3",  "11.0", ComponentGroup.Google, csprojName: "MobileAds");
-Artifact GOOGLE_UMP_ARTIFACT                   = new Artifact ("Google.UserMessagingPlatform", "1.1.0.1",   "11.0", ComponentGroup.Google, csprojName: "UserMessagingPlatform");
-Artifact GOOGLE_PLACES_ARTIFACT                = new Artifact ("Google.Places",                "6.0.0.3",   "12.0", ComponentGroup.Google, csprojName: "Places");
-Artifact GOOGLE_SIGN_IN_ARTIFACT               = new Artifact ("Google.SignIn",                "5.0.2.4",   "11.0", ComponentGroup.Google, csprojName: "SignIn");
-Artifact GOOGLE_TAG_MANAGER_ARTIFACT           = new Artifact ("Google.TagManager",            "7.4.0.2",   "11.0", ComponentGroup.Google, csprojName: "TagManager");
+Artifact GOOGLE_ANALYTICS_ARTIFACT                 = new Artifact ("Google.Analytics",                "3.20.0.2",  "11.0", ComponentGroup.Google, csprojName: "Analytics");
+Artifact GOOGLE_CAST_ARTIFACT                      = new Artifact ("Google.Cast",                     "4.7.0.1",   "12.0", ComponentGroup.Google, csprojName: "Cast");
+Artifact GOOGLE_MAPS_ARTIFACT                      = new Artifact ("Google.Maps",                     "9.2.0.5",   "15.0", ComponentGroup.Google, csprojName: "Maps");
+Artifact GOOGLE_MOBILE_ADS_ARTIFACT                = new Artifact ("Google.MobileAds",                "8.13.0.3",  "11.0", ComponentGroup.Google, csprojName: "MobileAds");
+Artifact GOOGLE_UMP_ARTIFACT                       = new Artifact ("Google.UserMessagingPlatform",    "1.1.0.1",   "11.0", ComponentGroup.Google, csprojName: "UserMessagingPlatform");
+Artifact GOOGLE_PLACES_ARTIFACT                    = new Artifact ("Google.Places",                   "6.0.0.3",   "12.0", ComponentGroup.Google, csprojName: "Places");
+Artifact GOOGLE_SIGN_IN_ARTIFACT                   = new Artifact ("Google.SignIn",                   "5.0.2.4",   "11.0", ComponentGroup.Google, csprojName: "SignIn");
+Artifact GOOGLE_TAG_MANAGER_ARTIFACT               = new Artifact ("Google.TagManager",               "7.4.0.2",   "11.0", ComponentGroup.Google, csprojName: "TagManager");
 
-Artifact GOOGLE_PROMISES_OBJC_ARTIFACT         = new Artifact ("Google.PromisesObjC",          "2.4.0",     "10.0", ComponentGroup.Google, csprojName: "PromisesObjC");
-Artifact GOOGLE_GTM_SESSION_FETCHER_ARTIFACT   = new Artifact ("Google.GTMSessionFetcher",     "4.1.0",     "13.0", ComponentGroup.Google, csprojName: "GTMSessionFetcher");
-Artifact GOOGLE_NANOPB_ARTIFACT                = new Artifact ("Google.Nanopb",                "3.30910.0", "12.0", ComponentGroup.Google, csprojName: "Nanopb");
-Artifact GOOGLE_GOOGLE_UTILITIES_ARTIFACT      = new Artifact ("Google.GoogleUtilities",       "8.0.2",     "12.0", ComponentGroup.Google, csprojName: "GoogleUtilities");
-Artifact GOOGLE_GOOGLE_DATA_TRANSPORT_ARTIFACT = new Artifact ("Google.GoogleDataTransport",   "10.1.0",    "12.0", ComponentGroup.Google, csprojName: "GoogleDataTransport");
+Artifact GOOGLE_GOOGLE_APP_MEASUREMENT_ARTIFACT    = new Artifact ("Google.AppMeasurement",           "11.4.0",    "12.0", ComponentGroup.Google, csprojName: "GoogleAppMeasurement");
+Artifact GOOGLE_PROMISES_OBJC_ARTIFACT             = new Artifact ("Google.PromisesObjC",             "2.4.0",     "10.0", ComponentGroup.Google, csprojName: "PromisesObjC");
+Artifact GOOGLE_GTM_SESSION_FETCHER_ARTIFACT       = new Artifact ("Google.GTMSessionFetcher",        "4.1.0",     "13.0", ComponentGroup.Google, csprojName: "GTMSessionFetcher");
+Artifact GOOGLE_NANOPB_ARTIFACT                    = new Artifact ("Google.Nanopb",                   "3.30910.0", "12.0", ComponentGroup.Google, csprojName: "Nanopb");
+Artifact GOOGLE_GOOGLE_UTILITIES_ARTIFACT          = new Artifact ("Google.GoogleUtilities",          "8.0.2",     "12.0", ComponentGroup.Google, csprojName: "GoogleUtilities");
+Artifact GOOGLE_GOOGLE_DATA_TRANSPORT_ARTIFACT     = new Artifact ("Google.GoogleDataTransport",      "10.1.0",    "12.0", ComponentGroup.Google, csprojName: "GoogleDataTransport");
 
 // MLKit artifacts available to be built. These artifacts generate NuGets.
-Artifact MLKIT_CORE_ARTIFACT                     = new Artifact ("MLKit.Core",                        "12.0.0.0", "16.0", ComponentGroup.MLKit, csprojName: "Core");
-Artifact MLKIT_TEXT_RECOGNITION                  = new Artifact ("MLKit.TextRecognition",             "1.0.0.3",  "10.0", ComponentGroup.MLKit, csprojName: "TextRecognition");
-Artifact MLKIT_VISION                            = new Artifact ("MLKit.Vision",                      "3.0.0",    "10.0", ComponentGroup.MLKit, csprojName: "Vision");
-Artifact MLKIT_TEXT_RECOGNITION_LATIN            = new Artifact ("MLKit.TextRecognition.Latin",       "1.4.0.3",  "10.0", ComponentGroup.MLKit, csprojName: "TextRecognitionLatin");
-Artifact MLKIT_TEXT_RECOGNITION_CHINESE          = new Artifact ("MLKit.TextRecognition.Chinese",     "1.0.0.3",  "10.0", ComponentGroup.MLKit, csprojName: "TextRecognitionChinese");
-Artifact MLKIT_TEXT_RECOGNITION_DEVANAGARI       = new Artifact ("MLKit.TextRecognition.Devanagari",  "1.0.0.3",  "10.0", ComponentGroup.MLKit, csprojName: "TextRecognitionDevanagari");
-Artifact MLKIT_TEXT_RECOGNITION_JAPANESE         = new Artifact ("MLKit.TextRecognition.Japanese",    "1.0.0.3",  "10.0", ComponentGroup.MLKit, csprojName: "TextRecognitionJapanese");
-Artifact MLKIT_TEXT_RECOGNITION_KOREAN           = new Artifact ("MLKit.TextRecognition.Korean",      "1.0.0.3",  "10.0", ComponentGroup.MLKit, csprojName: "TextRecognitionKorean");
-Artifact MLKIT_FACE_DETECTION                    = new Artifact ("MLKit.FaceDetection",               "1.5.0",    "10.0", ComponentGroup.MLKit, csprojName: "FaceDetection");
-Artifact MLKIT_BARCODE_SCANNING                  = new Artifact ("MLKit.BarcodeScanning",             "6.0.0.0",  "16.0", ComponentGroup.MLKit, csprojName: "BarcodeScanning");
-Artifact MLKIT_DIGITAL_INK_RECOGNITION           = new Artifact ("MLKit.DigitalInkRecognition",       "1.5.0",    "10.0", ComponentGroup.MLKit, csprojName: "DigitalInkRecognition");
-Artifact MLKIT_IMAGE_LABELING                    = new Artifact ("MLKit.ImageLabeling",               "1.5.0",    "10.0", ComponentGroup.MLKit, csprojName: "ImageLabeling");
-Artifact MLKIT_OBJECT_DETECTION                  = new Artifact ("MLKit.ObjectDetection",             "1.5.0",    "10.0", ComponentGroup.MLKit, csprojName: "ObjectDetection");
+Artifact MLKIT_CORE_ARTIFACT                     = new Artifact ("MLKit.Core",                        "12.0.0.0",  "16.0", ComponentGroup.MLKit, csprojName: "Core");
+Artifact MLKIT_TEXT_RECOGNITION                  = new Artifact ("MLKit.TextRecognition",             "1.0.0.3",   "10.0", ComponentGroup.MLKit, csprojName: "TextRecognition");
+Artifact MLKIT_VISION                            = new Artifact ("MLKit.Vision",                      "3.0.0",     "10.0", ComponentGroup.MLKit, csprojName: "Vision");
+Artifact MLKIT_TEXT_RECOGNITION_LATIN            = new Artifact ("MLKit.TextRecognition.Latin",       "1.4.0.3",   "10.0", ComponentGroup.MLKit, csprojName: "TextRecognitionLatin");
+Artifact MLKIT_TEXT_RECOGNITION_CHINESE          = new Artifact ("MLKit.TextRecognition.Chinese",     "1.0.0.3",   "10.0", ComponentGroup.MLKit, csprojName: "TextRecognitionChinese");
+Artifact MLKIT_TEXT_RECOGNITION_DEVANAGARI       = new Artifact ("MLKit.TextRecognition.Devanagari",  "1.0.0.3",   "10.0", ComponentGroup.MLKit, csprojName: "TextRecognitionDevanagari");
+Artifact MLKIT_TEXT_RECOGNITION_JAPANESE         = new Artifact ("MLKit.TextRecognition.Japanese",    "1.0.0.3",   "10.0", ComponentGroup.MLKit, csprojName: "TextRecognitionJapanese");
+Artifact MLKIT_TEXT_RECOGNITION_KOREAN           = new Artifact ("MLKit.TextRecognition.Korean",      "1.0.0.3",   "10.0", ComponentGroup.MLKit, csprojName: "TextRecognitionKorean");
+Artifact MLKIT_FACE_DETECTION                    = new Artifact ("MLKit.FaceDetection",               "1.5.0",     "10.0", ComponentGroup.MLKit, csprojName: "FaceDetection");
+Artifact MLKIT_BARCODE_SCANNING                  = new Artifact ("MLKit.BarcodeScanning",             "6.0.0.0",   "16.0", ComponentGroup.MLKit, csprojName: "BarcodeScanning");
+Artifact MLKIT_DIGITAL_INK_RECOGNITION           = new Artifact ("MLKit.DigitalInkRecognition",       "1.5.0",     "10.0", ComponentGroup.MLKit, csprojName: "DigitalInkRecognition");
+Artifact MLKIT_IMAGE_LABELING                    = new Artifact ("MLKit.ImageLabeling",               "1.5.0",     "10.0", ComponentGroup.MLKit, csprojName: "ImageLabeling");
+Artifact MLKIT_OBJECT_DETECTION                  = new Artifact ("MLKit.ObjectDetection",             "1.5.0",     "10.0", ComponentGroup.MLKit, csprojName: "ObjectDetection");
 
 var ARTIFACTS = new Dictionary<string, Artifact> {
 	{ "Firebase.ABTesting",              FIREBASE_AB_TESTING_ARTIFACT },
@@ -59,14 +60,15 @@ var ARTIFACTS = new Dictionary<string, Artifact> {
 	{ "Firebase.Crashlytics",            FIREBASE_CRASHLYTICS_ARTIFACT },
 	{ "Firebase.Database",               FIREBASE_DATABASE_ARTIFACT },
 	{ "Firebase.DynamicLinks",           FIREBASE_DYNAMIC_LINKS_ARTIFACT },
-	{ "Firebase.InAppMessaging",         FIREBASE_IN_APP_MESSAGING_ARTIFACT },
+	//{ "Firebase.InAppMessaging",         FIREBASE_IN_APP_MESSAGING_ARTIFACT },
 	{ "Firebase.Installations",          FIREBASE_INSTALLATIONS_ARTIFACT },
-	{ "Firebase.PerformanceMonitoring",  FIREBASE_PERFORMANCE_MONITORING_ARTIFACT },
+	//{ "Firebase.PerformanceMonitoring",  FIREBASE_PERFORMANCE_MONITORING_ARTIFACT },
 	{ "Firebase.RemoteConfig",           FIREBASE_REMOTE_CONFIG_ARTIFACT },
 	{ "Firebase.Storage",                FIREBASE_STORAGE_ARTIFACT },
 	// { "Firebase.AppDistribution",        FIREBASE_APP_DISTRIBUTION_ARTIFACT },
 	// { "Firebase.AppCheck",               FIREBASE_APP_CHECK_ARTIFACT },
 
+    { "Google.GoogleAppMeasurement",  GOOGLE_GOOGLE_APP_MEASUREMENT_ARTIFACT },
 	{ "Google.Analytics",             GOOGLE_ANALYTICS_ARTIFACT },
 	{ "Google.Cast",                  GOOGLE_CAST_ARTIFACT },	
 	{ "Google.Maps",                  GOOGLE_MAPS_ARTIFACT },
@@ -99,7 +101,7 @@ var ARTIFACTS = new Dictionary<string, Artifact> {
 void SetArtifactsDependencies ()
 {
 	FIREBASE_AB_TESTING_ARTIFACT.Dependencies              = new [] { FIREBASE_CORE_ARTIFACT };
-	FIREBASE_ANALYTICS_ARTIFACT.Dependencies               = new [] { FIREBASE_CORE_ARTIFACT, FIREBASE_INSTALLATIONS_ARTIFACT };
+	FIREBASE_ANALYTICS_ARTIFACT.Dependencies               = new [] { FIREBASE_CORE_ARTIFACT, FIREBASE_INSTALLATIONS_ARTIFACT, GOOGLE_GOOGLE_APP_MEASUREMENT_ARTIFACT };
 	FIREBASE_AUTH_ARTIFACT.Dependencies                    = new [] { FIREBASE_CORE_ARTIFACT, GOOGLE_GTM_SESSION_FETCHER_ARTIFACT /* Needed for sample GOOGLE_SIGN_IN_ARTIFACT */ };
 	FIREBASE_CLOUD_FIRESTORE_ARTIFACT.Dependencies         = new [] { FIREBASE_CORE_ARTIFACT, /* Needed for sample */ FIREBASE_AUTH_ARTIFACT };
 	FIREBASE_CLOUD_FUNCTIONS_ARTIFACT.Dependencies         = new [] { FIREBASE_CORE_ARTIFACT, GOOGLE_GTM_SESSION_FETCHER_ARTIFACT };
@@ -108,9 +110,9 @@ void SetArtifactsDependencies ()
 	FIREBASE_CRASHLYTICS_ARTIFACT.Dependencies             = new [] { FIREBASE_CORE_ARTIFACT, FIREBASE_INSTALLATIONS_ARTIFACT };
 	FIREBASE_DATABASE_ARTIFACT.Dependencies                = new [] { FIREBASE_CORE_ARTIFACT, /* Needed for sample FIREBASE_AUTH_ARTIFACT */ };
 	FIREBASE_DYNAMIC_LINKS_ARTIFACT.Dependencies           = new [] { FIREBASE_CORE_ARTIFACT };
-	FIREBASE_IN_APP_MESSAGING_ARTIFACT.Dependencies        = new [] { FIREBASE_CORE_ARTIFACT, FIREBASE_INSTALLATIONS_ARTIFACT, FIREBASE_AB_TESTING_ARTIFACT };
+	//FIREBASE_IN_APP_MESSAGING_ARTIFACT.Dependencies        = new [] { FIREBASE_CORE_ARTIFACT, FIREBASE_INSTALLATIONS_ARTIFACT, FIREBASE_AB_TESTING_ARTIFACT };
 	FIREBASE_INSTALLATIONS_ARTIFACT.Dependencies           = new [] { FIREBASE_CORE_ARTIFACT };
-	FIREBASE_PERFORMANCE_MONITORING_ARTIFACT.Dependencies  = new [] { FIREBASE_CORE_ARTIFACT, FIREBASE_INSTALLATIONS_ARTIFACT, FIREBASE_AB_TESTING_ARTIFACT, FIREBASE_REMOTE_CONFIG_ARTIFACT };
+	//FIREBASE_PERFORMANCE_MONITORING_ARTIFACT.Dependencies  = new [] { FIREBASE_CORE_ARTIFACT, FIREBASE_INSTALLATIONS_ARTIFACT, FIREBASE_AB_TESTING_ARTIFACT, FIREBASE_REMOTE_CONFIG_ARTIFACT };
 	FIREBASE_REMOTE_CONFIG_ARTIFACT.Dependencies           = new [] { FIREBASE_CORE_ARTIFACT, FIREBASE_INSTALLATIONS_ARTIFACT, FIREBASE_AB_TESTING_ARTIFACT };
 	FIREBASE_STORAGE_ARTIFACT.Dependencies                 = new [] { FIREBASE_CORE_ARTIFACT, FIREBASE_DATABASE_ARTIFACT, GOOGLE_GTM_SESSION_FETCHER_ARTIFACT /* Needed for sample FIREBASE_AUTH_ARTIFACT */ };
 	// FIREBASE_APP_DISTRIBUTION_ARTIFACT.Dependencies        = new [] { FIREBASE_CORE_ARTIFACT, FIREBASE_INSTALLATIONS_ARTIFACT };
@@ -195,15 +197,15 @@ void SetArtifactsPodSpecs ()
 	FIREBASE_DYNAMIC_LINKS_ARTIFACT.PodSpecs = new [] {
 		PodSpec.Create ("FirebaseDynamicLinks", "11.4.0", frameworkSource: FrameworkSource.Pods)
 	};
-	FIREBASE_IN_APP_MESSAGING_ARTIFACT.PodSpecs = new [] {
-		PodSpec.Create ("Firebase", "8.10.0", frameworkSource: FrameworkSource.Pods, frameworkName: "FirebaseInAppMessaging", targetName: "FirebaseInAppMessaging", subSpecs: new [] { "InAppMessaging" })
-	};
+	//FIREBASE_IN_APP_MESSAGING_ARTIFACT.PodSpecs = new [] {
+	//	PodSpec.Create ("Firebase", "8.10.0", frameworkSource: FrameworkSource.Pods, frameworkName: "FirebaseInAppMessaging", targetName: "FirebaseInAppMessaging", subSpecs: new [] { "InAppMessaging" })
+	//};
 	FIREBASE_INSTALLATIONS_ARTIFACT.PodSpecs = new [] {
 		PodSpec.Create ("FirebaseInstallations", "11.4.0", frameworkSource: FrameworkSource.Pods)
 	};
-	FIREBASE_PERFORMANCE_MONITORING_ARTIFACT.PodSpecs = new [] {
-		PodSpec.Create ("Firebase", "8.10.0", frameworkSource: FrameworkSource.Pods, frameworkName: "FirebasePerformance", targetName: "FirebasePerformance",  subSpecs: new [] { "Performance" })
-	};
+	//FIREBASE_PERFORMANCE_MONITORING_ARTIFACT.PodSpecs = new [] {
+	//	PodSpec.Create ("Firebase", "8.10.0", frameworkSource: FrameworkSource.Pods, frameworkName: "FirebasePerformance", targetName: "FirebasePerformance",  subSpecs: new [] { "Performance" })
+	//};
 	FIREBASE_REMOTE_CONFIG_ARTIFACT.PodSpecs = new [] {
 		PodSpec.Create ("FirebaseRemoteConfig", "11.4.0", frameworkSource: FrameworkSource.Pods)
 	};
@@ -244,6 +246,9 @@ void SetArtifactsPodSpecs ()
 	GOOGLE_TAG_MANAGER_ARTIFACT.PodSpecs = new [] {
 		PodSpec.Create ("GoogleTagManager", "7.4.0")
 	};
+    GOOGLE_GOOGLE_APP_MEASUREMENT_ARTIFACT.PodSpecs = new [] {
+        PodSpec.Create ("GoogleAppMeasurement", "11.4.0")
+    };
 	GOOGLE_PROMISES_OBJC_ARTIFACT.PodSpecs = new [] {
 	    PodSpec.Create ("PromisesObjC", "2.4.0", frameworkSource: FrameworkSource.Pods, frameworkName: "FBLPromises", targetName: "PromisesObjC"),
     };
@@ -363,10 +368,11 @@ void SetArtifactsExtraPodfileLines ()
 	FIREBASE_DATABASE_ARTIFACT.ExtraPodfileLines = extraPodfileLines.ToArray ();
 	FIREBASE_DYNAMIC_LINKS_ARTIFACT.ExtraPodfileLines = extraPodfileLines.ToArray ();
 	FIREBASE_INSTALLATIONS_ARTIFACT.ExtraPodfileLines = extraPodfileLines.ToArray ();
-	FIREBASE_PERFORMANCE_MONITORING_ARTIFACT.ExtraPodfileLines = extraPodfileLines.ToArray ();
+	//FIREBASE_PERFORMANCE_MONITORING_ARTIFACT.ExtraPodfileLines = extraPodfileLines.ToArray ();
 	FIREBASE_REMOTE_CONFIG_ARTIFACT.ExtraPodfileLines = extraPodfileLines.ToArray ();
 	FIREBASE_STORAGE_ARTIFACT.ExtraPodfileLines = extraPodfileLines.ToArray ();
 	
+	GOOGLE_GOOGLE_APP_MEASUREMENT_ARTIFACT.ExtraPodfileLines = extraPodfileLines.ToArray ();
 	GOOGLE_PROMISES_OBJC_ARTIFACT.ExtraPodfileLines = extraPodfileLines.ToArray ();
 	GOOGLE_GTM_SESSION_FETCHER_ARTIFACT.ExtraPodfileLines = extraPodfileLines.ToArray ();
 	GOOGLE_NANOPB_ARTIFACT.ExtraPodfileLines = extraPodfileLines.ToArray ();
@@ -400,7 +406,7 @@ void SetArtifactsExtraPodfileLines ()
 	inAppMessagingLines.AddRange (dynamicFrameworkLines);
 	inAppMessagingLines.AddRange (inAppMessagingWorkaround);
 
-	FIREBASE_IN_APP_MESSAGING_ARTIFACT.ExtraPodfileLines = inAppMessagingLines.ToArray ();
+	//FIREBASE_IN_APP_MESSAGING_ARTIFACT.ExtraPodfileLines = inAppMessagingLines.ToArray ();
 }
 
 void SetArtifactsSamples ()
@@ -416,9 +422,9 @@ void SetArtifactsSamples ()
 	FIREBASE_CRASHLYTICS_ARTIFACT.Samples             = new [] { "CrashlyticsSample" };
 	FIREBASE_DATABASE_ARTIFACT.Samples                = new [] { "DatabaseSample" };
 	FIREBASE_DYNAMIC_LINKS_ARTIFACT.Samples           = new [] { "DynamicLinksSample" };
-	FIREBASE_IN_APP_MESSAGING_ARTIFACT.Samples        = new [] { "InAppMessagingSample" };
+	//FIREBASE_IN_APP_MESSAGING_ARTIFACT.Samples        = new [] { "InAppMessagingSample" };
 	FIREBASE_INSTALLATIONS_ARTIFACT.Samples           = null;
-	FIREBASE_PERFORMANCE_MONITORING_ARTIFACT.Samples  = new [] { "PerformanceMonitoringSample" };
+	//FIREBASE_PERFORMANCE_MONITORING_ARTIFACT.Samples  = new [] { "PerformanceMonitoringSample" };
 	FIREBASE_REMOTE_CONFIG_ARTIFACT.Samples           = new [] { "RemoteConfigSample" };
 	FIREBASE_STORAGE_ARTIFACT.Samples                 = new [] { "StorageSample" };
 	//FIREBASE_APP_DISTRIBUTION_ARTIFACT.Samples        = new [] { "AppDistributionSample" };
