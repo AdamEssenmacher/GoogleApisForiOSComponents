@@ -5,10 +5,6 @@ using Foundation;
 using ObjCRuntime;
 using CoreGraphics;
 
-#if !NET
-using NativeHandle = System.IntPtr;
-#endif
-
 namespace Firebase.PerformanceMonitoring
 {
 	// @interface FIRHTTPMetric : NSObject <FIRPerformanceAttributable>

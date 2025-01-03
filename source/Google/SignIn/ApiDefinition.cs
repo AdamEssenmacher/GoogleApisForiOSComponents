@@ -3,10 +3,6 @@ using UIKit;
 using Foundation;
 using ObjCRuntime;
 
-#if !NET
-using NativeHandle = System.IntPtr;
-#endif
-
 namespace Google.SignIn
 {
 	// @interface GIDConfiguration : NSObject <NSCopying, NSSecureCoding>

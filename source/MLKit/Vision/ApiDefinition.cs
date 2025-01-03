@@ -7,10 +7,6 @@ using ObjCRuntime;
 
 using MLKit.Core;
 
-#if !NET
-using NativeHandle = System.IntPtr;
-#endif
-
 namespace MLKit.Vision {
 	// @interface MLKCommonImageLabelerOptions : NSObject
 	[BaseType (typeof (NSObject), Name = "MLKCommonImageLabelerOptions")]

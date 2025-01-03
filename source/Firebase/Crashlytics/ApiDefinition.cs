@@ -5,10 +5,6 @@ using Foundation;
 using ObjCRuntime;
 using UIKit;
 
-#if !NET
-using NativeHandle = System.IntPtr;
-#endif
-
 namespace Firebase.Crashlytics {
 	delegate void HasUnsentReportsHandler (bool hasUnsentReports);
 	delegate void CheckAndUpdateUnsentReportsHandler ([NullAllowed] CrashlyticsReport report);
