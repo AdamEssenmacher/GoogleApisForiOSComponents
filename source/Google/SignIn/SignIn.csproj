@@ -1,7 +1,6 @@
-﻿<Project Sdk="Xamarin.Legacy.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>xamarin.ios10;net6.0-ios</TargetFrameworks>
-    <NoNFloatUsing Condition="'$(TargetFramework)' == 'xamarin.ios10'">true</NoNFloatUsing>
+    <TargetFramework>net8.0-ios</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>true</ImplicitUsings>
     <IsBindingProject>true</IsBindingProject>
@@ -41,32 +40,26 @@
     <None Include="License.md" Pack="True" PackagePath="License.md" />
     <None Include="../../../icons/googleiossignin_128x128.png" Pack="True" PackagePath="googleiossignin_128x128.png" />
   </ItemGroup>
-  <!-- An iOS app project cannot find Xcframeworks within a NuGet if a TFM
-       previous than net6.0-ios is used.
-       https://github.com/xamarin/xamarin-macios/issues/13693
-       You must include the Xcframework's NativeReference tag into the iOS app
-       project so sidecar can work properly. -->
-  <!-- This workaround was designed like this to have the same
-       NativeReference tag for the iOS binding and for the .targets file -->
-  <Import Project="SignIn.targets" />
   <ItemGroup>
-    <_NativeReference Include="..\..\..\externals\AppAuth.xcframework">
-      <_Id>$(_AppAuthId)</_Id>
-    </_NativeReference>
-    <_NativeReference Include="..\..\..\externals\GTMAppAuth.xcframework">
-      <_Id>$(_GTMAppAuthId)</_Id>
-    </_NativeReference>
-  </ItemGroup>
-  <!-- End of workaround -->
-  <ItemGroup Condition="'$(TargetFramework)' == 'xamarin.ios10'">
-    <Compile Remove="ApiDefinition.cs" />
-    <Compile Remove="Enums.cs" />
+    <NativeReference Include="..\..\..\externals\AppAuth.xcframework">
+      <Kind>Framework</Kind>
+      <SmartLink>True</SmartLink>
+      <ForceLoad>True</ForceLoad>
+      <Frameworks>SafariServices</Frameworks>
+      <WeakFrameworks>AuthenticationServices</WeakFrameworks>
+    </NativeReference>
+    <NativeReference Include="..\..\..\externals\GTMAppAuth.xcframework">
+      <Kind>Framework</Kind>
+      <SmartLink>True</SmartLink>
+      <ForceLoad>True</ForceLoad>
+      <Frameworks>Security SystemConfiguration SafariServices</Frameworks>
+    </NativeReference>
   </ItemGroup>
   <ItemGroup>
-    <ObjcBindingCoreSource Include="Enums.cs" Condition=" '$(EnableDefaultCompileItems)' == 'true'" />
+    <ObjcBindingCoreSource Include="Enums.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ObjcBindingApiDefinition Include="ApiDefinition.cs" Condition=" '$(EnableDefaultCompileItems)' == 'true'" />
+    <ObjcBindingApiDefinition Include="ApiDefinition.cs" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Xamarin.Build.Download" Version="0.11.4" PrivateAssets="None" />

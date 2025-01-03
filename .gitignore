@@ -9,6 +9,7 @@ tmp-nugets
 Pods/
 build
 .vs/
+.idea/
 *.framework
 _._
 externals
