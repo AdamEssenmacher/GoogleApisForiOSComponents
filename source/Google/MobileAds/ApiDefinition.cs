@@ -2020,10 +2020,7 @@ namespace Google.MobileAds.DoubleClick {
 		void DidReceiveBannerView (Google.MobileAds.AdLoader adLoader, BannerView bannerView);
 	}
 
-	[BaseType (typeof (Google.MobileAds.BannerView),
-		Name = "GAMBannerView",
-		Delegates = new string [] { "AdSizeDelegate" },
-		Events = new Type [] { typeof (Google.MobileAds.AdSizeDelegate) })]
+	[BaseType (typeof (Google.MobileAds.BannerView), Name = "GAMBannerView")]
 	interface BannerView {
 
 		[Export ("initWithFrame:")]
