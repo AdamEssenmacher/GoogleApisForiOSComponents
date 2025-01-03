@@ -1,9 +1,7 @@
 ﻿using System;
-
 using UIKit;
 using Foundation;
 using ObjCRuntime;
-using CoreGraphics;
 
 #if !NET
 using NativeHandle = System.IntPtr;
@@ -11,203 +9,139 @@ using NativeHandle = System.IntPtr;
 
 namespace Google.SignIn
 {
-	// typedef void (^GIDAuthenticationHandler)(GIDAuthentication *authentication, NSError *error);
-	delegate void AuthenticationHandler (Authentication authentication, NSError error);
-
-	// typedef void (^GIDAccessTokenHandler)(NSString *, NSError *);
-	delegate void AccessTokenHandler (string accessToken, NSError error);
-
-	// @interface GIDAuthentication : NSObject <NSSecureCoding>
-	[BaseType (typeof (NSObject), Name = "GIDAuthentication")]
-	interface Authentication : INSSecureCoding
+	// @interface GIDConfiguration : NSObject <NSCopying, NSSecureCoding>
+	[BaseType (typeof (NSObject), Name = "GIDConfiguration")]
+	[DisableDefaultCtor]
+	interface Configuration : INSCopying, INSSecureCoding
 	{
-		// @property (readonly, nonatomic) NSString * clientID;
+		// @property (readonly, nonatomic) NSString * _Nonnull clientID;
 		[Export ("clientID")]
 		string ClientId { get; }
 
-		// @property (readonly, nonatomic) NSString * accessToken;
-		[Export ("accessToken")]
-		string AccessToken { get; }
+		// @property (readonly, nonatomic) NSString * _Nullable serverClientID;
+		[NullAllowed, Export ("serverClientID")]
+		string ServerClientId { get; }
 
-		// @property (readonly, nonatomic) NSDate * accessTokenExpirationDate;
-		[Export ("accessTokenExpirationDate")]
-		NSDate AccessTokenExpirationDate { get; }
+		// @property (readonly, nonatomic) NSString * _Nullable hostedDomain;
+		[NullAllowed, Export ("hostedDomain")]
+		string HostedDomain { get; }
 
-		// @property (readonly, nonatomic) NSString * refreshToken;
-		[Export ("refreshToken")]
-		string RefreshToken { get; }
+		// @property (readonly, nonatomic) NSString * _Nullable openIDRealm;
+		[NullAllowed, Export ("openIDRealm")]
+		string OpenIDRealm { get; }
 
-		// @property (readonly, nonatomic) NSString * idToken;
-		[Export ("idToken")]
-		string IdToken { get; }
+		// -(instancetype _Nonnull)initWithClientID:(NSString * _Nonnull)clientID;
+		[Export ("initWithClientID:")]
+		NativeHandle Constructor (string clientId);
 
-		// @property(nonatomic, readonly) NSDate *idTokenExpirationDate;
-		[Export ("idTokenExpirationDate")]
-		NSDate IdTokenExpirationDate { get; }
+		// -(instancetype _Nonnull)initWithClientID:(NSString * _Nonnull)clientID serverClientID:(NSString * _Nullable)serverClientID;
+		[Export ("initWithClientID:serverClientID:")]
+		NativeHandle Constructor (string clientId, [NullAllowed] string serverClientId);
 
-		//		// -(id<GTMFetcherAuthorizationProtocol>)fetcherAuthorizer;
-		//		[Export ("fetcherAuthorizer")]
-		//		IFetcherAuthorizationProtocol FetcherAuthorizer { get; }
-
-		// - (void)getTokensWithHandler:(GIDAuthenticationHandler)handler;
-		[Export ("getTokensWithHandler:")]
-		void GetTokens (AuthenticationHandler handler);
-
-		// - (void)refreshTokensWithHandler:(GIDAuthenticationHandler)handler;
-		[Export ("refreshTokensWithHandler:")]
-		void RefreshTokens (AuthenticationHandler handler);
+		// -(instancetype _Nonnull)initWithClientID:(NSString * _Nonnull)clientID serverClientID:(NSString * _Nullable)serverClientID hostedDomain:(NSString * _Nullable)hostedDomain openIDRealm:(NSString * _Nullable)openIDRealm __attribute__((objc_designated_initializer));
+		[Export ("initWithClientID:serverClientID:hostedDomain:openIDRealm:")]
+		[DesignatedInitializer] 
+		NativeHandle Constructor (string clientId, [NullAllowed] string serverClientId, [NullAllowed] string hostedDomain, [NullAllowed] string openIDRealm);
 	}
 
-	// @interface GIDGoogleUser : NSObject <NSSecureCoding>
+	//@interface GIDGoogleUser : NSObject <NSSecureCoding>
 	[BaseType (typeof (NSObject), Name = "GIDGoogleUser")]
 	interface GoogleUser : INSSecureCoding
 	{
-		// @property (readonly, nonatomic) NSString * userID;
-		[Export ("userID")]
+		// @property (readonly, nonatomic) NSString * _Nullable userID;
+		[NullAllowed, Export ("userID")]
 		string UserId { get; }
 
-		// @property (readonly, nonatomic) GIDProfileData * profile;
-		[Export ("profile")]
+		// @property (readonly, nonatomic) GIDProfileData * _Nullable profile;
+		[NullAllowed, Export ("profile")]
 		ProfileData Profile { get; }
 
-		// @property (readonly, nonatomic) GIDAuthentication * authentication;
-		[Export ("authentication")]
-		Authentication Authentication { get; }
+		// @property (readonly, nonatomic) NSArray<NSString *> * _Nullable grantedScopes;
+		[NullAllowed, Export ("grantedScopes")]
+		string[] GrantedScopes { get; }
 
-		// @property(nonatomic, readonly) NSArray *grantedScopes;
-		[Export ("grantedScopes")]
-		string [] GrantedScopes { get; }
+		// @property (readonly, nonatomic) GIDConfiguration * _Nonnull configuration;
+		[Export ("configuration")]
+		Configuration Configuration { get; }
 
-		// @property (readonly, nonatomic) NSString * hostedDomain;
-		[Export ("hostedDomain")]
-		string HostedDomain { get; }
+		// @property (readonly, nonatomic) GIDToken * _Nonnull accessToken;
+		[Export ("accessToken")]
+		Token AccessToken { get; }
 
-		// @property (readonly, nonatomic) NSString * serverAuthCode;
-		[Export ("serverAuthCode")]
-		string ServerAuthCode { get; }
+		// @property (readonly, nonatomic) GIDToken * _Nonnull refreshToken;
+		[Export ("refreshToken")]
+		Token RefreshToken { get; }
+
+		 // @property (readonly, nonatomic) GIDToken * _Nullable idToken;
+		[NullAllowed, Export ("idToken")]
+		Token IdToken { get; }
+
+		// @property (readonly, nonatomic) id<GTMFetcherAuthorizationProtocol> _Nonnull fetcherAuthorizer;
+		[Export ("fetcherAuthorizer")]
+		//FetcherAuthorizationProtocol FetcherAuthorizer { get; }]
+		// TODO: This opens a can of worms where GTMSessionFetcher needs to be bound at least partially.
+		NSObject FetcherAuthorizer { get; }
+
+		// -(void)refreshTokensIfNeededWithCompletion:(void (^ _Nonnull)(GIDGoogleUser * _Nullable, NSError * _Nullable))completion;
+		[Export ("refreshTokensIfNeededWithCompletion:")]
+		void RefreshTokensIfNeededWithCompletion (Action<GoogleUser, NSError> completion);
+
+		// -(void)addScopes:(NSArray<NSString *> * _Nonnull)scopes presentingViewController:(UIViewController * _Nonnull)presentingViewController completion:(void (^ _Nullable)(GIDSignInResult * _Nullable, NSError * _Nullable))completion __attribute__((availability(macos_app_extension, unavailable))) __attribute__((availability(ios_app_extension, unavailable)));
+		//[Unavailable (PlatformName.MacOSXAppExtension)]
+		//[Unavailable (PlatformName.iOSAppExtension)]
+		[Export ("addScopes:presentingViewController:completion:")]
+		void AddScopes (string[] scopes, UIViewController presentingViewController, [NullAllowed] Action<SignInResult, NSError> completion);
 	}
 
 	// @interface GIDProfileData : NSObject <NSCopying, NSSecureCoding>
 	[BaseType (typeof (NSObject), Name = "GIDProfileData")]
 	interface ProfileData : INSCopying, INSSecureCoding
 	{
-		// @property (readonly, nonatomic) NSString * email;
+		// @property (readonly, nonatomic) NSString * _Nonnull email;
 		[Export ("email")]
 		string Email { get; }
 
-		// @property (readonly, nonatomic) NSString * name;
+		// @property (readonly, nonatomic) NSString * _Nonnull name;
 		[Export ("name")]
 		string Name { get; }
 
-		// @property(nonatomic, readonly) NSString *givenName;
-		[Export ("givenName")]
+		// @property (readonly, nonatomic) NSString * _Nullable givenName;
+		[NullAllowed, Export ("givenName")]
 		string GivenName { get; }
 
-		// @property(nonatomic, readonly) NSString *familyName;
-		[Export ("familyName")]
+		// @property (readonly, nonatomic) NSString * _Nullable familyName;
+		[NullAllowed, Export ("familyName")]
 		string FamilyName { get; }
 
 		// @property (readonly, nonatomic) BOOL hasImage;
 		[Export ("hasImage")]
 		bool HasImage { get; }
 
-		// -(NSURL *)imageURLWithDimension:(NSUInteger)dimension;
+		// -(NSURL * _Nullable)imageURLWithDimension:(NSUInteger)dimension;
 		[Export ("imageURLWithDimension:")]
+		[return: NullAllowed]
 		NSUrl GetImageUrl (nuint dimension);
-	}
-
-	interface ISignInDelegate
-	{
-
-	}
-
-	// @protocol GIDSignInDelegate
-#if NET
-    [Model]
-#else
-    [Model (AutoGeneratedName = true)]
-#endif
-	[Protocol]
-	[BaseType (typeof (NSObject), Name = "GIDSignInDelegate")]
-	interface SignInDelegate
-	{
-		// @required -(void)signIn:(GIDSignIn *)signIn didSignInForUser:(GIDGoogleUser *)user withError:(NSError *)error;
-		[Abstract]
-		[EventArgs ("SignInDelegate")]
-		[EventName ("SignedIn")]
-		[Export ("signIn:didSignInForUser:withError:")]
-		void DidSignIn (SignIn signIn, GoogleUser user, NSError error);
-
-		// @optional -(void)signIn:(GIDSignIn *)signIn didDisconnectWithUser:(GIDGoogleUser *)user withError:(NSError *)error;
-		[EventArgs ("SignInDelegate")]
-		[EventName ("Disconnected")]
-		[Export ("signIn:didDisconnectWithUser:withError:")]
-		void DidDisconnect (SignIn signIn, GoogleUser user, NSError error);
 	}
 
 	// @interface GIDSignIn : NSObject
 	[DisableDefaultCtor]
-	[BaseType (typeof (NSObject),
-		Name = "GIDSignIn",
-		Delegates = new string [] { "Delegate" },
-		Events = new Type [] { typeof (SignInDelegate) })]
+	[BaseType (typeof (NSObject), Name = "GIDSignIn")]
 	interface SignIn
 	{
-		// extern NSString *const kGIDSignInErrorDomain;
-		[Field ("kGIDSignInErrorDomain", "__Internal")]
-		NSString SignInErrorDomainKey { get; }
-
-		// @property (readonly, nonatomic) GIDGoogleUser * currentUser;
-		[Export ("currentUser")]
-		GoogleUser CurrentUser { get; }
-
-		// @property (nonatomic, weak) id<GIDSignInDelegate> delegate;
-		[NullAllowed]
-		[Export ("delegate", ArgumentSemantic.Weak)]
-		ISignInDelegate Delegate { get; set; }
-
-		// @property (nonatomic, weak) UIViewController * presentingViewController;
-		[Export ("presentingViewController", ArgumentSemantic.Weak)]
-		UIViewController PresentingViewController { get; set; }
-
-		// @property (copy, nonatomic) NSString * clientID;
-		[Export ("clientID")]
-		string ClientId { get; set; }
-
-		// @property (copy, nonatomic) NSArray * scopes;
-		[Export ("scopes", ArgumentSemantic.Copy)]
-		string [] Scopes { get; set; }
-
-		// @property (assign, nonatomic) BOOL shouldFetchBasicProfile;
-		[Export ("shouldFetchBasicProfile")]
-		bool ShouldFetchBasicProfile { get; set; }
-
-		// @property (copy, nonatomic) NSString * language;
-		[Export ("language")]
-		string Language { get; set; }
-
-		// @property(nonatomic, copy) NSString *loginHint;
-		[Export ("loginHint")]
-		string LoginHint { get; set; }
-
-		// @property (copy, nonatomic) NSString * serverClientID;
-		[Export ("serverClientID")]
-		string ServerClientId { get; set; }
-
-		// @property (copy, nonatomic) NSString * openIDRealm;
-		[Export ("openIDRealm")]
-		string OpenIdRealm { get; set; }
-
-		// @property(nonatomic, copy) NSString *hostedDomain;
-		[Export ("hostedDomain")]
-		string HostedDomain { get; set; }
-
-		// +(GIDSignIn *)sharedInstance;
+		// @property (readonly, nonatomic, class) GIDSignIn * _Nonnull sharedInstance;
 		[Static]
 		[Export ("sharedInstance")]
 		SignIn SharedInstance { get; }
 
-		// -(BOOL)handleURL:(NSURL *)url;
+		// @property (readonly, nonatomic) GIDGoogleUser * _Nullable currentUser;
+		[NullAllowed, Export ("currentUser")]
+		GoogleUser CurrentUser { get; }
+
+		// @property (nonatomic) GIDConfiguration * _Nullable configuration;
+		[NullAllowed, Export ("configuration", ArgumentSemantic.Assign)]
+		Configuration Configuration { get; set; }
+
+		// -(BOOL)handleURL:(NSURL * _Nonnull)url;
 		[Export ("handleURL:")]
 		bool HandleUrl (NSUrl url);
 		
@@ -215,21 +149,35 @@ namespace Google.SignIn
 		[Export ("hasPreviousSignIn")]
 		bool HasPreviousSignIn { get; }
 
-		// -(void)restorePreviousSignIn;
-		[Export ("restorePreviousSignIn")]
-		void RestorePreviousSignIn ();
-
-		// -(void)signIn;
-		[Export ("signIn")]
-		void SignInUser ();
+		// -(void)restorePreviousSignInWithCompletion:(void (^ _Nullable)(GIDGoogleUser * _Nullable, NSError * _Nullable))completion;
+		[Export ("restorePreviousSignInWithCompletion:")]
+		void RestorePreviousSignInWithCompletion ([NullAllowed] Action<GoogleUser, NSError> completion);
 
 		// -(void)signOut;
 		[Export ("signOut")]
 		void SignOutUser ();
 
-		// -(void)disconnect;
-		[Export ("disconnect")]
-		void DisconnectUser ();
+		// -(void)disconnectWithCompletion:(void (^ _Nullable)(NSError * _Nullable))completion;
+		[Export ("disconnectWithCompletion:")]
+		void DisconnectWithCompletion ([NullAllowed] Action<NSError> completion);
+
+		// -(void)signInWithPresentingViewController:(UIViewController * _Nonnull)presentingViewController completion:(void (^ _Nullable)(GIDSignInResult * _Nullable, NSError * _Nullable))completion __attribute__((availability(macos_app_extension, unavailable))) __attribute__((availability(ios_app_extension, unavailable)));
+		//[Unavailable (PlatformName.MacOSXAppExtension)]
+		//[Unavailable (PlatformName.iOSAppExtension)]
+		[Export ("signInWithPresentingViewController:completion:")]
+		void SignInWithPresentingViewController (UIViewController presentingViewController, [NullAllowed] Action<SignInResult, NSError> completion);
+
+		// -(void)signInWithPresentingViewController:(UIViewController * _Nonnull)presentingViewController hint:(NSString * _Nullable)hint completion:(void (^ _Nullable)(GIDSignInResult * _Nullable, NSError * _Nullable))completion __attribute__((availability(macos_app_extension, unavailable))) __attribute__((availability(ios_app_extension, unavailable)));
+		//[Unavailable (PlatformName.MacOSXAppExtension)]
+		//[Unavailable (PlatformName.iOSAppExtension)]
+		[Export ("signInWithPresentingViewController:hint:completion:")]
+		void SignInWithPresentingViewController (UIViewController presentingViewController, [NullAllowed] string hint, [NullAllowed] Action<SignInResult, NSError> completion);
+
+		// -(void)signInWithPresentingViewController:(UIViewController * _Nonnull)presentingViewController hint:(NSString * _Nullable)hint additionalScopes:(NSArray<NSString *> * _Nullable)additionalScopes completion:(void (^ _Nullable)(GIDSignInResult * _Nullable, NSError * _Nullable))completion __attribute__((availability(macos_app_extension, unavailable))) __attribute__((availability(ios_app_extension, unavailable)));
+		//[Unavailable (PlatformName.MacOSXAppExtension)]
+		//[Unavailable (PlatformName.iOSAppExtension)]
+		[Export ("signInWithPresentingViewController:hint:additionalScopes:completion:")]
+		void SignInWithPresentingViewController (UIViewController presentingViewController, [NullAllowed] string hint, [NullAllowed] string[] additionalScopes, [NullAllowed] Action<SignInResult, NSError> completion);
 	}
 
 	// @interface GIDSignInButton : UIControl
@@ -243,6 +191,38 @@ namespace Google.SignIn
 		// @property (assign, nonatomic) GIDSignInButtonColorScheme colorScheme;
 		[Export ("colorScheme", ArgumentSemantic.Assign)]
 		ButtonColorScheme ColorScheme { get; set; }
+	}
+	
+	// @interface GIDSignInResult : NSObject
+	[BaseType (typeof(NSObject), Name = "GIDSignInResult")]
+	[DisableDefaultCtor]
+	interface SignInResult
+	{
+		// @property (readonly, nonatomic) GIDGoogleUser * _Nonnull user;
+		[Export ("user")]
+		GoogleUser User { get; }
+	
+		// @property (readonly, nonatomic) NSString * _Nullable serverAuthCode;
+		[NullAllowed, Export ("serverAuthCode")]
+		string ServerAuthCode { get; }
+	}
+	
+	// @interface GIDToken : NSObject <NSSecureCoding>
+	[BaseType (typeof(NSObject), Name = "GIDToken")]
+	[DisableDefaultCtor]
+	interface Token : INSSecureCoding
+	{
+		// @property (readonly, copy, nonatomic) NSString * _Nonnull tokenString;
+		[Export ("tokenString")]
+		string TokenString { get; }
+	
+		// @property (readonly, nonatomic) NSDate * _Nullable expirationDate;
+		[NullAllowed, Export ("expirationDate")]
+		NSDate ExpirationDate { get; }
+	
+		// -(BOOL)isEqualToToken:(GIDToken * _Nonnull)otherToken;
+		[Export ("isEqualToToken:")]
+		bool IsEqualToToken (Token otherToken);
 	}
 }
 

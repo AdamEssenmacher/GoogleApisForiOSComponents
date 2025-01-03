@@ -1,14 +1,7 @@
-﻿using System;
-
-namespace Google.SignIn
+﻿namespace Google.SignIn
 {
 	public class Loader
 	{
-		static Loader ()
-		{
-			Firebase.Core.Loader.ForceLoad ();
-		}
-
 		public static void ForceLoad () {}
 	}
 }

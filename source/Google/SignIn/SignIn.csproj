@@ -5,11 +5,11 @@
     <ImplicitUsings>true</ImplicitUsings>
     <IsBindingProject>true</IsBindingProject>
     <NoBindingEmbedding>true</NoBindingEmbedding>
-    <SupportedOSPlatformVersion>11.0</SupportedOSPlatformVersion>
+    <SupportedOSPlatformVersion>10.0</SupportedOSPlatformVersion>
     <RootNamespace>Google.SignIn</RootNamespace>
     <AssemblyName>Google.SignIn</AssemblyName>
-    <AssemblyVersion>1.0.0.0</AssemblyVersion>
-    <FileVersion>5.0.2.4</FileVersion>
+    <AssemblyVersion>7.0.0.0</AssemblyVersion>
+    <FileVersion>7.0.0.0</FileVersion>
     <IPhoneResourcePrefix>Resources</IPhoneResourcePrefix>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
@@ -25,7 +25,7 @@
     <PackageProjectUrl>https://github.com/AdamEssenmacher/GoogleApisForiOSComponents</PackageProjectUrl>
     <PackageLicenseFile>License.md</PackageLicenseFile>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-    <PackageVersion>5.0.2.4</PackageVersion>
+    <PackageVersion>7.0.0.0</PackageVersion>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="..\..\AssemblyInfo.cs" />
@@ -54,6 +54,14 @@
       <ForceLoad>True</ForceLoad>
       <Frameworks>Security SystemConfiguration SafariServices</Frameworks>
     </NativeReference>
+    <NativeReference Include="..\..\..\externals\GoogleSignIn.xcframework">
+      <Kind>Framework</Kind>
+      <SmartLink>True</SmartLink>
+      <ForceLoad>True</ForceLoad>
+      <LinkerFlags>-ObjC -lsqlite3</LinkerFlags>
+      <Frameworks>CoreGraphics CoreText Foundation LocalAuthentication SystemConfiguration UIKit</Frameworks>
+      <WeakFrameworks>SafariServices</WeakFrameworks>
+    </NativeReference>
   </ItemGroup>
   <ItemGroup>
     <ObjcBindingCoreSource Include="Enums.cs" />
@@ -62,9 +70,6 @@
     <ObjcBindingApiDefinition Include="ApiDefinition.cs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Xamarin.Build.Download" Version="0.11.4" PrivateAssets="None" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\Firebase\Core\Core.csproj" PrivateAssets="None" />
+    <PackageReference Include="AdamE.Google.iOS.GTMSessionFetcher" Version="[1.1.0,4.0.0)" />
   </ItemGroup>
 </Project>
