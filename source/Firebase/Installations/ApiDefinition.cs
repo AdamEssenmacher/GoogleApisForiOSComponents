@@ -3,10 +3,6 @@ using System.Collections.Generic;
 
 using Foundation;
 
-#if !NET
-using NativeHandle = System.IntPtr;
-#endif
-
 namespace Firebase.Installations
 {
 	// typedef void (^FIRInstallationsIDHandler)(NSString * _Nullable, NSError * _Nullable);

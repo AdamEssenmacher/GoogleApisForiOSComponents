@@ -5,10 +5,6 @@ using Foundation;
 using ObjCRuntime;
 using CoreGraphics;
 
-#if !NET
-using NativeHandle = System.IntPtr;
-#endif
-
 namespace Firebase.DynamicLinks
 {
 	// typedef void (^FIRDynamicLinkShortenerCompletion)(NSURL * _Nullable, NSArray<NSString *> * _Nullable, NSError * _Nullable);

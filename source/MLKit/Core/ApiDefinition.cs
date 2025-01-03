@@ -6,10 +6,6 @@ using CoreMedia;
 using CoreVideo;
 using ObjCRuntime;
 
-#if !NET
-using NativeHandle = System.IntPtr;
-#endif
-
 namespace MLKit.Core {
 	delegate void ErrorCallback ([NullAllowed] NSError error);
 
