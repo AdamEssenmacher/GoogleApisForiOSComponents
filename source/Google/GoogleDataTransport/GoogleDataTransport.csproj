@@ -1,7 +1,6 @@
-﻿<Project Sdk="Xamarin.Legacy.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>xamarin.ios10;net6.0-ios</TargetFrameworks>
-    <NoNFloatUsing Condition="'$(TargetFramework)' == 'xamarin.ios10'">true</NoNFloatUsing>
+    <TargetFramework>net8.0-ios</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>true</ImplicitUsings>
     <IsBindingProject>true</IsBindingProject>
@@ -35,25 +34,16 @@
     <None Include="GoogleDataTransport.targets" Pack="True" PackagePath="buildTransitive/AdamE.Google.iOS.GoogleDataTransport.targets" />
     <None Include="License.md" Pack="True" PackagePath="License.md" />
   </ItemGroup>
-  <!-- An iOS app project cannot find Xcframeworks within a NuGet if a TFM
-       previous than net6.0-ios is used.
-       https://github.com/xamarin/xamarin-macios/issues/13693
-       You must include the Xcframework's NativeReference tag into the iOS app
-       project so sidecar can work properly. -->
-  <!-- This workaround was designed like this to have the same
-       NativeReference tag for the iOS binding and for the .targets file -->
-  <Import Project="GoogleDataTransport.targets" />
   <ItemGroup>
-    <_NativeReference Include="..\..\..\externals\GoogleDataTransport.xcframework">
-      <_Id>$(_GoogleDataTransportId)</_Id>
-    </_NativeReference>
-  </ItemGroup>
-  <!-- End of workaround -->
-  <ItemGroup Condition="'$(TargetFramework)' == 'xamarin.ios10'">
-    <Compile Remove="ApiDefinition.cs" />
+    <NativeReference Include="..\..\..\externals\GoogleDataTransport.xcframework">
+      <Kind>Framework</Kind>
+      <SmartLink>True</SmartLink>
+      <ForceLoad>True</ForceLoad>
+      <Frameworks>SystemConfiguration CoreTelephony</Frameworks>
+    </NativeReference>
   </ItemGroup>
   <ItemGroup>
-    <ObjcBindingApiDefinition Include="ApiDefinition.cs" Condition=" '$(EnableDefaultCompileItems)' == 'true'" />
+    <ObjcBindingApiDefinition Include="ApiDefinition.cs" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="AdamE.Google.iOS.Nanopb" Version="[3.30910.0,4.0)" />
