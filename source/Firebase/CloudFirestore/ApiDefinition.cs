@@ -5,10 +5,6 @@ using Foundation;
 using ObjCRuntime;
 using CoreFoundation;
 
-#if !NET
-using NativeHandle = System.IntPtr;
-#endif
-
 namespace Firebase.CloudFirestore
 {
 	// void (^ _Nullable)(NSError * _Nullable)

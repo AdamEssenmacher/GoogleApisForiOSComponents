@@ -4,10 +4,6 @@ using System.Collections.Generic;
 using Foundation;
 using ObjCRuntime;
 
-#if !NET
-using NativeHandle = System.IntPtr;
-#endif
-
 namespace Firebase.AppDistribution
 {
 	// (void (^)(NSError *_Nullable error))completion
