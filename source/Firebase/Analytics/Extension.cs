@@ -13,9 +13,7 @@ namespace Firebase.Analytics
 		public static NSString AppOpen { get; } = new NSString ("app_open");
 		public static NSString BeginCheckout { get; } = new NSString ("begin_checkout");
 		public static NSString CampaignDetails { get; } = new NSString ("campaign_details");
-		public static NSString CheckoutProgress { get; } = new NSString ("checkout_progress");
 		public static NSString EarnVirtualCurrency { get; } = new NSString ("earn_virtual_currency");
-		public static NSString EcommercePurchase { get; } = new NSString ("ecommerce_purchase");
 		public static NSString GenerateLead { get; } = new NSString ("generate_lead");
 		public static NSString JoinGroup { get; } = new NSString ("join_group");
 		public static NSString LevelEnd { get; } = new NSString("level_end");
@@ -23,13 +21,10 @@ namespace Firebase.Analytics
 		public static NSString LevelUp { get; } = new NSString ("level_up");
 		public static NSString Login { get; } = new NSString ("login");
 		public static NSString PostScore { get; } = new NSString ("post_score");
-		public static NSString PresentOffer { get; } = new NSString ("present_offer");
-		public static NSString PurchaseRefund { get; } = new NSString ("purchase_refund");
 		public static NSString RemoveFromCart { get; } = new NSString ("remove_from_cart");
 		public static NSString ScreenView { get; } = new NSString ("screen_view");
 		public static NSString Search { get; } = new NSString ("search");
 		public static NSString SelectContent { get; } = new NSString ("select_content");
-		public static NSString SetCheckoutOption { get; } = new NSString ("set_checkout_option");
 		public static NSString Share { get; } = new NSString ("share");
 		public static NSString SignUp { get; } = new NSString ("sign_up");
 		public static NSString SpendVirtualCurrency { get; } = new NSString ("spend_virtual_currency");
@@ -59,8 +54,6 @@ namespace Firebase.Analytics
 		public static NSString Affiliation { get; } = new NSString ("affiliation");
 		public static NSString Campaign { get; } = new NSString ("campaign");
 		public static NSString Character { get; } = new NSString ("character");
-		public static NSString CheckoutStep { get; } = new NSString ("checkout_step");
-		public static NSString CheckoutOption { get; } = new NSString ("checkout_option");
 		public static NSString Content { get; } = new NSString ("content");
 		public static NSString ContentType { get; } = new NSString ("content_type");
 		public static NSString Coupon { get; } = new NSString ("coupon");
@@ -76,9 +69,7 @@ namespace Firebase.Analytics
 		public static NSString ItemBrand { get; } = new NSString ("item_brand");
 		public static NSString ItemCategory { get; } = new NSString ("item_category");
 		public static NSString ItemId { get; } = new NSString ("item_id");
-		public static NSString ItemLocationId { get; } = new NSString ("item_location_id");
 		public static NSString ItemName { get; } = new NSString ("item_name");
-		public static NSString ItemList { get; } = new NSString ("item_list");
 		public static NSString ItemVariant { get; } = new NSString ("item_variant");
 		public static NSString Level { get; } = new NSString ("level");
 		public static NSString Location { get; } = new NSString ("location");
@@ -94,8 +85,6 @@ namespace Firebase.Analytics
 		public static NSString ScreenName { get; } = new NSString ("score_name");
 		public static NSString SearchTerm { get; } = new NSString ("search_term");
 		public static NSString Shipping { get; } = new NSString ("shipping");
-		[Obsolete ("Use Method property instead.")]
-		public static NSString SignUpMethod { get; } = new NSString ("sign_up_method");
 		public static NSString Method { get; } = new NSString ("method");
 		public static NSString Source { get; } = new NSString ("source");
 		public static NSString StartDate { get; } = new NSString ("start_date");
