@@ -69,7 +69,7 @@ On .NET8, you must set the following property. Note that this will increase your
 ## Windows + Visual Studio (long path issue)
 If you're using Mac, you can skip this section. If you're using Windows and/or Visual Studio, you need to be aware that these packages are impacted by a long-path filename issue that will cause errors when restoring packages and archiving builds.
 
-While this is fundamentally an issue with Visual Studio, I think this project could be updated to work around it by statically linking XCFramework dependencies into intermediate 'shim' XCFrameworks. However, I do not have the personal bandwidth or sponsorship to fully explore this. Unless something changes, you should not expect this issue to be resolved until Visual Studio properly supports long file paths.
+This is fundamentally an issue with Visual Studio. Unless something changes, you should not expect this issue to be resolved until Visual Studio properly supports long file paths.
 
 ### Long-path issue root cause
 In the iOS/Catalyst world, code libraries are typically shipped as XCFrameworks. An XCFramework is a packaging format that bundles libraries for multiple platforms (e.g. iOS, macOS) and architectures into a single artifact. To build these AdamE.* artifacts, several XCFrameworks (Firebase and Google dependencies) are assembled and packed into the Nuget packages. This is how iOS.NET and Nuget are _designed_ to work.
@@ -138,7 +138,7 @@ Here's a table that shows in which Nuget package version is located each sdk of 
 | Firebase Installations          | **11.6.0**  | [![NuGet Version](https://img.shields.io/nuget/v/AdamE.Firebase.iOS.Installations)](https://nuget.org/packages/AdamE.Firebase.iOS.Installations) |
 | Firebase RemoteConfig           | **11.6.0**  | [![NuGet Version](https://img.shields.io/nuget/v/AdamE.Firebase.iOS.RemoteConfig)](https://nuget.org/packages/AdamE.Firebase.iOS.RemoteConfig) |
 | Firebase Storage                | **11.6.0**  | [![NuGet Version](https://img.shields.io/nuget/v/AdamE.Firebase.iOS.Storage)](https://nuget.org/packages/AdamE.Firebase.iOS.Storage) |
-| Google Maps                     |  **9.1.1**  | [![NuGet Version](https://img.shields.io/nuget/v/AdamE.Google.iOS.Maps)](https://www.nuget.org/packages/AdamE.Google.iOS.Maps) |
+| Google Maps                     |  **9.2.0**  | [![NuGet Version](https://img.shields.io/nuget/v/AdamE.Google.iOS.Maps)](https://www.nuget.org/packages/AdamE.Google.iOS.Maps) |
 
 
 ### SDKs net yet updates from where Microsoft left them:
