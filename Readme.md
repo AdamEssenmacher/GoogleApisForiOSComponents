@@ -156,12 +156,12 @@ Here's a table that shows in which Nuget package version is located each sdk of 
 
 # Troubleshooting
 
-## Incompatibility with other iOS.NET libraries that ship Google / Firebase native SDKs
+## Incompatibility with other iOS .NET libraries that ship Google / Firebase native SDKs
 Google, Firebase, and MLKit native SDKs can have some shared XCFramework dependencies. Take [GTMSessionFetcher](https://github.com/google/gtm-session-fetcher) as an example. It is a shared dependency of both Google Sign-In and Firebase.Core.
 
-In native iOS development, this dependency would be resolved through a dependency manager (Cocoapods, SPM), but we can't use these native dependency managers in iOS.NET!
+In native iOS development, this dependency would be resolved through a dependency manager (Cocoapods, SPM), but we can't use these native dependency managers in .NET for iOS.
 
-Microsoft's official recommendation to iOS.NET developers needing access to native SDKs is to build their own binding libraries using this ['slim binding' demo project](https://github.com/Redth/DotNet.Platform.SlimBindings) as a guide. This dependency situation for common mobile SDKs causes a major issue with this approach. For example, if a developer were to include their own 'slim binding' project in an iOS.NET solution for Google Sign-In, they would end up statically linking GTMSessionFetcher. Since AdamE.Firebase.iOS.Core _also_ includes GTMSessionFetcher, all AdamE.iOS.* packages would no longer be compatible due to the dependency conflict.
+Microsoft's official recommendation to developers needing access to native SDKs is to build their own binding libraries using this ['slim binding' demo project](https://github.com/Redth/DotNet.Platform.SlimBindings) as a guide. This dependency situation for common mobile SDKs causes a major issue with this approach. For example, if a developer were to include their own 'slim binding' project in a project for Google Sign-In, they would end up statically linking GTMSessionFetcher. Since AdamE.Firebase.iOS.Core _also_ includes GTMSessionFetcher, all AdamE.iOS.* packages would no longer be compatible due to the dependency conflict.
 
 To provide a real-world example, [Plugin.Firebase](https://github.com/TobiasBuchholz/Plugin.Firebase) migrated off of the abandoned Xamarin.Firebase.iOS.* packages to use AdamE.Firebase.iOS.* This made it incompatible with the popular [BarcodeScanner.Mobile.Maui](https://github.com/JimmyPun610/BarcodeScanner.Mobile) package until the maintainer also migrated to use AdamE.Firebase.iOS.* dependencies.
 
