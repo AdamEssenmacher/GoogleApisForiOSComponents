@@ -9,8 +9,8 @@
     <SupportedOSPlatformVersion>10.0</SupportedOSPlatformVersion>
     <RootNamespace>Google.SignIn</RootNamespace>
     <AssemblyName>Google.SignIn</AssemblyName>
-    <AssemblyVersion>7.0.0.0</AssemblyVersion>
-    <FileVersion>7.0.0.0</FileVersion>
+    <AssemblyVersion>8.0.0.0</AssemblyVersion>
+    <FileVersion>8.0.0.0</FileVersion>
     <IPhoneResourcePrefix>Resources</IPhoneResourcePrefix>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
@@ -26,7 +26,7 @@
     <PackageProjectUrl>https://github.com/AdamEssenmacher/GoogleApisForiOSComponents</PackageProjectUrl>
     <PackageLicenseFile>License.md</PackageLicenseFile>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-    <PackageVersion>7.0.0.0</PackageVersion>
+    <PackageVersion>8.0.0.0</PackageVersion>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="..\..\AssemblyInfo.cs" />
@@ -53,6 +53,9 @@
     <_NativeReference Include="..\..\..\externals\AppAuth.xcframework">
       <_Id>$(_AppAuthId)</_Id>
     </_NativeReference>
+    <_NativeReference Include="..\..\..\externals\AppCheckCore.xcframework">
+      <_Id>$(_AppCheckCoreId)</_Id>
+    </_NativeReference>
     <_NativeReference Include="..\..\..\externals\GTMAppAuth.xcframework">
       <_Id>$(_GTMAppAuthId)</_Id>
     </_NativeReference>
@@ -73,5 +76,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="AdamE.Google.iOS.GTMSessionFetcher" Version="[1.1.0,4.0.0)" />
+    <PackageReference Include="AdamE.Google.iOS.PromisesObjC" Version="2.4.0" />
+    <PackageReference Include="AdamE.Google.iOS.GoogleUtilities" Version="8.0.2" />
   </ItemGroup>
 </Project>
