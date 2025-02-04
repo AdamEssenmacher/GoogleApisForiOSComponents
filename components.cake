@@ -27,7 +27,7 @@ Artifact GOOGLE_PLACES_ARTIFACT                    = new Artifact ("Google.Place
 Artifact GOOGLE_SIGN_IN_ARTIFACT                   = new Artifact ("Google.SignIn",                   "8.0.0.0",   "12.0", ComponentGroup.Google, csprojName: "SignIn");
 Artifact GOOGLE_TAG_MANAGER_ARTIFACT               = new Artifact ("Google.TagManager",               "7.4.0.2",   "11.0", ComponentGroup.Google, csprojName: "TagManager");
 
-Artifact GOOGLE_GOOGLE_APP_MEASUREMENT_ARTIFACT    = new Artifact ("Google.AppMeasurement",           "11.7.0",    "12.0", ComponentGroup.Google, csprojName: "GoogleAppMeasurement");
+Artifact GOOGLE_GOOGLE_APP_MEASUREMENT_ARTIFACT    = new Artifact ("Google.AppMeasurement",           "11.8.0",    "12.0", ComponentGroup.Google, csprojName: "GoogleAppMeasurement");
 Artifact GOOGLE_PROMISES_OBJC_ARTIFACT             = new Artifact ("Google.PromisesObjC",             "2.4.0",     "10.0", ComponentGroup.Google, csprojName: "PromisesObjC");
 Artifact GOOGLE_GTM_SESSION_FETCHER_ARTIFACT       = new Artifact ("Google.GTMSessionFetcher",        "4.1.0",     "13.0", ComponentGroup.Google, csprojName: "GTMSessionFetcher");
 Artifact GOOGLE_NANOPB_ARTIFACT                    = new Artifact ("Google.Nanopb",                   "3.30910.0", "12.0", ComponentGroup.Google, csprojName: "Nanopb");
@@ -248,7 +248,7 @@ void SetArtifactsPodSpecs ()
 		PodSpec.Create ("GoogleTagManager", "7.4.0")
 	};
     GOOGLE_GOOGLE_APP_MEASUREMENT_ARTIFACT.PodSpecs = new [] {
-        PodSpec.Create ("GoogleAppMeasurement", "11.7.0")
+        PodSpec.Create ("GoogleAppMeasurement", "11.8.0")
     };
 	GOOGLE_PROMISES_OBJC_ARTIFACT.PodSpecs = new [] {
 	    PodSpec.Create ("PromisesObjC", "2.4.0", frameworkSource: FrameworkSource.Pods, frameworkName: "FBLPromises", targetName: "PromisesObjC"),
