@@ -29,7 +29,7 @@ Artifact GOOGLE_TAG_MANAGER_ARTIFACT               = new Artifact ("Google.TagMa
 
 Artifact GOOGLE_GOOGLE_APP_MEASUREMENT_ARTIFACT    = new Artifact ("Google.AppMeasurement",           "11.8.0",    "12.0", ComponentGroup.Google, csprojName: "GoogleAppMeasurement");
 Artifact GOOGLE_PROMISES_OBJC_ARTIFACT             = new Artifact ("Google.PromisesObjC",             "2.4.0",     "10.0", ComponentGroup.Google, csprojName: "PromisesObjC");
-Artifact GOOGLE_GTM_SESSION_FETCHER_ARTIFACT       = new Artifact ("Google.GTMSessionFetcher",        "4.0.0",     "13.0", ComponentGroup.Google, csprojName: "GTMSessionFetcher");
+Artifact GOOGLE_GTM_SESSION_FETCHER_ARTIFACT       = new Artifact ("Google.GTMSessionFetcher",        "4.1.0.1",   "13.0", ComponentGroup.Google, csprojName: "GTMSessionFetcher");
 Artifact GOOGLE_NANOPB_ARTIFACT                    = new Artifact ("Google.Nanopb",                   "3.30910.0", "12.0", ComponentGroup.Google, csprojName: "Nanopb");
 Artifact GOOGLE_GOOGLE_UTILITIES_ARTIFACT          = new Artifact ("Google.GoogleUtilities",          "8.0.2",     "12.0", ComponentGroup.Google, csprojName: "GoogleUtilities");
 Artifact GOOGLE_GOOGLE_DATA_TRANSPORT_ARTIFACT     = new Artifact ("Google.GoogleDataTransport",      "10.1.0",    "12.0", ComponentGroup.Google, csprojName: "GoogleDataTransport");
@@ -254,7 +254,7 @@ void SetArtifactsPodSpecs ()
 	    PodSpec.Create ("PromisesObjC", "2.4.0", frameworkSource: FrameworkSource.Pods, frameworkName: "FBLPromises", targetName: "PromisesObjC"),
     };
 	GOOGLE_GTM_SESSION_FETCHER_ARTIFACT.PodSpecs = new [] {
-        PodSpec.Create ("GTMSessionFetcher", "4.0.0", frameworkSource: FrameworkSource.Pods, subSpecs: new [] { "Full" }),
+        PodSpec.Create ("GTMSessionFetcher", "4.1.0", frameworkSource: FrameworkSource.Pods, subSpecs: new [] { "Full" }),
     };
     GOOGLE_NANOPB_ARTIFACT.PodSpecs = new [] {
         PodSpec.Create ("nanopb", "3.30910.0", frameworkSource: FrameworkSource.Pods),
