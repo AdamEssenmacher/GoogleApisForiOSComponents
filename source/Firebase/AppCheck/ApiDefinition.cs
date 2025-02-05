@@ -2,10 +2,6 @@
 using Firebase.Core;
 using Foundation;
 
-#if !NET
-using NativeHandle = System.IntPtr;
-#endif
-
 namespace Firebase.AppCheck {
 	// typedef void (^)(FIRAppCheckToken *_Nullable token, NSError *_Nullable error)
 	delegate void TokenCompletionHandler (AppCheckToken token, NSError error);

@@ -1,7 +1,6 @@
-﻿<Project Sdk="Xamarin.Legacy.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>xamarin.ios10;net6.0-ios</TargetFrameworks>
-    <NoNFloatUsing Condition="'$(TargetFramework)' == 'xamarin.ios10'">true</NoNFloatUsing>
+    <TargetFramework>net8.0-ios</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>true</ImplicitUsings>
     <IsBindingProject>true</IsBindingProject>
@@ -41,59 +40,67 @@
     <None Include="License.md" Pack="True" PackagePath="License.md" />
     <None Include="../../../icons/firebaseioscore_128x128.png" Pack="True" PackagePath="firebaseioscore_128x128.png" />
   </ItemGroup>
-  <!-- An iOS app project cannot find Xcframeworks within a NuGet if a TFM
-       previous than net6.0-ios is used.
-       https://github.com/xamarin/xamarin-macios/issues/13693
-       You must include the Xcframework's NativeReference tag into the iOS app
-       project so sidecar can work properly. -->
-  <!-- This workaround was designed like this to have the same
-       NativeReference tag for the iOS binding and for the .targets file -->
-  <Import Project="Core.targets" />
   <ItemGroup>
-    <_NativeReference Include="..\..\..\externals\FirebaseCore.xcframework">
-      <_Id>$(_FirebaseCoreId)</_Id>
-    </_NativeReference>
-    <_NativeReference Include="..\..\..\externals\leveldb.xcframework">
-      <_Id>$(_leveldbId)</_Id>
-    </_NativeReference>
-    <_NativeReference Include="..\..\..\externals\FirebaseAppCheckInterop.xcframework">
-      <_Id>$(_FirebaseAppCheckInteropId)</_Id>
-    </_NativeReference>
-    <_NativeReference Include="..\..\..\externals\FirebaseAuthInterop.xcframework">
-      <_Id>$(_FirebaseAuthInteropId)</_Id>
-    </_NativeReference>
-    <_NativeReference Include="..\..\..\externals\FirebaseCoreExtension.xcframework">
-      <_Id>$(_FirebaseCoreExtensionId)</_Id>
-    </_NativeReference>
-    <_NativeReference Include="..\..\..\externals\FirebaseCoreInternal.xcframework">
-      <_Id>$(_FirebaseCoreInternalId)</_Id>
-    </_NativeReference>
-    <_NativeReference Include="..\..\..\externals\FirebaseMessagingInterop.xcframework">
-      <_Id>$(_FirebaseMessagingInteropId)</_Id>
-    </_NativeReference>
-    <_NativeReference Include="..\..\..\externals\FirebaseRemoteConfigInterop.xcframework">
-      <_Id>$(_FirebaseRemoteConfigInteropId)</_Id>
-    </_NativeReference>
-    <_NativeReference Include="..\..\..\externals\FirebaseSharedSwift.xcframework">
-      <_Id>$(_FirebaseSharedSwiftId)</_Id>
-    </_NativeReference>
-    <_NativeReference Include="..\..\..\externals\Promises.xcframework">
-      <_Id>$(_PromisesId)</_Id>
-    </_NativeReference>
-    <_NativeReference Include="..\..\..\externals\FirebaseSessions.xcframework">
-      <_Id>$(_FirebaseSessionsId)</_Id>
-    </_NativeReference>
-  </ItemGroup>
-  <!-- End of workaround -->
-  <ItemGroup Condition="'$(TargetFramework)' == 'xamarin.ios10'">
-    <Compile Remove="ApiDefinition.cs" />
-    <Compile Remove="Enums.cs" />
+    <NativeReference Include="..\..\..\externals\FirebaseCore.xcframework">
+      <Kind>Framework</Kind>
+      <SmartLink>True</SmartLink>
+      <ForceLoad>True</ForceLoad>
+      <Frameworks>Foundation UIKit</Frameworks>
+    </NativeReference>
+    <NativeReference Include="..\..\..\externals\leveldb.xcframework">
+      <Kind>Framework</Kind>
+      <SmartLink>True</SmartLink>
+      <ForceLoad>True</ForceLoad>
+    </NativeReference>
+    <NativeReference Include="..\..\..\externals\FirebaseAppCheckInterop.xcframework">
+      <Kind>Framework</Kind>
+      <SmartLink>True</SmartLink>
+      <ForceLoad>True</ForceLoad>
+    </NativeReference>
+    <NativeReference Include="..\..\..\externals\FirebaseAuthInterop.xcframework">
+      <Kind>Framework</Kind>
+      <SmartLink>True</SmartLink>
+      <ForceLoad>True</ForceLoad>
+    </NativeReference>
+    <NativeReference Include="..\..\..\externals\FirebaseCoreExtension.xcframework">
+      <Kind>Framework</Kind>
+      <SmartLink>True</SmartLink>
+      <ForceLoad>True</ForceLoad>
+    </NativeReference>
+    <NativeReference Include="..\..\..\externals\FirebaseCoreInternal.xcframework">
+      <Kind>Framework</Kind>
+      <SmartLink>True</SmartLink>
+      <ForceLoad>True</ForceLoad>
+    </NativeReference>
+    <NativeReference Include="..\..\..\externals\FirebaseMessagingInterop.xcframework">
+      <Kind>Framework</Kind>
+      <SmartLink>True</SmartLink>
+      <ForceLoad>True</ForceLoad>
+    </NativeReference>
+    <NativeReference Include="..\..\..\externals\FirebaseRemoteConfigInterop.xcframework">
+      <Kind>Framework</Kind>
+      <SmartLink>True</SmartLink>
+      <ForceLoad>True</ForceLoad>
+    </NativeReference>
+    <NativeReference Include="..\..\..\externals\FirebaseSharedSwift.xcframework">
+      <Kind>Framework</Kind>
+      <SmartLink>True</SmartLink>
+      <ForceLoad>True</ForceLoad>
+    </NativeReference>
+    <NativeReference Include="..\..\..\externals\Promises.xcframework">
+      <Kind>Framework</Kind>
+      <SmartLink>True</SmartLink>
+      <ForceLoad>True</ForceLoad>
+    </NativeReference>
+    <NativeReference Include="..\..\..\externals\FirebaseSessions.xcframework">
+      <Kind>Framework</Kind>
+      <SmartLink>True</SmartLink>
+      <ForceLoad>True</ForceLoad>
+    </NativeReference>
   </ItemGroup>
   <ItemGroup>
-    <ObjcBindingCoreSource Include="Enums.cs" Condition=" '$(EnableDefaultCompileItems)' == 'true'" />
-  </ItemGroup>
-  <ItemGroup>
-    <ObjcBindingApiDefinition Include="ApiDefinition.cs" Condition=" '$(EnableDefaultCompileItems)' == 'true'" />
+    <ObjcBindingCoreSource Include="Enums.cs" />
+    <ObjcBindingApiDefinition Include="ApiDefinition.cs" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="AdamE.Google.iOS.GoogleDataTransport" Version="[10.1.0,11.0.0)" />

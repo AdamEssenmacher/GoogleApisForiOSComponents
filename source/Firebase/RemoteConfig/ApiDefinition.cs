@@ -6,10 +6,6 @@ using ObjCRuntime;
 using CoreGraphics;
 using System.Collections.Generic;
 
-#if !NET
-using NativeHandle = System.IntPtr;
-#endif
-
 namespace Firebase.RemoteConfig
 {
 	// typedef void (^FIRRemoteConfigFetchCompletion)(FIRRemoteConfigFetchStatus, NSError * _Nullable);
