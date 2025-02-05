@@ -8,8 +8,8 @@
     <SupportedOSPlatformVersion>11.0</SupportedOSPlatformVersion>
     <RootNamespace>Google.SignIn</RootNamespace>
     <AssemblyName>Google.SignIn</AssemblyName>
-    <AssemblyVersion>7.0.0.0</AssemblyVersion>
-    <FileVersion>7.0.0.0</FileVersion>
+    <AssemblyVersion>8.0.0.0</AssemblyVersion>
+    <FileVersion>8.0.0.0</FileVersion>
     <IPhoneResourcePrefix>Resources</IPhoneResourcePrefix>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
@@ -25,7 +25,7 @@
     <PackageProjectUrl>https://github.com/AdamEssenmacher/GoogleApisForiOSComponents</PackageProjectUrl>
     <PackageLicenseFile>License.md</PackageLicenseFile>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-    <PackageVersion>7.0.0.0</PackageVersion>
+    <PackageVersion>8.0.0.0</PackageVersion>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="..\..\AssemblyInfo.cs" />
@@ -48,6 +48,13 @@
       <Frameworks>SafariServices</Frameworks>
       <WeakFrameworks>AuthenticationServices</WeakFrameworks>
     </NativeReference>
+    <!--https://github.com/google/app-check/blob/main/AppCheckCore.podspechttps://github.com/google/app-check/blob/main/AppCheckCore.podspec-->
+    <NativeReference Include="..\..\..\externals\AppCheckCore.xcframework">
+      <Kind>Framework</Kind>
+      <SmartLink>True</SmartLink>
+      <ForceLoad>True</ForceLoad>
+      <WeakFrameworks>DeviceCheck</WeakFrameworks>
+    </NativeReference>
     <NativeReference Include="..\..\..\externals\GTMAppAuth.xcframework">
       <Kind>Framework</Kind>
       <SmartLink>True</SmartLink>
@@ -59,7 +66,7 @@
       <SmartLink>True</SmartLink>
       <ForceLoad>True</ForceLoad>
       <LinkerFlags>-ObjC -lsqlite3</LinkerFlags>
-      <Frameworks>CoreGraphics CoreText Foundation LocalAuthentication SystemConfiguration UIKit</Frameworks>
+      <Frameworks>CoreGraphics CoreText Foundation LocalAuthentication Security UIKit</Frameworks>
       <WeakFrameworks>SafariServices</WeakFrameworks>
     </NativeReference>
   </ItemGroup>
@@ -71,5 +78,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="AdamE.Google.iOS.GTMSessionFetcher" Version="[1.1.0,4.0.0)" />
+    <PackageReference Include="AdamE.Google.iOS.PromisesObjC" Version="2.4.0" />
+    <PackageReference Include="AdamE.Google.iOS.GoogleUtilities" Version="8.0.2" />
   </ItemGroup>
 </Project>
