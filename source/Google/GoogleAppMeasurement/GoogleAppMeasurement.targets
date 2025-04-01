@@ -1,13 +1,13 @@
 ﻿<Project>
   <PropertyGroup>
-    <_FirebaseCoreAssemblyName>Firebase.Core, Version=11.8.0.0, Culture=neutral, PublicKeyToken=null</_FirebaseCoreAssemblyName>
-    <_GoogleAppMeasurementItemsFolder>GAppM-11.7.0</_GoogleAppMeasurementItemsFolder>
-    <_GoogleAppMeasurementSDKBaseFolder>$(XamarinBuildDownloadDir)$(_GoogleAppMeasurementItemsFolder)\GoogleAppMeasurement-11.7.0\Frameworks\</_GoogleAppMeasurementSDKBaseFolder>
+    <_FirebaseCoreAssemblyName>Firebase.Core, Version=11.9.0.0, Culture=neutral, PublicKeyToken=null</_FirebaseCoreAssemblyName>
+    <_GoogleAppMeasurementItemsFolder>GAppM-11.9.0</_GoogleAppMeasurementItemsFolder>
+    <_GoogleAppMeasurementSDKBaseFolder>$(XamarinBuildDownloadDir)$(_GoogleAppMeasurementItemsFolder)\GoogleAppMeasurement-11.9.0\Frameworks\</_GoogleAppMeasurementSDKBaseFolder>
   </PropertyGroup>
   <!-- *.tar.gz URLs can be found in the podspec: https://github.com/CocoaPods/Specs/tree/master/Specs/e/3/b/GoogleAppMeasurement -->	
   <ItemGroup Condition="('$(OutputType)'!='Library' OR '$(IsAppExtension)'=='True')">
     <XamarinBuildDownload Include="$(_GoogleAppMeasurementItemsFolder)">
-      <Url>https://dl.google.com/firebase/ios/analytics/0effb46af2c7d935/GoogleAppMeasurement-11.7.0.tar.gz</Url>
+      <Url>https://dl.google.com/firebase/ios/analytics/0d93a8772fbd4088/GoogleAppMeasurement-11.9.0.tar.gz</Url>
       <Kind>Tgz</Kind>
     </XamarinBuildDownload>
     <XamarinBuildRestoreResources Include="_FCrDownloadedItems" />
