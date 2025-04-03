@@ -1,7 +1,6 @@
-﻿<Project Sdk="Xamarin.Legacy.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>xamarin.ios10;net6.0-ios</TargetFrameworks>
-    <NoNFloatUsing Condition="'$(TargetFramework)' == 'xamarin.ios10'">true</NoNFloatUsing>
+    <TargetFramework>net8.0-ios</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>true</ImplicitUsings>
     <IsBindingProject>true</IsBindingProject>
@@ -40,15 +39,11 @@
     <None Include="License.md" Pack="True" PackagePath="License.md" />
     <None Include="../../../icons/googleiosanalytics_128x128.png" Pack="True" PackagePath="googleiosanalytics_128x128.png" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetFramework)' == 'xamarin.ios10'">
-    <Compile Remove="ApiDefinition.cs" />
-    <Compile Remove="Enums.cs" />
+  <ItemGroup>
+    <ObjcBindingCoreSource Include="Enums.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ObjcBindingCoreSource Include="Enums.cs" Condition=" '$(EnableDefaultCompileItems)' == 'true'" />
-  </ItemGroup>
-  <ItemGroup>
-    <ObjcBindingApiDefinition Include="ApiDefinition.cs" Condition=" '$(EnableDefaultCompileItems)' == 'true'" />
+    <ObjcBindingApiDefinition Include="ApiDefinition.cs" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Xamarin.Build.Download" Version="0.11.4" PrivateAssets="None" />
