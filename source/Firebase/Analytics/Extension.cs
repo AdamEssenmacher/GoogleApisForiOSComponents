@@ -53,12 +53,14 @@ namespace Firebase.Analytics
 		public static NSString AdUnitName { get; } = new NSString ("ad_unit_name");
 		public static NSString Affiliation { get; } = new NSString ("affiliation");
 		public static NSString Campaign { get; } = new NSString ("campaign");
+		public static NSString CampaignId { get; } = new NSString ("campaign_id");
 		public static NSString Character { get; } = new NSString ("character");
 		public static NSString Content { get; } = new NSString ("content");
 		public static NSString ContentType { get; } = new NSString ("content_type");
 		public static NSString Coupon { get; } = new NSString ("coupon");
 		public static NSString Cp1 { get; } = new NSString ("cp1");
 		public static NSString CreativeName { get; } = new NSString ("creative_name");
+		public static NSString CreativeFormat { get; } = new NSString ("creative_format");
 		public static NSString CreativeSlot { get; } = new NSString ("creative_slot");
 		public static NSString Currency { get; } = new NSString ("currency");
 		public static NSString Destination { get; } = new NSString ("destination");
@@ -73,6 +75,7 @@ namespace Firebase.Analytics
 		public static NSString ItemVariant { get; } = new NSString ("item_variant");
 		public static NSString Level { get; } = new NSString ("level");
 		public static NSString Location { get; } = new NSString ("location");
+		public static NSString MarketingTactic { get; } = new NSString ("marketing_tactic");
 		public static NSString Medium { get; } = new NSString ("medium");
 		public static NSString NumberOfNights { get; } = new NSString ("number_of_nights");
 		public static NSString NumberOfPassengers { get; } = new NSString ("number_of_passengers");
@@ -87,6 +90,7 @@ namespace Firebase.Analytics
 		public static NSString Shipping { get; } = new NSString ("shipping");
 		public static NSString Method { get; } = new NSString ("method");
 		public static NSString Source { get; } = new NSString ("source");
+		public static NSString SourcePlatform { get; } = new NSString ("source_platform");
 		public static NSString StartDate { get; } = new NSString ("start_date");
 		public static NSString Tax { get; } = new NSString ("tax");
 		public static NSString Term { get; } = new NSString ("term");
