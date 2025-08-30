@@ -1,6 +1,6 @@
 ﻿<Project>
   <PropertyGroup>
-    <_MLKitBarcodeAssemblyName>MLKit.BarcodeScanning, Version=6.0.0.0, Culture=neutral, PublicKeyToken=null</_MLKitBarcodeAssemblyName>
+    <_MLKitBarcodeAssemblyName>MLKit.BarcodeScanning, Version=6.0.0.1, Culture=neutral, PublicKeyToken=null</_MLKitBarcodeAssemblyName>
     <_MLKitBarcodeItemsFolder>MLKitBarcodeScanning-6.0.0</_MLKitBarcodeItemsFolder>
     <_MLKitBarcodeSDKBaseFolder>$(XamarinBuildDownloadDir)$(_MLKitBarcodeItemsFolder)\</_MLKitBarcodeSDKBaseFolder>
   </PropertyGroup>

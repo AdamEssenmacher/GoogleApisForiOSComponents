@@ -1,5 +1,5 @@
 ﻿<Project>
   <PropertyGroup>
-    <_PromisesObjCAssemblyName>Google.PromisesObjC, Version=2.4.0.0, Culture=neutral, PublicKeyToken=null</_PromisesObjCAssemblyName>
+    <_PromisesObjCAssemblyName>Google.PromisesObjC, Version=2.4.0.1, Culture=neutral, PublicKeyToken=null</_PromisesObjCAssemblyName>
   </PropertyGroup>
 </Project>

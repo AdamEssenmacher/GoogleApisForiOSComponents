@@ -1,7 +1,7 @@
 <Project>
   <Target Name="_GoogleSignInBundleResources">
     <PropertyGroup>
-		<_ResourcesBaseFolder>lib\xamarinios10\Google.SignIn.resources\GoogleSignIn.xcframework\ios-arm64\GoogleSignIn.framework</_ResourcesBaseFolder>  
+		<_ResourcesBaseFolder>lib\net8.0-ios\Google.SignIn.resources\GoogleSignIn.xcframework\ios-arm64\GoogleSignIn.framework</_ResourcesBaseFolder>  
     </PropertyGroup>
     <ItemGroup>
       <BundleResource Include="$(MSBuildThisFileDirectory)..\$(ResourcesBaseFolder)\GoogleSignIn.bundle\Info.plist" Visible="False">

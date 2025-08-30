@@ -1,6 +1,6 @@
 ﻿<Project>
   <PropertyGroup>
-    <_MLKitCoreAssemblyName>MLKit.Core, Version=6.0.0.0, Culture=neutral, PublicKeyToken=null</_MLKitCoreAssemblyName>
+    <_MLKitCoreAssemblyName>MLKit.Core, Version=12.0.0.1, Culture=neutral, PublicKeyToken=null</_MLKitCoreAssemblyName>
     <_MLKitCommonItemsFolder>MLKCommon-12.0.0</_MLKitCommonItemsFolder>
     <_MLKitCommonSDKBaseFolder>$(XamarinBuildDownloadDir)$(_MLKitCommonItemsFolder)\Frameworks\</_MLKitCommonSDKBaseFolder>
     <_MLKitVisionItemsFolder>MLKVision-8.0.0</_MLKitVisionItemsFolder>

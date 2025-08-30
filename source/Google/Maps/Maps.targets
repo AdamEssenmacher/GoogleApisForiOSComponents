@@ -1,6 +1,6 @@
 <Project>
   <PropertyGroup>
-    <_GoogleMapsAssemblyName>Google.Maps, Version=9.2.0.0, Culture=neutral, PublicKeyToken=null</_GoogleMapsAssemblyName>
+    <_GoogleMapsAssemblyName>Google.Maps, Version=9.2.0.6, Culture=neutral, PublicKeyToken=null</_GoogleMapsAssemblyName>
     <_GoogleMapsItemsFolder>GMps-9.2.0</_GoogleMapsItemsFolder>
     <_GoogleMapsSDKBaseFolder>$(XamarinBuildDownloadDir)$(_GoogleMapsItemsFolder)\Maps\Frameworks\</_GoogleMapsSDKBaseFolder>
     <_GoogleMapsResourcesBaseFolder>$(XamarinBuildDownloadDir)$(_GoogleMapsItemsFolder)\Maps\Resources\GoogleMapsResources\GoogleMaps.bundle\</_GoogleMapsResourcesBaseFolder>
