@@ -1,6 +1,6 @@
 ﻿<Project>
   <PropertyGroup>
-    <_FirebaseCoreAssemblyName>Firebase.Core, Version=11.10.0.1, Culture=neutral, PublicKeyToken=null</_FirebaseCoreAssemblyName>
+    <_FirebaseCoreAssemblyName>Firebase.Core, Version=11.10.0.2, Culture=neutral, PublicKeyToken=null</_FirebaseCoreAssemblyName>
     <_GoogleAppMeasurementItemsFolder>GAppM-11.10.0</_GoogleAppMeasurementItemsFolder>
     <_GoogleAppMeasurementSDKBaseFolder>$(XamarinBuildDownloadDir)$(_GoogleAppMeasurementItemsFolder)\GoogleAppMeasurement-11.10.0\Frameworks\</_GoogleAppMeasurementSDKBaseFolder>
   </PropertyGroup>
