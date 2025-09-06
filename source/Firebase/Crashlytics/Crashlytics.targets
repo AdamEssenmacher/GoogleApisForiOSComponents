@@ -1,7 +1,7 @@
 <Project>
   <PropertyGroup>
-    <_FirebaseCrashlyticsAssemblyName>Firebase.Crashlytics, Version=11.12.0.0, Culture=neutral, PublicKeyToken=null</_FirebaseCrashlyticsAssemblyName>
-    <_FirebaseCrashlyticsItemsFolder>FCrshlytcs-11.12.0</_FirebaseCrashlyticsItemsFolder>
+    <_FirebaseCrashlyticsAssemblyName>Firebase.Crashlytics, Version=11.13.0.0, Culture=neutral, PublicKeyToken=null</_FirebaseCrashlyticsAssemblyName>
+    <_FirebaseCrashlyticsItemsFolder>FCrshlytcs-11.13.0</_FirebaseCrashlyticsItemsFolder>
     <_FirebaseCrashlyticsSDKBaseFolder>$(XamarinBuildDownloadDir)$(_FirebaseCrashlyticsItemsFolder)\</_FirebaseCrashlyticsSDKBaseFolder>
     <!-- Requires a file extension, otherwise XDB will complain  -->
     <_FirebaseScriptName>upload-symbols.sh</_FirebaseScriptName>
@@ -22,7 +22,7 @@
   <ItemGroup Condition="('$(OutputType)'!='Library' OR '$(IsAppExtension)'=='True')">
     <XamarinBuildDownload Include="$(_FirebaseCrashlyticsItemsFolder)">
       <!-- To upgrade, change commit id from the appropriate tag: https://github.com/firebase/firebase-ios-sdk/tags-->
-      <Url>https://raw.githubusercontent.com/firebase/firebase-ios-sdk/fbd463894af94d90eb4d6a4e54080459a8179519/Crashlytics/upload-symbols</Url>
+      <Url>https://raw.githubusercontent.com/firebase/firebase-ios-sdk/3663b1aa6c7a1bed67ee80fd09dc6d0f9c3bb660/Crashlytics/upload-symbols</Url>
       <ToFile>$(_FirebaseCrashlyticsSDKBaseFolder)$(_FirebaseScriptName)</ToFile>
       <Kind>Uncompressed</Kind>
     </XamarinBuildDownload>
