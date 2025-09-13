@@ -105,11 +105,6 @@ namespace Firebase.Core
 		[Export ("clientID")]
 		string ClientId { get; set; }
 
-		// @property (readonly, copy, nonatomic) NSString * trackingID;
-		[NullAllowed]
-		[Export ("trackingID")]
-		string TrackingId { get; set; }
-
 		// @property (readonly, copy, nonatomic) NSString * GCMSenderID;
 		[Export ("GCMSenderID")]
 		string GcmSenderId { get; set; }
@@ -119,11 +114,6 @@ namespace Firebase.Core
 		[Export ("projectID")]
 		string ProjectId { get; set; }
 
-		// @property (readonly, copy, nonatomic) NSString * androidClientID;
-		[NullAllowed]
-		[Export ("androidClientID")]
-		string AndroidClientId { get; set; }
-
 		// @property (readonly, copy, nonatomic) NSString * googleAppID;
 		[Export ("googleAppID")]
 		string GoogleAppId { get; set; }
@@ -132,11 +122,6 @@ namespace Firebase.Core
 		[NullAllowed]
 		[Export ("databaseURL")]
 		string DatabaseUrl { get; set; }
-
-		// @property (readwrite, copy, nonatomic) NSString * deepLinkURLScheme;
-		[NullAllowed]
-		[Export ("deepLinkURLScheme")]
-		string DeepLinkUrlScheme { get; set; }
 
 		// @property (readonly, copy, nonatomic) NSString * storageBucket;
 		[NullAllowed]

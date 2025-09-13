@@ -40,11 +40,6 @@ namespace Firebase.Auth
 		[Export ("androidInstallIfNotAvailable")]
 		bool AndroidInstallIfNotAvailable { get; }
 
-		// @property (copy, nonatomic) NSString * _Nullable dynamicLinkDomain;
-		[NullAllowed]
-		[Export ("dynamicLinkDomain")]
-		string DynamicLinkDomain { get; set; }
-
 		// -(void)setAndroidPackageName:(NSString * _Nonnull)androidPackageName installIfNotAvailable:(BOOL)installIfNotAvailable minimumVersion:(NSString * _Nullable)minimumVersion;
 		[Export ("setAndroidPackageName:installIfNotAvailable:minimumVersion:")]
 		void SetAndroidPackageName (string androidPackageName, bool installIfNotAvailable, [NullAllowed] string minimumVersion);
