@@ -1,5 +1,5 @@
 ﻿<Project>
   <PropertyGroup>
-    <_FirebaseCoreAssemblyName>Firebase.Core, Version=12.3.0.0, Culture=neutral, PublicKeyToken=null</_FirebaseCoreAssemblyName>
+    <_FirebaseCoreAssemblyName>Firebase.Core, Version=12.4.0.0, Culture=neutral, PublicKeyToken=null</_FirebaseCoreAssemblyName>
   </PropertyGroup>
 </Project>
