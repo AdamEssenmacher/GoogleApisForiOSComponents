@@ -113,7 +113,7 @@ Even with that Visual Studio can still be very temperamental with long file path
 5. Delete your project `bin` and `obj` folders.
 6. Make sure you didn't skip step 5.
 7. Run a `dotnet restore` for your project/solution from the command line.
-8. Build your project/solution successfully from the command line.
+8. Build your project/solution successfully from the command line `dotnet build`.
 9. Make sure you didn't skip step 8.
 
 Now you should be able to build and debug your iOS app in Visual Studio. It will probably still choke during archiving though, so either do that step directly on a mac or try it on the CLI as well.
