@@ -146,6 +146,7 @@ void BuildSdkOnPodfileV2 (Artifact artifact)
 	var platforms = new [] { 
 		PlatformV2.Create (Sdk.iPhoneOS),
 		PlatformV2.Create (Sdk.iPhoneSimulator),
+		PlatformV2.Create (Sdk.macCatalyst)
 	};
 	var podsProject = "./Pods/Pods.xcodeproj";
 	var workingDirectory = (DirectoryPath)$"./externals/build/{artifact.Id}";

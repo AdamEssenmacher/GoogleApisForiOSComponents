@@ -1,6 +1,6 @@
 ﻿<Project>
   <PropertyGroup>
-    <_FirebaseAnalyticsAssemblyName>Firebase.Analytics, Version=12.5.0.0, Culture=neutral, PublicKeyToken=null</_FirebaseAnalyticsAssemblyName>
+    <_FirebaseAnalyticsAssemblyName>Firebase.Analytics, Version=12.5.0.2, Culture=neutral, PublicKeyToken=null</_FirebaseAnalyticsAssemblyName>
     <_FirebaseAnalyticsItemsFolder>FAnlytcs-12.5.0</_FirebaseAnalyticsItemsFolder>
     <_FirebaseAnalyticsSDKBaseFolder>$(XamarinBuildDownloadDir)$(_FirebaseAnalyticsItemsFolder)\FirebaseAnalytics-12.5.0\Frameworks\</_FirebaseAnalyticsSDKBaseFolder>
   </PropertyGroup>

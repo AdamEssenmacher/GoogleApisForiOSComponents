@@ -1,6 +1,6 @@
 <Project>
   <PropertyGroup>
-    <_GooglePlacesAssemblyName>Google.Places, Version=7.4.0.1, Culture=neutral, PublicKeyToken=null</_GooglePlacesAssemblyName>
+    <_GooglePlacesAssemblyName>Google.Places, Version=7.4.0.3, Culture=neutral, PublicKeyToken=null</_GooglePlacesAssemblyName>
     <_GooglePlacesItemsFolder>GPlcs-7.4.0</_GooglePlacesItemsFolder>
     <_GooglePlacesSDKBaseFolder>$(XamarinBuildDownloadDir)$(_GooglePlacesItemsFolder)\GooglePlaces-7.4.0\Frameworks\</_GooglePlacesSDKBaseFolder>
   </PropertyGroup>

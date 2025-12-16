@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>net9.0-ios;net10.0-ios</TargetFrameworks>
+    <TargetFrameworks>net9.0-ios;net9.0-maccatalyst;net10.0-ios;net10.0-maccatalyst</TargetFrameworks>
     <Nullable>enable</Nullable>
     <ImplicitUsings>true</ImplicitUsings>
     <IsBindingProject>true</IsBindingProject>
@@ -8,8 +8,8 @@
     <SupportedOSPlatformVersion>15.0</SupportedOSPlatformVersion>
     <RootNamespace>Google.GoogleUtilities</RootNamespace>
     <AssemblyName>Google.GoogleUtilities</AssemblyName>
-    <AssemblyVersion>8.1.0.1</AssemblyVersion>
-    <FileVersion>8.1.0.1</FileVersion>
+    <AssemblyVersion>8.1.0.2</AssemblyVersion>
+    <FileVersion>8.1.0.2</FileVersion>
     <IPhoneResourcePrefix>Resources</IPhoneResourcePrefix>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
@@ -24,7 +24,7 @@
     <PackageProjectUrl>https://github.com/AdamEssenmacher/GoogleApisForiOSComponents</PackageProjectUrl>
     <PackageLicenseFile>License.md</PackageLicenseFile>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-    <PackageVersion>8.1.0.1</PackageVersion>
+    <PackageVersion>8.1.0.2</PackageVersion>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="..\..\AssemblyInfo.cs" />
