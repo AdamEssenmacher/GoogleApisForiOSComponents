@@ -238,7 +238,7 @@ void CreateSymlinkPreservingTarball (DirectoryPath workingDirectory, FilePath ta
 
 void CreateFirebaseCoreFrameworkTarball ()
 {
-        var externalsDirectory = Directory ("./externals");
+        DirectoryPath externalsDirectory = DirectoryPath.FromString ("./externals");
         var tarballPath = externalsDirectory.CombineWithFilePath ("FirebaseCore.xcframeworks.tar.gz");
         var firebaseCoreFrameworks = new [] {
                 "FirebaseAppCheckInterop.xcframework",
