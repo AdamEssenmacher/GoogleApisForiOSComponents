@@ -82,16 +82,28 @@ string GetMinimunSupportedVersion (Artifact artifact)
 
 List<string> GetPodfileLines (Artifact artifact)
 {
-	var podfileLines = new List<string> ();
+        var podfileLines = new List<string> ();
 
-	foreach (var podSpec in artifact.PodSpecs) {
-		if (podSpec.FrameworkSource != FrameworkSource.Pods)
-			continue;
+        foreach (var podSpec in artifact.PodSpecs) {
+                if (podSpec.FrameworkSource != FrameworkSource.Pods)
+                        continue;
 
-		podfileLines.AddRange (podSpec.BuildPodLines ());
-	}
+                podfileLines.AddRange (podSpec.BuildPodLines ());
+        }
 
-	return podfileLines;
+        return podfileLines;
+}
+
+void CopyDirectoryPreservingSymlinks (DirectoryPath source, DirectoryPath destination)
+{
+        EnsureDirectoryExists (destination);
+
+        var sourcePath = MakeAbsolute (source).FullPath.TrimEnd ('/');
+        var destinationPath = MakeAbsolute (destination).FullPath.TrimEnd ('/');
+
+        StartProcess ("rsync", new ProcessSettings {
+                Arguments = $"-a --delete \"{sourcePath}/\" \"{destinationPath}/\""
+        });
 }
 
 void BuildSdkOnPodfile (Artifact artifact)
@@ -140,8 +152,8 @@ void BuildSdkOnPodfile (Artifact artifact)
 
 void BuildSdkOnPodfileV2 (Artifact artifact)
 {
-	if (artifact.PodSpecs?.Length == 0)
-		return;
+        if (artifact.PodSpecs?.Length == 0)
+                return;
 
 	var platforms = new [] { 
 		PlatformV2.Create (Sdk.iPhoneOS),
@@ -149,41 +161,100 @@ void BuildSdkOnPodfileV2 (Artifact artifact)
 		PlatformV2.Create (Sdk.macCatalyst)
 	};
 	var podsProject = "./Pods/Pods.xcodeproj";
-	var workingDirectory = (DirectoryPath)$"./externals/build/{artifact.Id}";
+        var workingDirectory = (DirectoryPath)$"./externals/build/{artifact.Id}";
 
-	var podSpecsToBuild = new List<PodSpec> ();
+        var podSpecsToBuild = new List<PodSpec> ();
 
-	foreach (var podSpec in artifact.PodSpecs)
-	{
-		if (podSpec.FrameworkSource != FrameworkSource.Pods)
-			continue;
+        foreach (var podSpec in artifact.PodSpecs)
+        {
+                if (podSpec.FrameworkSource != FrameworkSource.Pods)
+                        continue;
 
-		var frameworkName = $"{podSpec.FrameworkName}.framework";
-		var frameworkPaths = GetDirectories($"{workingDirectory}/Pods/**/{frameworkName}");
+                var frameworkName = $"{podSpec.FrameworkName}.framework";
+                var frameworkPaths = GetDirectories($"{workingDirectory}/Pods/**/{frameworkName}");
 
-		var xcframeworkName = $"{podSpec.FrameworkName}.xcframework";
-		var xcframeworkPaths = GetDirectories($"{workingDirectory}/Pods/**/{xcframeworkName}");
-		
-		if (frameworkPaths?.Count <= 0 && xcframeworkPaths?.Count <= 0) {
-			if (!podSpec.CanBeBuild)
-				continue;
+                var xcframeworkName = $"{podSpec.FrameworkName}.xcframework";
+                var xcframeworkPaths = GetDirectories($"{workingDirectory}/Pods/**/{xcframeworkName}");
 
-			podSpecsToBuild.Add (podSpec);
-		} else {
-			foreach (var path in frameworkPaths)
-				CopyDirectory (path, $"./externals/{frameworkName}");
+                if (frameworkPaths?.Count <= 0 && xcframeworkPaths?.Count <= 0) {
+                        if (!podSpec.CanBeBuild)
+                                continue;
 
-			foreach (var path in xcframeworkPaths)
-				CopyDirectory (path, $"./externals/{xcframeworkName}");
-		}
-	}
+                        podSpecsToBuild.Add (podSpec);
+                } else {
+                        foreach (var path in frameworkPaths)
+                                CopyDirectoryPreservingSymlinks (path, Directory ($"./externals/{frameworkName}"));
 
-	BuildXcodeXcframework (podsProject, podSpecsToBuild.ToArray (), platforms, workingDirectory: workingDirectory);
+                        foreach (var path in xcframeworkPaths)
+                                CopyDirectoryPreservingSymlinks (path, Directory ($"./externals/{xcframeworkName}"));
+                }
+        }
 
-	foreach (var podSpec in podSpecsToBuild) {
-		var xcframeworkName = $"{podSpec.FrameworkName}.xcframework";
-		CopyDirectory ($"{workingDirectory}/{xcframeworkName}", $"./externals/{xcframeworkName}");
-	}
+        BuildXcodeXcframework (podsProject, podSpecsToBuild.ToArray (), platforms, workingDirectory: workingDirectory);
+
+        foreach (var podSpec in podSpecsToBuild) {
+                var xcframeworkName = $"{podSpec.FrameworkName}.xcframework";
+                CopyDirectoryPreservingSymlinks (Directory ($"{workingDirectory}/{xcframeworkName}"), Directory ($"./externals/{xcframeworkName}"));
+        }
+
+        if (string.Equals (artifact.Id, "Firebase.Core", StringComparison.OrdinalIgnoreCase))
+                CreateFirebaseCoreFrameworkTarball ();
+}
+
+void CreateSymlinkPreservingTarball (DirectoryPath workingDirectory, FilePath tarballPath, IEnumerable<string> entries)
+{
+        if (!IsRunningOnUnix ()) {
+                Warning ($"{0} is not available on the current platform.", "tar");
+                return;
+        }
+
+        if (entries == null || !entries.Any ())
+                throw new ArgumentException ("No entries were provided to tar.", nameof (entries));
+
+        EnsureDirectoryExists (tarballPath.GetDirectory ());
+
+        var missingEntries = entries
+                .Where (e => !DirectoryExists (workingDirectory.Combine (e)))
+                .ToArray ();
+
+        if (missingEntries.Any ())
+                throw new InvalidOperationException ($"Failed to find required directories for tarball: {string.Join (", ", missingEntries)}");
+
+        if (FileExists (tarballPath))
+                DeleteFile (tarballPath);
+
+        var arguments = new ProcessArgumentBuilder ();
+        arguments.Append ("-C");
+        arguments.AppendQuoted (workingDirectory.FullPath);
+        arguments.Append ("-czf");
+        arguments.AppendQuoted (tarballPath.FullPath);
+
+        foreach (var entry in entries)
+                arguments.AppendQuoted (entry);
+
+        Information ($"Creating tarball {tarballPath} from {workingDirectory} with entries: {string.Join (", ", entries)}");
+        StartProcess ("tar", new ProcessSettings { Arguments = arguments });
+}
+
+void CreateFirebaseCoreFrameworkTarball ()
+{
+        var externalsDirectory = Directory ("./externals");
+        var tarballPath = externalsDirectory.CombineWithFilePath ("FirebaseCore.xcframeworks.tar.gz");
+        var firebaseCoreFrameworks = new [] {
+                "FirebaseAppCheckInterop.xcframework",
+                "FirebaseAuthInterop.xcframework",
+                "FirebaseCore.xcframework",
+                "FirebaseCoreExtension.xcframework",
+                "FirebaseCoreInternal.xcframework",
+                "FirebaseMessagingInterop.xcframework",
+                "FirebaseRemoteConfigInterop.xcframework",
+                "FirebaseSessions.xcframework",
+                "FirebaseSharedSwift.xcframework",
+                "Promises.xcframework",
+                "leveldb.xcframework",
+        };
+
+        CreateSymlinkPreservingTarball (externalsDirectory, tarballPath, firebaseCoreFrameworks);
 }
 
 void CleanVisualStudioSolution ()
@@ -449,13 +520,13 @@ void BuildXcodeXcframework (FilePath xcodeProject, PodSpec [] podSpecs, Platform
 					continue;
 
 				DirectoryPath destinationDirectory = Directory (archiveFrameworksDirectory.ToString ().Replace ($"{podSpec.FrameworkName}", $"{builtFrameworkName}"));
-				destinationDirectory = destinationDirectory.Combine ($"{builtFrameworkName}.framework");
+                                destinationDirectory = destinationDirectory.Combine ($"{builtFrameworkName}.framework");
 
-				Information ($"Copying {directory} to {destinationDirectory}");
+                                Information ($"Copying {directory} to {destinationDirectory}");
 
-				CopyDirectory (directory, destinationDirectory);
-			}
-		}
+                                CopyDirectoryPreservingSymlinks (directory, destinationDirectory);
+                        }
+                }
 
 		Information ($"Building {podSpec.FrameworkName} xcframework...");
 		StartProcess("xcodebuild", new ProcessSettings { Arguments = xcodeBuildArgs });
