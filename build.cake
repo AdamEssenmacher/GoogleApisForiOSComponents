@@ -19,6 +19,30 @@ var BACKSLASH = string.Empty;
 var SOLUTION_PATH = "./Xamarin.Google.sln";
 var EXTERNALS_PATH = new DirectoryPath ("./externals");
 
+void CreateXcframeworkTarball (Artifact artifact, string xcframeworkName)
+{
+        var sourcePath = EXTERNALS_PATH.Combine (xcframeworkName);
+        var tarballPath = EXTERNALS_PATH.CombineWithFilePath ($"{artifact.CsprojName}.xcframework.tar.gz");
+
+        if (!DirectoryExists (sourcePath))
+                throw new Exception ($"Missing xcframework directory: {sourcePath}");
+
+        if (FileExists (tarballPath))
+                DeleteFile (tarballPath);
+
+        var args = new ProcessArgumentBuilder (); 
+        args.Append ("-czf");
+        args.AppendQuoted (tarballPath.FullPath);
+        args.Append ("-C");
+        args.AppendQuoted (EXTERNALS_PATH.FullPath);
+        args.AppendQuoted (xcframeworkName);
+
+        var exitCode = StartProcess ("tar", new ProcessSettings { Arguments = args });
+
+        if (exitCode != 0)
+                throw new Exception ($"Failed to create tarball for {artifact.Id} (exit code {exitCode}).");
+}
+
 // Artifacts that need to be built from pods or be copied from pods
 var ARTIFACTS_TO_BUILD = new List<Artifact> ();
 
@@ -147,9 +171,17 @@ Task ("externals")
 	// 	FirebaseCoreDownload ();
 });
 
+Task ("bundle-xcframeworks")
+        .IsDependentOn("externals")
+        .Does (() =>
+{
+        if (ARTIFACTS_TO_BUILD.Contains (GOOGLE_GOOGLE_UTILITIES_ARTIFACT))
+                CreateXcframeworkTarball (GOOGLE_GOOGLE_UTILITIES_ARTIFACT, "GoogleUtilities.xcframework");
+});
+
 Task ("ci-setup")
-	.WithCriteria (!BuildSystem.IsLocalBuild)
-	.Does (() => 
+        .WithCriteria (!BuildSystem.IsLocalBuild)
+        .Does (() =>
 {
 	var glob = "./source/**/AssemblyInfo.cs";
 
@@ -159,9 +191,9 @@ Task ("ci-setup")
 });
 
 Task ("libs")
-	.IsDependentOn("externals")
-	.IsDependentOn("ci-setup")
-	.Does(() =>
+        .IsDependentOn("bundle-xcframeworks")
+        .IsDependentOn("ci-setup")
+        .Does(() =>
 {
 	var msBuildSettings = new DotNetCoreMSBuildSettings ();
 	var dotNetCoreBuildSettings = new DotNetCoreBuildSettings { 

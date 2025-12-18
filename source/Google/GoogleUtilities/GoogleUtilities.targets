@@ -1,5 +1,32 @@
-﻿<Project>
+<Project>
   <PropertyGroup>
-    <_GoogleUtilitiesAssemblyName>Google.GoogleUtilities, Version=8.1.0.0, Culture=neutral, PublicKeyToken=null</_GoogleUtilitiesAssemblyName>
+    <_GoogleUtilitiesPackageNativeTarball>$(MSBuildThisFileDirectory)GoogleUtilities.xcframework.tar.gz</_GoogleUtilitiesPackageNativeTarball>
+    <_GoogleUtilitiesNativeTarball Condition="Exists('$(_GoogleUtilitiesPackageNativeTarball)')">$(_GoogleUtilitiesPackageNativeTarball)</_GoogleUtilitiesNativeTarball>
+    <_GoogleUtilitiesNativeTarball Condition="'$(_GoogleUtilitiesNativeTarball)' == ''">$(MSBuildThisFileDirectory)..\..\externals\GoogleUtilities.xcframework.tar.gz</_GoogleUtilitiesNativeTarball>
+    <_GoogleUtilitiesExtractionPath>$(IntermediateOutputPath)googleutilities-native</_GoogleUtilitiesExtractionPath>
+    <_GoogleUtilitiesExtractionStamp>$(_GoogleUtilitiesExtractionPath)\extracted.stamp</_GoogleUtilitiesExtractionStamp>
+    <_GoogleUtilitiesNativeFramework>$(_GoogleUtilitiesExtractionPath)\GoogleUtilities.xcframework</_GoogleUtilitiesNativeFramework>
   </PropertyGroup>
+
+  <Target Name="_GoogleUtilitiesExtractNativeFrameworks"
+          Inputs="$(_GoogleUtilitiesNativeTarball)"
+          Outputs="$(_GoogleUtilitiesExtractionStamp)">
+    <Error Condition="!Exists('$(_GoogleUtilitiesNativeTarball)')" Text="GoogleUtilities xcframework tarball was not found at '$(_GoogleUtilitiesNativeTarball)'." />
+    <MakeDir Directories="$(_GoogleUtilitiesExtractionPath)" />
+    <Exec Command="tar -xzf &quot;$(_GoogleUtilitiesNativeTarball)&quot; -C &quot;$(_GoogleUtilitiesExtractionPath)&quot;" />
+    <WriteLinesToFile File="$(_GoogleUtilitiesExtractionStamp)" Lines="extracted" Overwrite="true" />
+  </Target>
+
+  <Target Name="_GoogleUtilitiesRegisterNativeReferences"
+          DependsOnTargets="_GoogleUtilitiesExtractNativeFrameworks"
+          BeforeTargets="_CreateNativeReferenceItems">
+    <ItemGroup Condition="Exists('$(_GoogleUtilitiesNativeFramework)')">
+      <NativeReference Include="$(_GoogleUtilitiesNativeFramework)">
+        <Kind>Framework</Kind>
+        <SmartLink>True</SmartLink>
+        <ForceLoad>True</ForceLoad>
+        <Frameworks>Security SystemConfiguration</Frameworks>
+      </NativeReference>
+    </ItemGroup>
+  </Target>
 </Project>

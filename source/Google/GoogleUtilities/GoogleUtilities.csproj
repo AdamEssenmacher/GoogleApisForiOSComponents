@@ -29,20 +29,15 @@
   <ItemGroup>
     <Compile Include="..\..\AssemblyInfo.cs" />
   </ItemGroup>
-  <ItemGroup>    
+  <ItemGroup>
     <None Include="GoogleUtilities.targets" Pack="True" PackagePath="build/AdamE.Google.iOS.GoogleUtilities.targets" />
     <None Include="GoogleUtilities.targets" Pack="True" PackagePath="buildTransitive/AdamE.Google.iOS.GoogleUtilities.targets" />
+    <None Include="..\..\externals\GoogleUtilities.xcframework.tar.gz" Pack="True" PackagePath="build/GoogleUtilities.xcframework.tar.gz" />
+    <None Include="..\..\externals\GoogleUtilities.xcframework.tar.gz" Pack="True" PackagePath="buildTransitive/GoogleUtilities.xcframework.tar.gz" />
     <None Include="License.md" Pack="True" PackagePath="License.md" />
-  </ItemGroup>
-  <ItemGroup>
-    <NativeReference Include="..\..\..\externals\GoogleUtilities.xcframework">
-      <Kind>Framework</Kind>
-      <SmartLink>True</SmartLink>
-      <ForceLoad>True</ForceLoad>
-      <Frameworks>Security SystemConfiguration</Frameworks>
-    </NativeReference>
   </ItemGroup>
   <ItemGroup>
     <ObjcBindingApiDefinition Include="ApiDefinition.cs" />
   </ItemGroup>
+  <Import Project="GoogleUtilities.targets" Condition="Exists('GoogleUtilities.targets')" />
 </Project>
