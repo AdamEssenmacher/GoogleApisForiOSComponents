@@ -32,8 +32,8 @@
   <ItemGroup>
     <None Include="GoogleUtilities.targets" Pack="True" PackagePath="build/AdamE.Google.iOS.GoogleUtilities.targets" />
     <None Include="GoogleUtilities.targets" Pack="True" PackagePath="buildTransitive/AdamE.Google.iOS.GoogleUtilities.targets" />
-    <None Include="..\..\externals\GoogleUtilities.xcframework.tar.gz" Pack="True" PackagePath="build/GoogleUtilities.xcframework.tar.gz" />
-    <None Include="..\..\externals\GoogleUtilities.xcframework.tar.gz" Pack="True" PackagePath="buildTransitive/GoogleUtilities.xcframework.tar.gz" />
+    <None Include="..\..\..\externals\GoogleUtilities.xcframework.tar.gz" Pack="True" PackagePath="build/GoogleUtilities.xcframework.tar.gz" />
+    <None Include="..\..\..\externals\GoogleUtilities.xcframework.tar.gz" Pack="True" PackagePath="buildTransitive/GoogleUtilities.xcframework.tar.gz" />
     <None Include="License.md" Pack="True" PackagePath="License.md" />
   </ItemGroup>
   <ItemGroup>

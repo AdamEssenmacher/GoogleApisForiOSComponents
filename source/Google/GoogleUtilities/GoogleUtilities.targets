@@ -2,7 +2,7 @@
   <PropertyGroup>
     <_GoogleUtilitiesPackageNativeTarball>$(MSBuildThisFileDirectory)GoogleUtilities.xcframework.tar.gz</_GoogleUtilitiesPackageNativeTarball>
     <_GoogleUtilitiesNativeTarball Condition="Exists('$(_GoogleUtilitiesPackageNativeTarball)')">$(_GoogleUtilitiesPackageNativeTarball)</_GoogleUtilitiesNativeTarball>
-    <_GoogleUtilitiesNativeTarball Condition="'$(_GoogleUtilitiesNativeTarball)' == ''">$(MSBuildThisFileDirectory)..\..\externals\GoogleUtilities.xcframework.tar.gz</_GoogleUtilitiesNativeTarball>
+    <_GoogleUtilitiesNativeTarball Condition="'$(_GoogleUtilitiesNativeTarball)' == ''">$(MSBuildThisFileDirectory)..\..\..\externals\GoogleUtilities.xcframework.tar.gz</_GoogleUtilitiesNativeTarball>
     <_GoogleUtilitiesExtractionPath>$(IntermediateOutputPath)googleutilities-native</_GoogleUtilitiesExtractionPath>
     <_GoogleUtilitiesExtractionStamp>$(_GoogleUtilitiesExtractionPath)\extracted.stamp</_GoogleUtilitiesExtractionStamp>
     <_GoogleUtilitiesNativeFramework>$(_GoogleUtilitiesExtractionPath)\GoogleUtilities.xcframework</_GoogleUtilitiesNativeFramework>
