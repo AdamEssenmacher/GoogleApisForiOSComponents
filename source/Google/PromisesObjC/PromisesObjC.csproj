@@ -29,19 +29,15 @@
   <ItemGroup>
     <Compile Include="..\..\AssemblyInfo.cs" />
   </ItemGroup>
-  <ItemGroup>    
+  <ItemGroup>
     <None Include="PromisesObjC.targets" Pack="True" PackagePath="build/AdamE.Google.iOS.PromisesObjC.targets" />
     <None Include="PromisesObjC.targets" Pack="True" PackagePath="buildTransitive/AdamE.Google.iOS.PromisesObjC.targets" />
+    <None Include="..\..\..\externals\PromisesObjC.xcframeworks.tar.gz" Pack="True" PackagePath="build/AdamE.Google.iOS.PromisesObjC.xcframeworks.tar.gz" Visible="False" />
+    <None Include="..\..\..\externals\PromisesObjC.xcframeworks.tar.gz" Pack="True" PackagePath="buildTransitive/AdamE.Google.iOS.PromisesObjC.xcframeworks.tar.gz" Visible="False" />
     <None Include="License.md" Pack="True" PackagePath="License.md" />
-  </ItemGroup>
-  <ItemGroup>
-    <NativeReference Include="..\..\..\externals\FBLPromises.xcframework">
-      <Kind>Framework</Kind>
-      <SmartLink>True</SmartLink>
-      <ForceLoad>True</ForceLoad>
-    </NativeReference>
   </ItemGroup>
   <ItemGroup>
     <ObjcBindingApiDefinition Include="ApiDefinition.cs" />
   </ItemGroup>
+  <Import Project="PromisesObjC.targets" Condition="Exists('PromisesObjC.targets')" />
 </Project>

@@ -29,19 +29,15 @@
   <ItemGroup>
     <Compile Include="..\..\AssemblyInfo.cs" />
   </ItemGroup>
-  <ItemGroup>    
+  <ItemGroup>
     <None Include="Nanopb.targets" Pack="True" PackagePath="build/AdamE.Google.iOS.Nanopb.targets" />
     <None Include="Nanopb.targets" Pack="True" PackagePath="buildTransitive/AdamE.Google.iOS.Nanopb.targets" />
+    <None Include="..\..\..\externals\Nanopb.xcframeworks.tar.gz" Pack="True" PackagePath="build/AdamE.Google.iOS.Nanopb.xcframeworks.tar.gz" Visible="False" />
+    <None Include="..\..\..\externals\Nanopb.xcframeworks.tar.gz" Pack="True" PackagePath="buildTransitive/AdamE.Google.iOS.Nanopb.xcframeworks.tar.gz" Visible="False" />
     <None Include="License.md" Pack="True" PackagePath="License.md" />
-  </ItemGroup>
-  <ItemGroup>
-    <NativeReference Include="..\..\..\externals\nanopb.xcframework">
-      <Kind>Framework</Kind>
-      <SmartLink>True</SmartLink>
-      <ForceLoad>True</ForceLoad>
-    </NativeReference>
   </ItemGroup>
   <ItemGroup>
     <ObjcBindingApiDefinition Include="ApiDefinition.cs" />
   </ItemGroup>
+  <Import Project="Nanopb.targets" Condition="Exists('Nanopb.targets')" />
 </Project>

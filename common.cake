@@ -197,9 +197,20 @@ void BuildSdkOnPodfileV2 (Artifact artifact)
                 CopyDirectoryPreservingSymlinks (Directory ($"{workingDirectory}/{xcframeworkName}"), Directory ($"./externals/{xcframeworkName}"));
         }
 
-
 	if (string.Equals (artifact.Id, "Firebase.Core", StringComparison.OrdinalIgnoreCase))
 		CreateFirebaseCoreFrameworkTarball ();
+
+	if (string.Equals (artifact.Id, "Google.GoogleDataTransport", StringComparison.OrdinalIgnoreCase))
+		CreateGoogleDataTransportFrameworkTarball ();
+
+	if (string.Equals (artifact.Id, "Google.GoogleUtilities", StringComparison.OrdinalIgnoreCase))
+		CreateGoogleUtilitiesFrameworkTarball ();
+
+	if (string.Equals (artifact.Id, "Google.Nanopb", StringComparison.OrdinalIgnoreCase))
+		CreateNanopbFrameworkTarball ();
+
+	if (string.Equals (artifact.Id, "Google.PromisesObjC", StringComparison.OrdinalIgnoreCase))
+		CreatePromisesObjCFrameworkTarball ();
 }
 
 void CreateSymlinkPreservingTarball (DirectoryPath workingDirectory, FilePath tarballPath, IEnumerable<string> entries)
@@ -260,6 +271,46 @@ void CreateFirebaseCoreFrameworkTarball ()
 	};
 
 	CreateSymlinkPreservingTarball (externalsDirectory, tarballPath, firebaseCoreFrameworks);
+}
+
+void CreateGoogleDataTransportFrameworkTarball ()
+{
+	DirectoryPath externalsDirectory = DirectoryPath.FromString ("./externals");
+	var tarballPath = externalsDirectory.CombineWithFilePath ("GoogleDataTransport.xcframeworks.tar.gz");
+
+	CreateSymlinkPreservingTarball (externalsDirectory, tarballPath, new [] {
+		"GoogleDataTransport.xcframework",
+	});
+}
+
+void CreateGoogleUtilitiesFrameworkTarball ()
+{
+	DirectoryPath externalsDirectory = DirectoryPath.FromString ("./externals");
+	var tarballPath = externalsDirectory.CombineWithFilePath ("GoogleUtilities.xcframeworks.tar.gz");
+
+	CreateSymlinkPreservingTarball (externalsDirectory, tarballPath, new [] {
+		"GoogleUtilities.xcframework",
+	});
+}
+
+void CreateNanopbFrameworkTarball ()
+{
+	DirectoryPath externalsDirectory = DirectoryPath.FromString ("./externals");
+	var tarballPath = externalsDirectory.CombineWithFilePath ("Nanopb.xcframeworks.tar.gz");
+
+	CreateSymlinkPreservingTarball (externalsDirectory, tarballPath, new [] {
+		"nanopb.xcframework",
+	});
+}
+
+void CreatePromisesObjCFrameworkTarball ()
+{
+	DirectoryPath externalsDirectory = DirectoryPath.FromString ("./externals");
+	var tarballPath = externalsDirectory.CombineWithFilePath ("PromisesObjC.xcframeworks.tar.gz");
+
+	CreateSymlinkPreservingTarball (externalsDirectory, tarballPath, new [] {
+		"FBLPromises.xcframework",
+	});
 }
 
 

@@ -1,5 +1,44 @@
-﻿<Project>
+<Project>
   <PropertyGroup>
     <_PromisesObjCAssemblyName>Google.PromisesObjC, Version=2.4.0.4, Culture=neutral, PublicKeyToken=null</_PromisesObjCAssemblyName>
+    <_PromisesObjCPackageTarball>$(MSBuildThisFileDirectory)AdamE.Google.iOS.PromisesObjC.xcframeworks.tar.gz</_PromisesObjCPackageTarball>
+    <_PromisesObjCLocalTarball>$(MSBuildThisFileDirectory)../../externals/PromisesObjC.xcframeworks.tar.gz</_PromisesObjCLocalTarball>
+    <_PromisesObjCTarball Condition="'$(_PromisesObjCTarball)'=='' and Exists('$(_PromisesObjCPackageTarball)')">$(_PromisesObjCPackageTarball)</_PromisesObjCTarball>
+    <_PromisesObjCTarball Condition="'$(_PromisesObjCTarball)'=='' and Exists('$(_PromisesObjCLocalTarball)')">$(_PromisesObjCLocalTarball)</_PromisesObjCTarball>
+    <_PromisesObjCExtractedFrameworksDirectory>$(IntermediateOutputPath)promisesobjc-xcframeworks/</_PromisesObjCExtractedFrameworksDirectory>
+    <_PromisesObjCExtractMarker>$(_PromisesObjCExtractedFrameworksDirectory).extracted.stamp</_PromisesObjCExtractMarker>
   </PropertyGroup>
+
+  <ItemGroup>
+    <_PromisesObjCNativeFramework Include="FBLPromises.xcframework" />
+  </ItemGroup>
+
+  <Target Name="_PromisesObjCExtractNativeFrameworks"
+          Condition="'$(_PromisesObjCTarball)'!=''"
+          Inputs="$(_PromisesObjCTarball)"
+          Outputs="$(_PromisesObjCExtractMarker)"
+          BeforeTargets="_ComputeNativeReferenceItems">
+    <Error Condition="!Exists('$(_PromisesObjCTarball)')"
+           Text="The PromisesObjC native frameworks archive could not be found at '$(_PromisesObjCTarball)'." />
+
+    <RemoveDir Directories="$(_PromisesObjCExtractedFrameworksDirectory)" />
+    <MakeDir Directories="$(_PromisesObjCExtractedFrameworksDirectory)" />
+
+    <Exec Command="tar -xzf &quot;$(_PromisesObjCTarball)&quot; -C &quot;$(_PromisesObjCExtractedFrameworksDirectory)&quot;" />
+
+    <Touch Files="$(_PromisesObjCExtractMarker)" AlwaysCreate="true" />
+  </Target>
+
+  <Target Name="_PromisesObjCAddNativeReferences"
+          DependsOnTargets="_PromisesObjCExtractNativeFrameworks"
+          BeforeTargets="_ComputeNativeReferenceItems"
+          Condition="'$(_PromisesObjCTarball)'!=''">
+    <ItemGroup>
+      <NativeReference Include="@(_PromisesObjCNativeFramework->'$(_PromisesObjCExtractedFrameworksDirectory)%(Identity)')">
+        <Kind>Framework</Kind>
+        <SmartLink>True</SmartLink>
+        <ForceLoad>True</ForceLoad>
+      </NativeReference>
+    </ItemGroup>
+  </Target>
 </Project>

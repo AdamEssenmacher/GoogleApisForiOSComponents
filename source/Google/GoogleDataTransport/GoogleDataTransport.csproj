@@ -29,18 +29,12 @@
   <ItemGroup>
     <Compile Include="..\..\AssemblyInfo.cs" />
   </ItemGroup>
-  <ItemGroup>    
+  <ItemGroup>
     <None Include="GoogleDataTransport.targets" Pack="True" PackagePath="build/AdamE.Google.iOS.GoogleDataTransport.targets" />
     <None Include="GoogleDataTransport.targets" Pack="True" PackagePath="buildTransitive/AdamE.Google.iOS.GoogleDataTransport.targets" />
+    <None Include="..\..\..\externals\GoogleDataTransport.xcframeworks.tar.gz" Pack="True" PackagePath="build/AdamE.Google.iOS.GoogleDataTransport.xcframeworks.tar.gz" Visible="False" />
+    <None Include="..\..\..\externals\GoogleDataTransport.xcframeworks.tar.gz" Pack="True" PackagePath="buildTransitive/AdamE.Google.iOS.GoogleDataTransport.xcframeworks.tar.gz" Visible="False" />
     <None Include="License.md" Pack="True" PackagePath="License.md" />
-  </ItemGroup>
-  <ItemGroup>
-    <NativeReference Include="..\..\..\externals\GoogleDataTransport.xcframework">
-      <Kind>Framework</Kind>
-      <SmartLink>True</SmartLink>
-      <ForceLoad>True</ForceLoad>
-      <Frameworks>SystemConfiguration CoreTelephony</Frameworks>
-    </NativeReference>
   </ItemGroup>
   <ItemGroup>
     <ObjcBindingApiDefinition Include="ApiDefinition.cs" />
@@ -49,4 +43,5 @@
     <PackageReference Include="AdamE.Google.iOS.Nanopb" Version="[3.30910.0,4.0)" />
     <PackageReference Include="AdamE.Google.iOS.PromisesObjC" Version="[2.4,3.0)" />
   </ItemGroup>
+  <Import Project="GoogleDataTransport.targets" Condition="Exists('GoogleDataTransport.targets')" />
 </Project>

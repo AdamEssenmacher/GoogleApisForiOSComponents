@@ -1,5 +1,44 @@
-﻿<Project>
+<Project>
   <PropertyGroup>
     <_NanopbAssemblyName>Google.Nanopb, Version=3.30910.0.4, Culture=neutral, PublicKeyToken=null</_NanopbAssemblyName>
+    <_NanopbPackageTarball>$(MSBuildThisFileDirectory)AdamE.Google.iOS.Nanopb.xcframeworks.tar.gz</_NanopbPackageTarball>
+    <_NanopbLocalTarball>$(MSBuildThisFileDirectory)../../externals/Nanopb.xcframeworks.tar.gz</_NanopbLocalTarball>
+    <_NanopbTarball Condition="'$(_NanopbTarball)'=='' and Exists('$(_NanopbPackageTarball)')">$(_NanopbPackageTarball)</_NanopbTarball>
+    <_NanopbTarball Condition="'$(_NanopbTarball)'=='' and Exists('$(_NanopbLocalTarball)')">$(_NanopbLocalTarball)</_NanopbTarball>
+    <_NanopbExtractedFrameworksDirectory>$(IntermediateOutputPath)nanopb-xcframeworks/</_NanopbExtractedFrameworksDirectory>
+    <_NanopbExtractMarker>$(_NanopbExtractedFrameworksDirectory).extracted.stamp</_NanopbExtractMarker>
   </PropertyGroup>
+
+  <ItemGroup>
+    <_NanopbNativeFramework Include="nanopb.xcframework" />
+  </ItemGroup>
+
+  <Target Name="_NanopbExtractNativeFrameworks"
+          Condition="'$(_NanopbTarball)'!=''"
+          Inputs="$(_NanopbTarball)"
+          Outputs="$(_NanopbExtractMarker)"
+          BeforeTargets="_ComputeNativeReferenceItems">
+    <Error Condition="!Exists('$(_NanopbTarball)')"
+           Text="The Nanopb native frameworks archive could not be found at '$(_NanopbTarball)'." />
+
+    <RemoveDir Directories="$(_NanopbExtractedFrameworksDirectory)" />
+    <MakeDir Directories="$(_NanopbExtractedFrameworksDirectory)" />
+
+    <Exec Command="tar -xzf &quot;$(_NanopbTarball)&quot; -C &quot;$(_NanopbExtractedFrameworksDirectory)&quot;" />
+
+    <Touch Files="$(_NanopbExtractMarker)" AlwaysCreate="true" />
+  </Target>
+
+  <Target Name="_NanopbAddNativeReferences"
+          DependsOnTargets="_NanopbExtractNativeFrameworks"
+          BeforeTargets="_ComputeNativeReferenceItems"
+          Condition="'$(_NanopbTarball)'!=''">
+    <ItemGroup>
+      <NativeReference Include="@(_NanopbNativeFramework->'$(_NanopbExtractedFrameworksDirectory)%(Identity)')">
+        <Kind>Framework</Kind>
+        <SmartLink>True</SmartLink>
+        <ForceLoad>True</ForceLoad>
+      </NativeReference>
+    </ItemGroup>
+  </Target>
 </Project>
