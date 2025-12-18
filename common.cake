@@ -197,65 +197,71 @@ void BuildSdkOnPodfileV2 (Artifact artifact)
                 CopyDirectoryPreservingSymlinks (Directory ($"{workingDirectory}/{xcframeworkName}"), Directory ($"./externals/{xcframeworkName}"));
         }
 
-        if (string.Equals (artifact.Id, "Firebase.Core", StringComparison.OrdinalIgnoreCase))
-                CreateFirebaseCoreFrameworkTarball ();
+
+	if (string.Equals (artifact.Id, "Firebase.Core", StringComparison.OrdinalIgnoreCase))
+		CreateFirebaseCoreFrameworkTarball ();
 }
 
 void CreateSymlinkPreservingTarball (DirectoryPath workingDirectory, FilePath tarballPath, IEnumerable<string> entries)
 {
-        if (!IsRunningOnUnix ()) {
-                Warning ($"{0} is not available on the current platform.", "tar");
-                return;
-        }
+	if (!IsRunningOnUnix ()) {
+		Warning ("{0} is not available on the current platform.", "tar");
+		return;
+	}
 
-        if (entries == null || !entries.Any ())
-                throw new ArgumentException ("No entries were provided to tar.", nameof (entries));
+	if (entries == null || !entries.Any ())
+		throw new ArgumentException ("No entries were provided to tar.", nameof (entries));
 
-        EnsureDirectoryExists (tarballPath.GetDirectory ());
+	EnsureDirectoryExists (tarballPath.GetDirectory ());
 
-        var missingEntries = entries
-                .Where (e => !DirectoryExists (workingDirectory.Combine (e)))
-                .ToArray ();
+	var missingEntries = entries
+		.Where (e => !DirectoryExists (workingDirectory.Combine (e)))
+		.ToArray ();
 
-        if (missingEntries.Any ())
-                throw new InvalidOperationException ($"Failed to find required directories for tarball: {string.Join (", ", missingEntries)}");
+	if (missingEntries.Any ())
+		throw new InvalidOperationException ($"Failed to find required directories for tarball: {string.Join (", ", missingEntries)}");
 
-        if (FileExists (tarballPath))
-                DeleteFile (tarballPath);
+	if (FileExists (tarballPath))
+		DeleteFile (tarballPath);
 
-        var arguments = new ProcessArgumentBuilder ();
-        arguments.Append ("-C");
-        arguments.AppendQuoted (workingDirectory.FullPath);
-        arguments.Append ("-czf");
-        arguments.AppendQuoted (tarballPath.FullPath);
+	var arguments = new ProcessArgumentBuilder ();
+	arguments.Append ("-C");
+	arguments.AppendQuoted (workingDirectory.FullPath);
+	arguments.Append ("-czf");
+	arguments.AppendQuoted (tarballPath.FullPath);
 
-        foreach (var entry in entries)
-                arguments.AppendQuoted (entry);
+	foreach (var entry in entries)
+		arguments.AppendQuoted (entry);
 
-        Information ($"Creating tarball {tarballPath} from {workingDirectory} with entries: {string.Join (", ", entries)}");
-        StartProcess ("tar", new ProcessSettings { Arguments = arguments });
+	Information ($"Creating tarball {tarballPath} from {workingDirectory} with entries: {string.Join (", ", entries)}");
+
+	var exitCode = StartProcess ("tar", new ProcessSettings { Arguments = arguments });
+
+	if (exitCode != 0)
+		throw new InvalidOperationException ($"Failed to create tarball {tarballPath}. tar exited with code {exitCode}.");
 }
 
 void CreateFirebaseCoreFrameworkTarball ()
 {
-        DirectoryPath externalsDirectory = DirectoryPath.FromString ("./externals");
-        var tarballPath = externalsDirectory.CombineWithFilePath ("FirebaseCore.xcframeworks.tar.gz");
-        var firebaseCoreFrameworks = new [] {
-                "FirebaseAppCheckInterop.xcframework",
-                "FirebaseAuthInterop.xcframework",
-                "FirebaseCore.xcframework",
-                "FirebaseCoreExtension.xcframework",
-                "FirebaseCoreInternal.xcframework",
-                "FirebaseMessagingInterop.xcframework",
-                "FirebaseRemoteConfigInterop.xcframework",
-                "FirebaseSessions.xcframework",
-                "FirebaseSharedSwift.xcframework",
-                "Promises.xcframework",
-                "leveldb.xcframework",
-        };
+	DirectoryPath externalsDirectory = DirectoryPath.FromString ("./externals");
+	var tarballPath = externalsDirectory.CombineWithFilePath ("FirebaseCore.xcframeworks.tar.gz");
+	var firebaseCoreFrameworks = new [] {
+		"FirebaseAppCheckInterop.xcframework",
+		"FirebaseAuthInterop.xcframework",
+		"FirebaseCore.xcframework",
+		"FirebaseCoreExtension.xcframework",
+		"FirebaseCoreInternal.xcframework",
+		"FirebaseMessagingInterop.xcframework",
+		"FirebaseRemoteConfigInterop.xcframework",
+		"FirebaseSessions.xcframework",
+		"FirebaseSharedSwift.xcframework",
+		"Promises.xcframework",
+		"leveldb.xcframework",
+	};
 
-        CreateSymlinkPreservingTarball (externalsDirectory, tarballPath, firebaseCoreFrameworks);
+	CreateSymlinkPreservingTarball (externalsDirectory, tarballPath, firebaseCoreFrameworks);
 }
+
 
 void CleanVisualStudioSolution ()
 {
