@@ -1,12 +1,13 @@
 <Project>
   <PropertyGroup>
     <_GoogleUtilitiesAssemblyName>Google.GoogleUtilities, Version=8.1.0.2, Culture=neutral, PublicKeyToken=null</_GoogleUtilitiesAssemblyName>
-    <_GoogleUtilitiesPackageTarball>$(MSBuildThisFileDirectory)AdamE.Google.iOS.GoogleUtilities.xcframeworks.tar.gz</_GoogleUtilitiesPackageTarball>
-    <_GoogleUtilitiesLocalTarball>$(MSBuildThisFileDirectory)../../externals/GoogleUtilities.xcframeworks.tar.gz</_GoogleUtilitiesLocalTarball>
-    <_GoogleUtilitiesTarball Condition="'$(_GoogleUtilitiesTarball)'=='' and Exists('$(_GoogleUtilitiesPackageTarball)')">$(_GoogleUtilitiesPackageTarball)</_GoogleUtilitiesTarball>
-    <_GoogleUtilitiesTarball Condition="'$(_GoogleUtilitiesTarball)'=='' and Exists('$(_GoogleUtilitiesLocalTarball)')">$(_GoogleUtilitiesLocalTarball)</_GoogleUtilitiesTarball>
-    <_GoogleUtilitiesExtractedFrameworksDirectory>$(IntermediateOutputPath)googleutilities-xcframeworks/</_GoogleUtilitiesExtractedFrameworksDirectory>
-    <_GoogleUtilitiesExtractMarker>$(_GoogleUtilitiesExtractedFrameworksDirectory).extracted.stamp</_GoogleUtilitiesExtractMarker>
+<_GoogleUtilitiesPackageTarball>$(MSBuildThisFileDirectory)AdamE.Google.iOS.GoogleUtilities.xcframeworks.tar.gz</_GoogleUtilitiesPackageTarball>
+<_GoogleUtilitiesLocalTarball>$(MSBuildThisFileDirectory)../../externals/GoogleUtilities.xcframeworks.tar.gz</_GoogleUtilitiesLocalTarball>
+<_GoogleUtilitiesTarball Condition="'$(_GoogleUtilitiesTarball)'=='' and Exists('$(_GoogleUtilitiesPackageTarball)')">$(_GoogleUtilitiesPackageTarball)</_GoogleUtilitiesTarball>
+<_GoogleUtilitiesTarball Condition="'$(_GoogleUtilitiesTarball)'=='' and Exists('$(_GoogleUtilitiesLocalTarball)')">$(_GoogleUtilitiesLocalTarball)</_GoogleUtilitiesTarball>
+<_GoogleUtilitiesExtractedFrameworksDirectory>$(IntermediateOutputPath)googleutilities-xcframeworks/</_GoogleUtilitiesExtractedFrameworksDirectory>
+<_GoogleUtilitiesExtractMarker>$(_GoogleUtilitiesExtractedFrameworksDirectory).extracted.stamp</_GoogleUtilitiesExtractMarker>
+<_GoogleUtilitiesSkipNativeReferences Condition="'$(PackProjectInputFile)'!=''">true</_GoogleUtilitiesSkipNativeReferences>
   </PropertyGroup>
 
   <ItemGroup>
@@ -16,10 +17,10 @@
   </ItemGroup>
 
   <Target Name="_GoogleUtilitiesExtractNativeFrameworks"
-          Condition="'$(_GoogleUtilitiesTarball)'!=''"
-          Inputs="$(_GoogleUtilitiesTarball)"
-          Outputs="$(_GoogleUtilitiesExtractMarker)"
-          BeforeTargets="_ComputeNativeReferenceItems">
+  Condition="'$(_GoogleUtilitiesTarball)'!='' and '$(_GoogleUtilitiesSkipNativeReferences)'!='true'"
+  Inputs="$(_GoogleUtilitiesTarball)"
+  Outputs="$(_GoogleUtilitiesExtractMarker)"
+  BeforeTargets="_ComputeNativeReferenceItems">
     <Error Condition="!Exists('$(_GoogleUtilitiesTarball)')"
            Text="The GoogleUtilities native frameworks archive could not be found at '$(_GoogleUtilitiesTarball)'." />
 
@@ -32,9 +33,9 @@
   </Target>
 
   <Target Name="_GoogleUtilitiesAddNativeReferences"
-          DependsOnTargets="_GoogleUtilitiesExtractNativeFrameworks"
-          BeforeTargets="_ComputeNativeReferenceItems"
-          Condition="'$(_GoogleUtilitiesTarball)'!=''">
+  DependsOnTargets="_GoogleUtilitiesExtractNativeFrameworks"
+  BeforeTargets="_ComputeNativeReferenceItems"
+  Condition="'$(_GoogleUtilitiesTarball)'!='' and '$(_GoogleUtilitiesSkipNativeReferences)'!='true'">
     <ItemGroup>
       <NativeReference Include="@(_GoogleUtilitiesNativeFramework->'$(_GoogleUtilitiesExtractedFrameworksDirectory)%(Identity)')">
         <Kind>Framework</Kind>

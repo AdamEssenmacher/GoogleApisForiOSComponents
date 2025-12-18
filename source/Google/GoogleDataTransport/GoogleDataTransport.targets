@@ -1,12 +1,13 @@
 <Project>
   <PropertyGroup>
     <_GoogleDataTransportAssemblyName>Google.GoogleDataTransport, Version=10.1.0.4, Culture=neutral, PublicKeyToken=null</_GoogleDataTransportAssemblyName>
-    <_GoogleDataTransportPackageTarball>$(MSBuildThisFileDirectory)AdamE.Google.iOS.GoogleDataTransport.xcframeworks.tar.gz</_GoogleDataTransportPackageTarball>
-    <_GoogleDataTransportLocalTarball>$(MSBuildThisFileDirectory)../../externals/GoogleDataTransport.xcframeworks.tar.gz</_GoogleDataTransportLocalTarball>
-    <_GoogleDataTransportTarball Condition="'$(_GoogleDataTransportTarball)'=='' and Exists('$(_GoogleDataTransportPackageTarball)')">$(_GoogleDataTransportPackageTarball)</_GoogleDataTransportTarball>
-    <_GoogleDataTransportTarball Condition="'$(_GoogleDataTransportTarball)'=='' and Exists('$(_GoogleDataTransportLocalTarball)')">$(_GoogleDataTransportLocalTarball)</_GoogleDataTransportTarball>
-    <_GoogleDataTransportExtractedFrameworksDirectory>$(IntermediateOutputPath)googledatatransport-xcframeworks/</_GoogleDataTransportExtractedFrameworksDirectory>
-    <_GoogleDataTransportExtractMarker>$(_GoogleDataTransportExtractedFrameworksDirectory).extracted.stamp</_GoogleDataTransportExtractMarker>
+<_GoogleDataTransportPackageTarball>$(MSBuildThisFileDirectory)AdamE.Google.iOS.GoogleDataTransport.xcframeworks.tar.gz</_GoogleDataTransportPackageTarball>
+<_GoogleDataTransportLocalTarball>$(MSBuildThisFileDirectory)../../externals/GoogleDataTransport.xcframeworks.tar.gz</_GoogleDataTransportLocalTarball>
+<_GoogleDataTransportTarball Condition="'$(_GoogleDataTransportTarball)'=='' and Exists('$(_GoogleDataTransportPackageTarball)')">$(_GoogleDataTransportPackageTarball)</_GoogleDataTransportTarball>
+<_GoogleDataTransportTarball Condition="'$(_GoogleDataTransportTarball)'=='' and Exists('$(_GoogleDataTransportLocalTarball)')">$(_GoogleDataTransportLocalTarball)</_GoogleDataTransportTarball>
+<_GoogleDataTransportExtractedFrameworksDirectory>$(IntermediateOutputPath)googledatatransport-xcframeworks/</_GoogleDataTransportExtractedFrameworksDirectory>
+<_GoogleDataTransportExtractMarker>$(_GoogleDataTransportExtractedFrameworksDirectory).extracted.stamp</_GoogleDataTransportExtractMarker>
+<_GoogleDataTransportSkipNativeReferences Condition="'$(PackProjectInputFile)'!=''">true</_GoogleDataTransportSkipNativeReferences>
   </PropertyGroup>
 
   <ItemGroup>
@@ -16,10 +17,10 @@
   </ItemGroup>
 
   <Target Name="_GoogleDataTransportExtractNativeFrameworks"
-          Condition="'$(_GoogleDataTransportTarball)'!=''"
-          Inputs="$(_GoogleDataTransportTarball)"
-          Outputs="$(_GoogleDataTransportExtractMarker)"
-          BeforeTargets="_ComputeNativeReferenceItems">
+  Condition="'$(_GoogleDataTransportTarball)'!='' and '$(_GoogleDataTransportSkipNativeReferences)'!='true'"
+  Inputs="$(_GoogleDataTransportTarball)"
+  Outputs="$(_GoogleDataTransportExtractMarker)"
+  BeforeTargets="_ComputeNativeReferenceItems">
     <Error Condition="!Exists('$(_GoogleDataTransportTarball)')"
            Text="The GoogleDataTransport native frameworks archive could not be found at '$(_GoogleDataTransportTarball)'." />
 
@@ -32,9 +33,9 @@
   </Target>
 
   <Target Name="_GoogleDataTransportAddNativeReferences"
-          DependsOnTargets="_GoogleDataTransportExtractNativeFrameworks"
-          BeforeTargets="_ComputeNativeReferenceItems"
-          Condition="'$(_GoogleDataTransportTarball)'!=''">
+  DependsOnTargets="_GoogleDataTransportExtractNativeFrameworks"
+  BeforeTargets="_ComputeNativeReferenceItems"
+  Condition="'$(_GoogleDataTransportTarball)'!='' and '$(_GoogleDataTransportSkipNativeReferences)'!='true'">
     <ItemGroup>
       <NativeReference Include="@(_GoogleDataTransportNativeFramework->'$(_GoogleDataTransportExtractedFrameworksDirectory)%(Identity)')">
         <Kind>Framework</Kind>

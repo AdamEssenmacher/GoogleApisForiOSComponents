@@ -1,12 +1,13 @@
 <Project>
   <PropertyGroup>
     <_PromisesObjCAssemblyName>Google.PromisesObjC, Version=2.4.0.4, Culture=neutral, PublicKeyToken=null</_PromisesObjCAssemblyName>
-    <_PromisesObjCPackageTarball>$(MSBuildThisFileDirectory)AdamE.Google.iOS.PromisesObjC.xcframeworks.tar.gz</_PromisesObjCPackageTarball>
-    <_PromisesObjCLocalTarball>$(MSBuildThisFileDirectory)../../externals/PromisesObjC.xcframeworks.tar.gz</_PromisesObjCLocalTarball>
-    <_PromisesObjCTarball Condition="'$(_PromisesObjCTarball)'=='' and Exists('$(_PromisesObjCPackageTarball)')">$(_PromisesObjCPackageTarball)</_PromisesObjCTarball>
-    <_PromisesObjCTarball Condition="'$(_PromisesObjCTarball)'=='' and Exists('$(_PromisesObjCLocalTarball)')">$(_PromisesObjCLocalTarball)</_PromisesObjCTarball>
-    <_PromisesObjCExtractedFrameworksDirectory>$(IntermediateOutputPath)promisesobjc-xcframeworks/</_PromisesObjCExtractedFrameworksDirectory>
-    <_PromisesObjCExtractMarker>$(_PromisesObjCExtractedFrameworksDirectory).extracted.stamp</_PromisesObjCExtractMarker>
+<_PromisesObjCPackageTarball>$(MSBuildThisFileDirectory)AdamE.Google.iOS.PromisesObjC.xcframeworks.tar.gz</_PromisesObjCPackageTarball>
+<_PromisesObjCLocalTarball>$(MSBuildThisFileDirectory)../../externals/PromisesObjC.xcframeworks.tar.gz</_PromisesObjCLocalTarball>
+<_PromisesObjCTarball Condition="'$(_PromisesObjCTarball)'=='' and Exists('$(_PromisesObjCPackageTarball)')">$(_PromisesObjCPackageTarball)</_PromisesObjCTarball>
+<_PromisesObjCTarball Condition="'$(_PromisesObjCTarball)'=='' and Exists('$(_PromisesObjCLocalTarball)')">$(_PromisesObjCLocalTarball)</_PromisesObjCTarball>
+<_PromisesObjCExtractedFrameworksDirectory>$(IntermediateOutputPath)promisesobjc-xcframeworks/</_PromisesObjCExtractedFrameworksDirectory>
+<_PromisesObjCExtractMarker>$(_PromisesObjCExtractedFrameworksDirectory).extracted.stamp</_PromisesObjCExtractMarker>
+<_PromisesObjCSkipNativeReferences Condition="'$(PackProjectInputFile)'!=''">true</_PromisesObjCSkipNativeReferences>
   </PropertyGroup>
 
   <ItemGroup>
@@ -14,10 +15,10 @@
   </ItemGroup>
 
   <Target Name="_PromisesObjCExtractNativeFrameworks"
-          Condition="'$(_PromisesObjCTarball)'!=''"
-          Inputs="$(_PromisesObjCTarball)"
-          Outputs="$(_PromisesObjCExtractMarker)"
-          BeforeTargets="_ComputeNativeReferenceItems">
+  Condition="'$(_PromisesObjCTarball)'!='' and '$(_PromisesObjCSkipNativeReferences)'!='true'"
+  Inputs="$(_PromisesObjCTarball)"
+  Outputs="$(_PromisesObjCExtractMarker)"
+  BeforeTargets="_ComputeNativeReferenceItems">
     <Error Condition="!Exists('$(_PromisesObjCTarball)')"
            Text="The PromisesObjC native frameworks archive could not be found at '$(_PromisesObjCTarball)'." />
 
@@ -30,9 +31,9 @@
   </Target>
 
   <Target Name="_PromisesObjCAddNativeReferences"
-          DependsOnTargets="_PromisesObjCExtractNativeFrameworks"
-          BeforeTargets="_ComputeNativeReferenceItems"
-          Condition="'$(_PromisesObjCTarball)'!=''">
+  DependsOnTargets="_PromisesObjCExtractNativeFrameworks"
+  BeforeTargets="_ComputeNativeReferenceItems"
+  Condition="'$(_PromisesObjCTarball)'!='' and '$(_PromisesObjCSkipNativeReferences)'!='true'">
     <ItemGroup>
       <NativeReference Include="@(_PromisesObjCNativeFramework->'$(_PromisesObjCExtractedFrameworksDirectory)%(Identity)')">
         <Kind>Framework</Kind>

@@ -1,12 +1,13 @@
 <Project>
   <PropertyGroup>
     <_FirebaseCoreAssemblyName>Firebase.Core, Version=12.5.0.2, Culture=neutral, PublicKeyToken=null</_FirebaseCoreAssemblyName>
-    <_FirebaseCorePackageTarball>$(MSBuildThisFileDirectory)AdamE.Firebase.iOS.Core.xcframeworks.tar.gz</_FirebaseCorePackageTarball>
-    <_FirebaseCoreLocalTarball>$(MSBuildThisFileDirectory)../../externals/FirebaseCore.xcframeworks.tar.gz</_FirebaseCoreLocalTarball>
-    <_FirebaseCoreTarball Condition="'$(_FirebaseCoreTarball)'=='' and Exists('$(_FirebaseCorePackageTarball)')">$(_FirebaseCorePackageTarball)</_FirebaseCoreTarball>
-    <_FirebaseCoreTarball Condition="'$(_FirebaseCoreTarball)'=='' and Exists('$(_FirebaseCoreLocalTarball)')">$(_FirebaseCoreLocalTarball)</_FirebaseCoreTarball>
-    <_FirebaseCoreExtractedFrameworksDirectory>$(IntermediateOutputPath)firebasecore-xcframeworks/</_FirebaseCoreExtractedFrameworksDirectory>
-    <_FirebaseCoreExtractMarker>$(_FirebaseCoreExtractedFrameworksDirectory).extracted.stamp</_FirebaseCoreExtractMarker>
+<_FirebaseCorePackageTarball>$(MSBuildThisFileDirectory)AdamE.Firebase.iOS.Core.xcframeworks.tar.gz</_FirebaseCorePackageTarball>
+<_FirebaseCoreLocalTarball>$(MSBuildThisFileDirectory)../../externals/FirebaseCore.xcframeworks.tar.gz</_FirebaseCoreLocalTarball>
+<_FirebaseCoreTarball Condition="'$(_FirebaseCoreTarball)'=='' and Exists('$(_FirebaseCorePackageTarball)')">$(_FirebaseCorePackageTarball)</_FirebaseCoreTarball>
+<_FirebaseCoreTarball Condition="'$(_FirebaseCoreTarball)'=='' and Exists('$(_FirebaseCoreLocalTarball)')">$(_FirebaseCoreLocalTarball)</_FirebaseCoreTarball>
+<_FirebaseCoreExtractedFrameworksDirectory>$(IntermediateOutputPath)firebasecore-xcframeworks/</_FirebaseCoreExtractedFrameworksDirectory>
+<_FirebaseCoreExtractMarker>$(_FirebaseCoreExtractedFrameworksDirectory).extracted.stamp</_FirebaseCoreExtractMarker>
+<_FirebaseCoreSkipNativeReferences Condition="'$(PackProjectInputFile)'!=''">true</_FirebaseCoreSkipNativeReferences>
   </PropertyGroup>
 
   <ItemGroup>
@@ -26,10 +27,10 @@
   </ItemGroup>
 
   <Target Name="_FirebaseCoreExtractNativeFrameworks"
-          Condition="'$(_FirebaseCoreTarball)'!=''"
-          Inputs="$(_FirebaseCoreTarball)"
-          Outputs="$(_FirebaseCoreExtractMarker)"
-          BeforeTargets="_ComputeNativeReferenceItems">
+  Condition="'$(_FirebaseCoreTarball)'!='' and '$(_FirebaseCoreSkipNativeReferences)'!='true'"
+  Inputs="$(_FirebaseCoreTarball)"
+  Outputs="$(_FirebaseCoreExtractMarker)"
+  BeforeTargets="_ComputeNativeReferenceItems">
     <Error Condition="!Exists('$(_FirebaseCoreTarball)')"
            Text="The Firebase.Core native frameworks archive could not be found at '$(_FirebaseCoreTarball)'." />
 
@@ -42,9 +43,9 @@
   </Target>
 
   <Target Name="_FirebaseCoreAddNativeReferences"
-          DependsOnTargets="_FirebaseCoreExtractNativeFrameworks"
-          BeforeTargets="_ComputeNativeReferenceItems"
-          Condition="'$(_FirebaseCoreTarball)'!=''">
+  DependsOnTargets="_FirebaseCoreExtractNativeFrameworks"
+  BeforeTargets="_ComputeNativeReferenceItems"
+  Condition="'$(_FirebaseCoreTarball)'!='' and '$(_FirebaseCoreSkipNativeReferences)'!='true'">
     <ItemGroup>
       <NativeReference Include="@(_FirebaseCoreNativeFramework->'$(_FirebaseCoreExtractedFrameworksDirectory)%(Identity)')">
         <Kind>Framework</Kind>
