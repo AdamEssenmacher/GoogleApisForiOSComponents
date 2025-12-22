@@ -16,6 +16,7 @@ class ExternalDownloadSource
 	public string Url => $"https://dl.google.com/firebase/ios/analytics/{ArchiveKey}/{ArchiveFileName}";
 }
 
+// *.tar.gz URLs can be found in the podspecs (e.g., CocoaPods Specs repo paths)
 var ExternalDownloads = new Dictionary<string, ExternalDownloadSource> {
 	{ "FirebaseAnalytics", new ExternalDownloadSource ("FirebaseAnalytics", "12.5.0", "1d0a9f91196548b3") },
 	{ "GoogleAppMeasurement", new ExternalDownloadSource ("GoogleAppMeasurement", "12.5.0", "4a8fa8d922b0b454") },
