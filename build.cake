@@ -5,6 +5,7 @@
 #load "poco.cake"
 #load "components.cake"
 #load "common.cake"
+#load "custom_externals_download.cake"
 
 var TARGET = Argument ("t", Argument ("target", "ci"));
 var NAMES = Argument ("names", "");
@@ -143,8 +144,8 @@ Task ("externals")
 
 	// Call here custom methods created at custom_externals_download.cake file
 	// to download frameworks and/or bundles for the artifact
-	// if (ARTIFACTS_TO_BUILD.Contains (FIREBASE_CORE_ARTIFACT))
-	// 	FirebaseCoreDownload ();
+	if (ARTIFACTS_TO_BUILD.Contains (FIREBASE_ANALYTICS_ARTIFACT))
+		FirebaseAnalyticsDownload ();
 });
 
 Task ("ci-setup")

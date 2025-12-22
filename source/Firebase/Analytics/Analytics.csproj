@@ -4,7 +4,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>true</ImplicitUsings>
     <IsBindingProject>true</IsBindingProject>
-    <NoBindingEmbedding>false</NoBindingEmbedding>
+    <NoBindingEmbedding>true</NoBindingEmbedding>
     <SupportedOSPlatformVersion>15.0</SupportedOSPlatformVersion>
     <RootNamespace>Firebase.Analytics</RootNamespace>
     <AssemblyName>Firebase.Analytics</AssemblyName>
@@ -39,6 +39,15 @@
     <None Include="Analytics.targets" Pack="True" PackagePath="buildTransitive/AdamE.Firebase.iOS.Analytics.targets" />
     <None Include="License.md" Pack="True" PackagePath="License.md" />
     <None Include="../../../icons/firebaseiosanalytics_128x128.png" Pack="True" PackagePath="firebaseiosanalytics_128x128.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <NativeReference Include="..\..\..\externals\FirebaseAnalytics.xcframework">
+      <Kind>Framework</Kind>
+      <SmartLink>True</SmartLink>
+      <ForceLoad>True</ForceLoad>
+      <LinkerFlags>-ObjC -lc++ -lsqlite3 -lz</LinkerFlags>
+      <Frameworks>StoreKit</Frameworks>
+    </NativeReference>
   </ItemGroup>
   <ItemGroup>
     <ObjcBindingApiDefinition Include="ApiDefinition.cs" />
