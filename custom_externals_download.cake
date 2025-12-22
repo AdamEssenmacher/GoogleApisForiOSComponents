@@ -1,9 +1,50 @@
+class ExternalDownloadSource
+{
+	public string Id { get; }
+	public string Version { get; }
+	public string ArchiveKey { get; }
+
+	public ExternalDownloadSource (string id, string version, string archiveKey)
+	{
+		Id = id;
+		Version = version;
+		ArchiveKey = archiveKey;
+	}
+
+	public string ArchiveFileName => $"{Id}-{Version}.tar.gz";
+	public string ExtractionRootName => $"{Id}-{Version}";
+	public string Url => $"https://dl.google.com/firebase/ios/analytics/{ArchiveKey}/{ArchiveFileName}";
+}
+
+var ExternalDownloads = new Dictionary<string, ExternalDownloadSource> {
+	{ "FirebaseAnalytics", new ExternalDownloadSource ("FirebaseAnalytics", "12.5.0", "1d0a9f91196548b3") },
+	{ "GoogleAppMeasurement", new ExternalDownloadSource ("GoogleAppMeasurement", "12.5.0", "4a8fa8d922b0b454") },
+};
+
+FilePath GetArchivePath (ExternalDownloadSource source, DirectoryPath externalsPath) =>
+	externalsPath.CombineWithFilePath (source.ArchiveFileName);
+
+DirectoryPath GetExtractionRoot (ExternalDownloadSource source, DirectoryPath externalsPath) =>
+	externalsPath.Combine (source.ExtractionRootName);
+
+int ExtractArchive (ExternalDownloadSource source, DirectoryPath externalsPath, FilePath archivePath)
+{
+	Information ($"Extracting {source.ArchiveFileName} into externals...");
+	return StartProcess ("tar", $"-xzf \"{archivePath.FullPath}\" -C \"{externalsPath.FullPath}\"");
+}
+
+void DownloadArchive (ExternalDownloadSource source, FilePath archivePath)
+{
+	Information ($"Downloading {source.ArchiveFileName}...");
+	DownloadFile (source.Url, archivePath);
+}
+
 void FirebaseAnalyticsDownload ()
 {
 	var externalsPath = new DirectoryPath ("./externals");
-	var archiveUrl = "https://dl.google.com/firebase/ios/analytics/1d0a9f91196548b3/FirebaseAnalytics-12.5.0.tar.gz";
-	var archivePath = externalsPath.CombineWithFilePath ("FirebaseAnalytics-12.5.0.tar.gz");
-	var extractionRoot = externalsPath.Combine ("FirebaseAnalytics-12.5.0");
+	var source = ExternalDownloads["FirebaseAnalytics"];
+	var archivePath = GetArchivePath (source, externalsPath);
+	var extractionRoot = GetExtractionRoot (source, externalsPath);
 	var frameworkSource = extractionRoot.Combine ("Frameworks").Combine ("FirebaseAnalytics.xcframework");
 	var frameworkDestination = externalsPath.Combine ("FirebaseAnalytics.xcframework");
 
@@ -22,11 +63,9 @@ void FirebaseAnalyticsDownload ()
 	if (FileExists (archivePath))
 		DeleteFile (archivePath);
 
-	Information ("Downloading FirebaseAnalytics xcframework tarball...");
-	DownloadFile (archiveUrl, archivePath);
+	DownloadArchive (source, archivePath);
 
-	Information ("Extracting FirebaseAnalytics xcframework into externals...");
-	var exitCode = StartProcess ("tar", $"-xzf \"{archivePath.FullPath}\" -C \"{externalsPath.FullPath}\"");
+	var exitCode = ExtractArchive (source, externalsPath, archivePath);
 
 	if (exitCode != 0)
 		throw new Exception ($"tar failed with exit code {exitCode} while extracting {archivePath.GetFilename ()}.");
@@ -46,9 +85,9 @@ void FirebaseAnalyticsDownload ()
 void GoogleAppMeasurementDownload ()
 {
 	var externalsPath = new DirectoryPath ("./externals");
-	var archiveUrl = "https://dl.google.com/firebase/ios/analytics/4a8fa8d922b0b454/GoogleAppMeasurement-12.5.0.tar.gz";
-	var archivePath = externalsPath.CombineWithFilePath ("GoogleAppMeasurement-12.5.0.tar.gz");
-	var extractionRoot = externalsPath.Combine ("GoogleAppMeasurement-12.5.0");
+	var source = ExternalDownloads["GoogleAppMeasurement"];
+	var archivePath = GetArchivePath (source, externalsPath);
+	var extractionRoot = GetExtractionRoot (source, externalsPath);
 	var frameworkSource = extractionRoot.Combine ("Frameworks");
 	var identitySupportSource = frameworkSource.Combine ("GoogleAppMeasurementIdentitySupport.xcframework");
 	var measurementSource = frameworkSource.Combine ("GoogleAppMeasurement.xcframework");
@@ -70,11 +109,9 @@ void GoogleAppMeasurementDownload ()
 	if (FileExists (archivePath))
 		DeleteFile (archivePath);
 
-	Information ("Downloading GoogleAppMeasurement xcframework tarball...");
-	DownloadFile (archiveUrl, archivePath);
+	DownloadArchive (source, archivePath);
 
-	Information ("Extracting GoogleAppMeasurement xcframework into externals...");
-	var exitCode = StartProcess ("tar", $"-xzf \"{archivePath.FullPath}\" -C \"{externalsPath.FullPath}\"");
+	var exitCode = ExtractArchive (source, externalsPath, archivePath);
 
 	if (exitCode != 0)
 		throw new Exception ($"tar failed with exit code {exitCode} while extracting {archivePath.GetFilename ()}.");
