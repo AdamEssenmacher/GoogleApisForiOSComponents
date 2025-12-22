@@ -8,8 +8,8 @@
     <SupportedOSPlatformVersion>15.0</SupportedOSPlatformVersion>
     <RootNamespace>Google.GoogleAppMeasurement</RootNamespace>
     <AssemblyName>Google.GoogleAppMeasurement</AssemblyName>
-    <AssemblyVersion>12.5.0.1</AssemblyVersion>
-    <FileVersion>12.5.0.1</FileVersion>
+    <AssemblyVersion>12.5.0.2</AssemblyVersion>
+    <FileVersion>12.5.0.2</FileVersion>
     <IPhoneResourcePrefix>Resources</IPhoneResourcePrefix>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
@@ -24,20 +24,33 @@
     <PackageProjectUrl>https://github.com/AdamEssenmacher/GoogleApisForiOSComponents</PackageProjectUrl>
     <PackageLicenseFile>License.md</PackageLicenseFile>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-    <PackageVersion>12.5.0.1</PackageVersion>
+    <PackageVersion>12.5.0.2</PackageVersion>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="..\..\AssemblyInfo.cs" />
   </ItemGroup>
-  <ItemGroup>    
+  <ItemGroup>
     <None Include="GoogleAppMeasurement.targets" Pack="True" PackagePath="build/AdamE.Google.iOS.GoogleAppMeasurement.targets" />
     <None Include="GoogleAppMeasurement.targets" Pack="True" PackagePath="buildTransitive/AdamE.Google.iOS.GoogleAppMeasurement.targets" />
     <None Include="License.md" Pack="True" PackagePath="License.md" />
   </ItemGroup>
   <ItemGroup>
-    <ObjcBindingApiDefinition Include="ApiDefinition.cs" />
+    <NativeReference Include="..\..\..\externals\GoogleAppMeasurementIdentitySupport.xcframework" Condition="'$(FirebaseWithoutAdIdSupport)'!='True'">
+      <Kind>Framework</Kind>
+      <SmartLink>True</SmartLink>
+      <ForceLoad>True</ForceLoad>
+      <LinkerFlags>-ObjC -lc++ -lsqlite3 -lz</LinkerFlags>
+      <Frameworks>StoreKit</Frameworks>
+    </NativeReference>
+    <NativeReference Include="..\..\..\externals\GoogleAppMeasurement.xcframework">
+      <Kind>Framework</Kind>
+      <SmartLink>True</SmartLink>
+      <ForceLoad>True</ForceLoad>
+      <LinkerFlags>-ObjC -lc++ -lsqlite3 -lz</LinkerFlags>
+      <Frameworks>StoreKit</Frameworks>
+    </NativeReference>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Xamarin.Build.Download" Version="0.11.4" PrivateAssets="None" />
+    <ObjcBindingApiDefinition Include="ApiDefinition.cs" />
   </ItemGroup>
 </Project>
