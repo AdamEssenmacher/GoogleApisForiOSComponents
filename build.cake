@@ -146,6 +146,8 @@ Task ("externals")
 	// to download frameworks and/or bundles for the artifact
 	if (ARTIFACTS_TO_BUILD.Contains (FIREBASE_ANALYTICS_ARTIFACT))
 		FirebaseAnalyticsDownload ();
+	if (ARTIFACTS_TO_BUILD.Contains (GOOGLE_GOOGLE_APP_MEASUREMENT_ARTIFACT))
+		GoogleAppMeasurementDownload ();
 });
 
 Task ("ci-setup")
