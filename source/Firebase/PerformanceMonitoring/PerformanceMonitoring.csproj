@@ -8,10 +8,11 @@
     <SupportedOSPlatformVersion>15.0</SupportedOSPlatformVersion>
     <RootNamespace>Firebase.PerformanceMonitoring</RootNamespace>
     <AssemblyName>Firebase.PerformanceMonitoring</AssemblyName>
-    <AssemblyVersion>12.5.0.2</AssemblyVersion>
-    <FileVersion>12.5.0.2</FileVersion>
+    <AssemblyVersion>12.5.0.3</AssemblyVersion>
+    <FileVersion>12.5.0.3</FileVersion>
     <IPhoneResourcePrefix>Resources</IPhoneResourcePrefix>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <CompressBindingResourcePackage>true</CompressBindingResourcePackage>
   </PropertyGroup>
   <PropertyGroup>
     <PackageId>AdamE.Firebase.iOS.PerformanceMonitoring</PackageId>
@@ -25,7 +26,7 @@
     <PackageProjectUrl>https://github.com/AdamEssenmacher/GoogleApisForiOSComponents</PackageProjectUrl>
     <PackageLicenseFile>License.md</PackageLicenseFile>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-    <PackageVersion>12.5.0.2</PackageVersion>
+    <PackageVersion>12.5.0.3</PackageVersion>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="..\..\AssemblyInfo.cs" />

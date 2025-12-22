@@ -1,5 +1,5 @@
 ﻿<Project>
   <PropertyGroup>
-    <_GoogleAppMeasurementAssemblyName>Google.GoogleAppMeasurement, Version=12.5.0.2, Culture=neutral, PublicKeyToken=null</_GoogleAppMeasurementAssemblyName>
+    <_GoogleAppMeasurementAssemblyName>Google.GoogleAppMeasurement, Version=12.5.0.3, Culture=neutral, PublicKeyToken=null</_GoogleAppMeasurementAssemblyName>
   </PropertyGroup>
 </Project>
