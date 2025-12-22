@@ -1,5 +1,5 @@
 ﻿<Project>
   <PropertyGroup>
-    <_GTMSessionFetcherAssemblyName>Google.GTMSessionFetcher, Version=3.5.0.2, Culture=neutral, PublicKeyToken=null</_GTMSessionFetcherAssemblyName>
+    <_GTMSessionFetcherAssemblyName>Google.GTMSessionFetcher, Version=3.5.0.4, Culture=neutral, PublicKeyToken=null</_GTMSessionFetcherAssemblyName>
   </PropertyGroup>
 </Project>
