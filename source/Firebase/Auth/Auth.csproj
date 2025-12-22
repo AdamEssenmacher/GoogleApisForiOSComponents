@@ -8,8 +8,8 @@
     <SupportedOSPlatformVersion>15.0</SupportedOSPlatformVersion>
     <RootNamespace>Firebase.Auth</RootNamespace>
     <AssemblyName>Firebase.Auth</AssemblyName>
-    <AssemblyVersion>12.5.0.1</AssemblyVersion>
-    <FileVersion>12.5.0.1</FileVersion>
+    <AssemblyVersion>12.5.0.2</AssemblyVersion>
+    <FileVersion>12.5.0.2</FileVersion>
     <IPhoneResourcePrefix>Resources</IPhoneResourcePrefix>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
@@ -25,7 +25,7 @@
     <PackageProjectUrl>https://github.com/AdamEssenmacher/GoogleApisForiOSComponents</PackageProjectUrl>
     <PackageLicenseFile>License.md</PackageLicenseFile>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-    <PackageVersion>12.5.0.1</PackageVersion>
+    <PackageVersion>12.5.0.2</PackageVersion>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="..\..\AssemblyInfo.cs" />
@@ -59,7 +59,6 @@
     <ObjcBindingApiDefinition Include="ApiDefinition.cs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Xamarin.Build.Download" Version="0.11.4" PrivateAssets="None" />
     <PackageReference Include="AdamE.Google.iOS.GTMSessionFetcher" Version="[3.5.0,5.0.0)" />
   </ItemGroup>
   <ItemGroup>
