@@ -13,6 +13,38 @@ var PODFILE_END = new [] {
 	"end",
 };
 
+void CopyDirectoryWithSymlinks (DirectoryPath source, DirectoryPath destination)
+{
+	if (DirectoryExists (destination)) {
+		var deleteDirectorySettings = new DeleteDirectorySettings {
+			Recursive = true,
+			Force = true
+		};
+
+		DeleteDirectory (destination, deleteDirectorySettings);
+	}
+
+	if (!IsRunningOnUnix ()) {
+		CopyDirectory (source, destination);
+		return;
+	}
+
+	var destinationParentPath = System.IO.Path.GetDirectoryName (destination.FullPath);
+
+	if (!string.IsNullOrWhiteSpace (destinationParentPath))
+		EnsureDirectoryExists (destinationParentPath);
+
+	var args = new ProcessArgumentBuilder ();
+	args.Append ("-a");
+	args.AppendQuoted (source.FullPath);
+	args.AppendQuoted (destination.FullPath);
+
+	var exitCode = StartProcess ("cp", new ProcessSettings { Arguments = args });
+
+	if (exitCode != 0)
+		throw new Exception ($"Failed to copy directory '{source}' to '{destination}' preserving symlinks.");
+}
+
 void AddArtifactDependencies (List<Artifact> list, Artifact [] dependencies)
 {
 	if (dependencies == null)
@@ -126,7 +158,7 @@ void BuildSdkOnPodfile (Artifact artifact)
 			// CopyDirectory ($"{workingDirectory}/{framework}", $"./externals/{framework}");
 		} else {
 			foreach (var path in frameworkPaths)
-				CopyDirectory (path, $"./externals/{framework}");
+				CopyDirectoryWithSymlinks (path, $"./externals/{framework}");
 		}
 	}
 
@@ -134,7 +166,7 @@ void BuildSdkOnPodfile (Artifact artifact)
 
 	foreach (var podSpec in podSpecsToBuild) {
 		var framework = $"{podSpec.FrameworkName}.framework";
-		CopyDirectory ($"{workingDirectory}/{framework}", $"./externals/{framework}");
+		CopyDirectoryWithSymlinks ($"{workingDirectory}/{framework}", $"./externals/{framework}");
 	}
 }
 
@@ -146,6 +178,7 @@ void BuildSdkOnPodfileV2 (Artifact artifact)
 	var platforms = new [] { 
 		PlatformV2.Create (Sdk.iPhoneOS),
 		PlatformV2.Create (Sdk.iPhoneSimulator),
+		PlatformV2.Create (Sdk.macCatalyst)
 	};
 	var podsProject = "./Pods/Pods.xcodeproj";
 	var workingDirectory = (DirectoryPath)$"./externals/build/{artifact.Id}";
@@ -170,10 +203,10 @@ void BuildSdkOnPodfileV2 (Artifact artifact)
 			podSpecsToBuild.Add (podSpec);
 		} else {
 			foreach (var path in frameworkPaths)
-				CopyDirectory (path, $"./externals/{frameworkName}");
+				CopyDirectoryWithSymlinks (path, $"./externals/{frameworkName}");
 
 			foreach (var path in xcframeworkPaths)
-				CopyDirectory (path, $"./externals/{xcframeworkName}");
+				CopyDirectoryWithSymlinks (path, $"./externals/{xcframeworkName}");
 		}
 	}
 
@@ -181,7 +214,7 @@ void BuildSdkOnPodfileV2 (Artifact artifact)
 
 	foreach (var podSpec in podSpecsToBuild) {
 		var xcframeworkName = $"{podSpec.FrameworkName}.xcframework";
-		CopyDirectory ($"{workingDirectory}/{xcframeworkName}", $"./externals/{xcframeworkName}");
+		CopyDirectoryWithSymlinks ($"{workingDirectory}/{xcframeworkName}", $"./externals/{xcframeworkName}");
 	}
 }
 
@@ -285,7 +318,7 @@ void BuildXcodeFatFramework (FilePath xcodeProject, string target, Platform [] p
 		});
 
 		var outputPath = workingDirectory.Combine ("build").Combine ($"Release-{sdk}").Combine (target).Combine (fatFramework);
-		CopyDirectory (outputPath, dest);
+		CopyDirectoryWithSymlinks (outputPath, dest);
 	});
 
 	foreach (var platform in platforms) {
@@ -294,7 +327,7 @@ void BuildXcodeFatFramework (FilePath xcodeProject, string target, Platform [] p
 		buildArch (platform.Sdk, platform.Arch, workingDirectory.Combine (archPath));
 
 		if (!DirectoryExists (fatFrameworkPath))
-			CopyDirectory (workingDirectory.Combine (archPath), fatFrameworkPath);
+			CopyDirectoryWithSymlinks (workingDirectory.Combine (archPath), fatFrameworkPath);
 	}
 	
 	RunLipoCreate (workingDirectory, fatFramework.CombineWithFilePath (libraryFile), archsPaths.ToArray ());
@@ -359,12 +392,12 @@ void BuildXcodeFatFramework (FilePath xcodeProject, PodSpec [] podSpecs, Platfor
 				var fatFrameworkPath = workingDirectory.Combine (ff);
 
 				if (!DirectoryExists (fatFrameworkPath))
-					CopyDirectory (frameworkOutputPath, fatFrameworkPath);
+					CopyDirectoryWithSymlinks (frameworkOutputPath, fatFrameworkPath);
 
 				var pf = (DirectoryPath)$"{lt}-{arch}.framework";
 				var pfp = workingDirectory.Combine (pf);
 
-				CopyDirectory (frameworkOutputPath, pfp);
+				CopyDirectoryWithSymlinks (frameworkOutputPath, pfp);
 			}
 		}
 
@@ -452,7 +485,7 @@ void BuildXcodeXcframework (FilePath xcodeProject, PodSpec [] podSpecs, Platform
 
 				Information ($"Copying {directory} to {destinationDirectory}");
 
-				CopyDirectory (directory, destinationDirectory);
+					CopyDirectoryWithSymlinks (directory, destinationDirectory);
 			}
 		}
 
