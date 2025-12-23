@@ -23,7 +23,7 @@ Artifact GOOGLE_MAPS_ARTIFACT                      = new Artifact ("Google.Maps"
 Artifact GOOGLE_MOBILE_ADS_ARTIFACT                = new Artifact ("Google.MobileAds",                "8.13.0.3",  "15.0", ComponentGroup.Google, csprojName: "MobileAds");
 Artifact GOOGLE_UMP_ARTIFACT                       = new Artifact ("Google.UserMessagingPlatform",    "1.1.0.1",   "15.0", ComponentGroup.Google, csprojName: "UserMessagingPlatform");
 Artifact GOOGLE_PLACES_ARTIFACT                    = new Artifact ("Google.Places",                   "7.4.0.2",   "15.0", ComponentGroup.Google, csprojName: "Places");
-Artifact GOOGLE_SIGN_IN_ARTIFACT                   = new Artifact ("Google.SignIn",                   "8.0.0.3",   "15.0", ComponentGroup.Google, csprojName: "SignIn");
+Artifact GOOGLE_SIGN_IN_ARTIFACT                   = new Artifact ("Google.SignIn",                   "8.0.0.4",   "15.0", ComponentGroup.Google, csprojName: "SignIn");
 Artifact GOOGLE_TAG_MANAGER_ARTIFACT               = new Artifact ("Google.TagManager",               "7.4.0.2",   "15.0", ComponentGroup.Google, csprojName: "TagManager");
 
 Artifact GOOGLE_GOOGLE_APP_MEASUREMENT_ARTIFACT    = new Artifact ("Google.AppMeasurement",           "12.5.0.4",    "15.0", ComponentGroup.Google, csprojName: "GoogleAppMeasurement");
