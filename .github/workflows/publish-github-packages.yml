@@ -4,6 +4,12 @@ on:
   push:
     tags:
       - "v*"
+  workflow_dispatch:
+    inputs:
+      names:
+        description: "Cake --names (comma-separated)"
+        required: false
+        default: "Google.SignIn"
 
 permissions:
   contents: read
@@ -12,6 +18,8 @@ permissions:
 jobs:
   publish:
     runs-on: macos-14
+    env:
+      CAKE_NAMES: ${{ inputs.names || 'Google.SignIn' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -28,13 +36,11 @@ jobs:
           fi
           pod --version
 
-      - name: Install Cake
-        run: |
-          dotnet tool update -g cake.tool --version 0.38.5 || dotnet tool install -g cake.tool --version 0.38.5
-          echo "$HOME/.dotnet/tools" >> "$GITHUB_PATH"
+      - name: Restore tools
+        run: dotnet tool restore
 
-      - name: Build + pack (Google.SignIn)
-        run: dotnet cake --target=nuget --names=Google.SignIn
+      - name: Build + pack
+        run: dotnet tool run dotnet-cake -- --target=nuget --names="${CAKE_NAMES}"
 
       - name: Push packages
         run: |

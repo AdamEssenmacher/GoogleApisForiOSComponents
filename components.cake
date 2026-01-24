@@ -232,12 +232,12 @@ void SetArtifactsPodSpecs ()
 	GOOGLE_PLACES_ARTIFACT.PodSpecs = new [] {
 		PodSpec.Create ("GooglePlaces", "7.4.0")
 	};
-		GOOGLE_SIGN_IN_ARTIFACT.PodSpecs = new [] {
-			PodSpec.Create ("GoogleSignIn", "~> 9.0", frameworkSource: FrameworkSource.Pods),
-			PodSpec.Create ("AppAuth",      "1.7.6",  frameworkSource: FrameworkSource.Pods),
-			PodSpec.Create ("AppCheckCore", "11.2.0", frameworkSource: FrameworkSource.Pods),
-			PodSpec.Create ("GTMAppAuth",   "4.1.1",  frameworkSource: FrameworkSource.Pods),
-		};
+	GOOGLE_SIGN_IN_ARTIFACT.PodSpecs = new [] {
+		PodSpec.Create ("GoogleSignIn", "~> 9.0.0", frameworkSource: FrameworkSource.Pods),
+		PodSpec.Create ("AppAuth",      "2.0.0",  frameworkSource: FrameworkSource.Pods),
+		PodSpec.Create ("AppCheckCore", "11.2.0", frameworkSource: FrameworkSource.Pods),
+		PodSpec.Create ("GTMAppAuth",   "5.0.0",  frameworkSource: FrameworkSource.Pods),
+	};
 	GOOGLE_TAG_MANAGER_ARTIFACT.PodSpecs = new [] {
 		PodSpec.Create ("GoogleTagManager", "7.4.0")
 	};

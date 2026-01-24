@@ -11,8 +11,8 @@
 
 ## Quick commands
 - Build and pack a single component (macOS):
-  - `dotnet tool install -g cake.tool --version 0.38.5`
-  - `dotnet cake --target=nuget --names=Google.SignIn`
+  - `dotnet tool restore`
+  - `dotnet tool run dotnet-cake -- --target=nuget --names=Google.SignIn`
 
 ## CI
-- GitHub Actions should run build/pack validation without requiring any app secrets.
+- GitHub Actions should run build/pack validation without requiring any app secrets (publishing uses the built-in `GITHUB_TOKEN`).

@@ -8,11 +8,10 @@ This repo builds .NET iOS/macOS bindings and NuGet packages using Cake.
 - Xcode (matching the installed iOS workload requirements)
 - CocoaPods (`pod`)
 
-Install Cake (any version `< 1.0` should work):
+Restore the local Cake tool (any version `< 1.0` should work):
 
 ```sh
-dotnet tool install -g cake.tool --version 0.38.5
-export PATH="$PATH:$HOME/.dotnet/tools"
+dotnet tool restore
 ```
 
 ## Build + pack a component
@@ -20,11 +19,19 @@ export PATH="$PATH:$HOME/.dotnet/tools"
 Build and produce `.nupkg` files into `./output`:
 
 ```sh
-dotnet cake --target=nuget --names=Google.SignIn
+dotnet tool run dotnet-cake -- --target=nuget --names=Google.SignIn
+```
+
+## Build samples (using source)
+
+Build sample projects (without publishing packages):
+
+```sh
+dotnet tool run dotnet-cake -- --target=samples --names=Google.SignIn
 ```
 
 Clean generated folders:
 
 ```sh
-dotnet cake --target=clean
+dotnet tool run dotnet-cake -- --target=clean
 ```
