@@ -30,7 +30,7 @@ jobs:
           global-json-file: global.json
 
       - name: Restore .NET workloads
-        run: dotnet workload restore
+        run: dotnet workload restore Xamarin.Google.sln
 
       - name: Install CocoaPods
         run: |
