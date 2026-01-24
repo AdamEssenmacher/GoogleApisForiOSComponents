@@ -1,0 +1,43 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: macos-14
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET (global.json)
+        uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      - name: Install CocoaPods
+        run: |
+          if ! command -v pod >/dev/null 2>&1; then
+            sudo gem install cocoapods
+          fi
+          pod --version
+
+      - name: Install Cake
+        run: |
+          dotnet tool update -g cake.tool --version 0.38.5 || dotnet tool install -g cake.tool --version 0.38.5
+          echo "$HOME/.dotnet/tools" >> "$GITHUB_PATH"
+
+      - name: Build + pack (Google.SignIn)
+        run: dotnet cake --target=nuget --names=Google.SignIn
+
+      - name: Upload packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: nuget
+          path: output/*.nupkg

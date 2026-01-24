@@ -1,0 +1,44 @@
+name: Publish (GitHub Packages)
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  publish:
+    runs-on: macos-14
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET (global.json)
+        uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      - name: Install CocoaPods
+        run: |
+          if ! command -v pod >/dev/null 2>&1; then
+            sudo gem install cocoapods
+          fi
+          pod --version
+
+      - name: Install Cake
+        run: |
+          dotnet tool update -g cake.tool --version 0.38.5 || dotnet tool install -g cake.tool --version 0.38.5
+          echo "$HOME/.dotnet/tools" >> "$GITHUB_PATH"
+
+      - name: Build + pack (Google.SignIn)
+        run: dotnet cake --target=nuget --names=Google.SignIn
+
+      - name: Push packages
+        run: |
+          dotnet nuget push "output/*.nupkg" \
+            --source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" \
+            --api-key "${{ secrets.GITHUB_TOKEN }}" \
+            --skip-duplicate
