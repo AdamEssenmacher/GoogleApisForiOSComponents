@@ -29,6 +29,9 @@ jobs:
         with:
           global-json-file: global.json
 
+      - name: Restore .NET workloads
+        run: dotnet workload restore
+
       - name: Install CocoaPods
         run: |
           if ! command -v pod >/dev/null 2>&1; then
