@@ -12,16 +12,23 @@ namespace SignInExample
 	{
 		// class-level declarations
 
-		public override UIWindow Window {
+		public override UIWindow? Window {
 			get;
 			set;
 		}
 
-		public override bool FinishedLaunching (UIApplication application, NSDictionary launchOptions)
+		public override bool FinishedLaunching (UIApplication application, NSDictionary? launchOptions)
 		{
-			// You can get the GoogleService-Info.plist file at https://developers.google.com/mobile/add
-			var googleServiceDictionary = NSDictionary.FromFile ("GoogleService-Info.plist");
-			SignIn.SharedInstance.ClientId = googleServiceDictionary ["CLIENT_ID"].ToString ();
+			// For a runnable sample, add your own GoogleService-Info.plist (not committed) and set CLIENT_ID.
+			var googleServiceInfoPath = NSBundle.MainBundle.PathForResource ("GoogleService-Info", "plist");
+			var googleServiceDictionary = !string.IsNullOrWhiteSpace (googleServiceInfoPath)
+				? NSMutableDictionary.FromFile (googleServiceInfoPath)
+				: null;
+
+			var clientId = googleServiceDictionary?["CLIENT_ID"]?.ToString ();
+
+			if (!string.IsNullOrWhiteSpace (clientId))
+				SignIn.SharedInstance.Configuration = new Configuration (clientId);
 
 			return true;
 		}
@@ -40,5 +47,3 @@ namespace SignInExample
 		}
 	}
 }
-
-

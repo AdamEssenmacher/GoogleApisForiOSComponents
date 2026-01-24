@@ -24,6 +24,7 @@
     <Copyright>© Microsoft Corporation. All rights reserved. © 2024, Adam Essenmacher.</Copyright>
     <PackageProjectUrl>https://github.com/AdamEssenmacher/GoogleApisForiOSComponents</PackageProjectUrl>
     <PackageLicenseFile>License.md</PackageLicenseFile>
+    <PackageReadmeFile>NUGET_README.md</PackageReadmeFile>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     <PackageVersion>2.4.0.5</PackageVersion>
   </PropertyGroup>
@@ -34,6 +35,7 @@
     <None Include="PromisesObjC.targets" Pack="True" PackagePath="build/AdamE.Google.iOS.PromisesObjC.targets" />
     <None Include="PromisesObjC.targets" Pack="True" PackagePath="buildTransitive/AdamE.Google.iOS.PromisesObjC.targets" />
     <None Include="License.md" Pack="True" PackagePath="License.md" />
+    <None Include="../../../docs/NUGET_README.md" Pack="True" PackagePath="NUGET_README.md" />
   </ItemGroup>
   <ItemGroup>
     <NativeReference Include="..\..\..\externals\FBLPromises.xcframework">

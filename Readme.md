@@ -5,6 +5,11 @@ This was a really unfortunate decision from Microsoft. Having these extremely co
 
 Microsoft's current recommendation to iOS.NET developers is that they should write their own bindings using this [slim binding demo project](https://github.com/Redth/DotNet.Platform.SlimBindings) as a guide. However, developers following this approach can find their 'slim bindings' to be incompatible with any other published libraries with dependency conflicts, such as Plugin.Firebase.
 
+## CI and publishing
+
+- Local build instructions: `docs/BUILDING.md`
+- GitHub Packages publishing workflow (NuGet): `docs/PUBLISHING_GITHUB_PACKAGES.md`
+
 # Contributing & Sponsoring
 As a community-supported continuation, I'm happy to review any PRs to help move this project forward. These libraries almost certainly have some missing or stale bindings. Work needs to happen to keep these bindings current with native SDKs. Whole artifacts still need to be converted from where Microsoft left them. Sample projects need to be updated (or rewritten). Tests would be nice.
 

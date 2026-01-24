@@ -15,7 +15,6 @@
     <Platforms>iPhoneSimulator;iPhone</Platforms>
     <Configurations>Debug;Release</Configurations>
     <IsPackable>false</IsPackable>
-    <ProvisioningType>manual</ProvisioningType>
     <AssemblyName>SignInExample</AssemblyName>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|iPhoneSimulator' ">
@@ -29,12 +28,10 @@
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|iPhone' ">
     <RuntimeIdentifier>ios-arm64</RuntimeIdentifier>
-    <CodesignKey>iPhone Developer</CodesignKey>
     <DebugType>full</DebugType>
     <Optimize>true</Optimize>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <CodesignEntitlements>Entitlements.plist</CodesignEntitlements>
     <ConsolePause>false</ConsolePause>
     <MtouchLink>SdkOnly</MtouchLink>
   </PropertyGroup>
@@ -48,14 +45,12 @@
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|iPhone' ">
     <RuntimeIdentifier>ios-arm64</RuntimeIdentifier>
-    <CodesignKey>iPhone Developer</CodesignKey>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <ConsolePause>false</ConsolePause>
-    <CodesignEntitlements>Entitlements.plist</CodesignEntitlements>
     <MtouchLink>SdkOnly</MtouchLink>
   </PropertyGroup>
   <ItemGroup>
@@ -63,14 +58,14 @@
       <DependentUpon>ViewController.cs</DependentUpon>
     </Compile>
   </ItemGroup>
-  <Import Project="$(MSBuildThisFileDirectory)..\..\..\..\source\Firebase\Core\Core.targets" />
   <Import Project="$(MSBuildThisFileDirectory)..\..\..\..\source\Google\SignIn\SignIn.targets" />
   <ItemGroup>
-    <ProjectReference Include="..\..\..\..\source\Firebase\Core\Core.csproj" />
     <ProjectReference Include="..\..\..\..\source\Google\SignIn\SignIn.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <BundleResource Include="GoogleService-Info.plist" />
+    <None Remove="GoogleService-Info.plist" Condition="Exists('GoogleService-Info.plist')" />
+    <BundleResource Include="GoogleService-Info.plist" Condition="Exists('GoogleService-Info.plist')" />
+    <None Include="GoogleService-Info.plist.template" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Xamarin.Build.Download" Version="0.11.4" />

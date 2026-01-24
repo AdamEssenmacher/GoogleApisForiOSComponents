@@ -18,24 +18,38 @@ namespace SignInExample
 		{
 			base.ViewDidLoad ();
 
-			SignIn.SharedInstance.PresentingViewController = this;
-			SignIn.SharedInstance.SignedIn += (sender, e) => {
-				// Perform any operations on signed in user here.
-				if (e.User != null && e.Error == null) {
-					statusText.Text = string.Format ("Signed in user: {0}",	e.User.Profile.Name);
-					ToggleAuthUI ();
-				}
-			};
+			signInButton.TouchUpInside += (_, __) => {
+				SignIn.SharedInstance.SignInWithPresentingViewController (this, (result, error) => {
+					if (error != null) {
+						statusText.Text = error.LocalizedDescription;
+						return;
+					}
 
-			SignIn.SharedInstance.Disconnected += (sender, e) => {
-				// Perform any operations when the user disconnects from app here.
-				statusText.Text = "Disconnected user";
-				ToggleAuthUI ();
+					var user = result?.User ?? SignIn.SharedInstance.CurrentUser;
+					statusText.Text = user?.Profile?.Name != null
+						? $"Signed in user: {user.Profile.Name}"
+						: "Signed in";
+
+					ToggleAuthUI ();
+				});
 			};
 
 			// Automatically sign in the user.
-			if (SignIn.SharedInstance.HasPreviousSignIn)
-				SignIn.SharedInstance.RestorePreviousSignIn ();
+			if (SignIn.SharedInstance.HasPreviousSignIn) {
+				SignIn.SharedInstance.RestorePreviousSignInWithCompletion ((user, error) => {
+					if (error != null) {
+						statusText.Text = error.LocalizedDescription;
+						return;
+					}
+
+					statusText.Text = user?.Profile?.Name != null
+						? $"Signed in user: {user.Profile.Name}"
+						: "Signed in";
+
+					ToggleAuthUI ();
+				});
+			}
+
 			ToggleAuthUI ();
 
 			statusText.Text = "Google Sign in\niOS Demo";
@@ -49,12 +63,20 @@ namespace SignInExample
 
 		partial void didTapDisconnect (NSObject sender)
 		{
-			SignIn.SharedInstance.DisconnectUser ();
+			SignIn.SharedInstance.DisconnectWithCompletion (error => {
+				if (error != null) {
+					statusText.Text = error.LocalizedDescription;
+					return;
+				}
+
+				statusText.Text = "Disconnected user";
+				ToggleAuthUI ();
+			});
 		}
 
 		void ToggleAuthUI ()
 		{
-			if (SignIn.SharedInstance.CurrentUser == null || SignIn.SharedInstance.CurrentUser.Authentication == null) {
+			if (SignIn.SharedInstance.CurrentUser == null) {
 				// Not signed in
 				statusText.Text = "Google Sign in\niOS Demo";
 				signInButton.Hidden = false;
@@ -62,7 +84,8 @@ namespace SignInExample
 				disconnectButton.Hidden = true;
 			} else {
 				// Signed in
-				statusText.Text = string.Format ("Signed in user: {0}", SignIn.SharedInstance.CurrentUser.Profile.Name);
+				var name = SignIn.SharedInstance.CurrentUser.Profile?.Name;
+				statusText.Text = name != null ? $"Signed in user: {name}" : "Signed in";
 				signInButton.Hidden = true;
 				signOutButton.Hidden = false;
 				disconnectButton.Hidden = false;
