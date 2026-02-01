@@ -1,6 +1,7 @@
 ﻿using System;
 using Firebase.Core;
 using Foundation;
+using ObjCRuntime;
 
 namespace Firebase.AppCheck {
 	// typedef void (^)(FIRAppCheckToken *_Nullable token, NSError *_Nullable error)
