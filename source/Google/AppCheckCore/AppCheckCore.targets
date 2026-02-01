@@ -1,0 +1,5 @@
+﻿<Project>
+  <PropertyGroup>
+    <_GoogleAppCheckCoreAssemblyName>Google.AppCheckCore, Version=11.2.0.0, Culture=neutral, PublicKeyToken=null</_GoogleAppCheckCoreAssemblyName>
+  </PropertyGroup>
+</Project>

@@ -1,0 +1,49 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>net9.0-ios;net10.0-ios;net9.0-maccatalyst;net10.0-maccatalyst</TargetFrameworks>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>true</ImplicitUsings>
+    <IsBindingProject>true</IsBindingProject>
+    <NoBindingEmbedding>true</NoBindingEmbedding>
+    <SupportedOSPlatformVersion>15.0</SupportedOSPlatformVersion>
+    <RootNamespace>Google.AppCheckCore</RootNamespace>
+    <AssemblyName>Google.AppCheckCore</AssemblyName>
+    <AssemblyVersion>11.2.0.0</AssemblyVersion>
+    <FileVersion>11.2.0.0</FileVersion>
+    <IPhoneResourcePrefix>Resources</IPhoneResourcePrefix>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <CompressBindingResourcePackage>true</CompressBindingResourcePackage>
+  </PropertyGroup>
+  <PropertyGroup>
+    <PackageId>AdamE.Google.iOS.AppCheckCore</PackageId>
+    <Title>AppCheckCore</Title>
+    <Summary>AppCheckCore packed for .NET for iOS</Summary>
+    <Description>AppCheckCore packed for .NET for iOS</Description>
+    <Authors>Microsoft, Adam Essenmacher, Jean-Emmanuel Baillat</Authors>
+    <Owners>Adam Essenmacher</Owners>
+    <Copyright>© Microsoft Corporation. All rights reserved. © 2026, Adam Essenmacher.</Copyright>
+    <PackageProjectUrl>https://github.com/AdamEssenmacher/GoogleApisForiOSComponents</PackageProjectUrl>
+    <PackageLicenseFile>License.md</PackageLicenseFile>
+    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+    <PackageVersion>11.2.0.0</PackageVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="..\..\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="AppCheckCore.targets" Pack="True" PackagePath="build/AdamE.Google.iOS.AppCheckCore.targets" />
+    <None Include="AppCheckCore.targets" Pack="True" PackagePath="buildTransitive/AdamE.Google.iOS.AppCheckCore.targets" />
+    <None Include="License.md" Pack="True" PackagePath="License.md" />
+  </ItemGroup>
+  <ItemGroup>
+    <NativeReference Include="..\..\..\externals\AppCheckCore.xcframework">
+      <Kind>Framework</Kind>
+      <SmartLink>True</SmartLink>
+      <ForceLoad>True</ForceLoad>
+      <WeakFrameworks>DeviceCheck</WeakFrameworks>
+    </NativeReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ObjcBindingApiDefinition Include="ApiDefinition.cs" />
+  </ItemGroup>
+</Project>
