@@ -14,7 +14,7 @@ Artifact FIREBASE_PERFORMANCE_MONITORING_ARTIFACT  = new Artifact ("Firebase.Per
 Artifact FIREBASE_REMOTE_CONFIG_ARTIFACT           = new Artifact ("Firebase.RemoteConfig",           "12.5.0.4",  "15.0", ComponentGroup.Firebase, csprojName: "RemoteConfig");
 Artifact FIREBASE_STORAGE_ARTIFACT                 = new Artifact ("Firebase.Storage",                "12.5.0.4",  "15.0", ComponentGroup.Firebase, csprojName: "Storage");
 //Artifact FIREBASE_APP_DISTRIBUTION_ARTIFACT      = new Artifact ("Firebase.AppDistribution",        "8.10.0.1",  "15.0", ComponentGroup.Firebase, csprojName: "AppDistribution");
-//Artifact FIREBASE_APP_CHECK_ARTIFACT             = new Artifact ("Firebase.AppCheck",               "8.10.0.1",  "15.0", ComponentGroup.Firebase, csprojName: "AppCheck");
+Artifact FIREBASE_APP_CHECK_ARTIFACT               = new Artifact ("Firebase.AppCheck",               "12.5.0.4",  "15.0", ComponentGroup.Firebase, csprojName: "AppCheck");
 
 // Google artifacts available to be built. These artifacts generate NuGets.
 Artifact GOOGLE_ANALYTICS_ARTIFACT                 = new Artifact ("Google.Analytics",                "3.20.0.2",  "15.0", ComponentGroup.Google, csprojName: "Analytics");
@@ -24,6 +24,7 @@ Artifact GOOGLE_MOBILE_ADS_ARTIFACT                = new Artifact ("Google.Mobil
 Artifact GOOGLE_UMP_ARTIFACT                       = new Artifact ("Google.UserMessagingPlatform",    "1.1.0.1",   "15.0", ComponentGroup.Google, csprojName: "UserMessagingPlatform");
 Artifact GOOGLE_PLACES_ARTIFACT                    = new Artifact ("Google.Places",                   "7.4.0.2",   "15.0", ComponentGroup.Google, csprojName: "Places");
 Artifact GOOGLE_SIGN_IN_ARTIFACT                   = new Artifact ("Google.SignIn",                   "8.0.0.4",   "15.0", ComponentGroup.Google, csprojName: "SignIn");
+Artifact GOOGLE_APP_CHECK_CORE_ARTIFACT            = new Artifact ("Google.AppCheckCore",              "11.2.0.0",  "15.0", ComponentGroup.Google, csprojName: "AppCheckCore");
 Artifact GOOGLE_TAG_MANAGER_ARTIFACT               = new Artifact ("Google.TagManager",               "7.4.0.2",   "15.0", ComponentGroup.Google, csprojName: "TagManager");
 
 Artifact GOOGLE_GOOGLE_APP_MEASUREMENT_ARTIFACT    = new Artifact ("Google.AppMeasurement",           "12.5.0.4",    "15.0", ComponentGroup.Google, csprojName: "GoogleAppMeasurement");
@@ -64,7 +65,7 @@ var ARTIFACTS = new Dictionary<string, Artifact> {
 	{ "Firebase.RemoteConfig",           FIREBASE_REMOTE_CONFIG_ARTIFACT },
 	{ "Firebase.Storage",                FIREBASE_STORAGE_ARTIFACT },
 	// { "Firebase.AppDistribution",        FIREBASE_APP_DISTRIBUTION_ARTIFACT },
-	// { "Firebase.AppCheck",               FIREBASE_APP_CHECK_ARTIFACT },
+		{ "Firebase.AppCheck",               FIREBASE_APP_CHECK_ARTIFACT },
 
     { "Google.GoogleAppMeasurement",  GOOGLE_GOOGLE_APP_MEASUREMENT_ARTIFACT },
 	{ "Google.Analytics",             GOOGLE_ANALYTICS_ARTIFACT },
@@ -73,8 +74,9 @@ var ARTIFACTS = new Dictionary<string, Artifact> {
 	{ "Google.MobileAds",             GOOGLE_MOBILE_ADS_ARTIFACT },
 	{ "Google.UserMessagingPlatform", GOOGLE_UMP_ARTIFACT },
 	{ "Google.Places",                GOOGLE_PLACES_ARTIFACT },
-	{ "Google.SignIn",                GOOGLE_SIGN_IN_ARTIFACT },
-	{ "Google.TagManager",            GOOGLE_TAG_MANAGER_ARTIFACT },
+		{ "Google.SignIn",                GOOGLE_SIGN_IN_ARTIFACT },
+		{ "Google.AppCheckCore",          GOOGLE_APP_CHECK_CORE_ARTIFACT },
+		{ "Google.TagManager",            GOOGLE_TAG_MANAGER_ARTIFACT },
 	{ "Google.GTMSessionFetcher",     GOOGLE_GTM_SESSION_FETCHER_ARTIFACT },
 	{ "Google.PromisesObjC",          GOOGLE_PROMISES_OBJC_ARTIFACT },
 	{ "Google.Nanopb",                GOOGLE_NANOPB_ARTIFACT },
@@ -113,7 +115,7 @@ void SetArtifactsDependencies ()
 	FIREBASE_REMOTE_CONFIG_ARTIFACT.Dependencies           = new [] { FIREBASE_CORE_ARTIFACT, FIREBASE_INSTALLATIONS_ARTIFACT, FIREBASE_AB_TESTING_ARTIFACT };
 	FIREBASE_STORAGE_ARTIFACT.Dependencies                 = new [] { FIREBASE_CORE_ARTIFACT, FIREBASE_DATABASE_ARTIFACT, GOOGLE_GTM_SESSION_FETCHER_ARTIFACT /* Needed for sample FIREBASE_AUTH_ARTIFACT */ };
 	// FIREBASE_APP_DISTRIBUTION_ARTIFACT.Dependencies        = new [] { FIREBASE_CORE_ARTIFACT, FIREBASE_INSTALLATIONS_ARTIFACT };
-	// FIREBASE_APP_CHECK_ARTIFACT.Dependencies               = new [] { FIREBASE_CORE_ARTIFACT };
+	FIREBASE_APP_CHECK_ARTIFACT.Dependencies               = new [] { FIREBASE_CORE_ARTIFACT };
 
 	GOOGLE_ANALYTICS_ARTIFACT.Dependencies             = null;
 	GOOGLE_CAST_ARTIFACT.Dependencies                  = new [] { FIREBASE_CORE_ARTIFACT };
@@ -121,8 +123,9 @@ void SetArtifactsDependencies ()
 	GOOGLE_MOBILE_ADS_ARTIFACT.Dependencies            = new [] { FIREBASE_CORE_ARTIFACT };
 	GOOGLE_UMP_ARTIFACT.Dependencies                   = null;
 	GOOGLE_PLACES_ARTIFACT.Dependencies                = null;
-	GOOGLE_SIGN_IN_ARTIFACT.Dependencies               = new [] { GOOGLE_GTM_SESSION_FETCHER_ARTIFACT, GOOGLE_PROMISES_OBJC_ARTIFACT, GOOGLE_GOOGLE_UTILITIES_ARTIFACT };
+	GOOGLE_SIGN_IN_ARTIFACT.Dependencies               = new [] { GOOGLE_GTM_SESSION_FETCHER_ARTIFACT, GOOGLE_PROMISES_OBJC_ARTIFACT, GOOGLE_GOOGLE_UTILITIES_ARTIFACT, GOOGLE_APP_CHECK_CORE_ARTIFACT };
 	GOOGLE_TAG_MANAGER_ARTIFACT.Dependencies           = new [] { FIREBASE_CORE_ARTIFACT, FIREBASE_INSTALLATIONS_ARTIFACT, FIREBASE_ANALYTICS_ARTIFACT };
+	GOOGLE_APP_CHECK_CORE_ARTIFACT.Dependencies        = null;
 	GOOGLE_PROMISES_OBJC_ARTIFACT.Dependencies         = null;
 	GOOGLE_GTM_SESSION_FETCHER_ARTIFACT.Dependencies   = null;
 	GOOGLE_NANOPB_ARTIFACT.Dependencies                = null;
@@ -209,9 +212,9 @@ void SetArtifactsPodSpecs ()
 	// FIREBASE_APP_DISTRIBUTION_ARTIFACT.PodSpecs = new [] {
 	// 	PodSpec.Create ("Firebase", "8.10.0", frameworkSource: FrameworkSource.Pods, frameworkName: "FirebaseAppDistribution", targetName: "FirebaseAppDistribution", subSpecs: new [] { "AppDistribution" })		
 	// };
-	// FIREBASE_APP_CHECK_ARTIFACT.PodSpecs = new [] {
-	// 	PodSpec.Create ("Firebase", "8.10.0", frameworkSource: FrameworkSource.Pods, frameworkName: "FirebaseAppCheck", targetName: "FirebaseAppCheck", subSpecs: new [] { "AppCheck" })		
-	// };
+	FIREBASE_APP_CHECK_ARTIFACT.PodSpecs = new [] {
+		PodSpec.Create ("FirebaseAppCheck", "12.5.0", frameworkSource: FrameworkSource.Pods)
+	};
 
 	// Google components
 	GOOGLE_ANALYTICS_ARTIFACT.PodSpecs = new [] {
@@ -233,10 +236,12 @@ void SetArtifactsPodSpecs ()
 		PodSpec.Create ("GooglePlaces", "7.4.0")
 	};
 	GOOGLE_SIGN_IN_ARTIFACT.PodSpecs = new [] {
-		PodSpec.Create ("GoogleSignIn", "8.0.0",  frameworkSource: FrameworkSource.Pods),
-		PodSpec.Create ("AppAuth",      "1.7.6",  frameworkSource: FrameworkSource.Pods),
+		PodSpec.Create ("GoogleSignIn", "8.0.0", frameworkSource: FrameworkSource.Pods),
+		PodSpec.Create ("AppAuth",      "1.7.6", frameworkSource: FrameworkSource.Pods),
+		PodSpec.Create ("GTMAppAuth",   "4.1.1", frameworkSource: FrameworkSource.Pods),
+	};
+	GOOGLE_APP_CHECK_CORE_ARTIFACT.PodSpecs = new [] {
 		PodSpec.Create ("AppCheckCore", "11.2.0", frameworkSource: FrameworkSource.Pods),
-		PodSpec.Create ("GTMAppAuth",   "4.1.1",  frameworkSource: FrameworkSource.Pods),
 	};
 	GOOGLE_TAG_MANAGER_ARTIFACT.PodSpecs = new [] {
 		PodSpec.Create ("GoogleTagManager", "7.4.0")
