@@ -167,34 +167,42 @@ Task ("libs")
 	.IsDependentOn("ci-setup")
 	.Does(() =>
 {
-	var msBuildSettings = new DotNetCoreMSBuildSettings ();
 	var dotNetCoreBuildSettings = new DotNetCoreBuildSettings { 
 		Configuration = "Release",
 		Verbosity = DotNetCoreVerbosity.Diagnostic,
-		MSBuildSettings = msBuildSettings
+		NoRestore = false
 	};
 	
-	foreach (var target in SOURCES_TARGETS)
-		msBuildSettings.Targets.Add($"source/{target}");
-	
-	DotNetCoreBuild(SOLUTION_PATH, dotNetCoreBuildSettings);
+	// Build each artifact's csproj directly instead of using solution targets
+	foreach (var artifact in ARTIFACTS_TO_BUILD) {
+		var csprojPath = $"./source/{artifact.ComponentGroup}/{artifact.CsprojName}/{artifact.CsprojName}.csproj";
+		Information ($"Building: {csprojPath}");
+		DotNetCoreBuild(csprojPath, dotNetCoreBuildSettings);
+	}
 });
 
 Task ("samples")
 	.IsDependentOn("libs")
 	.Does(() =>
 {
-	var msBuildSettings = new DotNetCoreMSBuildSettings ();
 	var dotNetCoreBuildSettings = new DotNetCoreBuildSettings { 
 		Configuration = "Release",
 		Verbosity = DotNetCoreVerbosity.Diagnostic,
-		MSBuildSettings = msBuildSettings
+		NoRestore = false
 	};
 	
-	foreach (var target in SAMPLES_TARGETS)
-		msBuildSettings.Targets.Add($"samples-using-source/{target}");
-	
-	DotNetCoreBuild(SOLUTION_PATH, dotNetCoreBuildSettings);
+	// Build each sample csproj directly
+	foreach (var artifact in ARTIFACTS_TO_BUILD) {
+		if (artifact.Samples == null)
+			continue;
+		foreach (var sample in artifact.Samples) {
+			var samplePath = $"./samples/{artifact.ComponentGroup}/{sample}/{sample}.csproj";
+			if (FileExists(samplePath)) {
+				Information ($"Building sample: {samplePath}");
+				DotNetCoreBuild(samplePath, dotNetCoreBuildSettings);
+			}
+		}
+	}
 });
 
 Task ("nuget")
@@ -211,8 +219,12 @@ Task ("nuget")
 		Verbosity = DotNetCoreVerbosity.Diagnostic,
 	};
 
-	foreach (var target in SOURCES_TARGETS)
-		DotNetCorePack($"./source/{target}", dotNetCorePackSettings);
+	// Pack each artifact's csproj directly
+	foreach (var artifact in ARTIFACTS_TO_BUILD) {
+		var csprojPath = $"./source/{artifact.ComponentGroup}/{artifact.CsprojName}/{artifact.CsprojName}.csproj";
+		Information ($"Packing: {csprojPath}");
+		DotNetCorePack(csprojPath, dotNetCorePackSettings);
+	}
 });
 
 Task ("clean")
