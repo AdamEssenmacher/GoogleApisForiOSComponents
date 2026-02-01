@@ -1,32 +1,32 @@
-﻿<Project Sdk="Xamarin.Legacy.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>xamarin.ios10;net6.0-ios</TargetFrameworks>
-    <NoNFloatUsing Condition="'$(TargetFramework)' == 'xamarin.ios10'">true</NoNFloatUsing>
+    <TargetFrameworks>net9.0-ios;net10.0-ios;net9.0-maccatalyst;net10.0-maccatalyst</TargetFrameworks>
     <Nullable>enable</Nullable>
     <ImplicitUsings>true</ImplicitUsings>
     <IsBindingProject>true</IsBindingProject>
     <NoBindingEmbedding>true</NoBindingEmbedding>
-    <SupportedOSPlatformVersion>11.0</SupportedOSPlatformVersion>
+    <SupportedOSPlatformVersion>15.0</SupportedOSPlatformVersion>
     <RootNamespace>Firebase.AppCheck</RootNamespace>
     <AssemblyName>Firebase.AppCheck</AssemblyName>
-    <AssemblyVersion>1.0.0.0</AssemblyVersion>
-    <FileVersion>8.10.0</FileVersion>
+    <AssemblyVersion>12.5.0.4</AssemblyVersion>
+    <FileVersion>12.5.0.4</FileVersion>
     <IPhoneResourcePrefix>Resources</IPhoneResourcePrefix>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <CompressBindingResourcePackage>true</CompressBindingResourcePackage>
   </PropertyGroup>
   <PropertyGroup>
     <PackageId>AdamE.Firebase.iOS.AppCheck</PackageId>
     <Title>Firebase APIs App Check iOS Library</Title>
     <Summary>C# bindings for Firebase APIs App Check iOS Library</Summary>
     <Description>C# bindings for Firebase APIs App Check iOS Library</Description>
-    <Authors>Microsoft, Adam Essenmacher</Authors>
+    <Authors>Microsoft, Adam Essenmacher, Jean-Emmanuel Baillat</Authors>
     <Owners>Adam Essenmacher</Owners>
-    <Copyright>© Microsoft Corporation. All rights reserved. © 2024, Adam Essenmacher.</Copyright>
+    <Copyright>© Microsoft Corporation. All rights reserved. © 2026, Adam Essenmacher.</Copyright>
     <PackageIcon>firebaseiosappcheck_128x128.png</PackageIcon>
     <PackageProjectUrl>https://github.com/AdamEssenmacher/GoogleApisForiOSComponents</PackageProjectUrl>
     <PackageLicenseFile>License.md</PackageLicenseFile>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-    <PackageVersion>8.10.0</PackageVersion>
+    <PackageVersion>12.5.0.4</PackageVersion>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="..\..\AssemblyInfo.cs" />
@@ -35,6 +35,8 @@
     <Folder Include="Resources\" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="AppCheck.targets" Pack="True" PackagePath="build/AdamE.Firebase.iOS.AppCheck.targets" />
+    <None Include="AppCheck.targets" Pack="True" PackagePath="buildTransitive/AdamE.Firebase.iOS.AppCheck.targets" />
     <None Include="License.md" Pack="True" PackagePath="License.md" />
     <None Include="../../../icons/firebaseiosappcheck_128x128.png" Pack="True" PackagePath="firebaseiosappcheck_128x128.png" />
   </ItemGroup>
@@ -47,13 +49,8 @@
     </NativeReference>
   </ItemGroup>
   <ItemGroup>
-    <ObjcBindingCoreSource Include="Enums.cs" />
-  </ItemGroup>
-  <ItemGroup>
     <ObjcBindingApiDefinition Include="ApiDefinition.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="Xamarin.Build.Download" Version="0.11.0" PrivateAssets="None" />
+    <ObjcBindingApiDefinition Include="Enums.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Core\Core.csproj" PrivateAssets="None" />
