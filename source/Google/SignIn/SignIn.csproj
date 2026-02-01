@@ -24,6 +24,7 @@
     <PackageIcon>googleiossignin_128x128.png</PackageIcon>
     <PackageProjectUrl>https://github.com/AdamEssenmacher/GoogleApisForiOSComponents</PackageProjectUrl>
     <PackageLicenseFile>License.md</PackageLicenseFile>
+    <PackageReadmeFile>NUGET_README.md</PackageReadmeFile>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     <PackageVersion>8.0.0.4</PackageVersion>
   </PropertyGroup>
@@ -38,6 +39,7 @@
     <None Include="SignIn.targets" Pack="True" PackagePath="buildTransitive/AdamE.Google.iOS.SignIn.targets" />
     <None Include="External-Dependency-Info.txt" Pack="True" PackagePath="THIRD-PARTY-NOTICES.txt" />
     <None Include="License.md" Pack="True" PackagePath="License.md" />
+    <None Include="../../../docs/NUGET_README.md" Pack="True" PackagePath="NUGET_README.md" />
     <None Include="../../../icons/googleiossignin_128x128.png" Pack="True" PackagePath="googleiossignin_128x128.png" />
   </ItemGroup>
   <ItemGroup>
