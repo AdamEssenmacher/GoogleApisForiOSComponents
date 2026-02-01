@@ -24,10 +24,18 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup .NET (global.json)
+      - name: Setup .NET SDK 10.0.100 (exact)
         uses: actions/setup-dotnet@v4
         with:
-          global-json-file: global.json
+          dotnet-version: '10.0.100'
+
+      - name: Verify .NET SDK
+        run: |
+          dotnet --version
+          if [[ "$(dotnet --version)" != "10.0.100" ]]; then
+            echo "ERROR: Expected .NET SDK 10.0.100 but got $(dotnet --version)."
+            exit 1
+          fi
 
       - name: Restore .NET workloads
         run: dotnet workload restore Xamarin.Google.sln

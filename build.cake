@@ -55,7 +55,8 @@ Setup (context =>
 {
 	IS_LOCAL_BUILD = string.IsNullOrWhiteSpace (EnvironmentVariable ("AGENT_ID"));
 	Information ($"Is a local build? {IS_LOCAL_BUILD}");
-	BACKSLASH = IS_LOCAL_BUILD ? @"\" : @"\";
+	// Always use forward slashes for MSBuild targets on all platforms
+	BACKSLASH = "/";
 });
 
 Task("build")
@@ -174,7 +175,7 @@ Task ("libs")
 	};
 	
 	foreach (var target in SOURCES_TARGETS)
-		msBuildSettings.Targets.Add($@"source\{target}");
+		msBuildSettings.Targets.Add($"source/{target}");
 	
 	DotNetCoreBuild(SOLUTION_PATH, dotNetCoreBuildSettings);
 });
@@ -191,7 +192,7 @@ Task ("samples")
 	};
 	
 	foreach (var target in SAMPLES_TARGETS)
-		msBuildSettings.Targets.Add($@"samples-using-source\{target}");
+		msBuildSettings.Targets.Add($"samples-using-source/{target}");
 	
 	DotNetCoreBuild(SOLUTION_PATH, dotNetCoreBuildSettings);
 });
