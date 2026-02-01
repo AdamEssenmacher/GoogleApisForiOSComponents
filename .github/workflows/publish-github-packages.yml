@@ -80,6 +80,10 @@ jobs:
           dotnet nuget remove source "bootstrap-output" >/dev/null 2>&1 || true
           dotnet nuget add source "${PWD}/output" --name "bootstrap-output"
 
+      - name: Un-quarantine built frameworks
+        run: |
+          sudo xattr -dr com.apple.quarantine externals || true
+
       - name: Build + pack
         run: dotnet tool run dotnet-cake -- --target=nuget --names="${CAKE_NAMES}"
 
