@@ -29,6 +29,15 @@ jobs:
         with:
           global-json-file: global.json
 
+      - name: Configure GitHub Packages NuGet source (this repo owner)
+        run: |
+          dotnet nuget remove source "github-owner" >/dev/null 2>&1 || true
+          dotnet nuget add source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" \
+            --name "github-owner" \
+            --username "${{ github.actor }}" \
+            --password "${{ secrets.GITHUB_TOKEN }}" \
+            --store-password-in-clear-text
+
       - name: Restore .NET workloads
         run: dotnet workload restore Xamarin.Google.sln
 
@@ -41,6 +50,35 @@ jobs:
 
       - name: Restore tools
         run: dotnet tool restore
+
+      - name: Bootstrap AppCheckCore (required by Google.SignIn / Firebase.AppCheck)
+        run: |
+          set -euo pipefail
+
+          if [[ "${CAKE_NAMES}" != *"Google.SignIn"* && "${CAKE_NAMES}" != *"Firebase.AppCheck"* && "${CAKE_NAMES}" != *"Google.AppCheckCore"* ]]; then
+            echo "Skipping bootstrap; CAKE_NAMES=${CAKE_NAMES}"
+            exit 0
+          fi
+
+          mkdir -p output
+
+          # Build externals (produces externals/AppCheckCore.xcframework)
+          dotnet tool run dotnet-cake -- --target=externals --names="Google.AppCheckCore"
+
+          # Pack the AppCheckCore NuGet without restoring the entire solution
+          dotnet pack "./source/Google/AppCheckCore/AppCheckCore.csproj" \
+            -c Release \
+            -o "./output"
+
+          # Push AppCheckCore first so subsequent restore can resolve it
+          dotnet nuget push "output/AdamE.Google.iOS.AppCheckCore.*.nupkg" \
+            --source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" \
+            --api-key "${{ secrets.GITHUB_TOKEN }}" \
+            --skip-duplicate
+
+          # Avoid propagation delays within the same job
+          dotnet nuget remove source "bootstrap-output" >/dev/null 2>&1 || true
+          dotnet nuget add source "${PWD}/output" --name "bootstrap-output"
 
       - name: Build + pack
         run: dotnet tool run dotnet-cake -- --target=nuget --names="${CAKE_NAMES}"
