@@ -1,0 +1,52 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      names:
+        description: "Cake --names (comma-separated)"
+        required: false
+        default: "Google.SignIn"
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: macos-14
+    env:
+      CAKE_NAMES: ${{ inputs.names || 'Google.SignIn' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET (global.json)
+        uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      - name: Restore .NET workloads
+        run: dotnet workload restore Xamarin.Google.sln
+
+      - name: Install CocoaPods
+        run: |
+          if ! command -v pod >/dev/null 2>&1; then
+            sudo gem install cocoapods
+          fi
+          pod --version
+
+      - name: Restore tools
+        run: dotnet tool restore
+
+      - name: Build + pack
+        run: dotnet tool run dotnet-cake -- --target=nuget --names="${CAKE_NAMES}"
+
+      - name: Upload packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: nuget
+          path: output/*.nupkg
