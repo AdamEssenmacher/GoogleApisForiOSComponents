@@ -20,6 +20,10 @@ jobs:
     runs-on: macos-15
     env:
       CAKE_NAMES: ${{ inputs.names || 'Google.SignIn' }}
+      # Pin the .NET SDK selection to the exact global.json version (avoid rolling forward to a broken patch).
+      DOTNET_ROLL_FORWARD: Disable
+      # Avoid picking up any preinstalled SDKs outside DOTNET_ROOT.
+      DOTNET_MULTILEVEL_LOOKUP: 0
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -34,6 +38,16 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           global-json-file: global.json
+
+      - name: Verify .NET SDK selection
+        run: |
+          dotnet --version
+          dotnet --info
+          dotnet --list-sdks
+          if [[ "$(dotnet --version)" != "10.0.100" ]]; then
+            echo "ERROR: Expected .NET SDK 10.0.100 (global.json) but got $(dotnet --version)."
+            exit 1
+          fi
 
       - name: Configure GitHub Packages NuGet source (this repo owner)
         run: |
