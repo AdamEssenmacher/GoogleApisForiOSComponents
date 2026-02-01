@@ -233,7 +233,7 @@ void SetArtifactsPodSpecs ()
 		PodSpec.Create ("GooglePlaces", "7.4.0")
 	};
 	GOOGLE_SIGN_IN_ARTIFACT.PodSpecs = new [] {
-		PodSpec.Create ("GoogleSignIn", "~> 9.0.0", frameworkSource: FrameworkSource.Pods),
+		PodSpec.Create ("GoogleSignIn", "9.0.0", frameworkSource: FrameworkSource.Pods),
 		PodSpec.Create ("AppAuth",      "2.0.0",  frameworkSource: FrameworkSource.Pods),
 		PodSpec.Create ("AppCheckCore", "11.2.0", frameworkSource: FrameworkSource.Pods),
 		PodSpec.Create ("GTMAppAuth",   "5.0.0",  frameworkSource: FrameworkSource.Pods),

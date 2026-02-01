@@ -30,7 +30,13 @@ Build sample projects (without publishing packages):
 dotnet tool run dotnet-cake -- --target=samples --names=Google.SignIn
 ```
 
-Clean generated folders:
+### Configure the Google Sign-In sample
+
+For a runnable sign-in flow on iOS, the app must register an URL scheme callback. When you provide your own `GoogleService-Info.plist` (or fill in `samples/Google/SignIn/SignInExample/GoogleService-Info.plist.template`), also update `samples/Google/SignIn/SignInExample/Info.plist` so `CFBundleURLSchemes` matches your `REVERSED_CLIENT_ID`.
+
+## Clean-up
+
+To clean generated folders:
 
 ```sh
 dotnet tool run dotnet-cake -- --target=clean
