@@ -55,7 +55,7 @@
     <ObjcBindingApiDefinition Include="Enums.cs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="AdamE.Google.iOS.GoogleAppMeasurement" Version="12.5.0.1" />
+    <PackageReference Include="AdamE.Google.iOS.GoogleAppMeasurement" Version="12.6.0" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Core\Core.csproj" PrivateAssets="None" />
