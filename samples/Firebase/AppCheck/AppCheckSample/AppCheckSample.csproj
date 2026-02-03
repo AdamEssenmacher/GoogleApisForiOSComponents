@@ -17,6 +17,7 @@
     <Configurations>Debug;Release</Configurations>
     <IsPackable>false</IsPackable>
     <ProvisioningType>manual</ProvisioningType>
+    <DefaultItemExcludes>$(DefaultItemExcludes);obj/AppCheckSample.NuGet/**;bin/AppCheckSample.NuGet/**</DefaultItemExcludes>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|iPhoneSimulator' ">
     <DebugSymbols>true</DebugSymbols>
@@ -68,6 +69,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\..\..\source\Firebase\Core\Core.csproj" />
     <ProjectReference Include="..\..\..\..\source\Firebase\AppCheck\AppCheck.csproj" />
+    <ProjectReference Include="..\..\..\..\source\Firebase\Installations\Installations.csproj" />
   </ItemGroup>
   <Import Project="$(MSBuildThisFileDirectory)..\..\..\..\source\Firebase\Core\Core.targets" />
   <Import Project="$(MSBuildThisFileDirectory)..\..\..\..\source\Firebase\AppCheck\AppCheck.targets" />

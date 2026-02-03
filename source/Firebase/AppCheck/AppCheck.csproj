@@ -54,5 +54,6 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Core\Core.csproj" PrivateAssets="None" />
+    <ProjectReference Include="..\..\Google\AppCheckCore\AppCheckCore.csproj" PrivateAssets="None" />
   </ItemGroup>
 </Project>

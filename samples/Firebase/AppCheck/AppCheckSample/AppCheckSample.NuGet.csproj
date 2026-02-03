@@ -17,6 +17,7 @@
     <Configurations>Debug;Release</Configurations>
     <IsPackable>false</IsPackable>
     <ProvisioningType>manual</ProvisioningType>
+    <DefaultItemExcludes>$(DefaultItemExcludes);obj/AppCheckSample/**;bin/AppCheckSample/**</DefaultItemExcludes>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|iPhoneSimulator' ">
     <DebugSymbols>true</DebugSymbols>
@@ -69,5 +70,6 @@
     <PackageReference Include="Xamarin.Build.Download" Version="0.11.1" />
     <PackageReference Include="AdamE.Firebase.iOS.Core" Version="12.5.0.4" />
     <PackageReference Include="AdamE.Firebase.iOS.AppCheck" Version="12.5.0.4" />
+    <PackageReference Include="AdamE.Firebase.iOS.Installations" Version="12.5.0.4" />
   </ItemGroup>
 </Project>
