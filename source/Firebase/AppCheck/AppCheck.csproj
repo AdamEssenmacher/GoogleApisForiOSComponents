@@ -26,7 +26,7 @@
     <PackageProjectUrl>https://github.com/AdamEssenmacher/GoogleApisForiOSComponents</PackageProjectUrl>
     <PackageLicenseFile>License.md</PackageLicenseFile>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-    <PackageVersion>12.5.0.4</PackageVersion>
+    <PackageVersion>12.5.0.4-fork</PackageVersion>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="..\..\AssemblyInfo.cs" />
@@ -53,7 +53,11 @@
     <ObjcBindingApiDefinition Include="Enums.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Core\Core.csproj" PrivateAssets="None" />
-    <ProjectReference Include="..\..\Google\AppCheckCore\AppCheckCore.csproj" PrivateAssets="None" />
+    <ProjectReference Include="..\Core\Core.csproj" PrivateAssets="None">
+      <GlobalPropertiesToRemove>PackageVersion</GlobalPropertiesToRemove>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Google\AppCheckCore\AppCheckCore.csproj" PrivateAssets="None">
+      <GlobalPropertiesToRemove>PackageVersion</GlobalPropertiesToRemove>
+    </ProjectReference>
   </ItemGroup>
 </Project>
