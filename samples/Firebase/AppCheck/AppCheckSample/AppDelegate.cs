@@ -1,46 +1,57 @@
-using Xamarin.iOS.Shared.Helpers;
-
 namespace AppCheckSample;
 
 using FirebaseAppCheck = Firebase.AppCheck.AppCheck;
 using FirebaseCoreApp = Firebase.Core.App;
+using Xamarin.iOS.Shared.Helpers;
+using Xamarin.iOS.Shared.ViewControllers;
 
 [Register ("AppDelegate")]
 public class AppDelegate : UIApplicationDelegate {
-	public override UIWindow? Window {
-		get;
-		set;
-	}
+	static bool IsFirebaseConfigured { get; set; }
 
-	public override bool FinishedLaunching (UIApplication application, NSDictionary launchOptions)
+	public override bool FinishedLaunching (UIApplication application, NSDictionary? launchOptions)
 	{
-		// create a new window instance based on the screen size
-		Window = new UIWindow (UIScreen.MainScreen.Bounds);
-
-		// You can download your GoogleService-Info.plist file following the next link:
-		// https://firebase.google.com/docs/ios/setup
-		if (!GoogleServiceInfoPlistHelper.FileExist ()) {
-			Window = GoogleServiceInfoPlistHelper.CreateWindowWithFileNotFoundMessage ();
-			return true;
+		if (GoogleServiceInfoPlistHelper.FileExist () && !IsFirebaseConfigured) {
+			FirebaseAppCheck.SetAppCheckProviderFactory (new Firebase.AppCheck.AppCheckDebugProviderFactory ());
+			FirebaseCoreApp.Configure ();
+			IsFirebaseConfigured = true;
 		}
 
-		FirebaseAppCheck.SetAppCheckProviderFactory (new Firebase.AppCheck.AppCheckDebugProviderFactory ());
-		FirebaseCoreApp.Configure ();
+		return true;
+	}
 
-		var vc = new UIViewController ();
-		vc.View!.BackgroundColor = UIColor.White;
+	public override UISceneConfiguration GetConfiguration (
+		UIApplication application,
+		UISceneSession connectingSceneSession,
+		UISceneConnectionOptions options)
+	{
+		return UISceneConfiguration.Create ("Default Configuration", connectingSceneSession.Role);
+	}
 
-		var statusLabel = new UILabel (new CGRect (24, 140, Window!.Frame.Width - 48, 200)) {
+	internal static UIViewController CreateRootViewController ()
+	{
+		return GoogleServiceInfoPlistHelper.FileExist ()
+			? CreateTokenViewController ()
+			: new GoogleServiceInfoPlistNotFoundViewController ();
+	}
+
+	static UIViewController CreateTokenViewController ()
+	{
+		var viewController = new UIViewController ();
+		viewController.View!.BackgroundColor = UIColor.White;
+
+		var statusLabel = new UILabel {
 			BackgroundColor = UIColor.White,
 			TextColor = UIColor.Black,
 			TextAlignment = UITextAlignment.Center,
 			Lines = 0,
+			TranslatesAutoresizingMaskIntoConstraints = false,
 			Text = "Firebase App Check sample\nMode: Debug provider\nTap the button to fetch a token."
 		};
 
 		var tokenButton = UIButton.FromType (UIButtonType.System);
-		tokenButton.Frame = new CGRect (24, 360, Window!.Frame.Width - 48, 48);
 		tokenButton.SetTitle ("Fetch App Check Token", UIControlState.Normal);
+		tokenButton.TranslatesAutoresizingMaskIntoConstraints = false;
 		tokenButton.TouchUpInside += (_, _) => {
 			statusLabel.Text = "Fetching App Check token...";
 			FirebaseAppCheck.SharedInstance.TokenForcingRefresh (true, (token, error) => {
@@ -62,13 +73,17 @@ public class AppDelegate : UIApplicationDelegate {
 			});
 		};
 
-		vc.View.AddSubview (statusLabel);
-		vc.View.AddSubview (tokenButton);
-		Window.RootViewController = vc;
+		viewController.View.AddSubview (statusLabel);
+		viewController.View.AddSubview (tokenButton);
 
-		// make the window visible
-		Window.MakeKeyAndVisible ();
+		NSLayoutConstraint.ActivateConstraints (new [] {
+			statusLabel.LeadingAnchor.ConstraintEqualTo (viewController.View.SafeAreaLayoutGuide.LeadingAnchor, 24),
+			statusLabel.TrailingAnchor.ConstraintEqualTo (viewController.View.SafeAreaLayoutGuide.TrailingAnchor, -24),
+			statusLabel.TopAnchor.ConstraintEqualTo (viewController.View.SafeAreaLayoutGuide.TopAnchor, 120),
+			tokenButton.TopAnchor.ConstraintEqualTo (statusLabel.BottomAnchor, 24),
+			tokenButton.CenterXAnchor.ConstraintEqualTo (viewController.View.SafeAreaLayoutGuide.CenterXAnchor)
+		});
 
-		return true;
+		return viewController;
 	}
 }
