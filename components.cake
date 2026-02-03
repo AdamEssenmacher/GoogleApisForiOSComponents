@@ -426,7 +426,7 @@ void SetArtifactsSamples ()
 	FIREBASE_REMOTE_CONFIG_ARTIFACT.Samples           = new [] { "RemoteConfigSample" };
 	FIREBASE_STORAGE_ARTIFACT.Samples                 = new [] { "StorageSample" };
 	//FIREBASE_APP_DISTRIBUTION_ARTIFACT.Samples        = new [] { "AppDistributionSample" };
-	//FIREBASE_APP_CHECK_ARTIFACT.Samples               = new [] { "AppCheckSample" };
+	FIREBASE_APP_CHECK_ARTIFACT.Samples                = new [] { "AppCheckSample" };
 
 	// Google components
 	GOOGLE_ANALYTICS_ARTIFACT.Samples                 = new [] { "AnalyticsSample" };
