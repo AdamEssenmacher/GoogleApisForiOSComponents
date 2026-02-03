@@ -7,6 +7,8 @@ namespace Firebase.AppCheck {
 	// typedef void (^)(FIRAppCheckToken *_Nullable token, NSError *_Nullable error)
 	delegate void TokenCompletionHandler (AppCheckToken token, NSError error);
 
+	interface IAppCheckProviderFactory { }
+
 	// @interface FIRAppCheck : NSObject	
 	[DisableDefaultCtor]
 	[BaseType (typeof (NSObject), Name = "FIRAppCheck")]
@@ -41,7 +43,7 @@ namespace Firebase.AppCheck {
 		// +(void)setAppCheckProviderFactory:(id<FIRAppCheckProviderFactory> _Nullable)factory;
 		[Static]
 		[Export ("setAppCheckProviderFactory:")]
-		void SetAppCheckProviderFactory ([NullAllowed] AppCheckProviderFactory factory);
+		void SetAppCheckProviderFactory ([NullAllowed] IAppCheckProviderFactory factory);
 
 		// @property (assign, nonatomic) BOOL isTokenAutoRefreshEnabled;
 		[Export ("isTokenAutoRefreshEnabled")]
