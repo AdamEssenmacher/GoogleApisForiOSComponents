@@ -51,6 +51,22 @@ The Cake pipeline updates versions in binding `.csproj` files during the `extern
 
 This allows forked builds to publish `-fork` (or similar) packages without changing the shared component version line in `components.cake`, while keeping deterministic, aligned build outputs.
 
+## Fork testing suffix policy (`-local` vs `-fork`)
+
+When validating a binding fix before upstream release:
+
+* Use `-local` for packages built on a developer machine and consumed from a local NuGet source.
+* Use `-fork` for packages built by your fork CI and published to GitHub Packages.
+
+Suggested flow:
+
+1. Set a temporary prerelease `PackageVersion` (for example `12.5.0.4-fork` or `12.5.0.4-local`) in the affected project(s).
+2. Build/publish from the matching channel (local machine for `-local`, GitHub Actions for `-fork`).
+3. Consume that package from downstream repos to validate the fix.
+4. Before opening an upstream PR, revert temporary prerelease versions/references back to the canonical version line expected upstream.
+
+Important: do not merge or submit upstream PRs with temporary fork-only or local-only package versions unless explicitly requested by maintainers.
+
 ## Validation checklist (before requesting review)
 
 At minimum, validate the component(s) you touched:
