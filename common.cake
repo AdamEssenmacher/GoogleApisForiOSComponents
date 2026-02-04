@@ -61,7 +61,9 @@ void UpdateVersionInCsproj (Artifact artifact)
 	var componentGroup = artifact.ComponentGroup.ToString ();
 	var csprojPath = $"./source/{componentGroup}/{artifact.CsprojName}/{artifact.CsprojName}.csproj";
 	XmlPoke(csprojPath, "/Project/PropertyGroup/FileVersion", artifact.NugetVersion);
-	XmlPoke(csprojPath, "/Project/PropertyGroup/PackageVersion", artifact.NugetVersion);
+	var currentPackageVersion = XmlPeek(csprojPath, "/Project/PropertyGroup/PackageVersion");
+	if (!currentPackageVersion.Contains("-"))
+		XmlPoke(csprojPath, "/Project/PropertyGroup/PackageVersion", artifact.NugetVersion);
 }
 
 void CreateAndInstallPodfile (Artifact artifact)
