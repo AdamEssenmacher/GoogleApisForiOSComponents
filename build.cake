@@ -36,6 +36,14 @@ FilePath GetCakeToolPath ()
 	return new FilePath (p.Modules[0].FileName);
 }
 
+string GetDefaultiOSSimulatorRuntimeIdentifier ()
+{
+	var arch = System.Runtime.InteropServices.RuntimeInformation.ProcessArchitecture;
+	return arch == System.Runtime.InteropServices.Architecture.Arm64
+		? "iossimulator-arm64"
+		: "iossimulator-x64";
+}
+
 void BuildCake (string target)
 {
 	var cakeSettings = new CakeSettings { 
@@ -185,6 +193,11 @@ Task ("samples")
 	.IsDependentOn("libs")
 	.Does(() =>
 {
+	var msBuildSettings = new DotNetCoreMSBuildSettings ();
+	msBuildSettings.Properties ["Platform"] = new [] { "iPhoneSimulator" };
+	msBuildSettings.Properties ["RuntimeIdentifier"] = new [] { GetDefaultiOSSimulatorRuntimeIdentifier () };
+	msBuildSettings.Properties ["EnableCodeSigning"] = new [] { "false" };
+
 	var dotNetCoreBuildSettings = new DotNetCoreBuildSettings { 
 		Configuration = "Release",
 		Verbosity = DotNetCoreVerbosity.Diagnostic,
