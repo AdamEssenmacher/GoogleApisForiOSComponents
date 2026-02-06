@@ -75,6 +75,10 @@
     <PackageReference Include="AdamE.Google.iOS.GTMSessionFetcher" Version="3.5.0.5" />
     <PackageReference Include="AdamE.Google.iOS.PromisesObjC" Version="2.4.0.5" />
     <PackageReference Include="AdamE.Google.iOS.GoogleUtilities" Version="8.0.2.2" />
-    <PackageReference Include="AdamE.Google.iOS.AppCheckCore" Version="11.2.0.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\AppCheckCore\AppCheckCore.csproj" PrivateAssets="None">
+      <GlobalPropertiesToRemove>PackageVersion</GlobalPropertiesToRemove>
+    </ProjectReference>
   </ItemGroup>
 </Project>

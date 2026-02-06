@@ -201,7 +201,8 @@ Task ("samples")
 	var dotNetCoreBuildSettings = new DotNetCoreBuildSettings { 
 		Configuration = "Release",
 		Verbosity = DotNetCoreVerbosity.Diagnostic,
-		NoRestore = false
+		NoRestore = false,
+		MSBuildSettings = msBuildSettings
 	};
 	
 	// Build each sample csproj directly
