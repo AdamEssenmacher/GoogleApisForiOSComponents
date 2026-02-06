@@ -65,7 +65,7 @@ var ARTIFACTS = new Dictionary<string, Artifact> {
 	{ "Firebase.RemoteConfig",           FIREBASE_REMOTE_CONFIG_ARTIFACT },
 	{ "Firebase.Storage",                FIREBASE_STORAGE_ARTIFACT },
 	// { "Firebase.AppDistribution",        FIREBASE_APP_DISTRIBUTION_ARTIFACT },
-		{ "Firebase.AppCheck",               FIREBASE_APP_CHECK_ARTIFACT },
+	{ "Firebase.AppCheck",               FIREBASE_APP_CHECK_ARTIFACT },
 
     { "Google.GoogleAppMeasurement",  GOOGLE_GOOGLE_APP_MEASUREMENT_ARTIFACT },
 	{ "Google.Analytics",             GOOGLE_ANALYTICS_ARTIFACT },
@@ -74,9 +74,9 @@ var ARTIFACTS = new Dictionary<string, Artifact> {
 	{ "Google.MobileAds",             GOOGLE_MOBILE_ADS_ARTIFACT },
 	{ "Google.UserMessagingPlatform", GOOGLE_UMP_ARTIFACT },
 	{ "Google.Places",                GOOGLE_PLACES_ARTIFACT },
-		{ "Google.SignIn",                GOOGLE_SIGN_IN_ARTIFACT },
-		{ "Google.AppCheckCore",          GOOGLE_APP_CHECK_CORE_ARTIFACT },
-		{ "Google.TagManager",            GOOGLE_TAG_MANAGER_ARTIFACT },
+	{ "Google.SignIn",                GOOGLE_SIGN_IN_ARTIFACT },
+	{ "Google.AppCheckCore",          GOOGLE_APP_CHECK_CORE_ARTIFACT },
+	{ "Google.TagManager",            GOOGLE_TAG_MANAGER_ARTIFACT },
 	{ "Google.GTMSessionFetcher",     GOOGLE_GTM_SESSION_FETCHER_ARTIFACT },
 	{ "Google.PromisesObjC",          GOOGLE_PROMISES_OBJC_ARTIFACT },
 	{ "Google.Nanopb",                GOOGLE_NANOPB_ARTIFACT },
@@ -125,7 +125,7 @@ void SetArtifactsDependencies ()
 	GOOGLE_PLACES_ARTIFACT.Dependencies                = null;
 	GOOGLE_SIGN_IN_ARTIFACT.Dependencies               = new [] { GOOGLE_GTM_SESSION_FETCHER_ARTIFACT, GOOGLE_PROMISES_OBJC_ARTIFACT, GOOGLE_GOOGLE_UTILITIES_ARTIFACT, GOOGLE_APP_CHECK_CORE_ARTIFACT };
 	GOOGLE_TAG_MANAGER_ARTIFACT.Dependencies           = new [] { FIREBASE_CORE_ARTIFACT, FIREBASE_INSTALLATIONS_ARTIFACT, FIREBASE_ANALYTICS_ARTIFACT };
-	GOOGLE_APP_CHECK_CORE_ARTIFACT.Dependencies        = null;
+	GOOGLE_APP_CHECK_CORE_ARTIFACT.Dependencies        = new [] { GOOGLE_PROMISES_OBJC_ARTIFACT, GOOGLE_GOOGLE_UTILITIES_ARTIFACT };
 	GOOGLE_PROMISES_OBJC_ARTIFACT.Dependencies         = null;
 	GOOGLE_GTM_SESSION_FETCHER_ARTIFACT.Dependencies   = null;
 	GOOGLE_NANOPB_ARTIFACT.Dependencies                = null;

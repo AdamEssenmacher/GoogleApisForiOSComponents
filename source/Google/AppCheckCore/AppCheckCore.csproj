@@ -46,4 +46,8 @@
   <ItemGroup>
     <ObjcBindingApiDefinition Include="ApiDefinition.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="AdamE.Google.iOS.PromisesObjC" Version="[2.4.0,3.0.0)" />
+    <PackageReference Include="AdamE.Google.iOS.GoogleUtilities" Version="[8.0.0,9.0.0)" />
+  </ItemGroup>
 </Project>
