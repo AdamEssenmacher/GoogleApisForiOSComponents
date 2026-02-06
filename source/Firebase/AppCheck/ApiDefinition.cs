@@ -43,7 +43,7 @@ namespace Firebase.AppCheck {
 		// +(void)setAppCheckProviderFactory:(id<FIRAppCheckProviderFactory> _Nullable)factory;
 		[Static]
 		[Export ("setAppCheckProviderFactory:")]
-		void SetAppCheckProviderFactory ([NullAllowed] IAppCheckProviderFactory factory);
+		void SetAppCheckProviderFactory ([NullAllowed] NSObject factory);
 
 		// @property (assign, nonatomic) BOOL isTokenAutoRefreshEnabled;
 		[Export ("isTokenAutoRefreshEnabled")]
@@ -68,7 +68,7 @@ namespace Firebase.AppCheck {
 		[Abstract]
 		[Export ("createProviderWithApp:")]
 		[return: NullAllowed]
-		IAppCheckProvider CreateProviderWithApp (App app);
+		NSObject CreateProviderWithApp (App app);
 	}
 
 	// @interface FIRAppCheckToken : NSObject	
