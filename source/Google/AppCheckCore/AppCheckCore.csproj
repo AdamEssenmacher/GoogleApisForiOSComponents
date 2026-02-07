@@ -6,58 +6,48 @@
     <IsBindingProject>true</IsBindingProject>
     <NoBindingEmbedding>true</NoBindingEmbedding>
     <SupportedOSPlatformVersion>15.0</SupportedOSPlatformVersion>
-    <RootNamespace>Firebase.AppCheck</RootNamespace>
-    <AssemblyName>Firebase.AppCheck</AssemblyName>
-    <AssemblyVersion>12.5.0.4</AssemblyVersion>
-    <FileVersion>12.5.0.4</FileVersion>
+    <RootNamespace>Google.AppCheckCore</RootNamespace>
+    <AssemblyName>Google.AppCheckCore</AssemblyName>
+    <AssemblyVersion>11.2.0.0</AssemblyVersion>
+    <FileVersion>11.2.0.0</FileVersion>
     <IPhoneResourcePrefix>Resources</IPhoneResourcePrefix>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <CompressBindingResourcePackage>true</CompressBindingResourcePackage>
   </PropertyGroup>
   <PropertyGroup>
-    <PackageId>AdamE.Firebase.iOS.AppCheck</PackageId>
-    <Title>Firebase APIs App Check iOS Library</Title>
-    <Summary>C# bindings for Firebase APIs App Check iOS Library</Summary>
-    <Description>C# bindings for Firebase APIs App Check iOS Library</Description>
+    <PackageId>AdamE.Google.iOS.AppCheckCore</PackageId>
+    <Title>AppCheckCore</Title>
+    <Summary>AppCheckCore packed for .NET for iOS</Summary>
+    <Description>AppCheckCore packed for .NET for iOS</Description>
     <Authors>Microsoft, Adam Essenmacher, Jean-Emmanuel Baillat</Authors>
     <Owners>Adam Essenmacher</Owners>
     <Copyright>© Microsoft Corporation. All rights reserved. © 2026, Adam Essenmacher.</Copyright>
-    <PackageIcon>firebaseiosappcheck_128x128.png</PackageIcon>
     <PackageProjectUrl>https://github.com/AdamEssenmacher/GoogleApisForiOSComponents</PackageProjectUrl>
     <PackageLicenseFile>License.md</PackageLicenseFile>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-    <PackageVersion>12.5.0.4</PackageVersion>
+    <PackageVersion>11.2.0.0</PackageVersion>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="..\..\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Resources\" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="AppCheck.targets" Pack="True" PackagePath="build/AdamE.Firebase.iOS.AppCheck.targets" />
-    <None Include="AppCheck.targets" Pack="True" PackagePath="buildTransitive/AdamE.Firebase.iOS.AppCheck.targets" />
+    <None Include="AppCheckCore.targets" Pack="True" PackagePath="build/AdamE.Google.iOS.AppCheckCore.targets" />
+    <None Include="AppCheckCore.targets" Pack="True" PackagePath="buildTransitive/AdamE.Google.iOS.AppCheckCore.targets" />
     <None Include="License.md" Pack="True" PackagePath="License.md" />
-    <None Include="../../../icons/firebaseiosappcheck_128x128.png" Pack="True" PackagePath="firebaseiosappcheck_128x128.png" />
   </ItemGroup>
   <ItemGroup>
-    <NativeReference Include="..\..\..\externals\FirebaseAppCheck.xcframework">
+    <NativeReference Include="..\..\..\externals\AppCheckCore.xcframework">
       <Kind>Framework</Kind>
       <SmartLink>True</SmartLink>
       <ForceLoad>True</ForceLoad>
-      <LinkerFlags>-ObjC</LinkerFlags>
+      <WeakFrameworks>DeviceCheck</WeakFrameworks>
     </NativeReference>
   </ItemGroup>
   <ItemGroup>
     <ObjcBindingApiDefinition Include="ApiDefinition.cs" />
-    <ObjcBindingApiDefinition Include="Enums.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Core\Core.csproj" PrivateAssets="None">
-      <GlobalPropertiesToRemove>PackageVersion</GlobalPropertiesToRemove>
-    </ProjectReference>
-    <ProjectReference Include="..\..\Google\AppCheckCore\AppCheckCore.csproj" PrivateAssets="None">
-      <GlobalPropertiesToRemove>PackageVersion</GlobalPropertiesToRemove>
-    </ProjectReference>
+    <PackageReference Include="AdamE.Google.iOS.PromisesObjC" Version="[2.4.0,3.0.0)" />
+    <PackageReference Include="AdamE.Google.iOS.GoogleUtilities" Version="[8.0.0,9.0.0)" />
   </ItemGroup>
 </Project>

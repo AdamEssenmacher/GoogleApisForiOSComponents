@@ -50,13 +50,6 @@
           <Frameworks>SafariServices</Frameworks>
           <WeakFrameworks>AuthenticationServices</WeakFrameworks>
       </NativeReference>
-      <!--https://github.com/google/app-check/blob/main/AppCheckCore.podspechttps://github.com/google/app-check/blob/main/AppCheckCore.podspec-->
-      <NativeReference Include="..\..\..\externals\AppCheckCore.xcframework">
-          <Kind>Framework</Kind>
-          <SmartLink>True</SmartLink>
-          <ForceLoad>True</ForceLoad>
-          <WeakFrameworks>DeviceCheck</WeakFrameworks>
-      </NativeReference>
       <NativeReference Include="..\..\..\externals\GTMAppAuth.xcframework">
           <Kind>Framework</Kind>
           <SmartLink>True</SmartLink>
@@ -82,5 +75,10 @@
     <PackageReference Include="AdamE.Google.iOS.GTMSessionFetcher" Version="3.5.0.5" />
     <PackageReference Include="AdamE.Google.iOS.PromisesObjC" Version="2.4.0.5" />
     <PackageReference Include="AdamE.Google.iOS.GoogleUtilities" Version="8.0.2.2" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\AppCheckCore\AppCheckCore.csproj" PrivateAssets="None">
+      <GlobalPropertiesToRemove>PackageVersion</GlobalPropertiesToRemove>
+    </ProjectReference>
   </ItemGroup>
 </Project>
