@@ -43,7 +43,7 @@ namespace Firebase.AppCheck {
 		// +(void)setAppCheckProviderFactory:(id<FIRAppCheckProviderFactory> _Nullable)factory;
 		[Static]
 		[Export ("setAppCheckProviderFactory:")]
-		void SetAppCheckProviderFactory ([NullAllowed] NSObject factory);
+		void SetAppCheckProviderFactory ([NullAllowed] IAppCheckProviderFactory factory);
 
 		// @property (assign, nonatomic) BOOL isTokenAutoRefreshEnabled;
 		[Export ("isTokenAutoRefreshEnabled")]
@@ -53,6 +53,8 @@ namespace Firebase.AppCheck {
 	// @protocol FIRAppCheckProvider <NSObject>
 	interface IAppCheckProvider { }
 
+	[Model]
+	[BaseType (typeof (NSObject))]
 	[Protocol (Name = "FIRAppCheckProvider")]
 	interface AppCheckProvider {
 		// @required -(void)getTokenWithCompletion:(void (^ _Nonnull)(FIRAppCheckToken * _Nullable, NSError * _Nullable))handler __attribute__((swift_name("getToken(completion:)")));
@@ -62,6 +64,8 @@ namespace Firebase.AppCheck {
 	}
 
 	// @protocol FIRAppCheckProviderFactory <NSObject>
+	[Model]
+	[BaseType (typeof (NSObject))]
 	[Protocol (Name = "FIRAppCheckProviderFactory")]
 	interface AppCheckProviderFactory {
 		// @required -(id<FIRAppCheckProvider> _Nullable)createProviderWithApp:(FIRApp * _Nonnull)app;
@@ -107,14 +111,14 @@ namespace Firebase.AppCheck {
 
 	// @interface FIRAppCheckDebugProviderFactory : NSObject <FIRAppCheckProviderFactory>
 	[BaseType (typeof (NSObject), Name = "FIRAppCheckDebugProviderFactory")]
-	interface AppCheckDebugProviderFactory : IAppCheckProviderFactory {
+	interface AppCheckDebugProviderFactory : AppCheckProviderFactory {
 	}
 
 	// @interface FIRDeviceCheckProvider : NSObject <FIRAppCheckProvider>
 	//[TV (11, 0), NoWatch, Mac (10, 15), iOS (11, 0)]	
 	[DisableDefaultCtor]
 	[BaseType (typeof (NSObject), Name = "FIRDeviceCheckProvider")]
-	interface DeviceCheckProvider : IAppCheckProvider {
+	interface DeviceCheckProvider : AppCheckProvider {
 		// -(instancetype _Nullable)initWithApp:(FIRApp * _Nonnull)app;
 		[Export ("initWithApp:")]
 		NativeHandle Constructor (App app);
@@ -124,7 +128,7 @@ namespace Firebase.AppCheck {
 	//[NoTV, NoWatch, NoMac, iOS (14, 0)]	
 	[DisableDefaultCtor]
 	[BaseType (typeof (NSObject), Name = "FIRAppAttestProvider")]
-	interface AppAttestProvider : IAppCheckProvider {
+	interface AppAttestProvider : AppCheckProvider {
 		// -(instancetype _Nullable)initWithApp:(FIRApp * _Nonnull)app;
 		[Export ("initWithApp:")]
 		NativeHandle Constructor (App app);
@@ -133,6 +137,6 @@ namespace Firebase.AppCheck {
 	// @interface FIRDeviceCheckProviderFactory : NSObject <FIRAppCheckProviderFactory>
 	//[TV (11, 0), NoWatch, Mac (10, 15), iOS (11, 0)]
 	[BaseType (typeof (NSObject), Name = "FIRDeviceCheckProviderFactory")]
-	interface DeviceCheckProviderFactory : IAppCheckProviderFactory {
+	interface DeviceCheckProviderFactory : AppCheckProviderFactory {
 	}
 }
