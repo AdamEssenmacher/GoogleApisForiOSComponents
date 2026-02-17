@@ -1,5 +1,5 @@
-﻿<Project>
+<Project>
   <PropertyGroup>
-    <_FirebaseAnalyticsAssemblyName>Firebase.Analytics, Version=12.5.0.4, Culture=neutral, PublicKeyToken=null</_FirebaseAnalyticsAssemblyName>
+    <_FirebaseAnalyticsAssemblyName>Firebase.Analytics, Version=12.9.0, Culture=neutral, PublicKeyToken=null</_FirebaseAnalyticsAssemblyName>
   </PropertyGroup>
 </Project>

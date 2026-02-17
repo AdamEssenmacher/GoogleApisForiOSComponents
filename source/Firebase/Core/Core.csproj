@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFrameworks>net9.0-ios;net10.0-ios;net9.0-maccatalyst;net10.0-maccatalyst</TargetFrameworks>
     <Nullable>enable</Nullable>
@@ -8,8 +8,8 @@
     <SupportedOSPlatformVersion>15.0</SupportedOSPlatformVersion>
     <RootNamespace>Firebase.Core</RootNamespace>
     <AssemblyName>Firebase.Core</AssemblyName>
-    <AssemblyVersion>12.5.0.4</AssemblyVersion>
-    <FileVersion>12.5.0.4</FileVersion>
+    <AssemblyVersion>12.9.0</AssemblyVersion>
+    <FileVersion>12.9.0</FileVersion>
     <IPhoneResourcePrefix>Resources</IPhoneResourcePrefix>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <CompressBindingResourcePackage>true</CompressBindingResourcePackage>
@@ -26,7 +26,7 @@
     <PackageProjectUrl>https://github.com/AdamEssenmacher/GoogleApisForiOSComponents</PackageProjectUrl>
     <PackageLicenseFile>License.md</PackageLicenseFile>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-    <PackageVersion>12.5.0.4</PackageVersion>
+    <PackageVersion>12.9.0</PackageVersion>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="..\..\AssemblyInfo.cs" />
@@ -104,9 +104,9 @@
     <ObjcBindingApiDefinition Include="ApiDefinition.cs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="AdamE.Google.iOS.GoogleDataTransport" Version="[10.1.0,11.0.0)" />
-    <PackageReference Include="AdamE.Google.iOS.GoogleUtilities" Version="[8.1.0,9.0.0)" />
-    <PackageReference Include="AdamE.Google.iOS.Nanopb" Version="[3.30910.0,4.0.0)" />
-    <PackageReference Include="AdamE.Google.iOS.PromisesObjC" Version="[2.4.0,3.0.0)" />
+    <PackageReference Include="AdamE.Google.iOS.GoogleDataTransport" Version="[10.1.0.5,11.0.0)" />
+    <PackageReference Include="AdamE.Google.iOS.GoogleUtilities" Version="[8.1.0.3,9.0.0)" />
+    <PackageReference Include="AdamE.Google.iOS.Nanopb" Version="[3.30910.0.5,4.0.0)" />
+    <PackageReference Include="AdamE.Google.iOS.PromisesObjC" Version="[2.4.0.5,3.0.0)" />
   </ItemGroup>
 </Project>
