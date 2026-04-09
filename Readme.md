@@ -1,5 +1,5 @@
 # Overview
-This is a **community-supported** fork of the GoogleApisForiOSComponents repo maintained initially by Xamarin. Microsoft just kind of stopped maintaining these bindings libraries, which were published under the package prefixes Xamarin.Firebase.iOS.* and Xamarin.Google.iOS.*
+This is a **community-supported** fork of the GoogleApisForiOSComponents repo maintained initially by Xamarin. Microsoft just kind of stopped maintaining these binding libraries, which were published under the package prefixes Xamarin.Firebase.iOS.* and Xamarin.Google.iOS.*
 
 This was a really unfortunate decision from Microsoft. Having these extremely common native iOS dependencies published by a central, trusted source allowed plugin developers for things like MLKit, Google Sign-In, and Firebase to coexist. Now, such libraries will either have to include native dependencies directly (which will make them incompatible with each-other) or accept a new community standard. I have published updated packages under the prefix AdamE.Firebase.iOS.* which have so far been adopted by [Plugin.Firebase](https://github.com/TobiasBuchholz/Plugin.Firebase) and [BarcodeScanner.Mobile.Maui](https://github.com/JimmyPun610/BarcodeScanner.Mobile)
 
@@ -13,7 +13,7 @@ Microsoft's current recommendation to iOS.NET developers is that they should wri
 # Contributing & Sponsoring
 As a community-supported continuation, I'm happy to review any PRs to help move this project forward. These libraries almost certainly have some missing or stale bindings. Work needs to happen to keep these bindings current with native SDKs. Whole artifacts still need to be converted from where Microsoft left them. Sample projects need to be updated (or rewritten). Tests would be nice.
 
-If you're considering contributing, feel free to open an issue to discuss it and I'll help as I can.
+If you're considering contributing, feel free to open an issue to discuss it, and I'll help as I can.
 
 Alternatively, I have one-time sponsorship options on my profile if you'd like to prioritize an afternoon or weekend of my time on a feature or issue that's important to you.
 
@@ -22,45 +22,9 @@ Failure to read and follow these instructions will result in build failures and/
 
 At the moment, you may need to explicitly reference AdamE.Firebase.iOS.Installations even if you don't "need" it. I'll try to get this fixed in future releases.
 
-## Firebase Analytics
-
-On .NET 6+, FirebaseAnalytics 10.17+ requires this target be added to your app's .csproj:
-
-```xml
-<!-- Target needed until LinkWithSwiftSystemLibraries makes it into the SDK: https://github.com/xamarin/xamarin-macios/pull/20463 -->
-<Target Name="LinkWithSwift" DependsOnTargets="_ParseBundlerArguments;_DetectSdkLocations" BeforeTargets="_LinkNativeExecutable">
-    <PropertyGroup>
-        <_SwiftPlatform Condition="$(RuntimeIdentifier.StartsWith('iossimulator-'))">iphonesimulator</_SwiftPlatform>
-        <_SwiftPlatform Condition="$(RuntimeIdentifier.StartsWith('ios-'))">iphoneos</_SwiftPlatform>
-    </PropertyGroup>
-    <ItemGroup>
-        <_CustomLinkFlags Include="-L" />
-        <_CustomLinkFlags Include="/usr/lib/swift" />
-        <_CustomLinkFlags Include="-L" />
-        <_CustomLinkFlags Include="$(_SdkDevPath)/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/$(_SwiftPlatform)" />
-        <_CustomLinkFlags Include="-Wl,-rpath" />
-        <_CustomLinkFlags Include="-Wl,/usr/lib/swift" />
-    </ItemGroup>
-</Target>
-```
-
-On *Legacy Xamarin.iOS*, FirebaseAnalytics 10.17+ requires that additional mtouch arguments be added to the iOS project:
-
-For iPhone: 
-```
---gcc_flags -L/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphoneos
-```
-
-For simulator: 
-```
---gcc_flags -L/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/
-```
-
-You may need to adjust the XCode location if it's not default.
-
 ## Firebase Crashlytics
 
-It's important to understand that the native Crashlytics SDK doesn't know anything about .NET, so its not going to be as useful as a complete error/crash reporting mechanism. See this [issue in Plugin.Firebase](https://github.com/TobiasBuchholz/Plugin.Firebase/issues/291)
+It's important to understand that the native Crashlytics SDK doesn't know anything about .NET, so it's not going to be as useful as a complete error/crash reporting mechanism. See this [issue in Plugin.Firebase](https://github.com/TobiasBuchholz/Plugin.Firebase/issues/291)
 
 On .NET8, you must set the following property. Note that this will increase your app's size.
 
@@ -77,7 +41,7 @@ If you're using Mac, you can skip this section. If you're using Windows and/or V
 This is fundamentally an issue with Visual Studio. Unless something changes, you should not expect this issue to be resolved until Visual Studio properly supports long file paths.
 
 ### Long-path issue root cause
-In the iOS/Catalyst world, code libraries are typically shipped as XCFrameworks. An XCFramework is a packaging format that bundles libraries for multiple platforms (e.g. iOS, macOS) and architectures into a single artifact. To build these AdamE.* artifacts, several XCFrameworks (Firebase and Google dependencies) are assembled and packed into the Nuget packages. This is how iOS.NET and Nuget are _designed_ to work.
+In the iOS/Catalyst world, code libraries are typically shipped as XCFrameworks. An XCFramework is a packaging format that bundles libraries for multiple platforms (e.g., iOS, macOS) and architectures into a single artifact. To build these AdamE.* artifacts, several XCFrameworks (Firebase and Google dependencies) are assembled and packed into the Nuget packages. This is how iOS.NET and Nuget are _designed_ to work.
 
 XCFrameworks follow a rigid, opinionated naming structure. For example, a framework's binary falls under a path like `[XCFramework Name]\[Arch]\[Framework Name]\[Binary Name]`. Header files fall under a path like `[XCFramework Name]\[Arch]\[Framework Name]\Headers\[Framework]-*.h`
 
@@ -92,12 +56,12 @@ Combining both, we get full file paths like `C:\n\adame.firebase.ios.core\10.24.
 Windows has trouble with path lengths > 256, but a registry edit can be made that helps
 `New-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem" -Name "LongPathsEnabled" -Value 1 -PropertyType DWORD -Force`
 
-Even with that Visual Studio can still be very temperamental with long file paths. It's a limitation baked into the core of the IDE. It is still possible to build iOS apps using Visual Studio, but you *must restore packages from the CLI first:*
+Even with that, Visual Studio can still be very temperamental with long file paths. It's a limitation baked into the core of the IDE. It is still possible to build iOS apps using Visual Studio, but you *must restore packages from the CLI first:*
 
 1. Close Visual Studio
 2. Make sure you didn't skip step 1.
 3. Clear your local NuGet cache AND your local XamarinBuildDownload cache:
-   - In your Windows Terminal (Powershell):
+   - In your Windows Terminal (PowerShell):
      ```ps
      dotnet nuget locals all -c # Clear all Nuget cache
      cd $env:localappdata # Go to your AppData\Local folder
@@ -121,42 +85,41 @@ Even with that Visual Studio can still be very temperamental with long file path
 8. Build your project/solution successfully from the command line `dotnet build`.
 9. Make sure you didn't skip step 8.
 
-Now you should be able to build and debug your iOS app in Visual Studio. It will probably still choke during archiving though, so either do that step directly on a mac or try it on the CLI as well.
+Now you should be able to build and debug your iOS app in Visual Studio. It will probably still choke during archiving, though, so either do that step directly on a Mac or try it on the CLI as well.
 
 # Firebase Apple SDK and Nuget Package Releases
 
 Here's a table that shows in which Nuget package version is located each sdk of Firebase:
 
 
-| SDK Name                        | SDK Version |   Nuget Package Version   |
-| ------------------------------- |:-----------:| :----------------: |
-| Firebase A/B Testing            | **11.10.0** | [![NuGet Version](https://img.shields.io/nuget/v/AdamE.Firebase.iOS.ABTesting)](https://nuget.org/packages/AdamE.Firebase.iOS.ABTesting) |
-| Firebase Analytics              | **11.10.0** | [![NuGet Version](https://img.shields.io/nuget/v/AdamE.Firebase.iOS.Analytics)](https://nuget.org/packages/AdamE.Firebase.iOS.Analytics) |
-| Firebase Auth                   | **11.10.0** | [![NuGet Version](https://img.shields.io/nuget/v/AdamE.Firebase.iOS.Auth)](https://nuget.org/packages/AdamE.Firebase.iOS.Auth) |
-| Firebase Firestore              | **11.10.0** | [![NuGet Version](https://img.shields.io/nuget/v/AdamE.Firebase.iOS.CloudFirestore)](https://nuget.org/packages/AdamE.Firebase.iOS.CloudFirestore) |
-| Firebase Functions              | **11.10.0** | [![NuGet Version](https://img.shields.io/nuget/v/AdamE.Firebase.iOS.CloudFunctions)](https://nuget.org/packages/AdamE.Firebase.iOS.CloudFunctions) |
-| Firebase Messaging              | **11.10.0** | [![NuGet Version](https://img.shields.io/nuget/v/AdamE.Firebase.iOS.CloudMessaging)](https://nuget.org/packages/AdamE.Firebase.iOS.CloudMessaging) |
-| Firebase Core                   | **11.10.0** | [![NuGet Version](https://img.shields.io/nuget/v/AdamE.Firebase.iOS.Core)](https://nuget.org/packages/AdamE.Firebase.iOS.Core) |
-| Firebase Crashlytics            | **11.10.0** | [![NuGet Version](https://img.shields.io/nuget/v/AdamE.Firebase.iOS.Crashlytics)](https://nuget.org/packages/AdamE.Firebase.iOS.Crashlytics) |
-| Firebase Database               | **11.10.0** | [![NuGet Version](https://img.shields.io/nuget/v/AdamE.Firebase.iOS.Database)](https://nuget.org/packages/AdamE.Firebase.iOS.Database) |
-| Firebase Dynamic Links          | **11.10.0** | [![NuGet Version](https://img.shields.io/nuget/v/AdamE.Firebase.iOS.DynamicLinks)](https://nuget.org/packages/AdamE.Firebase.iOS.DynamicLinks) |
-| Firebase Installations          | **11.10.0** | [![NuGet Version](https://img.shields.io/nuget/v/AdamE.Firebase.iOS.Installations)](https://nuget.org/packages/AdamE.Firebase.iOS.Installations) |
-| Firebase RemoteConfig           | **11.10.0** | [![NuGet Version](https://img.shields.io/nuget/v/AdamE.Firebase.iOS.RemoteConfig)](https://nuget.org/packages/AdamE.Firebase.iOS.RemoteConfig) |
-| Firebase Storage                | **11.10.0** | [![NuGet Version](https://img.shields.io/nuget/v/AdamE.Firebase.iOS.Storage)](https://nuget.org/packages/AdamE.Firebase.iOS.Storage) |
-| Google Maps                     |  **9.2.0**  | [![NuGet Version](https://img.shields.io/nuget/v/AdamE.Google.iOS.Maps)](https://www.nuget.org/packages/AdamE.Google.iOS.Maps) |
+| SDK Name                        | SDK Version |                                                                      Nuget Package Version                                                                       |
+|---------------------------------|:-----------:|:----------------------------------------------------------------------------------------------------------------------------------------------------------------:|
+| Firebase A/B Testing            | **12.6.0**  |             [![NuGet Version](https://img.shields.io/nuget/v/AdamE.Firebase.iOS.ABTesting)](https://nuget.org/packages/AdamE.Firebase.iOS.ABTesting)             |
+| Firebase Analytics              | **12.6.0**  |             [![NuGet Version](https://img.shields.io/nuget/v/AdamE.Firebase.iOS.Analytics)](https://nuget.org/packages/AdamE.Firebase.iOS.Analytics)             |
+| Firebase AppCheck               | **12.6.0**  |              [![NuGet Version](https://img.shields.io/nuget/v/AdamE.Firebase.iOS.AppCheck)](https://nuget.org/packages/AdamE.Firebase.iOS.AppCheck)              |
+| Firebase Auth                   | **12.6.0**  |                  [![NuGet Version](https://img.shields.io/nuget/v/AdamE.Firebase.iOS.Auth)](https://nuget.org/packages/AdamE.Firebase.iOS.Auth)                  |
+| Firebase Firestore              | **12.6.0**  |        [![NuGet Version](https://img.shields.io/nuget/v/AdamE.Firebase.iOS.CloudFirestore)](https://nuget.org/packages/AdamE.Firebase.iOS.CloudFirestore)        |
+| Firebase Functions              | **12.6.0**  |        [![NuGet Version](https://img.shields.io/nuget/v/AdamE.Firebase.iOS.CloudFunctions)](https://nuget.org/packages/AdamE.Firebase.iOS.CloudFunctions)        |
+| Firebase Messaging              | **12.6.0**  |        [![NuGet Version](https://img.shields.io/nuget/v/AdamE.Firebase.iOS.CloudMessaging)](https://nuget.org/packages/AdamE.Firebase.iOS.CloudMessaging)        |
+| Firebase Core                   | **12.6.0**  |                  [![NuGet Version](https://img.shields.io/nuget/v/AdamE.Firebase.iOS.Core)](https://nuget.org/packages/AdamE.Firebase.iOS.Core)                  |
+| Firebase Crashlytics            | **12.6.0**  |           [![NuGet Version](https://img.shields.io/nuget/v/AdamE.Firebase.iOS.Crashlytics)](https://nuget.org/packages/AdamE.Firebase.iOS.Crashlytics)           |
+| Firebase Database               | **12.6.0**  |              [![NuGet Version](https://img.shields.io/nuget/v/AdamE.Firebase.iOS.Database)](https://nuget.org/packages/AdamE.Firebase.iOS.Database)              |
+| Firebase Installations          | **12.6.0**  |         [![NuGet Version](https://img.shields.io/nuget/v/AdamE.Firebase.iOS.Installations)](https://nuget.org/packages/AdamE.Firebase.iOS.Installations)         |
+| Firebase Performance Monitoring | **12.6.0**  | [![NuGet Version](https://img.shields.io/nuget/v/AdamE.Firebase.iOS.PerformanceMonitoring)](https://nuget.org/packages/AdamE.Firebase.iOS.PerformanceMonitoring) |
+| Firebase RemoteConfig           | **12.6.0**  |          [![NuGet Version](https://img.shields.io/nuget/v/AdamE.Firebase.iOS.RemoteConfig)](https://nuget.org/packages/AdamE.Firebase.iOS.RemoteConfig)          |
+| Firebase Storage                | **12.6.0**  |               [![NuGet Version](https://img.shields.io/nuget/v/AdamE.Firebase.iOS.Storage)](https://nuget.org/packages/AdamE.Firebase.iOS.Storage)               |
+| Google Maps                     |  **9.2.0**  |                  [![NuGet Version](https://img.shields.io/nuget/v/AdamE.Google.iOS.Maps)](https://www.nuget.org/packages/AdamE.Google.iOS.Maps)                  |
 
 
 ### SDKs net yet updates from where Microsoft left them:
 
-| SDK Name                  |  SDK Version |   Nuget Package Version   |
-| ------------------------------- | :---------------: | :----------------: |
-| Firebase AdMob                  |    **8.10.0**     |     **8.10.0**     |
-| Firebase In App Messaging       |    **8.10.0**     |     **8.10.0**     |
-| Firebase Performance Monitoring |    **8.10.0**     |     **8.10.0**     |
-| Google User Messaging Platform  |    **1.1.0.0**    |     **8.10.0**     |
-| Google Cast                     |    **4.7.0.0**    |     **8.10.0**     |
-| Google Sign-In                  |    **5.0.2.2**    |     **8.10.0**     |
-| Google Tag Manager              |    **7.4.0.0**    |     **8.10.0**     |
+| SDK Name                       | SDK Version | Nuget Package Version |
+|--------------------------------|:-----------:|:---------------------:|
+| Firebase AdMob                 | **8.10.0**  |      **8.10.0**       |
+| Firebase In App Messaging      | **8.10.0**  |      **8.10.0**       |
+| Google User Messaging Platform | **1.1.0.0** |      **8.10.0**       |
+| Google Cast                    | **4.7.0.0** |      **8.10.0**       |
+| Google Tag Manager             | **7.4.0.0** |      **8.10.0**       |
 
 
 # Troubleshooting
@@ -166,7 +129,7 @@ Google, Firebase, and MLKit native SDKs can have some shared XCFramework depende
 
 In native iOS development, this dependency would be resolved through a dependency manager (Cocoapods, SPM), but we can't use these native dependency managers in .NET for iOS.
 
-Microsoft's official recommendation to developers needing access to native SDKs is to build their own binding libraries using this ['slim binding' demo project](https://github.com/Redth/DotNet.Platform.SlimBindings) as a guide. This dependency situation for common mobile SDKs causes a major issue with this approach. For example, if a developer were to include their own 'slim binding' project in a project for Google Sign-In, they would end up statically linking GTMSessionFetcher. Since AdamE.Firebase.iOS.Core _also_ includes GTMSessionFetcher, all AdamE.iOS.* packages would no longer be compatible due to the dependency conflict.
+Microsoft's official recommendation to developers needing access to native SDKs is to build their own binding libraries using this [slim binding demo project](https://github.com/Redth/DotNet.Platform.SlimBindings) as a guide. This dependency situation for common mobile SDKs causes a major issue with this approach. For example, if a developer were to include their own 'slim binding' project in a project for Google Sign-In, they would end up statically linking GTMSessionFetcher. Since AdamE.Firebase.iOS.Core _also_ includes GTMSessionFetcher, all AdamE.iOS.* packages would no longer be compatible due to the dependency conflict.
 
 To provide a real-world example, [Plugin.Firebase](https://github.com/TobiasBuchholz/Plugin.Firebase) migrated off of the abandoned Xamarin.Firebase.iOS.* packages to use AdamE.Firebase.iOS.* This made it incompatible with the popular [BarcodeScanner.Mobile.Maui](https://github.com/JimmyPun610/BarcodeScanner.Mobile) package until the maintainer also migrated to use AdamE.Firebase.iOS.* dependencies.
 
@@ -187,14 +150,14 @@ Most likely, you've added these AdamE.* packages to a .csproj that targets other
     </PropertyGroup>
 ...
     <ItemGroup>
-        <PackageReference Include="AdamE.Firebase.iOS.Core" Version="10.24.0.2" />
+        <PackageReference Include="AdamE.Firebase.iOS.Core" Version="12.6.0" />
     </ItemGroup>
 </Project>
 ```
 Instead, you should do:
 ```xml
 <ItemGroup Condition="'$(TargetFramework)' == 'net8.0-ios'">
-    <PackageReference Include="AdamE.Firebase.iOS.Core" Version="10.24.0.2" />
+    <PackageReference Include="AdamE.Firebase.iOS.Core" Version="12.6.0" />
 </ItemGroup>
 ```
 Or, it's the Z-zip issue below:
@@ -213,9 +176,9 @@ The following steps are not required for consuming the published Nugets. These a
 
 ## Prerequisites
 
-Before building the libraries and samples in this repository, you will need to install .NET Core] and the Cake .NET Core Tool]:
+Before building the libraries and samples in this repository, you will need to install .NET Core and the Cake .NET Core Tool:
 
-Currently requires a version of Cake less than 1.0 (due to dependencies).
+Currently, building requires a version of Cake less than 1.0 (due to dependencies).
 
 ```sh
 dotnet tool install -g cake.tool --version 0.38.5
@@ -239,13 +202,14 @@ You can either build all the libraries and samples in the repository from the ro
 dotnet cake
 ```
 
-Or, you can specify the components and its dependencies to be build by using the `--names=Key1,Key2,...`:
+Or, you can specify the components and its dependencies to be built by using the `--names=Key1,Key2,...`:
 
 ```sh
 // Firebase keys
 Firebase.ABTesting
 Firebase.AdMob
 Firebase.Analytics
+Firebase.AppCheck
 Firebase.Auth
 Firebase.CloudFirestore
 Firebase.CloudFunctions
@@ -253,8 +217,6 @@ Firebase.CloudMessaging
 Firebase.Core
 Firebase.Crashlytics
 Firebase.Database
-Firebase.DynamicLinks
-Firebase.InAppMessaging
 Firebase.Installations
 Firebase.PerformanceMonitoring
 Firebase.RemoteConfig
@@ -290,7 +252,7 @@ The following targets can be specified using the `--target=<target-name>`:
 
 - `libs` builds the class library bindings (depends on `externals`)
 - `externals` downloads and builds the external dependencies
-- `samples` builds all of the samples (depends on `libs`)
+- `samples` builds all the samples (depends on `libs`)
 - `nuget` builds the nuget packages (depends on `libs`)
 - `clean` cleans up everything
 
