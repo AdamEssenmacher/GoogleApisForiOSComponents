@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using ObjCRuntime;
-
 namespace Firebase.CloudFunctions {
 	public partial class CloudFunctions {
 		static string currentVersion;
-
 		public static string CurrentVersion {
 			get {
 				if (currentVersion == null) {
