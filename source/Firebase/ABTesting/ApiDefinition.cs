@@ -19,7 +19,7 @@ namespace Firebase.ABTesting {
 
 		// -(void)updateExperimentsWithServiceOrigin:(NSString * _Nonnull)origin events:(FIRLifecycleEvents * _Nonnull)events policy:(ABTExperimentPayloadExperimentOverflowPolicy)policy lastStartTime:(NSTimeInterval)lastStartTime payloads:(NSArray<NSData *> * _Nonnull)payloads completionHandler:(void (^ _Nullable)(NSError * _Nullable))completionHandler;
 		[Export ("updateExperimentsWithServiceOrigin:events:policy:lastStartTime:payloads:completionHandler:")]
-		void UpdateExperiments (string origin, LifecycleEvents events, NSObject policy, double lastStartTime, NSData [] payloads, [NullAllowed] Action<NSError> completionHandler);
+		void UpdateExperiments (string origin, LifecycleEvents events, ExperimentPayloadExperimentOverflowPolicy policy, double lastStartTime, NSData [] payloads, [NullAllowed] Action<NSError> completionHandler);
 
 		// -(NSTimeInterval)latestExperimentStartTimestampBetweenTimestamp:(NSTimeInterval)timestamp andPayloads:(NSArray<NSData *> * _Nonnull)payloads;
 		[Export ("latestExperimentStartTimestampBetweenTimestamp:andPayloads:")]
