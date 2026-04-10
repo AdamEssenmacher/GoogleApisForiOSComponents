@@ -295,15 +295,15 @@ namespace Firebase.Storage
 		[Export ("writeToFile:completion:")]
 		StorageDownloadTask WriteToFile (NSUrl fileURL, [NullAllowed] StorageWriteToFileCompletionHandler completion);
 
-		// -(void)listAllWithCompletion:(void (^ _Nonnull)(FIRStorageListResult * _Nonnull, NSError * _Nullable))completion;
+		// -(void)listAllWithCompletion:(void (^ _Nonnull)(FIRStorageListResult * _Nullable, NSError * _Nullable))completion;
 		[Export ("listAllWithCompletion:")]
 		void ListAll (Action<StorageListResult, NSError> completion);
 
-		// -(void)listWithMaxResults:(int64_t)maxResults completion:(void (^ _Nonnull)(FIRStorageListResult * _Nonnull, NSError * _Nullable))completion;
+		// -(void)listWithMaxResults:(int64_t)maxResults completion:(void (^ _Nonnull)(FIRStorageListResult * _Nullable, NSError * _Nullable))completion;
 		[Export ("listWithMaxResults:completion:")]
 		void List (long maxResults, Action<StorageListResult, NSError> completion);
 
-		// -(void)listWithMaxResults:(int64_t)maxResults pageToken:(NSString * _Nonnull)pageToken completion:(void (^ _Nonnull)(FIRStorageListResult * _Nonnull, NSError * _Nullable))completion;
+		// -(void)listWithMaxResults:(int64_t)maxResults pageToken:(NSString * _Nonnull)pageToken completion:(void (^ _Nonnull)(FIRStorageListResult * _Nullable, NSError * _Nullable))completion;
 		[Export ("listWithMaxResults:pageToken:completion:")]
 		void List (long maxResults, string pageToken, Action<StorageListResult, NSError> completion);
 

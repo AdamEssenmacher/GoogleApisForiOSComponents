@@ -13,6 +13,7 @@ namespace Firebase.PerformanceMonitoring
 	interface HttpMetric : PerformanceAttributable
 	{
 		// -(instancetype _Nullable)initWithURL:(NSURL * _Nonnull)URL HTTPMethod:(FIRHTTPMethod)httpMethod;
+		[return: NullAllowed]
 		[Export ("initWithURL:HTTPMethod:")]
 		NativeHandle Constructor (NSUrl url, HttpMethod httpMethod);
 

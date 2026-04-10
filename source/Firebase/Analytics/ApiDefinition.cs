@@ -42,6 +42,7 @@ namespace Firebase.Analytics
 
 		// + (nullable NSString *)appInstanceID;
 		[Static]
+		[NullAllowed]
 		[Export ("appInstanceID")]
 		string AppInstanceId { get; }
 

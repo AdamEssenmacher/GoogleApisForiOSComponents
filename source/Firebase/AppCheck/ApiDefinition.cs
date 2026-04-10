@@ -5,7 +5,7 @@ using ObjCRuntime;
 
 namespace Firebase.AppCheck {
 	// typedef void (^)(FIRAppCheckToken *_Nullable token, NSError *_Nullable error)
-	delegate void TokenCompletionHandler (AppCheckToken token, NSError error);
+	delegate void TokenCompletionHandler ([NullAllowed] AppCheckToken token, [NullAllowed] NSError error);
 
 	interface IAppCheckProviderFactory { }
 
@@ -97,6 +97,7 @@ namespace Firebase.AppCheck {
 	[BaseType (typeof (NSObject), Name = "FIRAppCheckDebugProvider")]
 	interface AppCheckDebugProvider : IAppCheckProvider {
 		// -(instancetype _Nullable)initWithApp:(FIRApp * _Nonnull)app;
+		[return: NullAllowed]
 		[Export ("initWithApp:")]
 		NativeHandle Constructor (App app);
 
@@ -120,6 +121,7 @@ namespace Firebase.AppCheck {
 	[BaseType (typeof (NSObject), Name = "FIRDeviceCheckProvider")]
 	interface DeviceCheckProvider : AppCheckProvider {
 		// -(instancetype _Nullable)initWithApp:(FIRApp * _Nonnull)app;
+		[return: NullAllowed]
 		[Export ("initWithApp:")]
 		NativeHandle Constructor (App app);
 	}
@@ -130,6 +132,7 @@ namespace Firebase.AppCheck {
 	[BaseType (typeof (NSObject), Name = "FIRAppAttestProvider")]
 	interface AppAttestProvider : AppCheckProvider {
 		// -(instancetype _Nullable)initWithApp:(FIRApp * _Nonnull)app;
+		[return: NullAllowed]
 		[Export ("initWithApp:")]
 		NativeHandle Constructor (App app);
 	}

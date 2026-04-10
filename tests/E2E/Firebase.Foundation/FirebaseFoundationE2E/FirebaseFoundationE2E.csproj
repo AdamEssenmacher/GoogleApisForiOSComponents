@@ -1,0 +1,67 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>net9.0-ios;net9.0-maccatalyst</TargetFrameworks>
+    <RuntimeIdentifiers Condition="!Exists('$(ProjectAssetsFile)')">iossimulator-arm64;ios-arm64;maccatalyst-arm64</RuntimeIdentifiers>
+    <RuntimeIdentifiers Condition="Exists('$(ProjectAssetsFile)')"></RuntimeIdentifiers>
+    <OutputType>Exe</OutputType>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>true</ImplicitUsings>
+    <SupportedOSPlatformVersion>15.0</SupportedOSPlatformVersion>
+    <RootNamespace>FirebaseFoundationE2E</RootNamespace>
+    <AssemblyName>FirebaseFoundationE2E</AssemblyName>
+    <IPhoneResourcePrefix>Resources</IPhoneResourcePrefix>
+    <Platforms>AnyCPU;iPhoneSimulator;iPhone</Platforms>
+    <Configurations>Debug;Release</Configurations>
+    <IsPackable>false</IsPackable>
+    <ProvisioningType>manual</ProvisioningType>
+    <EnableNullabilityValidation>false</EnableNullabilityValidation>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(EnableNullabilityValidation)' == 'true'">
+    <DefineConstants>$(DefineConstants);ENABLE_NULLABILITY_VALIDATION</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net9.0-ios' and '$(Platform)' == ''">
+    <Platform>iPhoneSimulator</Platform>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net9.0-ios' and '$(RuntimeIdentifier)' == ''">
+    <RuntimeIdentifier>iossimulator-arm64</RuntimeIdentifier>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net9.0-maccatalyst' and '$(RuntimeIdentifier)' == ''">
+    <RuntimeIdentifier>maccatalyst-arm64</RuntimeIdentifier>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <MtouchLink>None</MtouchLink>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="GoogleService-Info.plist" Condition="Exists('GoogleService-Info.plist')" />
+    <BundleResource Include="GoogleService-Info.plist" Condition="Exists('GoogleService-Info.plist')" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AdamE.Firebase.iOS.Analytics" Version="12.6.0" />
+    <PackageReference Include="AdamE.Firebase.iOS.Core" Version="12.6.0" />
+    <PackageReference Include="AdamE.Firebase.iOS.Installations" Version="12.6.0" />
+    <PackageReference Include="AdamE.Google.iOS.GoogleAppMeasurement" Version="12.6.0" />
+    <PackageReference Include="AdamE.Google.iOS.GoogleDataTransport" Version="10.1.0.5" />
+    <PackageReference Include="AdamE.Google.iOS.GoogleUtilities" Version="8.1.0.3" />
+    <PackageReference Include="AdamE.Google.iOS.Nanopb" Version="3.30910.0.5" />
+    <PackageReference Include="AdamE.Google.iOS.PromisesObjC" Version="2.4.0.5" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(EnableNullabilityValidation)' == 'true'">
+    <PackageReference Include="AdamE.Firebase.iOS.CloudFirestore" Version="12.6.0" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(EnableNullabilityValidation)' == 'true'">
+    <PackageReference Include="AdamE.Firebase.iOS.AppCheck" Version="12.6.0" />
+    <PackageReference Include="AdamE.Firebase.iOS.CloudMessaging" Version="12.6.0" />
+    <PackageReference Include="AdamE.Firebase.iOS.Crashlytics" Version="12.6.0" />
+    <PackageReference Include="AdamE.Firebase.iOS.Database" Version="12.6.0" />
+    <PackageReference Include="AdamE.Firebase.iOS.PerformanceMonitoring" Version="12.6.0" />
+  </ItemGroup>
+</Project>
