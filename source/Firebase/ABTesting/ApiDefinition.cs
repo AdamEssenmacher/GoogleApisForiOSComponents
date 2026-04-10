@@ -27,7 +27,7 @@ namespace Firebase.ABTesting {
 
 		// -(void)validateRunningExperimentsForServiceOrigin:(NSString * _Nonnull)origin runningExperimentPayloads:(NSArray<ABTExperimentPayload *> * _Nonnull)payloads;
 		[Export ("validateRunningExperimentsForServiceOrigin:runningExperimentPayloads:")]
-		void ValidateRunningExperiments (string origin, NSObject [] payloads);
+		void ValidateRunningExperiments (string origin, ExperimentPayload [] payloads);
 
 		// -(void)activateExperiment:(ABTExperimentPayload * _Nonnull)experimentPayload forServiceOrigin:(NSString * _Nonnull)origin;
 		[Export ("activateExperiment:forServiceOrigin:")]
