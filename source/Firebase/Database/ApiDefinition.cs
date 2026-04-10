@@ -463,7 +463,7 @@ namespace Firebase.Database
 
 		// -(void)runTransactionBlock:(FIRTransactionResult * _Nonnull (^ _Nonnull)(FIRMutableData * _Nonnull))block andCompletionBlock:(void (^ _Nullable)(NSError * _Nullable, BOOL, FIRDataSnapshot * _Nullable))completionBlock withLocalEvents:(BOOL)localEvents;
 		[Export ("runTransactionBlock:andCompletionBlock:withLocalEvents:")]
-		void RunTransaction (DatabaseReferenceTransactionHandler transactionHandler, DatabaseReferenceTransactionCompletionHandler completionBlock, bool localEvents);
+		void RunTransaction (DatabaseReferenceTransactionHandler transactionHandler, [NullAllowed] DatabaseReferenceTransactionCompletionHandler completionBlock, bool localEvents);
 
 		// -(NSString * _Nonnull)description;
 		[New]
@@ -480,6 +480,7 @@ namespace Firebase.Database
 		DatabaseReference Root { get; }
 
 		// @property (readonly, nonatomic, strong) NSString * _Nonnull key;
+		[NullAllowed]
 		[Export ("key", ArgumentSemantic.Strong)]
 		string Key { get; }
 

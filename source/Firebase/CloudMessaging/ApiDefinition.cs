@@ -37,9 +37,9 @@ namespace Firebase.CloudMessaging
 	[BaseType (typeof (NSObject), Name = "FIRMessagingDelegate")]
 	interface MessagingDelegate
 	{
-		// @optional -(void)messaging:(FIRMessaging * _Nonnull)messaging didReceiveRegistrationToken:(NSString * _Nonnull)fcmToken;
+		// @optional -(void)messaging:(FIRMessaging * _Nonnull)messaging didReceiveRegistrationToken:(NSString * _Nullable)fcmToken;
 		[Export ("messaging:didReceiveRegistrationToken:")]
-		void DidReceiveRegistrationToken (Messaging messaging, string fcmToken);
+		void DidReceiveRegistrationToken (Messaging messaging, [NullAllowed] string fcmToken);
 	}
 
 	// @interface FIRMessaging : NSObject
@@ -108,7 +108,7 @@ namespace Firebase.CloudMessaging
 		// -(void)subscribeToTopic:(NSString * _Nonnull)topic completion:(nullable FIRMessagingTopicOperationCompletion)completion;
 		[Async]
 		[Export ("subscribeToTopic:completion:")]
-		void Subscribe (string topic, MessagingTopicOperationCompletionHandler completion);
+		void Subscribe (string topic, [NullAllowed] MessagingTopicOperationCompletionHandler completion);
 
 		// -(void)unsubscribeFromTopic:(NSString * _Nonnull)topic;
 		[Export ("unsubscribeFromTopic:")]
@@ -117,7 +117,7 @@ namespace Firebase.CloudMessaging
 		//-(void)unsubscribeFromTopic:(NSString * _Nonnull)topic completion:(nullable FIRMessagingTopicOperationCompletion)completion;
 		[Async]
 		[Export ("unsubscribeFromTopic:completion:")]
-		void Unsubscribe (string topic, MessagingTopicOperationCompletionHandler completion);
+		void Unsubscribe (string topic, [NullAllowed] MessagingTopicOperationCompletionHandler completion);
 
 		// -(FIRMessagingMessageInfo * _Nonnull)appDidReceiveMessage:(NSDictionary * _Nonnull)message;
 		[Export ("appDidReceiveMessage:")]

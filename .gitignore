@@ -3,6 +3,11 @@ bin
 obj
 output
 tools
+!tools/
+tools/*
+!tools/e2e/
+tools/e2e/*
+!tools/e2e/run-firebase-foundation.sh
 tmp-nugets
 *.userprefs
 *.DS_Store
@@ -16,3 +21,4 @@ externals
 artifacts
 *.user
 GoogleService-Info.plist
+!tests/E2E/Firebase.Foundation/FirebaseFoundationE2E/GoogleService-Info.plist

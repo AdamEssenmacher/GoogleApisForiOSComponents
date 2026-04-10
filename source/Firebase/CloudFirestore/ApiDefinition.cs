@@ -45,10 +45,10 @@ namespace Firebase.CloudFirestore
 
 		// -(FIRDocumentReference * _Nonnull)addDocumentWithData:(NSDictionary<NSString *,id> * _Nonnull)data completion:(void (^ _Nullable)(NSError * _Nullable))completion;
 		[Export ("addDocumentWithData:completion:")]
-		DocumentReference AddDocument (NSDictionary<NSString, NSObject> nsData, AddDocumentCompletionHandler completion);
+		DocumentReference AddDocument (NSDictionary<NSString, NSObject> nsData, [NullAllowed] AddDocumentCompletionHandler completion);
 
 		[Wrap ("AddDocument (data == null ? null : NSDictionary<NSString, NSObject>.FromObjectsAndKeys (System.Linq.Enumerable.ToArray (data.Values), System.Linq.Enumerable.ToArray (data.Keys), data.Keys.Count), completion)")]
-		DocumentReference AddDocument (Dictionary<object, object> data, AddDocumentCompletionHandler completion);
+		DocumentReference AddDocument (Dictionary<object, object> data, [NullAllowed] AddDocumentCompletionHandler completion);
 	}
 
 	// @interface FIRDocumentChange : NSObject
@@ -247,6 +247,7 @@ namespace Firebase.CloudFirestore
 		SnapshotMetadata Metadata { get; }
 
 		// -(NSDictionary<NSString *,id> * _Nonnull)data;
+		[NullAllowed]
 		[Export ("data")]
 		NSDictionary<NSString, NSObject> Data { get; }
 

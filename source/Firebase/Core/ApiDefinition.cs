@@ -32,6 +32,7 @@ namespace Firebase.Core
 
 		// +(FIRApp * _Nullable)defaultApp;
 		[Static]
+		[NullAllowed]
 		[Export ("defaultApp")]
 		App DefaultInstance { get; }
 
@@ -96,7 +97,6 @@ namespace Firebase.Core
 		string ApiKey { get; set; }
 
 		// @property(nonatomic, copy) NSString *bundleID;
-		[NullAllowed]
 		[Export ("bundleID")]
 		string BundleId { get; set; }
 
