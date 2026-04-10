@@ -6,6 +6,12 @@ using Foundation;
 using ObjCRuntime;
 #endif
 
+#if ENABLE_RUNTIME_DRIFT_CASE_ABTESTING_VALIDATERUNNINGEXPERIMENTS
+using Firebase.ABTesting;
+using Foundation;
+using ObjCRuntime;
+#endif
+
 #if ENABLE_RUNTIME_DRIFT_CASE_CLOUDFIRESTORE_GETQUERYNAMED
 using Firebase.CloudFirestore;
 using Foundation;
@@ -117,6 +123,86 @@ static class FirebaseRuntimeDriftCases
             return Task.FromResult(
                 $"Selector '{selector}' completed without ObjC exception after the binding fix. " +
                 $"Managed payload type: {payload.GetType().FullName}. " +
+                $"Origin argument type: {origin.GetType().FullName}.");
+        }
+        finally
+        {
+            Runtime.MarshalObjectiveCException -= OnMarshalObjectiveCException;
+        }
+    }
+#endif
+
+#if ENABLE_RUNTIME_DRIFT_CASE_ABTESTING_VALIDATERUNNINGEXPERIMENTS
+    static Task<string> VerifyABTestingValidateRunningExperimentsAsync()
+    {
+        const string selector = "validateRunningExperimentsForServiceOrigin:runningExperimentPayloads:";
+
+        var controller = ExperimentController.SharedInstance;
+        if (controller is null)
+        {
+            throw new InvalidOperationException("Firebase.ABTesting.ExperimentController.SharedInstance returned null after App.Configure().");
+        }
+
+        var signature = typeof(ExperimentController).GetMethod(
+            nameof(ExperimentController.ValidateRunningExperiments),
+            BindingFlags.Instance | BindingFlags.Public,
+            binder: null,
+            types: new[] { typeof(string), typeof(ExperimentPayload[]) },
+            modifiers: null);
+        if (signature is null)
+        {
+            throw new InvalidOperationException(
+                $"Expected managed API '{nameof(ExperimentController.ValidateRunningExperiments)}(string, {typeof(ExperimentPayload[]).FullName})' was not found.");
+        }
+
+        var parameters = signature.GetParameters();
+        if (parameters.Length != 2 || parameters[1].ParameterType != typeof(ExperimentPayload[]))
+        {
+            throw new InvalidOperationException(
+                $"Managed signature regression: expected payload parameter type '{typeof(ExperimentPayload[]).FullName}', observed '{parameters.ElementAtOrDefault(1)?.ParameterType.FullName ?? "<missing>"}'.");
+        }
+
+        var payloads = Array.Empty<ExperimentPayload>();
+        var origin = "codex";
+        NSException? marshaledException = null;
+        MarshalObjectiveCExceptionMode? marshaledExceptionMode = null;
+
+        void OnMarshalObjectiveCException(object? sender, MarshalObjectiveCExceptionEventArgs args)
+        {
+            marshaledException ??= args.Exception;
+            marshaledExceptionMode ??= args.ExceptionMode;
+        }
+
+        Runtime.MarshalObjectiveCException += OnMarshalObjectiveCException;
+        try
+        {
+            try
+            {
+                controller.ValidateRunningExperiments(origin, payloads);
+            }
+            catch (ObjCException ex)
+            {
+                throw new InvalidOperationException(
+                    $"Selector '{selector}' should not throw after the binding fix, but observed {ex.GetType().FullName}. " +
+                    $"Managed payload array type: {payloads.GetType().FullName}. Payload count: {payloads.Length}. " +
+                    $"Origin argument type: {origin.GetType().FullName}. " +
+                    $"NSException.Name: {FormatDetail(marshaledException?.Name?.ToString())}. " +
+                    $"NSException.Reason: {FormatDetail(marshaledException?.Reason)}. " +
+                    $"Marshal mode: {FormatDetail(marshaledExceptionMode?.ToString())}.",
+                    ex);
+            }
+
+            if (marshaledException is not null)
+            {
+                throw new InvalidOperationException(
+                    $"Selector '{selector}' completed, but Runtime.MarshalObjectiveCException captured unexpected NSException.Name '{marshaledException.Name}'. " +
+                    $"Reason: {FormatDetail(marshaledException.Reason)}. Marshal mode: {FormatDetail(marshaledExceptionMode?.ToString())}.");
+            }
+
+            return Task.FromResult(
+                $"Selector '{selector}' completed without ObjC exception after the binding fix. " +
+                $"Managed signature payload type: {parameters[1].ParameterType.FullName}. " +
+                $"Managed payload array type: {payloads.GetType().FullName}. Payload count: {payloads.Length}. " +
                 $"Origin argument type: {origin.GetType().FullName}.");
         }
         finally
