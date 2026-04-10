@@ -143,6 +143,25 @@ static class FirebaseRuntimeDriftCases
             throw new InvalidOperationException("Firebase.ABTesting.ExperimentController.SharedInstance returned null after App.Configure().");
         }
 
+        var signature = typeof(ExperimentController).GetMethod(
+            nameof(ExperimentController.ValidateRunningExperiments),
+            BindingFlags.Instance | BindingFlags.Public,
+            binder: null,
+            types: new[] { typeof(string), typeof(ExperimentPayload[]) },
+            modifiers: null);
+        if (signature is null)
+        {
+            throw new InvalidOperationException(
+                $"Expected managed API '{nameof(ExperimentController.ValidateRunningExperiments)}(string, {typeof(ExperimentPayload[]).FullName})' was not found.");
+        }
+
+        var parameters = signature.GetParameters();
+        if (parameters.Length != 2 || parameters[1].ParameterType != typeof(ExperimentPayload[]))
+        {
+            throw new InvalidOperationException(
+                $"Managed signature regression: expected payload parameter type '{typeof(ExperimentPayload[]).FullName}', observed '{parameters.ElementAtOrDefault(1)?.ParameterType.FullName ?? "<missing>"}'.");
+        }
+
         var payloads = Array.Empty<ExperimentPayload>();
         var origin = "codex";
         NSException? marshaledException = null;
@@ -182,6 +201,7 @@ static class FirebaseRuntimeDriftCases
 
             return Task.FromResult(
                 $"Selector '{selector}' completed without ObjC exception after the binding fix. " +
+                $"Managed signature payload type: {parameters[1].ParameterType.FullName}. " +
                 $"Managed payload array type: {payloads.GetType().FullName}. Payload count: {payloads.Length}. " +
                 $"Origin argument type: {origin.GetType().FullName}.");
         }
