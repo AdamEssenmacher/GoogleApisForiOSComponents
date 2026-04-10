@@ -40,6 +40,11 @@ namespace Firebase.Analytics
 		[Export ("setSessionTimeoutInterval:")]
 		void SetSessionTimeoutInterval (double sessionTimeoutInterval);
 
+		// + (void)sessionIDWithCompletion:(void (^)(int64_t sessionID, NSError *_Nullable error))completion;
+		[Static]
+		[Export ("sessionIDWithCompletion:")]
+		void SessionIdWithCompletion (Action<long, NSError> completion);
+
 		// + (nullable NSString *)appInstanceID;
 		[Static]
 		[NullAllowed]

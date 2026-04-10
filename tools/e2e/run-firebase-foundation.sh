@@ -124,7 +124,7 @@ method = case.get("method")
 binding_package = case.get("bindingPackage")
 packages = case.get("packages", [])
 
-if not method or not binding_package or not packages:
+if not method or not binding_package or packages is None:
     raise SystemExit(f"Runtime drift case '{case_id}' is missing required manifest fields.")
 
 symbol = "ENABLE_RUNTIME_DRIFT_CASE_" + re.sub(r"[^A-Za-z0-9]+", "_", case_id).strip("_").upper()
@@ -153,6 +153,7 @@ PY
   runtime_drift_details=("${(@f)$(<"$runtime_drift_info")}")
   runtime_drift_method="${runtime_drift_details[1]}"
   runtime_drift_binding_package="${runtime_drift_details[2]}"
+  required_packages+=("$runtime_drift_binding_package")
   for (( i = 3; i <= ${#runtime_drift_details[@]}; i++ )); do
     required_packages+=("${runtime_drift_details[$i]}")
   done
