@@ -4,18 +4,18 @@ using ObjCRuntime;
 
 namespace Firebase.CloudFunctions {
 	public partial class CloudFunctions {
-		static string? currentVersion;
+		static string currentVersion;
 
 		public static string CurrentVersion {
 			get {
 				if (currentVersion == null) {
 					IntPtr RTLD_MAIN_ONLY = Dlfcn.dlopen (null, 0);
 					IntPtr ptr = Dlfcn.dlsym (RTLD_MAIN_ONLY, "FirebaseCloudFunctionsVersionStr");
-					currentVersion = Marshal.PtrToStringAnsi (ptr) ?? string.Empty;
+					currentVersion = Marshal.PtrToStringAnsi (ptr);
 					Dlfcn.dlclose (RTLD_MAIN_ONLY);
 				}
 
-				return currentVersion ?? string.Empty;
+				return currentVersion;
 			}
 		}
 
