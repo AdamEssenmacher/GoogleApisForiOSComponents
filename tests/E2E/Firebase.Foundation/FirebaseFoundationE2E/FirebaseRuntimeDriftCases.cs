@@ -1,5 +1,11 @@
 using System.Reflection;
 
+#if ENABLE_RUNTIME_DRIFT_CASE_ABTESTING_ACTIVATEEXPERIMENT
+using Firebase.ABTesting;
+using Foundation;
+using ObjCRuntime;
+#endif
+
 #if ENABLE_RUNTIME_DRIFT_CASE_CLOUDFIRESTORE_GETQUERYNAMED
 using Firebase.CloudFirestore;
 using Foundation;
@@ -59,6 +65,66 @@ static class FirebaseRuntimeDriftCases
             .FirstOrDefault(attribute => string.Equals(attribute.Key, key, StringComparison.Ordinal))
             ?.Value;
     }
+
+#if ENABLE_RUNTIME_DRIFT_CASE_ABTESTING_ACTIVATEEXPERIMENT
+    static Task<string> VerifyABTestingActivateExperimentAsync()
+    {
+        const string selector = "activateExperiment:forServiceOrigin:";
+
+        var controller = ExperimentController.SharedInstance;
+        if (controller is null)
+        {
+            throw new InvalidOperationException("Firebase.ABTesting.ExperimentController.SharedInstance returned null after App.Configure().");
+        }
+
+        var payload = new ExperimentPayload();
+        var origin = "codex";
+        NSException? marshaledException = null;
+        MarshalObjectiveCExceptionMode? marshaledExceptionMode = null;
+
+        void OnMarshalObjectiveCException(object? sender, MarshalObjectiveCExceptionEventArgs args)
+        {
+            marshaledException ??= args.Exception;
+            marshaledExceptionMode ??= args.ExceptionMode;
+        }
+
+        Runtime.MarshalObjectiveCException += OnMarshalObjectiveCException;
+        try
+        {
+            try
+            {
+                controller.ActivateExperiment(payload, origin);
+            }
+            catch (ObjCException ex)
+            {
+                throw new InvalidOperationException(
+                    $"Selector '{selector}' should not throw after the binding fix, but observed {ex.GetType().FullName}. " +
+                    $"Managed payload type: {payload.GetType().FullName}. " +
+                    $"Origin argument type: {origin.GetType().FullName}. " +
+                    $"NSException.Name: {FormatDetail(marshaledException?.Name?.ToString())}. " +
+                    $"NSException.Reason: {FormatDetail(marshaledException?.Reason)}. " +
+                    $"Marshal mode: {FormatDetail(marshaledExceptionMode?.ToString())}.",
+                    ex);
+            }
+
+            if (marshaledException is not null)
+            {
+                throw new InvalidOperationException(
+                    $"Selector '{selector}' completed, but Runtime.MarshalObjectiveCException captured unexpected NSException.Name '{marshaledException.Name}'. " +
+                    $"Reason: {FormatDetail(marshaledException.Reason)}. Marshal mode: {FormatDetail(marshaledExceptionMode?.ToString())}.");
+            }
+
+            return Task.FromResult(
+                $"Selector '{selector}' completed without ObjC exception after the binding fix. " +
+                $"Managed payload type: {payload.GetType().FullName}. " +
+                $"Origin argument type: {origin.GetType().FullName}.");
+        }
+        finally
+        {
+            Runtime.MarshalObjectiveCException -= OnMarshalObjectiveCException;
+        }
+    }
+#endif
 
 #if ENABLE_RUNTIME_DRIFT_CASE_CLOUDFIRESTORE_GETQUERYNAMED
     static async Task<string> VerifyCloudFirestoreGetQueryNamedAsync()

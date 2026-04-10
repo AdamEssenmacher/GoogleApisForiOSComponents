@@ -1,6 +1,17 @@
 {
   "cases": [
     {
+      "id": "abtesting-activateexperiment",
+      "method": "VerifyABTestingActivateExperimentAsync",
+      "bindingPackage": "AdamE.Firebase.iOS.ABTesting",
+      "packages": [
+        {
+          "id": "AdamE.Firebase.iOS.ABTesting",
+          "version": "12.6.0"
+        }
+      ]
+    },
+    {
       "id": "cloudfirestore-getquerynamed",
       "method": "VerifyCloudFirestoreGetQueryNamedAsync",
       "bindingPackage": "AdamE.Firebase.iOS.CloudFirestore",
