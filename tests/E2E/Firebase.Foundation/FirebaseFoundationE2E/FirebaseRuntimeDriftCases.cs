@@ -99,12 +99,12 @@ static class FirebaseRuntimeDriftCases
             nameof(Analytics.SessionIdWithCompletion),
             BindingFlags.Static | BindingFlags.Public,
             binder: null,
-            types: new[] { typeof(SessionIdCompletionHandler) },
+            types: new[] { typeof(Action<long, NSError>) },
             modifiers: null);
         if (signature is null)
         {
             throw new InvalidOperationException(
-                $"Expected managed API '{nameof(Analytics.SessionIdWithCompletion)}({typeof(SessionIdCompletionHandler).FullName})' was not found.");
+                $"Expected managed API '{nameof(Analytics.SessionIdWithCompletion)}({typeof(Action<long, NSError>).FullName})' was not found.");
         }
 
         Analytics.SetAnalyticsCollectionEnabled(true);
@@ -144,7 +144,7 @@ static class FirebaseRuntimeDriftCases
             {
                 throw new InvalidOperationException(
                     $"Selector '{selector}' should not throw after the missing binding is added, but observed {ex.GetType().FullName}. " +
-                    $"Completion delegate type: {typeof(SessionIdCompletionHandler).FullName}. " +
+                    $"Completion delegate type: {typeof(Action<long, NSError>).FullName}. " +
                     $"NSException.Name: {FormatDetail(marshaledException?.Name?.ToString())}. " +
                     $"NSException.Reason: {FormatDetail(marshaledException?.Reason)}. " +
                     $"Marshal mode: {FormatDetail(marshaledExceptionMode?.ToString())}.",
@@ -173,7 +173,7 @@ static class FirebaseRuntimeDriftCases
 
             return
                 $"Selector '{selector}' invoked its completion callback without ObjC exception. " +
-                $"Completion delegate type: {typeof(SessionIdCompletionHandler).FullName}. " +
+                $"Completion delegate type: {typeof(Action<long, NSError>).FullName}. " +
                 $"SessionId: {callbackSessionId}. " +
                 $"NSError: {callbackError?.LocalizedDescription ?? "<null>"}.";
         }
