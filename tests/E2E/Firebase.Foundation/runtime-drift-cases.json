@@ -1,0 +1,15 @@
+{
+  "cases": [
+    {
+      "id": "cloudfirestore-getquerynamed",
+      "method": "VerifyCloudFirestoreGetQueryNamedAsync",
+      "bindingPackage": "AdamE.Firebase.iOS.CloudFirestore",
+      "packages": [
+        {
+          "id": "AdamE.Firebase.iOS.CloudFirestore",
+          "version": "12.6.0"
+        }
+      ]
+    }
+  ]
+}

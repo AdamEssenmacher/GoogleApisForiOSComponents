@@ -26,6 +26,11 @@ public static class FirebaseSelfTestRunner
 #if ENABLE_NULLABILITY_VALIDATION
         await statusViewController.AppendLineAsync("Firebase nullability validation mode enabled.");
 #endif
+        var runtimeDriftCase = FirebaseRuntimeDriftCases.GetConfiguredCaseId();
+        if (!string.IsNullOrWhiteSpace(runtimeDriftCase))
+        {
+            await statusViewController.AppendLineAsync($"Runtime drift case mode enabled: {runtimeDriftCase}");
+        }
 
         try
         {
@@ -44,74 +49,82 @@ public static class FirebaseSelfTestRunner
                 return $"Configured app '{defaultApp.Name}'.";
             });
 
-            await ExecuteCaseAsync(result, statusViewController, "CoreSurface", async () =>
+            if (!string.IsNullOrWhiteSpace(runtimeDriftCase))
             {
-                var defaultApp = App.DefaultInstance ?? throw new InvalidOperationException("Firebase.Core.App.DefaultInstance returned null.");
-                var firebaseVersion = App.FirebaseVersion;
-
-                if (string.IsNullOrWhiteSpace(firebaseVersion))
+                await ExecuteCaseAsync(result, statusViewController, $"RuntimeDrift:{runtimeDriftCase}", () =>
+                    FirebaseRuntimeDriftCases.ExecuteConfiguredCaseAsync());
+            }
+            else
+            {
+                await ExecuteCaseAsync(result, statusViewController, "CoreSurface", async () =>
                 {
-                    throw new InvalidOperationException("Firebase.Core.App.FirebaseVersion returned an empty value.");
-                }
+                    var defaultApp = App.DefaultInstance ?? throw new InvalidOperationException("Firebase.Core.App.DefaultInstance returned null.");
+                    var firebaseVersion = App.FirebaseVersion;
 
-                result.FirebaseVersion = firebaseVersion;
-                return $"Firebase version: {firebaseVersion}; app name: {defaultApp.Name}.";
-            });
+                    if (string.IsNullOrWhiteSpace(firebaseVersion))
+                    {
+                        throw new InvalidOperationException("Firebase.Core.App.FirebaseVersion returned an empty value.");
+                    }
+
+                    result.FirebaseVersion = firebaseVersion;
+                    return $"Firebase version: {firebaseVersion}; app name: {defaultApp.Name}.";
+                });
 
 #if ENABLE_NULLABILITY_VALIDATION
-            await ExecuteCaseAsync(result, statusViewController, "CoreNullabilitySurface", () =>
-                FirebaseNullabilityValidation.VerifyCoreNullabilityAsync());
+                await ExecuteCaseAsync(result, statusViewController, "CoreNullabilitySurface", () =>
+                    FirebaseNullabilityValidation.VerifyCoreNullabilityAsync());
 
-            await ExecuteCaseAsync(result, statusViewController, "AnalyticsNullabilitySurface", () =>
-                FirebaseNullabilityValidation.VerifyAnalyticsNullabilityAsync());
+                await ExecuteCaseAsync(result, statusViewController, "AnalyticsNullabilitySurface", () =>
+                    FirebaseNullabilityValidation.VerifyAnalyticsNullabilityAsync());
 
-            await ExecuteCaseAsync(result, statusViewController, "AppCheckNullabilitySurface", () =>
-                FirebaseNullabilityValidation.VerifyAppCheckNullabilityAsync());
+                await ExecuteCaseAsync(result, statusViewController, "AppCheckNullabilitySurface", () =>
+                    FirebaseNullabilityValidation.VerifyAppCheckNullabilityAsync());
 
-            await ExecuteCaseAsync(result, statusViewController, "CloudMessagingNullabilitySurface", () =>
-                FirebaseNullabilityValidation.VerifyCloudMessagingNullabilityAsync());
+                await ExecuteCaseAsync(result, statusViewController, "CloudMessagingNullabilitySurface", () =>
+                    FirebaseNullabilityValidation.VerifyCloudMessagingNullabilityAsync());
 
-            await ExecuteCaseAsync(result, statusViewController, "CloudFirestoreNullabilitySurface", () =>
-                FirebaseNullabilityValidation.VerifyCloudFirestoreNullabilityAsync());
+                await ExecuteCaseAsync(result, statusViewController, "CloudFirestoreNullabilitySurface", () =>
+                    FirebaseNullabilityValidation.VerifyCloudFirestoreNullabilityAsync());
 
-            await ExecuteCaseAsync(result, statusViewController, "CrashlyticsNullabilitySurface", () =>
-                FirebaseNullabilityValidation.VerifyCrashlyticsNullabilityAsync());
+                await ExecuteCaseAsync(result, statusViewController, "CrashlyticsNullabilitySurface", () =>
+                    FirebaseNullabilityValidation.VerifyCrashlyticsNullabilityAsync());
 
-            await ExecuteCaseAsync(result, statusViewController, "DatabaseNullabilitySurface", () =>
-                FirebaseNullabilityValidation.VerifyDatabaseNullabilityAsync());
+                await ExecuteCaseAsync(result, statusViewController, "DatabaseNullabilitySurface", () =>
+                    FirebaseNullabilityValidation.VerifyDatabaseNullabilityAsync());
 
-            await ExecuteCaseAsync(result, statusViewController, "PerformanceNullabilitySurface", () =>
-                FirebaseNullabilityValidation.VerifyPerformanceNullabilityAsync());
+                await ExecuteCaseAsync(result, statusViewController, "PerformanceNullabilitySurface", () =>
+                    FirebaseNullabilityValidation.VerifyPerformanceNullabilityAsync());
 #endif
 
-            await ExecuteCaseAsync(result, statusViewController, "InstallationsSurface", async () =>
-            {
-                var installations = Installations.DefaultInstance ?? throw new InvalidOperationException("Firebase.Installations.Installations.DefaultInstance returned null.");
-                var installationId = await GetInstallationIdAsync(installations);
-                result.InstallationsIdPreview = installationId.Length > 16
-                    ? installationId[..8] + "..." + installationId[^8..]
-                    : installationId;
-                return $"Installation id: {result.InstallationsIdPreview}.";
-            });
-
-            await ExecuteCaseAsync(result, statusViewController, "AnalyticsSurface", async () =>
-            {
-                Analytics.SetAnalyticsCollectionEnabled(true);
-                Analytics.SetConsent(new Dictionary<ConsentType, ConsentStatus>
+                await ExecuteCaseAsync(result, statusViewController, "InstallationsSurface", async () =>
                 {
-                    [ConsentType.AnalyticsStorage] = ConsentStatus.Granted,
-                    [ConsentType.AdStorage] = ConsentStatus.Denied,
+                    var installations = Installations.DefaultInstance ?? throw new InvalidOperationException("Firebase.Installations.Installations.DefaultInstance returned null.");
+                    var installationId = await GetInstallationIdAsync(installations);
+                    result.InstallationsIdPreview = installationId.Length > 16
+                        ? installationId[..8] + "..." + installationId[^8..]
+                        : installationId;
+                    return $"Installation id: {result.InstallationsIdPreview}.";
                 });
 
-                Analytics.LogEvent(EventNamesConstants.ScreenView.ToString(), new Dictionary<object, object>
+                await ExecuteCaseAsync(result, statusViewController, "AnalyticsSurface", async () =>
                 {
-                    [ParameterNamesConstants.ScreenName] = new NSString("firebase_nuget_e2e"),
-                    [ParameterNamesConstants.ScreenClass] = new NSString(nameof(FirebaseSelfTestRunner)),
-                    [ParameterNamesConstants.Success] = NSNumber.FromBoolean(true),
-                });
+                    Analytics.SetAnalyticsCollectionEnabled(true);
+                    Analytics.SetConsent(new Dictionary<ConsentType, ConsentStatus>
+                    {
+                        [ConsentType.AnalyticsStorage] = ConsentStatus.Granted,
+                        [ConsentType.AdStorage] = ConsentStatus.Denied,
+                    });
 
-                return "Analytics collection and event APIs completed without throwing.";
-            });
+                    Analytics.LogEvent(EventNamesConstants.ScreenView.ToString(), new Dictionary<object, object>
+                    {
+                        [ParameterNamesConstants.ScreenName] = new NSString("firebase_nuget_e2e"),
+                        [ParameterNamesConstants.ScreenClass] = new NSString(nameof(FirebaseSelfTestRunner)),
+                        [ParameterNamesConstants.Success] = NSNumber.FromBoolean(true),
+                    });
+
+                    return "Analytics collection and event APIs completed without throwing.";
+                });
+            }
         }
         catch (Exception ex)
         {

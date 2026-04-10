@@ -15,7 +15,12 @@
     <IsPackable>false</IsPackable>
     <ProvisioningType>manual</ProvisioningType>
     <EnableNullabilityValidation>false</EnableNullabilityValidation>
+    <RuntimeDriftCase></RuntimeDriftCase>
+    <RuntimeDriftCaseMethod></RuntimeDriftCaseMethod>
+    <RuntimeDriftCasePropsPath></RuntimeDriftCasePropsPath>
   </PropertyGroup>
+
+  <Import Project="$(RuntimeDriftCasePropsPath)" Condition="'$(RuntimeDriftCasePropsPath)' != '' and Exists('$(RuntimeDriftCasePropsPath)')" />
 
   <PropertyGroup Condition="'$(EnableNullabilityValidation)' == 'true'">
     <DefineConstants>$(DefineConstants);ENABLE_NULLABILITY_VALIDATION</DefineConstants>
@@ -40,6 +45,17 @@
   <ItemGroup>
     <None Remove="GoogleService-Info.plist" Condition="Exists('GoogleService-Info.plist')" />
     <BundleResource Include="GoogleService-Info.plist" Condition="Exists('GoogleService-Info.plist')" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(RuntimeDriftCase)' != ''">
+    <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+      <_Parameter1>RuntimeDriftCase</_Parameter1>
+      <_Parameter2>$(RuntimeDriftCase)</_Parameter2>
+    </AssemblyAttribute>
+    <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute" Condition="'$(RuntimeDriftCaseMethod)' != ''">
+      <_Parameter1>RuntimeDriftCaseMethod</_Parameter1>
+      <_Parameter2>$(RuntimeDriftCaseMethod)</_Parameter2>
+    </AssemblyAttribute>
   </ItemGroup>
 
   <ItemGroup>
