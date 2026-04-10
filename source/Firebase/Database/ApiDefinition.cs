@@ -595,6 +595,11 @@ namespace Firebase.Database
 		[Static]
 		[Export ("timestamp")]
 		NSDictionary Timestamp { get; }
+
+		// +(NSDictionary * _Nonnull)increment:(NSNumber * _Nonnull)delta;
+		[Static]
+		[Export ("increment:")]
+		NSDictionary Increment (NSNumber delta);
 	}
 
 	// @interface FIRTransactionResult : NSObject

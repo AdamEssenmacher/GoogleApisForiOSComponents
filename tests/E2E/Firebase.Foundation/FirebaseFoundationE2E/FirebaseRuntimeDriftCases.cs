@@ -1,5 +1,11 @@
 using System.Reflection;
 
+#if ENABLE_RUNTIME_DRIFT_CASE_DATABASE_SERVERVALUE_INCREMENT
+using Firebase.Database;
+using Foundation;
+using ObjCRuntime;
+#endif
+
 #if ENABLE_RUNTIME_DRIFT_CASE_ABTESTING_UPDATEEXPERIMENTS
 using Firebase.ABTesting;
 using Foundation;
@@ -77,6 +83,75 @@ static class FirebaseRuntimeDriftCases
             .FirstOrDefault(attribute => string.Equals(attribute.Key, key, StringComparison.Ordinal))
             ?.Value;
     }
+
+#if ENABLE_RUNTIME_DRIFT_CASE_DATABASE_SERVERVALUE_INCREMENT
+    static Task<string> VerifyDatabaseServerValueIncrementAsync()
+    {
+        const string selector = "increment:";
+
+        var signature = typeof(ServerValue).GetMethod(
+            nameof(ServerValue.Increment),
+            BindingFlags.Static | BindingFlags.Public,
+            binder: null,
+            types: new[] { typeof(NSNumber) },
+            modifiers: null);
+        if (signature is null)
+        {
+            throw new InvalidOperationException(
+                $"Expected managed API '{nameof(ServerValue.Increment)}({typeof(NSNumber).FullName})' was not found.");
+        }
+
+        using var delta = NSNumber.FromInt64(1);
+        NSException? marshaledException = null;
+        MarshalObjectiveCExceptionMode? marshaledExceptionMode = null;
+
+        void OnMarshalObjectiveCException(object? sender, MarshalObjectiveCExceptionEventArgs args)
+        {
+            marshaledException ??= args.Exception;
+            marshaledExceptionMode ??= args.ExceptionMode;
+        }
+
+        Runtime.MarshalObjectiveCException += OnMarshalObjectiveCException;
+        try
+        {
+            NSDictionary placeholder;
+            try
+            {
+                placeholder = ServerValue.Increment(delta);
+            }
+            catch (ObjCException ex)
+            {
+                throw new InvalidOperationException(
+                    $"Selector '{selector}' should not throw for a valid NSNumber delta, but observed {ex.GetType().FullName}. " +
+                    $"Managed delta argument type: {delta.GetType().FullName}. " +
+                    $"NSException.Name: {FormatDetail(marshaledException?.Name?.ToString())}. " +
+                    $"NSException.Reason: {FormatDetail(marshaledException?.Reason)}. " +
+                    $"Marshal mode: {FormatDetail(marshaledExceptionMode?.ToString())}.",
+                    ex);
+            }
+
+            if (marshaledException is not null)
+            {
+                throw new InvalidOperationException(
+                    $"Selector '{selector}' completed, but Runtime.MarshalObjectiveCException captured unexpected NSException.Name '{marshaledException.Name}'. " +
+                    $"Reason: {FormatDetail(marshaledException.Reason)}. Marshal mode: {FormatDetail(marshaledExceptionMode?.ToString())}.");
+            }
+
+            if (placeholder.Count == 0)
+            {
+                throw new InvalidOperationException("ServerValue.Increment returned an empty placeholder dictionary.");
+            }
+
+            return Task.FromResult(
+                $"Selector '{selector}' returned a non-empty placeholder dictionary. " +
+                $"Managed delta argument type: {delta.GetType().FullName}. Placeholder count: {placeholder.Count}.");
+        }
+        finally
+        {
+            Runtime.MarshalObjectiveCException -= OnMarshalObjectiveCException;
+        }
+    }
+#endif
 
 #if ENABLE_RUNTIME_DRIFT_CASE_ABTESTING_UPDATEEXPERIMENTS
     static async Task<string> VerifyABTestingUpdateExperimentsAsync()
