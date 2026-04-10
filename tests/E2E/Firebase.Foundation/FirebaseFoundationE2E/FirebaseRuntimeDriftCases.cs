@@ -176,12 +176,37 @@ static class FirebaseRuntimeDriftCases
                         $"CloudFunctions.EmulatorOrigin returned '{FormatDetail(cachedOrigin)}' after UseFunctionsEmulatorOrigin, expected '{origin}'.");
                 }
 
+                var recreatedWrapper = (CloudFunctions?)Activator.CreateInstance(
+                    typeof(CloudFunctions),
+                    BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic,
+                    binder: null,
+                    args: new object?[] { functions.Handle },
+                    culture: null);
+                if (recreatedWrapper is null)
+                {
+                    throw new InvalidOperationException("Failed to create a second managed CloudFunctions wrapper for the same native handle.");
+                }
+
+                var recreatedOrigin = recreatedWrapper.EmulatorOrigin;
+                if (!string.Equals(recreatedOrigin, origin, StringComparison.Ordinal))
+                {
+                    throw new InvalidOperationException(
+                        $"CloudFunctions.EmulatorOrigin returned '{FormatDetail(recreatedOrigin)}' from a recreated wrapper, expected '{origin}'.");
+                }
+
                 functions.UseEmulatorOriginWithHost("127.0.0.1", 5002);
                 cachedOrigin = functions.EmulatorOrigin;
                 if (!string.Equals(cachedOrigin, "127.0.0.1:5002", StringComparison.Ordinal))
                 {
                     throw new InvalidOperationException(
                         $"CloudFunctions.EmulatorOrigin returned '{FormatDetail(cachedOrigin)}' after UseEmulatorOriginWithHost, expected '127.0.0.1:5002'.");
+                }
+
+                recreatedOrigin = recreatedWrapper.EmulatorOrigin;
+                if (!string.Equals(recreatedOrigin, "127.0.0.1:5002", StringComparison.Ordinal))
+                {
+                    throw new InvalidOperationException(
+                        $"CloudFunctions.EmulatorOrigin returned '{FormatDetail(recreatedOrigin)}' from a recreated wrapper after UseEmulatorOriginWithHost, expected '127.0.0.1:5002'.");
                 }
             }
             catch (ObjCException ex)
@@ -206,7 +231,9 @@ static class FirebaseRuntimeDriftCases
                 $"Selector '{selector}' completed without ObjC exception after the binding fix. " +
                 $"Runtime argument type: {origin.GetType().FullName}. " +
                 $"Cached origin after legacy method: {origin}. " +
-                $"Cached origin after host/port method: 127.0.0.1:5002.");
+                $"Recreated wrapper origin after legacy method: {origin}. " +
+                $"Cached origin after host/port method: 127.0.0.1:5002. " +
+                $"Recreated wrapper origin after host/port method: 127.0.0.1:5002.");
         }
         finally
         {

@@ -1,17 +1,21 @@
 ﻿using System;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using Foundation;
 using ObjCRuntime;
 namespace Firebase.CloudFunctions {
 	public partial class CloudFunctions {
 		static string? currentVersion;
 		// The current native SDK only exposes useEmulatorWithHost:port: to ObjC, so preserve the
-		// managed emulatorOrigin/useFunctionsEmulatorOrigin API by caching the last requested origin.
-		static readonly ConditionalWeakTable<CloudFunctions, EmulatorOriginState> emulatorOrigins = new ();
+		// managed emulatorOrigin/useFunctionsEmulatorOrigin API by caching the last requested origin
+		// on the native FIRFunctions instance itself.
+		static readonly NSString emulatorOriginAssociationKey = new ("Firebase.CloudFunctions.EmulatorOrigin");
+		const nuint AssociationPolicyRetainNonAtomic = 1;
 
-		sealed class EmulatorOriginState {
-			public string? Origin { get; set; }
-		}
+		[DllImport (Constants.ObjectiveCLibrary)]
+		static extern IntPtr objc_getAssociatedObject (IntPtr obj, IntPtr key);
+
+		[DllImport (Constants.ObjectiveCLibrary)]
+		static extern void objc_setAssociatedObject (IntPtr obj, IntPtr key, IntPtr value, nuint policy);
 
 		public static string CurrentVersion {
 			get {
@@ -29,13 +33,22 @@ namespace Firebase.CloudFunctions {
 		public const string CloudFunctionsErrorDomain = "com.firebase.functions";
 		public const string CloudFunctionsErrorDetailsKey = "details";
 
-		public string? EmulatorOrigin => emulatorOrigins.GetOrCreateValue (this).Origin;
+		public string? EmulatorOrigin {
+			get {
+				var handle = objc_getAssociatedObject (Handle, emulatorOriginAssociationKey.Handle);
+				if (handle == IntPtr.Zero)
+					return null;
+
+				var value = Runtime.GetNSObject<NSString> (handle, false);
+				return value?.ToString ();
+			}
+		}
 
 		public void UseFunctionsEmulatorOrigin (string origin)
 		{
 			var (host, port) = ParseEmulatorOrigin (origin);
 			UseEmulatorOriginWithHost (host, port);
-			emulatorOrigins.GetOrCreateValue (this).Origin = origin;
+			SetCachedEmulatorOrigin (origin);
 		}
 
 		public void UseEmulatorOriginWithHost (string host, uint port)
@@ -44,7 +57,13 @@ namespace Firebase.CloudFunctions {
 				throw new ArgumentException ("Host must not be null or empty.", nameof (host));
 
 			_UseEmulatorOriginWithHost (host, checked ((nint) port));
-			emulatorOrigins.GetOrCreateValue (this).Origin = $"{host}:{port}";
+			SetCachedEmulatorOrigin ($"{host}:{port}");
+		}
+
+		void SetCachedEmulatorOrigin (string origin)
+		{
+			using var value = new NSString (origin);
+			objc_setAssociatedObject (Handle, emulatorOriginAssociationKey.Handle, value.Handle, AssociationPolicyRetainNonAtomic);
 		}
 
 		static (string Host, uint Port) ParseEmulatorOrigin (string origin)
