@@ -6,6 +6,12 @@ using Foundation;
 using ObjCRuntime;
 #endif
 
+#if ENABLE_RUNTIME_DRIFT_CASE_CLOUDFUNCTIONS_USEFUNCTIONSEMULATORORIGIN
+using Firebase.CloudFunctions;
+using Foundation;
+using ObjCRuntime;
+#endif
+
 namespace FirebaseFoundationE2E;
 
 static class FirebaseRuntimeDriftCases
@@ -128,6 +134,95 @@ static class FirebaseRuntimeDriftCases
                 $"CallbackInvoked: {callbackInvoked}. " +
                 $"ReturnedQueryWasNull: {returnedQueryWasNull}. " +
                 $"ReturnedQueryType: {returnedQuery?.GetType().FullName ?? "<null>"}.";
+        }
+        finally
+        {
+            Runtime.MarshalObjectiveCException -= OnMarshalObjectiveCException;
+        }
+    }
+#endif
+
+#if ENABLE_RUNTIME_DRIFT_CASE_CLOUDFUNCTIONS_USEFUNCTIONSEMULATORORIGIN
+    static Task<string> VerifyCloudFunctionsUseFunctionsEmulatorOriginAsync()
+    {
+        const string staleSelector = "useFunctionsEmulatorOrigin:";
+        const string liveSelector = "useEmulatorWithHost:port:";
+
+        var functions = CloudFunctions.DefaultInstance;
+        if (functions is null)
+        {
+            throw new InvalidOperationException("Firebase.CloudFunctions.CloudFunctions.DefaultInstance returned null after App.Configure().");
+        }
+
+        var staleMethod = typeof(CloudFunctions).GetMethod(
+            "UseFunctionsEmulatorOrigin",
+            BindingFlags.Instance | BindingFlags.Public,
+            binder: null,
+            types: new[] { typeof(string) },
+            modifiers: null);
+        if (staleMethod is not null)
+        {
+            throw new InvalidOperationException(
+                $"CloudFunctions still exposes stale managed API '{staleMethod.Name}', so callers can still reach selector '{staleSelector}'.");
+        }
+
+        var staleProperty = typeof(CloudFunctions).GetProperty("EmulatorOrigin", BindingFlags.Instance | BindingFlags.Public);
+        if (staleProperty is not null)
+        {
+            throw new InvalidOperationException(
+                $"CloudFunctions still exposes stale managed property '{staleProperty.Name}', which no longer maps to a real ObjC surface.");
+        }
+
+        if (functions.RespondsToSelector(new Selector(staleSelector)))
+        {
+            throw new InvalidOperationException(
+                $"Native FIRFunctions still responds to stale selector '{staleSelector}', so the runtime drift would still be reachable.");
+        }
+
+        if (!functions.RespondsToSelector(new Selector(liveSelector)))
+        {
+            throw new InvalidOperationException(
+                $"Native FIRFunctions does not respond to expected live selector '{liveSelector}'.");
+        }
+
+        NSException? marshaledException = null;
+        MarshalObjectiveCExceptionMode? marshaledExceptionMode = null;
+
+        void OnMarshalObjectiveCException(object? sender, MarshalObjectiveCExceptionEventArgs args)
+        {
+            marshaledException ??= args.Exception;
+            marshaledExceptionMode ??= args.ExceptionMode;
+        }
+
+        Runtime.MarshalObjectiveCException += OnMarshalObjectiveCException;
+        try
+        {
+            try
+            {
+                functions.UseEmulatorOriginWithHost("127.0.0.1", 5002);
+            }
+            catch (ObjCException ex)
+            {
+                throw new InvalidOperationException(
+                    $"Selector '{liveSelector}' should not throw after the binding fix, but observed {ex.GetType().FullName}. " +
+                    $"Runtime host argument type: {typeof(string).FullName}. Runtime port argument type: {typeof(uint).FullName}. " +
+                    $"NSException.Name: {FormatDetail(marshaledException?.Name?.ToString())}. " +
+                    $"NSException.Reason: {FormatDetail(marshaledException?.Reason)}. " +
+                    $"Marshal mode: {FormatDetail(marshaledExceptionMode?.ToString())}.",
+                    ex);
+            }
+
+            if (marshaledException is not null)
+            {
+                throw new InvalidOperationException(
+                    $"Cloud Functions emulator API completed, but Runtime.MarshalObjectiveCException captured unexpected NSException.Name '{marshaledException.Name}'. " +
+                    $"Reason: {FormatDetail(marshaledException.Reason)}. Marshal mode: {FormatDetail(marshaledExceptionMode?.ToString())}.");
+            }
+
+            return Task.FromResult(
+                $"Removed stale managed selector '{staleSelector}' and property 'EmulatorOrigin'. " +
+                $"Live selector '{liveSelector}' completed without ObjC exception after the binding fix. " +
+                $"Runtime host argument type: {typeof(string).FullName}. Runtime port argument type: {typeof(uint).FullName}.");
         }
         finally
         {

@@ -66,7 +66,7 @@ The runner writes logs and JSON results under:
 
 ## Optional nullability validation mode
 
-This project also supports an opt-in nullability validation lane that exercises the shipped consumer APIs for the current Firebase nullability fixes and verifies those APIs still work with the broadened contracts. The lane is binding-focused: configuration-dependent Firebase errors are acceptable as long as the managed API crosses into native correctly and does not fail with a binding-layer exception. It currently covers the fixes that are safely exercisable in the E2E app; Cloud Functions is intentionally out of scope here because `emulatorOrigin` and `useFunctionsEmulatorOrigin:` are a separate selector-binding issue.
+This project also supports an opt-in nullability validation lane that exercises the shipped consumer APIs for the current Firebase nullability fixes and verifies those APIs still work with the broadened contracts. The lane is binding-focused: configuration-dependent Firebase errors are acceptable as long as the managed API crosses into native correctly and does not fail with a binding-layer exception. It currently covers the fixes that are safely exercisable in the E2E app; Cloud Functions remains out of scope for the nullability lane, and selector-oriented runtime cases are handled through the targeted runtime drift mode instead.
 
 1. Pack the Firebase slices used by the validation lane and their dependencies:
 
