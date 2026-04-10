@@ -1,6 +1,17 @@
 {
   "cases": [
     {
+      "id": "database-servervalue-increment",
+      "method": "VerifyDatabaseServerValueIncrementAsync",
+      "bindingPackage": "AdamE.Firebase.iOS.Database",
+      "packages": [
+        {
+          "id": "AdamE.Firebase.iOS.Database",
+          "version": "12.6.0"
+        }
+      ]
+    },
+    {
       "id": "abtesting-updateexperiments",
       "method": "VerifyABTestingUpdateExperimentsAsync",
       "bindingPackage": "AdamE.Firebase.iOS.ABTesting",
