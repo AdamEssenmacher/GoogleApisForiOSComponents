@@ -1,5 +1,11 @@
 using System.Reflection;
 
+#if ENABLE_RUNTIME_DRIFT_CASE_ABTESTING_UPDATEEXPERIMENTS
+using Firebase.ABTesting;
+using Foundation;
+using ObjCRuntime;
+#endif
+
 #if ENABLE_RUNTIME_DRIFT_CASE_ABTESTING_ACTIVATEEXPERIMENT
 using Firebase.ABTesting;
 using Foundation;
@@ -71,6 +77,123 @@ static class FirebaseRuntimeDriftCases
             .FirstOrDefault(attribute => string.Equals(attribute.Key, key, StringComparison.Ordinal))
             ?.Value;
     }
+
+#if ENABLE_RUNTIME_DRIFT_CASE_ABTESTING_UPDATEEXPERIMENTS
+    static async Task<string> VerifyABTestingUpdateExperimentsAsync()
+    {
+        const string selector = "updateExperimentsWithServiceOrigin:events:policy:lastStartTime:payloads:completionHandler:";
+
+        var signature = typeof(ExperimentController).GetMethod(
+            nameof(ExperimentController.UpdateExperiments),
+            BindingFlags.Instance | BindingFlags.Public,
+            binder: null,
+            types: new[]
+            {
+                typeof(string),
+                typeof(LifecycleEvents),
+                typeof(ExperimentPayloadExperimentOverflowPolicy),
+                typeof(double),
+                typeof(NSData[]),
+                typeof(Action<NSError>)
+            },
+            modifiers: null);
+        if (signature is null)
+        {
+            throw new InvalidOperationException(
+                $"Expected managed API '{nameof(ExperimentController.UpdateExperiments)}(string, {typeof(LifecycleEvents).FullName}, {typeof(ExperimentPayloadExperimentOverflowPolicy).FullName}, double, {typeof(NSData[]).FullName}, {typeof(Action<NSError>).FullName})' was not found.");
+        }
+
+        var parameters = signature.GetParameters();
+        if (parameters.Length != 6 || parameters[2].ParameterType != typeof(ExperimentPayloadExperimentOverflowPolicy))
+        {
+            throw new InvalidOperationException(
+                $"Managed signature regression: expected policy parameter type '{typeof(ExperimentPayloadExperimentOverflowPolicy).FullName}', observed '{parameters.ElementAtOrDefault(2)?.ParameterType.FullName ?? "<missing>"}'.");
+        }
+
+        var controller = ExperimentController.SharedInstance;
+        if (controller is null)
+        {
+            throw new InvalidOperationException("Firebase.ABTesting.ExperimentController.SharedInstance returned null after App.Configure().");
+        }
+
+        var events = new LifecycleEvents
+        {
+            SetExperimentEventName = new NSString("codex_set_experiment"),
+            ActivateExperimentEventName = new NSString("codex_activate_experiment"),
+            ClearExperimentEventName = new NSString("codex_clear_experiment"),
+            TimeoutExperimentEventName = new NSString("codex_timeout_experiment"),
+            ExpireExperimentEventName = new NSString("codex_expire_experiment"),
+        };
+        var policy = ExperimentPayloadExperimentOverflowPolicy.DiscardOldest;
+        var payloads = Array.Empty<NSData>();
+        var completionInvoked = false;
+        NSError? completionError = null;
+        NSException? marshaledException = null;
+        MarshalObjectiveCExceptionMode? marshaledExceptionMode = null;
+        var completionSource = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+
+        void OnMarshalObjectiveCException(object? sender, MarshalObjectiveCExceptionEventArgs args)
+        {
+            marshaledException ??= args.Exception;
+            marshaledExceptionMode ??= args.ExceptionMode;
+        }
+
+        Runtime.MarshalObjectiveCException += OnMarshalObjectiveCException;
+        try
+        {
+            try
+            {
+                controller.UpdateExperiments("codex", events, policy, -1, payloads, error =>
+                {
+                    completionInvoked = true;
+                    completionError = error;
+                    completionSource.TrySetResult(true);
+                });
+            }
+            catch (ObjCException ex)
+            {
+                throw new InvalidOperationException(
+                    $"Selector '{selector}' should not throw with the corrected enum binding, but observed {ex.GetType().FullName}. " +
+                    $"Managed policy argument type: {policy.GetType().FullName}. Policy value: {(int)policy}. " +
+                    $"Payload array type: {payloads.GetType().FullName}. Payload count: {payloads.Length}. " +
+                    $"NSException.Name: {FormatDetail(marshaledException?.Name?.ToString())}. " +
+                    $"NSException.Reason: {FormatDetail(marshaledException?.Reason)}. " +
+                    $"Marshal mode: {FormatDetail(marshaledExceptionMode?.ToString())}.",
+                    ex);
+            }
+
+            var completedTask = await Task.WhenAny(completionSource.Task, Task.Delay(AsyncTimeout));
+            if (completedTask != completionSource.Task)
+            {
+                throw new TimeoutException(
+                    $"Selector '{selector}' did not invoke its completion callback within {AsyncTimeout.TotalSeconds} seconds.");
+            }
+
+            if (!completionInvoked)
+            {
+                throw new InvalidOperationException(
+                    $"Selector '{selector}' completed without throwing, but the completion callback was never marked as invoked.");
+            }
+
+            if (marshaledException is not null)
+            {
+                throw new InvalidOperationException(
+                    $"Selector '{selector}' completed, but Runtime.MarshalObjectiveCException captured unexpected NSException.Name '{marshaledException.Name}'. " +
+                    $"Reason: {FormatDetail(marshaledException.Reason)}. Marshal mode: {FormatDetail(marshaledExceptionMode?.ToString())}.");
+            }
+
+            return
+                $"Selector '{selector}' completed without ObjC exception. " +
+                $"Managed policy argument type: {parameters[2].ParameterType.FullName}. Policy value: {(int)policy}. " +
+                $"Payload array type: {payloads.GetType().FullName}. Payload count: {payloads.Length}. " +
+                $"CompletionInvoked: {completionInvoked}. CompletionError: {FormatDetail(completionError?.LocalizedDescription)}.";
+        }
+        finally
+        {
+            Runtime.MarshalObjectiveCException -= OnMarshalObjectiveCException;
+        }
+    }
+#endif
 
 #if ENABLE_RUNTIME_DRIFT_CASE_ABTESTING_ACTIVATEEXPERIMENT
     static Task<string> VerifyABTestingActivateExperimentAsync()

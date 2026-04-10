@@ -20,6 +20,7 @@ log_file="$artifacts_dir/firebase-foundation-sim.log"
 result_file="$artifacts_dir/firebase-foundation-result.json"
 restore_config="$artifacts_dir/NuGet.generated.config"
 repo_restore_config="$repo_root/tests/E2E/Firebase.Foundation/NuGet.config"
+packages_cache_dir="$artifacts_dir/packages"
 runtime_drift_manifest="$repo_root/tests/E2E/Firebase.Foundation/runtime-drift-cases.json"
 runtime_drift_props="$artifacts_dir/runtime-drift-case.generated.props"
 runtime_drift_info="$artifacts_dir/runtime-drift-case.info"
@@ -63,6 +64,9 @@ fi
 mkdir -p "$artifacts_dir"
 : > "$log_file"
 
+rm -rf "$packages_cache_dir"
+mkdir -p "$packages_cache_dir"
+
 if [[ "$enable_nullability_validation" == "true" && -n "$runtime_drift_case" ]]; then
   echo "--enable-nullability-validation and --runtime-drift-case cannot be used together." >&2
   exit 1
@@ -80,6 +84,7 @@ required_packages=(
 )
 
 msbuild_args=()
+restore_args=()
 if [[ "$enable_nullability_validation" == "true" ]]; then
   required_packages+=(
     "AdamE.Firebase.iOS.AppCheck"
@@ -157,6 +162,7 @@ PY
     "-p:RuntimeDriftCaseMethod=$runtime_drift_method"
     "-p:RuntimeDriftCasePropsPath=$runtime_drift_props"
   )
+  restore_args+=("--force-evaluate")
 
   echo "Runtime drift case: $runtime_drift_case ($runtime_drift_binding_package)"
 fi
@@ -198,7 +204,15 @@ if [[ ! -f "$config_file" ]]; then
 fi
 
 echo "Restoring FirebaseFoundationE2E from $package_dir"
-dotnet restore "$project_file" --configfile "$restore_config" "${msbuild_args[@]}"
+dotnet restore "$project_file" --configfile "$restore_config" --packages "$packages_cache_dir" "${restore_args[@]}" "${msbuild_args[@]}"
+
+echo "Cleaning FirebaseFoundationE2E for iOS simulator"
+dotnet clean "$project_file" \
+  --configuration "$configuration" \
+  --framework net9.0-ios \
+  -p:Platform=iPhoneSimulator \
+  -p:RuntimeIdentifier=iossimulator-arm64 \
+  "${msbuild_args[@]}"
 
 echo "Building FirebaseFoundationE2E for iOS simulator"
 dotnet build "$project_file" \
