@@ -102,7 +102,7 @@ namespace Firebase.Crashlytics {
 
 		// + (instancetype)stackFrameWithAddress:(NSUInteger)address;
 		[Static]
-		[Export ("stackFrameWithAddress:address")]
+		[Export ("stackFrameWithAddress:")]
 		StackFrame Create (nuint address);
 
 		// +(instancetype _Nonnull)stackFrameWithSymbol:(NSString * _Nonnull)symbol file:(NSString * _Nonnull)file line:(NSInteger)line __attribute__((availability(swift, unavailable)));

@@ -42,6 +42,11 @@ using Foundation;
 using ObjCRuntime;
 #endif
 
+#if ENABLE_RUNTIME_DRIFT_CASE_CRASHLYTICS_STACKFRAMEWITHADDRESS
+using Firebase.Crashlytics;
+using ObjCRuntime;
+#endif
+
 namespace FirebaseFoundationE2E;
 
 static class FirebaseRuntimeDriftCases
@@ -673,6 +678,72 @@ static class FirebaseRuntimeDriftCases
                 $"Removed stale managed selector '{staleSelector}' and property 'EmulatorOrigin'. " +
                 $"Live selector '{liveSelector}' completed without ObjC exception after the binding fix. " +
                 $"Runtime host argument type: {typeof(string).FullName}. Runtime port argument type: {typeof(uint).FullName}.");
+        }
+        finally
+        {
+            Runtime.MarshalObjectiveCException -= OnMarshalObjectiveCException;
+        }
+    }
+#endif
+
+#if ENABLE_RUNTIME_DRIFT_CASE_CRASHLYTICS_STACKFRAMEWITHADDRESS
+    static Task<string> VerifyCrashlyticsStackFrameWithAddressAsync()
+    {
+        const string staleSelector = "stackFrameWithAddress:address";
+        const string liveSelector = "stackFrameWithAddress:";
+
+        var signature = typeof(StackFrame).GetMethod(
+            nameof(StackFrame.Create),
+            BindingFlags.Static | BindingFlags.Public,
+            binder: null,
+            types: new[] { typeof(nuint) },
+            modifiers: null);
+        if (signature is null)
+        {
+            throw new InvalidOperationException(
+                $"Expected managed API '{nameof(StackFrame.Create)}({typeof(nuint).FullName})' was not found.");
+        }
+
+        var marshaledExceptionCaptured = false;
+        MarshalObjectiveCExceptionMode? marshaledExceptionMode = null;
+
+        void OnMarshalObjectiveCException(object? sender, MarshalObjectiveCExceptionEventArgs args)
+        {
+            marshaledExceptionCaptured = true;
+            marshaledExceptionMode ??= args.ExceptionMode;
+        }
+
+        Runtime.MarshalObjectiveCException += OnMarshalObjectiveCException;
+        try
+        {
+            try
+            {
+                using var stackFrame = StackFrame.Create((nuint)1);
+                if (stackFrame is null)
+                {
+                    throw new InvalidOperationException(
+                        $"Selector '{liveSelector}' returned null after the binding fix. Runtime address argument type: {typeof(nuint).FullName}.");
+                }
+            }
+            catch (ObjCException ex)
+            {
+                throw new InvalidOperationException(
+                    $"Selector '{liveSelector}' should not throw after the binding fix, but observed {ex.GetType().FullName}. " +
+                    $"Stale selector was '{staleSelector}'. " +
+                    $"Runtime address argument type: {typeof(nuint).FullName}. " +
+                    $"Marshal mode: {FormatDetail(marshaledExceptionMode?.ToString())}.");
+            }
+
+            if (marshaledExceptionCaptured)
+            {
+                throw new InvalidOperationException(
+                    $"Selector '{liveSelector}' completed, but Runtime.MarshalObjectiveCException captured an unexpected Objective-C exception. " +
+                    $"Marshal mode: {FormatDetail(marshaledExceptionMode?.ToString())}.");
+            }
+
+            return Task.FromResult(
+                $"Corrected stale selector '{staleSelector}' to native selector '{liveSelector}'. " +
+                $"Runtime address argument type: {typeof(nuint).FullName}; StackFrame.Create returned without ObjC exception.");
         }
         finally
         {
