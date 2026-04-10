@@ -3,6 +3,11 @@ using ObjCRuntime;
 using System;
 
 namespace Firebase.ABTesting {
+	// @class ABTExperimentPayload;
+	[BaseType (typeof (NSObject), Name = "ABTExperimentPayload")]
+	interface ExperimentPayload {
+	}
+
 	// @interface FIRExperimentController : NSObject
 	[DisableDefaultCtor]
 	[BaseType (typeof (NSObject), Name = "FIRExperimentController")]
@@ -26,7 +31,7 @@ namespace Firebase.ABTesting {
 
 		// -(void)activateExperiment:(ABTExperimentPayload * _Nonnull)experimentPayload forServiceOrigin:(NSString * _Nonnull)origin;
 		[Export ("activateExperiment:forServiceOrigin:")]
-		void ActivateExperiment (NSObject experimentPayload, string origin);
+		void ActivateExperiment (ExperimentPayload experimentPayload, string origin);
 	}
 
 	[Static]
