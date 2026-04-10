@@ -1,6 +1,12 @@
 {
   "cases": [
     {
+      "id": "analytics-sessionidwithcompletion",
+      "method": "VerifyAnalyticsSessionIdWithCompletionAsync",
+      "bindingPackage": "AdamE.Firebase.iOS.Analytics",
+      "packages": []
+    },
+    {
       "id": "database-servervalue-increment",
       "method": "VerifyDatabaseServerValueIncrementAsync",
       "bindingPackage": "AdamE.Firebase.iOS.Database",

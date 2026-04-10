@@ -6,6 +6,8 @@ using ObjCRuntime;
 
 namespace Firebase.Analytics
 {
+	delegate void SessionIdCompletionHandler (long sessionId, [NullAllowed] NSError error);
+
 	// @interface FIRAnalytics : NSObject
 	[DisableDefaultCtor]
 	[BaseType (typeof (NSObject), Name = "FIRAnalytics")]
@@ -39,6 +41,11 @@ namespace Firebase.Analytics
 		[Static]
 		[Export ("setSessionTimeoutInterval:")]
 		void SetSessionTimeoutInterval (double sessionTimeoutInterval);
+
+		// + (void)sessionIDWithCompletion:(void (^)(int64_t sessionID, NSError *_Nullable error))completion;
+		[Static]
+		[Export ("sessionIDWithCompletion:")]
+		void SessionIdWithCompletion (SessionIdCompletionHandler completion);
 
 		// + (nullable NSString *)appInstanceID;
 		[Static]

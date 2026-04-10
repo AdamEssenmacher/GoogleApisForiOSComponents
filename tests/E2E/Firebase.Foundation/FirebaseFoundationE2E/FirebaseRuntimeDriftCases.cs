@@ -1,5 +1,11 @@
 using System.Reflection;
 
+#if ENABLE_RUNTIME_DRIFT_CASE_ANALYTICS_SESSIONIDWITHCOMPLETION
+using Firebase.Analytics;
+using Foundation;
+using ObjCRuntime;
+#endif
+
 #if ENABLE_RUNTIME_DRIFT_CASE_DATABASE_SERVERVALUE_INCREMENT
 using Firebase.Database;
 using Foundation;
@@ -83,6 +89,100 @@ static class FirebaseRuntimeDriftCases
             .FirstOrDefault(attribute => string.Equals(attribute.Key, key, StringComparison.Ordinal))
             ?.Value;
     }
+
+#if ENABLE_RUNTIME_DRIFT_CASE_ANALYTICS_SESSIONIDWITHCOMPLETION
+    static async Task<string> VerifyAnalyticsSessionIdWithCompletionAsync()
+    {
+        const string selector = "sessionIDWithCompletion:";
+
+        var signature = typeof(Analytics).GetMethod(
+            nameof(Analytics.SessionIdWithCompletion),
+            BindingFlags.Static | BindingFlags.Public,
+            binder: null,
+            types: new[] { typeof(SessionIdCompletionHandler) },
+            modifiers: null);
+        if (signature is null)
+        {
+            throw new InvalidOperationException(
+                $"Expected managed API '{nameof(Analytics.SessionIdWithCompletion)}({typeof(SessionIdCompletionHandler).FullName})' was not found.");
+        }
+
+        Analytics.SetAnalyticsCollectionEnabled(true);
+        Analytics.SetConsent(new Dictionary<ConsentType, ConsentStatus>
+        {
+            [ConsentType.AnalyticsStorage] = ConsentStatus.Granted,
+            [ConsentType.AdStorage] = ConsentStatus.Denied,
+        });
+
+        var callbackInvoked = false;
+        long callbackSessionId = 0;
+        NSError? callbackError = null;
+        NSException? marshaledException = null;
+        MarshalObjectiveCExceptionMode? marshaledExceptionMode = null;
+        var completionSource = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+
+        void OnMarshalObjectiveCException(object? sender, MarshalObjectiveCExceptionEventArgs args)
+        {
+            marshaledException ??= args.Exception;
+            marshaledExceptionMode ??= args.ExceptionMode;
+        }
+
+        Runtime.MarshalObjectiveCException += OnMarshalObjectiveCException;
+        try
+        {
+            try
+            {
+                Analytics.SessionIdWithCompletion((sessionId, error) =>
+                {
+                    callbackInvoked = true;
+                    callbackSessionId = sessionId;
+                    callbackError = error;
+                    completionSource.TrySetResult(true);
+                });
+            }
+            catch (ObjCException ex)
+            {
+                throw new InvalidOperationException(
+                    $"Selector '{selector}' should not throw after the missing binding is added, but observed {ex.GetType().FullName}. " +
+                    $"Completion delegate type: {typeof(SessionIdCompletionHandler).FullName}. " +
+                    $"NSException.Name: {FormatDetail(marshaledException?.Name?.ToString())}. " +
+                    $"NSException.Reason: {FormatDetail(marshaledException?.Reason)}. " +
+                    $"Marshal mode: {FormatDetail(marshaledExceptionMode?.ToString())}.",
+                    ex);
+            }
+
+            var completedTask = await Task.WhenAny(completionSource.Task, Task.Delay(AsyncTimeout));
+            if (completedTask != completionSource.Task)
+            {
+                throw new TimeoutException(
+                    $"Selector '{selector}' did not invoke its completion callback within {AsyncTimeout.TotalSeconds} seconds.");
+            }
+
+            if (!callbackInvoked)
+            {
+                throw new InvalidOperationException(
+                    $"Selector '{selector}' completed without throwing, but the completion callback was never marked as invoked.");
+            }
+
+            if (marshaledException is not null)
+            {
+                throw new InvalidOperationException(
+                    $"Selector '{selector}' completed, but Runtime.MarshalObjectiveCException captured unexpected NSException.Name '{marshaledException.Name}'. " +
+                    $"Reason: {FormatDetail(marshaledException.Reason)}. Marshal mode: {FormatDetail(marshaledExceptionMode?.ToString())}.");
+            }
+
+            return
+                $"Selector '{selector}' invoked its completion callback without ObjC exception. " +
+                $"Completion delegate type: {typeof(SessionIdCompletionHandler).FullName}. " +
+                $"SessionId: {callbackSessionId}. " +
+                $"NSError: {callbackError?.LocalizedDescription ?? "<null>"}.";
+        }
+        finally
+        {
+            Runtime.MarshalObjectiveCException -= OnMarshalObjectiveCException;
+        }
+    }
+#endif
 
 #if ENABLE_RUNTIME_DRIFT_CASE_DATABASE_SERVERVALUE_INCREMENT
     static Task<string> VerifyDatabaseServerValueIncrementAsync()
