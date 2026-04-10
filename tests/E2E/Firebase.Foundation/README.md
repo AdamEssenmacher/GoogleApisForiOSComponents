@@ -35,13 +35,13 @@ The E2E app uses the fixed bundle id:
 
 The app includes a disposable `GoogleService-Info.plist` checked into:
 
-[`FirebaseFoundationE2E/GoogleService-Info.plist`](/Users/adam/RiderProjects/GoogleApisForiOSComponents/tests/E2E/Firebase.Foundation/FirebaseFoundationE2E/GoogleService-Info.plist)
+[`FirebaseFoundationE2E/GoogleService-Info.plist`](./FirebaseFoundationE2E/GoogleService-Info.plist)
 
 If the Firebase test app registration ever changes, update that file so it continues to match the fixed bundle id above.
 
 ## Local package restore
 
-[`NuGet.config`](/Users/adam/RiderProjects/GoogleApisForiOSComponents/tests/E2E/Firebase.Foundation/NuGet.config) forces all `AdamE.*` packages to restore from the local `output/` feed, which means this app validates the packages produced by the repository rather than project references.
+[`NuGet.config`](./NuGet.config) forces all `AdamE.*` packages to restore from the local `output/` feed, which means this app validates the packages produced by the repository rather than project references.
 
 ## Local workflow
 
@@ -60,7 +60,7 @@ tools/e2e/run-firebase-foundation.sh --package-dir output --configuration Debug
 
 The runner writes logs and JSON results under:
 
-[`tests/E2E/Firebase.Foundation/artifacts`](/Users/adam/RiderProjects/GoogleApisForiOSComponents/tests/E2E/Firebase.Foundation/artifacts)
+[`tests/E2E/Firebase.Foundation/artifacts`](./artifacts)
 
 `Release` remains available for manual runs, but the automated simulator lane uses `Debug` to avoid the heavier AOT/LLVM step on lower-memory machines.
 
