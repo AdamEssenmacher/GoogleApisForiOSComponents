@@ -48,9 +48,8 @@ namespace Firebase.CloudFunctions
 		HttpsCallable HttpsCallable(string name);
 
 		//- (void)useEmulatorWithHost:(NSString *)host port:(NSInteger) port;
-		[Internal]
 		[Export ("useEmulatorWithHost:port:")]
-		void _UseEmulatorOriginWithHost (string host, nint port);
+		void UseEmulatorOriginWithHost (string host, uint port);
 	}
 
 	// void (^)(FIRHTTPSCallableResult *_Nullable result, NSError *_Nullable error);

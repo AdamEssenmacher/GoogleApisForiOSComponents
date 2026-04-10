@@ -145,7 +145,8 @@ static class FirebaseRuntimeDriftCases
 #if ENABLE_RUNTIME_DRIFT_CASE_CLOUDFUNCTIONS_USEFUNCTIONSEMULATORORIGIN
     static Task<string> VerifyCloudFunctionsUseFunctionsEmulatorOriginAsync()
     {
-        const string selector = "useFunctionsEmulatorOrigin:";
+        const string staleSelector = "useFunctionsEmulatorOrigin:";
+        const string liveSelector = "useEmulatorWithHost:port:";
 
         var functions = CloudFunctions.DefaultInstance;
         if (functions is null)
@@ -153,7 +154,37 @@ static class FirebaseRuntimeDriftCases
             throw new InvalidOperationException("Firebase.CloudFunctions.CloudFunctions.DefaultInstance returned null after App.Configure().");
         }
 
-        const string origin = "localhost:5001";
+        var staleMethod = typeof(CloudFunctions).GetMethod(
+            "UseFunctionsEmulatorOrigin",
+            BindingFlags.Instance | BindingFlags.Public,
+            binder: null,
+            types: new[] { typeof(string) },
+            modifiers: null);
+        if (staleMethod is not null)
+        {
+            throw new InvalidOperationException(
+                $"CloudFunctions still exposes stale managed API '{staleMethod.Name}', so callers can still reach selector '{staleSelector}'.");
+        }
+
+        var staleProperty = typeof(CloudFunctions).GetProperty("EmulatorOrigin", BindingFlags.Instance | BindingFlags.Public);
+        if (staleProperty is not null)
+        {
+            throw new InvalidOperationException(
+                $"CloudFunctions still exposes stale managed property '{staleProperty.Name}', which no longer maps to a real ObjC surface.");
+        }
+
+        if (functions.RespondsToSelector(new Selector(staleSelector)))
+        {
+            throw new InvalidOperationException(
+                $"Native FIRFunctions still responds to stale selector '{staleSelector}', so the runtime drift would still be reachable.");
+        }
+
+        if (!functions.RespondsToSelector(new Selector(liveSelector)))
+        {
+            throw new InvalidOperationException(
+                $"Native FIRFunctions does not respond to expected live selector '{liveSelector}'.");
+        }
+
         NSException? marshaledException = null;
         MarshalObjectiveCExceptionMode? marshaledExceptionMode = null;
 
@@ -168,52 +199,13 @@ static class FirebaseRuntimeDriftCases
         {
             try
             {
-                functions.UseFunctionsEmulatorOrigin(origin);
-                var cachedOrigin = functions.EmulatorOrigin;
-                if (!string.Equals(cachedOrigin, origin, StringComparison.Ordinal))
-                {
-                    throw new InvalidOperationException(
-                        $"CloudFunctions.EmulatorOrigin returned '{FormatDetail(cachedOrigin)}' after UseFunctionsEmulatorOrigin, expected '{origin}'.");
-                }
-
-                var recreatedWrapper = (CloudFunctions?)Activator.CreateInstance(
-                    typeof(CloudFunctions),
-                    BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic,
-                    binder: null,
-                    args: new object?[] { functions.Handle },
-                    culture: null);
-                if (recreatedWrapper is null)
-                {
-                    throw new InvalidOperationException("Failed to create a second managed CloudFunctions wrapper for the same native handle.");
-                }
-
-                var recreatedOrigin = recreatedWrapper.EmulatorOrigin;
-                if (!string.Equals(recreatedOrigin, origin, StringComparison.Ordinal))
-                {
-                    throw new InvalidOperationException(
-                        $"CloudFunctions.EmulatorOrigin returned '{FormatDetail(recreatedOrigin)}' from a recreated wrapper, expected '{origin}'.");
-                }
-
                 functions.UseEmulatorOriginWithHost("127.0.0.1", 5002);
-                cachedOrigin = functions.EmulatorOrigin;
-                if (!string.Equals(cachedOrigin, "127.0.0.1:5002", StringComparison.Ordinal))
-                {
-                    throw new InvalidOperationException(
-                        $"CloudFunctions.EmulatorOrigin returned '{FormatDetail(cachedOrigin)}' after UseEmulatorOriginWithHost, expected '127.0.0.1:5002'.");
-                }
-
-                recreatedOrigin = recreatedWrapper.EmulatorOrigin;
-                if (!string.Equals(recreatedOrigin, "127.0.0.1:5002", StringComparison.Ordinal))
-                {
-                    throw new InvalidOperationException(
-                        $"CloudFunctions.EmulatorOrigin returned '{FormatDetail(recreatedOrigin)}' from a recreated wrapper after UseEmulatorOriginWithHost, expected '127.0.0.1:5002'.");
-                }
             }
             catch (ObjCException ex)
             {
                 throw new InvalidOperationException(
-                    $"Selector '{selector}' should not throw after the binding fix, but observed {ex.GetType().FullName}. " +
-                    $"Runtime argument type: {origin.GetType().FullName}. " +
+                    $"Selector '{liveSelector}' should not throw after the binding fix, but observed {ex.GetType().FullName}. " +
+                    $"Runtime host argument type: {typeof(string).FullName}. Runtime port argument type: {typeof(uint).FullName}. " +
                     $"NSException.Name: {FormatDetail(marshaledException?.Name?.ToString())}. " +
                     $"NSException.Reason: {FormatDetail(marshaledException?.Reason)}. " +
                     $"Marshal mode: {FormatDetail(marshaledExceptionMode?.ToString())}.",
@@ -228,12 +220,9 @@ static class FirebaseRuntimeDriftCases
             }
 
             return Task.FromResult(
-                $"Selector '{selector}' completed without ObjC exception after the binding fix. " +
-                $"Runtime argument type: {origin.GetType().FullName}. " +
-                $"Cached origin after legacy method: {origin}. " +
-                $"Recreated wrapper origin after legacy method: {origin}. " +
-                $"Cached origin after host/port method: 127.0.0.1:5002. " +
-                $"Recreated wrapper origin after host/port method: 127.0.0.1:5002.");
+                $"Removed stale managed selector '{staleSelector}' and property 'EmulatorOrigin'. " +
+                $"Live selector '{liveSelector}' completed without ObjC exception after the binding fix. " +
+                $"Runtime host argument type: {typeof(string).FullName}. Runtime port argument type: {typeof(uint).FullName}.");
         }
         finally
         {
