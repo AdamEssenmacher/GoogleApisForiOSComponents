@@ -71,6 +71,17 @@
           "version": "12.6.0"
         }
       ]
+    },
+    {
+      "id": "crashlytics-stackframewithaddress",
+      "method": "VerifyCrashlyticsStackFrameWithAddressAsync",
+      "bindingPackage": "AdamE.Firebase.iOS.Crashlytics",
+      "packages": [
+        {
+          "id": "AdamE.Firebase.iOS.Crashlytics",
+          "version": "12.6.0"
+        }
+      ]
     }
   ]
 }
