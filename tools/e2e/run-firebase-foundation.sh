@@ -3,7 +3,7 @@ set -euo pipefail
 
 usage() {
   cat <<'EOF'
-Usage: tools/e2e/run-firebase-foundation.sh [--package-dir output] [--configuration Release] [--enable-nullability-validation]
+Usage: tools/e2e/run-firebase-foundation.sh [--package-dir output] [--configuration Release] [--enable-nullability-validation] [--runtime-drift-case <id>]
 EOF
 }
 
@@ -13,12 +13,18 @@ project_file="$project_dir/FirebaseFoundationE2E.csproj"
 bundle_id="com.googleapisforioscomponents.tests.firebase.e2e"
 configuration="Release"
 enable_nullability_validation="false"
+runtime_drift_case=""
 package_dir="$repo_root/output"
 artifacts_dir="$repo_root/tests/E2E/Firebase.Foundation/artifacts"
 log_file="$artifacts_dir/firebase-foundation-sim.log"
 result_file="$artifacts_dir/firebase-foundation-result.json"
 restore_config="$artifacts_dir/NuGet.generated.config"
 repo_restore_config="$repo_root/tests/E2E/Firebase.Foundation/NuGet.config"
+runtime_drift_manifest="$repo_root/tests/E2E/Firebase.Foundation/runtime-drift-cases.json"
+runtime_drift_props="$artifacts_dir/runtime-drift-case.generated.props"
+runtime_drift_info="$artifacts_dir/runtime-drift-case.info"
+runtime_drift_method=""
+runtime_drift_binding_package=""
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -33,6 +39,10 @@ while [[ $# -gt 0 ]]; do
     --enable-nullability-validation)
       enable_nullability_validation="true"
       shift
+      ;;
+    --runtime-drift-case)
+      runtime_drift_case="$2"
+      shift 2
       ;;
     --help|-h)
       usage
@@ -52,6 +62,11 @@ fi
 
 mkdir -p "$artifacts_dir"
 : > "$log_file"
+
+if [[ "$enable_nullability_validation" == "true" && -n "$runtime_drift_case" ]]; then
+  echo "--enable-nullability-validation and --runtime-drift-case cannot be used together." >&2
+  exit 1
+fi
 
 required_packages=(
   "AdamE.Firebase.iOS.Core"
@@ -75,6 +90,75 @@ if [[ "$enable_nullability_validation" == "true" ]]; then
     "AdamE.Firebase.iOS.PerformanceMonitoring"
   )
   msbuild_args+=("-p:EnableNullabilityValidation=true")
+fi
+
+if [[ -n "$runtime_drift_case" ]]; then
+  if [[ ! -f "$runtime_drift_manifest" ]]; then
+    echo "Missing runtime drift manifest: $runtime_drift_manifest" >&2
+    exit 1
+  fi
+
+  python3 - "$runtime_drift_manifest" "$runtime_drift_case" "$runtime_drift_props" > "$runtime_drift_info" <<'PY'
+import json
+import pathlib
+import re
+import sys
+from xml.sax.saxutils import escape
+
+manifest_path = pathlib.Path(sys.argv[1])
+case_id = sys.argv[2]
+props_path = pathlib.Path(sys.argv[3])
+manifest = json.loads(manifest_path.read_text())
+
+case = next((entry for entry in manifest.get("cases", []) if entry.get("id") == case_id), None)
+if case is None:
+    available = ", ".join(sorted(entry.get("id", "<missing>") for entry in manifest.get("cases", [])))
+    raise SystemExit(f"Unknown runtime drift case '{case_id}'. Available cases: {available}")
+
+method = case.get("method")
+binding_package = case.get("bindingPackage")
+packages = case.get("packages", [])
+
+if not method or not binding_package or not packages:
+    raise SystemExit(f"Runtime drift case '{case_id}' is missing required manifest fields.")
+
+symbol = "ENABLE_RUNTIME_DRIFT_CASE_" + re.sub(r"[^A-Za-z0-9]+", "_", case_id).strip("_").upper()
+props_path.write_text(
+    "<Project>\n"
+    "  <PropertyGroup>\n"
+    f"    <RuntimeDriftCase>{escape(case_id)}</RuntimeDriftCase>\n"
+    f"    <RuntimeDriftCaseMethod>{escape(method)}</RuntimeDriftCaseMethod>\n"
+    f"    <DefineConstants>$(DefineConstants);ENABLE_RUNTIME_DRIFT_CASE;{escape(symbol)}</DefineConstants>\n"
+    "  </PropertyGroup>\n"
+    "  <ItemGroup>\n"
+    + "".join(
+        f"    <PackageReference Include=\"{escape(package['id'])}\" Version=\"{escape(package['version'])}\" />\n"
+        for package in packages
+    )
+    + "  </ItemGroup>\n"
+    "</Project>\n"
+)
+
+print(method)
+print(binding_package)
+for package in packages:
+    print(package["id"])
+PY
+
+  runtime_drift_details=("${(@f)$(<"$runtime_drift_info")}")
+  runtime_drift_method="${runtime_drift_details[1]}"
+  runtime_drift_binding_package="${runtime_drift_details[2]}"
+  for (( i = 3; i <= ${#runtime_drift_details[@]}; i++ )); do
+    required_packages+=("${runtime_drift_details[$i]}")
+  done
+
+  msbuild_args+=(
+    "-p:RuntimeDriftCase=$runtime_drift_case"
+    "-p:RuntimeDriftCaseMethod=$runtime_drift_method"
+    "-p:RuntimeDriftCasePropsPath=$runtime_drift_props"
+  )
+
+  echo "Runtime drift case: $runtime_drift_case ($runtime_drift_binding_package)"
 fi
 
 for package_name in "${required_packages[@]}"; do

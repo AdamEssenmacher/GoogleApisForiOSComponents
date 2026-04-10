@@ -448,7 +448,7 @@ namespace Firebase.CloudFirestore
 
 		// - (void)getQueryNamed:(NSString *)name completion:(void (^)(FIRQuery *_Nullable query))completion
 		[Export ("getQueryNamed:completion:")]
-		void GetQueryNamed (NSInputStream bundleStream, Action<Query> completion);
+		void GetQueryNamed (string name, Action<Query> completion);
 	}
 
 	// @interface FIRTimestamp : NSObject <NSCopying>
