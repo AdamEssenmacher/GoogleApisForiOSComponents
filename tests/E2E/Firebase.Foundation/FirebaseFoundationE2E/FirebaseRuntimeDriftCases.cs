@@ -6,6 +6,12 @@ using Foundation;
 using ObjCRuntime;
 #endif
 
+#if ENABLE_RUNTIME_DRIFT_CASE_CLOUDFUNCTIONS_USEFUNCTIONSEMULATORORIGIN
+using Firebase.CloudFunctions;
+using Foundation;
+using ObjCRuntime;
+#endif
+
 namespace FirebaseFoundationE2E;
 
 static class FirebaseRuntimeDriftCases
@@ -128,6 +134,79 @@ static class FirebaseRuntimeDriftCases
                 $"CallbackInvoked: {callbackInvoked}. " +
                 $"ReturnedQueryWasNull: {returnedQueryWasNull}. " +
                 $"ReturnedQueryType: {returnedQuery?.GetType().FullName ?? "<null>"}.";
+        }
+        finally
+        {
+            Runtime.MarshalObjectiveCException -= OnMarshalObjectiveCException;
+        }
+    }
+#endif
+
+#if ENABLE_RUNTIME_DRIFT_CASE_CLOUDFUNCTIONS_USEFUNCTIONSEMULATORORIGIN
+    static Task<string> VerifyCloudFunctionsUseFunctionsEmulatorOriginAsync()
+    {
+        const string selector = "useFunctionsEmulatorOrigin:";
+
+        var functions = CloudFunctions.DefaultInstance;
+        if (functions is null)
+        {
+            throw new InvalidOperationException("Firebase.CloudFunctions.CloudFunctions.DefaultInstance returned null after App.Configure().");
+        }
+
+        const string origin = "localhost:5001";
+        NSException? marshaledException = null;
+        MarshalObjectiveCExceptionMode? marshaledExceptionMode = null;
+
+        void OnMarshalObjectiveCException(object? sender, MarshalObjectiveCExceptionEventArgs args)
+        {
+            marshaledException ??= args.Exception;
+            marshaledExceptionMode ??= args.ExceptionMode;
+        }
+
+        Runtime.MarshalObjectiveCException += OnMarshalObjectiveCException;
+        try
+        {
+            try
+            {
+                functions.UseFunctionsEmulatorOrigin(origin);
+                var cachedOrigin = functions.EmulatorOrigin;
+                if (!string.Equals(cachedOrigin, origin, StringComparison.Ordinal))
+                {
+                    throw new InvalidOperationException(
+                        $"CloudFunctions.EmulatorOrigin returned '{FormatDetail(cachedOrigin)}' after UseFunctionsEmulatorOrigin, expected '{origin}'.");
+                }
+
+                functions.UseEmulatorOriginWithHost("127.0.0.1", 5002);
+                cachedOrigin = functions.EmulatorOrigin;
+                if (!string.Equals(cachedOrigin, "127.0.0.1:5002", StringComparison.Ordinal))
+                {
+                    throw new InvalidOperationException(
+                        $"CloudFunctions.EmulatorOrigin returned '{FormatDetail(cachedOrigin)}' after UseEmulatorOriginWithHost, expected '127.0.0.1:5002'.");
+                }
+            }
+            catch (ObjCException ex)
+            {
+                throw new InvalidOperationException(
+                    $"Selector '{selector}' should not throw after the binding fix, but observed {ex.GetType().FullName}. " +
+                    $"Runtime argument type: {origin.GetType().FullName}. " +
+                    $"NSException.Name: {FormatDetail(marshaledException?.Name?.ToString())}. " +
+                    $"NSException.Reason: {FormatDetail(marshaledException?.Reason)}. " +
+                    $"Marshal mode: {FormatDetail(marshaledExceptionMode?.ToString())}.",
+                    ex);
+            }
+
+            if (marshaledException is not null)
+            {
+                throw new InvalidOperationException(
+                    $"Cloud Functions emulator API completed, but Runtime.MarshalObjectiveCException captured unexpected NSException.Name '{marshaledException.Name}'. " +
+                    $"Reason: {FormatDetail(marshaledException.Reason)}. Marshal mode: {FormatDetail(marshaledExceptionMode?.ToString())}.");
+            }
+
+            return Task.FromResult(
+                $"Selector '{selector}' completed without ObjC exception after the binding fix. " +
+                $"Runtime argument type: {origin.GetType().FullName}. " +
+                $"Cached origin after legacy method: {origin}. " +
+                $"Cached origin after host/port method: 127.0.0.1:5002.");
         }
         finally
         {

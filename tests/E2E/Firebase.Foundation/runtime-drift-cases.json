@@ -10,6 +10,17 @@
           "version": "12.6.0"
         }
       ]
+    },
+    {
+      "id": "cloudfunctions-usefunctionsemulatororigin",
+      "method": "VerifyCloudFunctionsUseFunctionsEmulatorOriginAsync",
+      "bindingPackage": "AdamE.Firebase.iOS.CloudFunctions",
+      "packages": [
+        {
+          "id": "AdamE.Firebase.iOS.CloudFunctions",
+          "version": "12.6.0"
+        }
+      ]
     }
   ]
 }
