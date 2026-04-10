@@ -48,6 +48,7 @@ namespace Firebase.CloudFunctions
 		HttpsCallable HttpsCallable(string name);
 
 		// @property(nonatomic, readonly, nullable) NSString *emulatorOrigin;
+		[NullAllowed]
 		[Export("emulatorOrigin")]
 		string EmulatorOrigin { get; }
 
