@@ -40,6 +40,10 @@ namespace Firebase.AppCheck {
 		[Export ("tokenForcingRefresh:completion:")]
 		void TokenForcingRefresh (bool forcingRefresh, TokenCompletionHandler handler);
 
+		// -(void)limitedUseTokenWithCompletion:(void (^ _Nonnull)(FIRAppCheckToken * _Nullable, NSError * _Nullable))handler;
+		[Export ("limitedUseTokenWithCompletion:")]
+		void LimitedUseTokenWithCompletion (TokenCompletionHandler handler);
+
 		// +(void)setAppCheckProviderFactory:(id<FIRAppCheckProviderFactory> _Nullable)factory;
 		[Static]
 		[Export ("setAppCheckProviderFactory:")]
@@ -61,6 +65,10 @@ namespace Firebase.AppCheck {
 		[Abstract]
 		[Export ("getTokenWithCompletion:")]
 		void GetTokenWithCompletion (TokenCompletionHandler handler);
+
+		// @optional -(void)getLimitedUseTokenWithCompletion:(void (^ _Nonnull)(FIRAppCheckToken * _Nullable, NSError * _Nullable))handler __attribute__((swift_name("getLimitedUseToken(completion:)")));
+		[Export ("getLimitedUseTokenWithCompletion:")]
+		void GetLimitedUseTokenWithCompletion (TokenCompletionHandler handler);
 	}
 
 	// @protocol FIRAppCheckProviderFactory <NSObject>
@@ -108,6 +116,10 @@ namespace Firebase.AppCheck {
 		// -(NSString * _Nonnull)currentDebugToken;
 		[Export ("currentDebugToken")]
 		string CurrentDebugToken { get; }
+
+		// -(void)getLimitedUseTokenWithCompletion:(void (^ _Nonnull)(FIRAppCheckToken * _Nullable, NSError * _Nullable))handler __attribute__((swift_name("getLimitedUseToken(completion:)")));
+		[Export ("getLimitedUseTokenWithCompletion:")]
+		void GetLimitedUseTokenWithCompletion (TokenCompletionHandler handler);
 	}
 
 	// @interface FIRAppCheckDebugProviderFactory : NSObject <FIRAppCheckProviderFactory>
