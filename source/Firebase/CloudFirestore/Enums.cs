@@ -50,6 +50,12 @@ namespace Firebase.CloudFirestore
 	}
 
 	[Native]
+	public enum AggregateSource : ulong
+	{
+		Server
+	}
+
+	[Native]
 	public enum LoadBundleTaskState : long
 	{
 		Error,

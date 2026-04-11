@@ -357,6 +357,73 @@ namespace Firebase.CloudFirestore
 		NativeHandle Constructor (NSNumber [] array);
 	}
 
+	// @interface FIRAggregateField : NSObject
+	[DisableDefaultCtor]
+	[BaseType (typeof (NSObject), Name = "FIRAggregateField")]
+	interface AggregateField
+	{
+		// +(instancetype _Nonnull)aggregateFieldForCount;
+		[Static]
+		[Export ("aggregateFieldForCount")]
+		AggregateField Count { get; }
+
+		// +(instancetype _Nonnull)aggregateFieldForSumOfField:(NSString * _Nonnull)field;
+		[Static]
+		[Export ("aggregateFieldForSumOfField:")]
+		AggregateField Sum (string field);
+
+		// +(instancetype _Nonnull)aggregateFieldForSumOfFieldPath:(FIRFieldPath * _Nonnull)fieldPath;
+		[Static]
+		[Export ("aggregateFieldForSumOfFieldPath:")]
+		AggregateField Sum (FieldPath fieldPath);
+
+		// +(instancetype _Nonnull)aggregateFieldForAverageOfField:(NSString * _Nonnull)field;
+		[Static]
+		[Export ("aggregateFieldForAverageOfField:")]
+		AggregateField Average (string field);
+
+		// +(instancetype _Nonnull)aggregateFieldForAverageOfFieldPath:(FIRFieldPath * _Nonnull)fieldPath;
+		[Static]
+		[Export ("aggregateFieldForAverageOfFieldPath:")]
+		AggregateField Average (FieldPath fieldPath);
+	}
+
+	// typedef void (^FIRAggregateQuerySnapshotBlock)(FIRAggregateQuerySnapshot * _Nullable, NSError * _Nullable);
+	delegate void AggregateQuerySnapshotHandler ([NullAllowed] AggregateQuerySnapshot snapshot, [NullAllowed] NSError error);
+
+	// @interface FIRAggregateQuery : NSObject
+	[DisableDefaultCtor]
+	[BaseType (typeof (NSObject), Name = "FIRAggregateQuery")]
+	interface AggregateQuery
+	{
+		// @property (readonly, nonatomic) FIRQuery * _Nonnull query;
+		[Export ("query", ArgumentSemantic.Strong)]
+		Query Query { get; }
+
+		// -(void)aggregationWithSource:(FIRAggregateSource)source completion:(void (^ _Nonnull)(FIRAggregateQuerySnapshot * _Nullable, NSError * _Nullable))completion;
+		[Async]
+		[Export ("aggregationWithSource:completion:")]
+		void GetAggregation (AggregateSource source, AggregateQuerySnapshotHandler completion);
+	}
+
+	// @interface FIRAggregateQuerySnapshot : NSObject
+	[DisableDefaultCtor]
+	[BaseType (typeof (NSObject), Name = "FIRAggregateQuerySnapshot")]
+	interface AggregateQuerySnapshot
+	{
+		// @property (readonly, nonatomic) FIRAggregateQuery * _Nonnull query;
+		[Export ("query", ArgumentSemantic.Strong)]
+		AggregateQuery Query { get; }
+
+		// @property (readonly, nonatomic) NSNumber * _Nonnull count;
+		[Export ("count", ArgumentSemantic.Strong)]
+		NSNumber Count { get; }
+
+		// -(id _Nonnull)valueForAggregateField:(FIRAggregateField * _Nonnull)aggregateField;
+		[Export ("valueForAggregateField:")]
+		NSObject GetValue (AggregateField aggregateField);
+	}
+
 	// void (^)(id _Nullable result, NSError *_Nullable error)
 	delegate void TransactionCompletionHandler ([NullAllowed] NSObject result, [NullAllowed] NSError error);
 	// (nullable void (^)(FIRLoadBundleTaskProgress *_Nullable progress, NSError *_Nullable error)
@@ -783,6 +850,14 @@ namespace Firebase.CloudFirestore
 
 		[Wrap ("EndingAt (CloudFirestoreHelper.GetNSObjects (fieldValues))")]
 		Query EndingAt (object [] fieldValues);
+
+		// @property (readonly, nonatomic) FIRAggregateQuery * _Nonnull count;
+		[Export ("count", ArgumentSemantic.Strong)]
+		AggregateQuery Count { get; }
+
+		// -(FIRAggregateQuery * _Nonnull)aggregate:(NSArray<FIRAggregateField *> * _Nonnull)aggregateFields;
+		[Export ("aggregate:")]
+		AggregateQuery Aggregate (AggregateField [] aggregateFields);
 	}
 
 	// @interface FIRQuerySnapshot : NSObject

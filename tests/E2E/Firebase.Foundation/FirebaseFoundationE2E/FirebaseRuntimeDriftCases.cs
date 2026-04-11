@@ -54,6 +54,12 @@ using Foundation;
 using ObjCRuntime;
 #endif
 
+#if ENABLE_RUNTIME_DRIFT_CASE_CLOUDFIRESTORE_AGGREGATE_QUERY
+using Firebase.CloudFirestore;
+using Foundation;
+using ObjCRuntime;
+#endif
+
 #if ENABLE_RUNTIME_DRIFT_CASE_CLOUDFUNCTIONS_USEFUNCTIONSEMULATORORIGIN
 using Firebase.CloudFunctions;
 using Foundation;
@@ -968,6 +974,202 @@ static class FirebaseRuntimeDriftCases
                 $"Selector '{selector}' returned a VectorValue without ObjC exception after the missing binding was added. " +
                 $"Managed vector argument type: {values.GetType().FullName}. " +
                 $"Return type: {signature.ReturnType.FullName}. Vector array length: {vectorArrayLength}.");
+        }
+        finally
+        {
+            Runtime.MarshalObjectiveCException -= OnMarshalObjectiveCException;
+        }
+    }
+#endif
+
+#if ENABLE_RUNTIME_DRIFT_CASE_CLOUDFIRESTORE_AGGREGATE_QUERY
+    static Task<string> VerifyCloudFirestoreAggregateQueryAsync()
+    {
+        const string queryCountSelector = "count";
+        const string aggregateSelector = "aggregate:";
+        const string aggregateQueryQuerySelector = "query";
+        const string getAggregationSelector = "aggregationWithSource:completion:";
+
+        var queryCountProperty = typeof(Query).GetProperty(
+            nameof(Query.Count),
+            BindingFlags.Instance | BindingFlags.Public);
+        if (queryCountProperty is null)
+        {
+            throw new InvalidOperationException(
+                $"Expected managed API '{nameof(Query.Count)}' was not found on '{typeof(Query).FullName}'.");
+        }
+
+        if (queryCountProperty.PropertyType != typeof(AggregateQuery))
+        {
+            throw new InvalidOperationException(
+                $"Managed signature regression: expected '{nameof(Query.Count)}' to return '{typeof(AggregateQuery).FullName}', observed '{queryCountProperty.PropertyType.FullName}'.");
+        }
+
+        var aggregateSignature = typeof(Query).GetMethod(
+            nameof(Query.Aggregate),
+            BindingFlags.Instance | BindingFlags.Public,
+            binder: null,
+            types: new[] { typeof(AggregateField[]) },
+            modifiers: null);
+        if (aggregateSignature is null)
+        {
+            throw new InvalidOperationException(
+                $"Expected managed API '{nameof(Query.Aggregate)}({typeof(AggregateField[]).FullName})' was not found.");
+        }
+
+        if (aggregateSignature.ReturnType != typeof(AggregateQuery))
+        {
+            throw new InvalidOperationException(
+                $"Managed signature regression: expected '{nameof(Query.Aggregate)}' to return '{typeof(AggregateQuery).FullName}', observed '{aggregateSignature.ReturnType.FullName}'.");
+        }
+
+        var getAggregationSignature = typeof(AggregateQuery).GetMethod(
+            nameof(AggregateQuery.GetAggregation),
+            BindingFlags.Instance | BindingFlags.Public,
+            binder: null,
+            types: new[] { typeof(AggregateSource), typeof(AggregateQuerySnapshotHandler) },
+            modifiers: null);
+        if (getAggregationSignature is null)
+        {
+            throw new InvalidOperationException(
+                $"Expected managed API '{nameof(AggregateQuery.GetAggregation)}({typeof(AggregateSource).FullName}, {typeof(AggregateQuerySnapshotHandler).FullName})' was not found.");
+        }
+
+        var snapshotCountProperty = typeof(AggregateQuerySnapshot).GetProperty(
+            nameof(AggregateQuerySnapshot.Count),
+            BindingFlags.Instance | BindingFlags.Public);
+        if (snapshotCountProperty?.PropertyType != typeof(NSNumber))
+        {
+            throw new InvalidOperationException(
+                $"Managed signature regression: expected '{nameof(AggregateQuerySnapshot.Count)}' to return '{typeof(NSNumber).FullName}', observed '{snapshotCountProperty?.PropertyType.FullName ?? "<missing>"}'.");
+        }
+
+        var snapshotValueSignature = typeof(AggregateQuerySnapshot).GetMethod(
+            nameof(AggregateQuerySnapshot.GetValue),
+            BindingFlags.Instance | BindingFlags.Public,
+            binder: null,
+            types: new[] { typeof(AggregateField) },
+            modifiers: null);
+        if (snapshotValueSignature?.ReturnType != typeof(NSObject))
+        {
+            throw new InvalidOperationException(
+                $"Managed signature regression: expected '{nameof(AggregateQuerySnapshot.GetValue)}' to return '{typeof(NSObject).FullName}', observed '{snapshotValueSignature?.ReturnType.FullName ?? "<missing>"}'.");
+        }
+
+        var firestore = Firestore.SharedInstance;
+        if (firestore is null)
+        {
+            throw new InvalidOperationException("Firebase.CloudFirestore.Firestore.SharedInstance returned null after App.Configure().");
+        }
+
+        var query = firestore.GetCollection("codex-aggregate-e2e");
+        if (query is null)
+        {
+            throw new InvalidOperationException("Firebase.CloudFirestore.Firestore.GetCollection returned null.");
+        }
+
+        if (!query.RespondsToSelector(new Selector(queryCountSelector)))
+        {
+            throw new InvalidOperationException($"Native FIRQuery does not respond to expected selector '{queryCountSelector}'.");
+        }
+
+        if (!query.RespondsToSelector(new Selector(aggregateSelector)))
+        {
+            throw new InvalidOperationException($"Native FIRQuery does not respond to expected selector '{aggregateSelector}'.");
+        }
+
+        NSException? marshaledException = null;
+        MarshalObjectiveCExceptionMode? marshaledExceptionMode = null;
+
+        void OnMarshalObjectiveCException(object? sender, MarshalObjectiveCExceptionEventArgs args)
+        {
+            marshaledException ??= args.Exception;
+            marshaledExceptionMode ??= args.ExceptionMode;
+        }
+
+        Runtime.MarshalObjectiveCException += OnMarshalObjectiveCException;
+        try
+        {
+            AggregateField countField;
+            AggregateField sumByNameField;
+            AggregateField sumByPathField;
+            AggregateField averageByNameField;
+            AggregateField averageByPathField;
+            AggregateQuery countQuery;
+            AggregateQuery aggregateQuery;
+            Query countUnderlyingQuery;
+            Query aggregateUnderlyingQuery;
+
+            try
+            {
+                using var fieldPath = new FieldPath(new[] { "score" });
+                countField = AggregateField.Count;
+                sumByNameField = AggregateField.Sum("score");
+                sumByPathField = AggregateField.Sum(fieldPath);
+                averageByNameField = AggregateField.Average("score");
+                averageByPathField = AggregateField.Average(fieldPath);
+
+                countQuery = query.Count;
+                aggregateQuery = query.Aggregate(new[]
+                {
+                    countField,
+                    sumByNameField,
+                    sumByPathField,
+                    averageByNameField,
+                    averageByPathField,
+                });
+                countUnderlyingQuery = countQuery.Query;
+                aggregateUnderlyingQuery = aggregateQuery.Query;
+            }
+            catch (ObjCException ex)
+            {
+                throw new InvalidOperationException(
+                    $"Firestore aggregate selectors should not throw after the missing bindings are added, but observed {ex.GetType().FullName}. " +
+                    $"Selectors exercised: '{queryCountSelector}', '{aggregateSelector}', '{aggregateQueryQuerySelector}', aggregateFieldForCount, aggregateFieldForSumOfField:, aggregateFieldForSumOfFieldPath:, aggregateFieldForAverageOfField:, aggregateFieldForAverageOfFieldPath:. " +
+                    $"NSException.Name: {FormatDetail(marshaledException?.Name?.ToString())}. " +
+                    $"NSException.Reason: {FormatDetail(marshaledException?.Reason)}. " +
+                    $"Marshal mode: {FormatDetail(marshaledExceptionMode?.ToString())}.",
+                    ex);
+            }
+
+            if (marshaledException is not null)
+            {
+                throw new InvalidOperationException(
+                    $"Firestore aggregate selectors completed, but Runtime.MarshalObjectiveCException captured unexpected NSException.Name '{marshaledException.Name}'. " +
+                    $"Reason: {FormatDetail(marshaledException.Reason)}. Marshal mode: {FormatDetail(marshaledExceptionMode?.ToString())}.");
+            }
+
+            if (countQuery is null)
+            {
+                throw new InvalidOperationException($"Selector '{queryCountSelector}' returned null.");
+            }
+
+            if (aggregateQuery is null)
+            {
+                throw new InvalidOperationException($"Selector '{aggregateSelector}' returned null.");
+            }
+
+            if (countUnderlyingQuery is null)
+            {
+                throw new InvalidOperationException($"Selector '{aggregateQueryQuerySelector}' returned null for the count aggregate query.");
+            }
+
+            if (aggregateUnderlyingQuery is null)
+            {
+                throw new InvalidOperationException($"Selector '{aggregateQueryQuerySelector}' returned null for the multi-field aggregate query.");
+            }
+
+            if (!countQuery.RespondsToSelector(new Selector(getAggregationSelector)))
+            {
+                throw new InvalidOperationException($"Native FIRAggregateQuery does not respond to expected selector '{getAggregationSelector}'.");
+            }
+
+            return Task.FromResult(
+                $"Selectors '{queryCountSelector}' and '{aggregateSelector}' returned aggregate query objects without ObjC exception. " +
+                $"Aggregate field types: {countField.GetType().FullName}, {sumByNameField.GetType().FullName}, {sumByPathField.GetType().FullName}, {averageByNameField.GetType().FullName}, {averageByPathField.GetType().FullName}. " +
+                $"Count query type: {countQuery.GetType().FullName}. Aggregate query type: {aggregateQuery.GetType().FullName}. " +
+                $"Underlying query types: {countUnderlyingQuery.GetType().FullName}, {aggregateUnderlyingQuery.GetType().FullName}. " +
+                $"Aggregate query get selector present: {getAggregationSelector}.");
         }
         finally
         {
