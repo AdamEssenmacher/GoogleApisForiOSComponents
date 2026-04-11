@@ -223,6 +223,10 @@ namespace Firebase.CloudFirestore
 		// -(id<FIRListenerRegistration> _Nonnull)addSnapshotListenerWithIncludeMetadataChanges:(BOOL)includeMetadataChanges listener:(FIRDocumentSnapshotBlock _Nonnull)listener;
 		[Export ("addSnapshotListenerWithIncludeMetadataChanges:listener:")]
 		IListenerRegistration AddSnapshotListener (bool includeMetadataChanges, DocumentSnapshotHandler listener);
+
+		// -(id<FIRListenerRegistration> _Nonnull)addSnapshotListenerWithOptions:(FIRSnapshotListenOptions * _Nonnull)options listener:(FIRDocumentSnapshotBlock _Nonnull)listener;
+		[Export ("addSnapshotListenerWithOptions:listener:")]
+		IListenerRegistration AddSnapshotListener (SnapshotListenOptions options, DocumentSnapshotHandler listener);
 	}
 
 	// @interface FIRDocumentSnapshot : NSObject
@@ -833,6 +837,33 @@ namespace Firebase.CloudFirestore
 		void Remove ();
 	}
 
+	// @interface FIRSnapshotListenOptions : NSObject
+	[DisableDefaultCtor]
+	[BaseType (typeof (NSObject), Name = "FIRSnapshotListenOptions")]
+	interface SnapshotListenOptions
+	{
+		// @property(nonatomic, readonly) FIRListenSource source;
+		[Export ("source")]
+		ListenSource Source { get; }
+
+		// @property(nonatomic, readonly) BOOL includeMetadataChanges;
+		[Export ("includeMetadataChanges")]
+		bool IncludeMetadataChanges { get; }
+
+		// - (instancetype _Nonnull)init __attribute__((objc_designated_initializer));
+		[DesignatedInitializer]
+		[Export ("init")]
+		NativeHandle Constructor ();
+
+		// - (FIRSnapshotListenOptions * _Nonnull)optionsWithIncludeMetadataChanges:(BOOL)includeMetadataChanges;
+		[Export ("optionsWithIncludeMetadataChanges:")]
+		SnapshotListenOptions OptionsWithIncludeMetadataChanges (bool includeMetadataChanges);
+
+		// - (FIRSnapshotListenOptions * _Nonnull)optionsWithSource:(FIRListenSource)source;
+		[Export ("optionsWithSource:")]
+		SnapshotListenOptions OptionsWithSource (ListenSource source);
+	}
+
 	// typedef void (^FIRQuerySnapshotBlock)(FIRQuerySnapshot * _Nullable, NSError * _Nullable);
 	delegate void QuerySnapshotHandler ([NullAllowed] QuerySnapshot snapshot, [NullAllowed] NSError error);
 
@@ -861,6 +892,10 @@ namespace Firebase.CloudFirestore
 		// -(id<FIRListenerRegistration> _Nonnull)addSnapshotListenerWithIncludeMetadataChanges:(BOOL)includeMetadataChanges listener:(FIRQuerySnapshotBlock _Nonnull)listener;
 		[Export ("addSnapshotListenerWithIncludeMetadataChanges:listener:")]
 		IListenerRegistration AddSnapshotListener (bool includeMetadataChanges, QuerySnapshotHandler listener);
+
+		// -(id<FIRListenerRegistration> _Nonnull)addSnapshotListenerWithOptions:(FIRSnapshotListenOptions * _Nonnull)options listener:(FIRQuerySnapshotBlock _Nonnull)listener;
+		[Export ("addSnapshotListenerWithOptions:listener:")]
+		IListenerRegistration AddSnapshotListener (SnapshotListenOptions options, QuerySnapshotHandler listener);
 
 		// -(FIRQuery * _Nonnull)queryWhereFilter:(FIRFilter * _Nonnull)filter;
 		[Export ("queryWhereFilter:")]

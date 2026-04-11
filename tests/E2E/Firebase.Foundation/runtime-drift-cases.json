@@ -116,6 +116,17 @@
       ]
     },
     {
+      "id": "cloudfirestore-snapshot-listen-options",
+      "method": "VerifyCloudFirestoreSnapshotListenOptionsAsync",
+      "bindingPackage": "AdamE.Firebase.iOS.CloudFirestore",
+      "packages": [
+        {
+          "id": "AdamE.Firebase.iOS.CloudFirestore",
+          "version": "12.6.0"
+        }
+      ]
+    },
+    {
       "id": "cloudfunctions-usefunctionsemulatororigin",
       "method": "VerifyCloudFunctionsUseFunctionsEmulatorOriginAsync",
       "bindingPackage": "AdamE.Firebase.iOS.CloudFunctions",
