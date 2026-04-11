@@ -54,6 +54,12 @@ using Foundation;
 using ObjCRuntime;
 #endif
 
+#if ENABLE_RUNTIME_DRIFT_CASE_CLOUDFIRESTORE_AGGREGATE_QUERY
+using Firebase.CloudFirestore;
+using Foundation;
+using ObjCRuntime;
+#endif
+
 #if ENABLE_RUNTIME_DRIFT_CASE_CLOUDFUNCTIONS_USEFUNCTIONSEMULATORORIGIN
 using Firebase.CloudFunctions;
 using Foundation;
@@ -973,6 +979,315 @@ static class FirebaseRuntimeDriftCases
         {
             Runtime.MarshalObjectiveCException -= OnMarshalObjectiveCException;
         }
+    }
+#endif
+
+#if ENABLE_RUNTIME_DRIFT_CASE_CLOUDFIRESTORE_AGGREGATE_QUERY
+    static async Task<string> VerifyCloudFirestoreAggregateQueryAsync()
+    {
+        const string queryCountSelector = "count";
+        const string aggregateSelector = "aggregate:";
+        const string aggregateQueryQuerySelector = "query";
+        const string getAggregationSelector = "aggregationWithSource:completion:";
+
+        var queryCountProperty = typeof(Query).GetProperty(
+            nameof(Query.Count),
+            BindingFlags.Instance | BindingFlags.Public);
+        if (queryCountProperty is null)
+        {
+            throw new InvalidOperationException(
+                $"Expected managed API '{nameof(Query.Count)}' was not found on '{typeof(Query).FullName}'.");
+        }
+
+        if (queryCountProperty.PropertyType != typeof(AggregateQuery))
+        {
+            throw new InvalidOperationException(
+                $"Managed signature regression: expected '{nameof(Query.Count)}' to return '{typeof(AggregateQuery).FullName}', observed '{queryCountProperty.PropertyType.FullName}'.");
+        }
+
+        var aggregateSignature = typeof(Query).GetMethod(
+            nameof(Query.Aggregate),
+            BindingFlags.Instance | BindingFlags.Public,
+            binder: null,
+            types: new[] { typeof(AggregateField[]) },
+            modifiers: null);
+        if (aggregateSignature is null)
+        {
+            throw new InvalidOperationException(
+                $"Expected managed API '{nameof(Query.Aggregate)}({typeof(AggregateField[]).FullName})' was not found.");
+        }
+
+        if (aggregateSignature.ReturnType != typeof(AggregateQuery))
+        {
+            throw new InvalidOperationException(
+                $"Managed signature regression: expected '{nameof(Query.Aggregate)}' to return '{typeof(AggregateQuery).FullName}', observed '{aggregateSignature.ReturnType.FullName}'.");
+        }
+
+        var getAggregationSignature = typeof(AggregateQuery).GetMethod(
+            nameof(AggregateQuery.GetAggregation),
+            BindingFlags.Instance | BindingFlags.Public,
+            binder: null,
+            types: new[] { typeof(AggregateSource), typeof(AggregateQuerySnapshotHandler) },
+            modifiers: null);
+        if (getAggregationSignature is null)
+        {
+            throw new InvalidOperationException(
+                $"Expected managed API '{nameof(AggregateQuery.GetAggregation)}({typeof(AggregateSource).FullName}, {typeof(AggregateQuerySnapshotHandler).FullName})' was not found.");
+        }
+
+        var snapshotCountProperty = typeof(AggregateQuerySnapshot).GetProperty(
+            nameof(AggregateQuerySnapshot.Count),
+            BindingFlags.Instance | BindingFlags.Public);
+        if (snapshotCountProperty?.PropertyType != typeof(NSNumber))
+        {
+            throw new InvalidOperationException(
+                $"Managed signature regression: expected '{nameof(AggregateQuerySnapshot.Count)}' to return '{typeof(NSNumber).FullName}', observed '{snapshotCountProperty?.PropertyType.FullName ?? "<missing>"}'.");
+        }
+
+        var snapshotValueSignature = typeof(AggregateQuerySnapshot).GetMethod(
+            nameof(AggregateQuerySnapshot.GetValue),
+            BindingFlags.Instance | BindingFlags.Public,
+            binder: null,
+            types: new[] { typeof(AggregateField) },
+            modifiers: null);
+        if (snapshotValueSignature?.ReturnType != typeof(NSObject))
+        {
+            throw new InvalidOperationException(
+                $"Managed signature regression: expected '{nameof(AggregateQuerySnapshot.GetValue)}' to return '{typeof(NSObject).FullName}', observed '{snapshotValueSignature?.ReturnType.FullName ?? "<missing>"}'.");
+        }
+
+        var firestore = Firestore.SharedInstance;
+        if (firestore is null)
+        {
+            throw new InvalidOperationException("Firebase.CloudFirestore.Firestore.SharedInstance returned null after App.Configure().");
+        }
+
+        var query = firestore.GetCollection("codex-aggregate-e2e");
+        if (query is null)
+        {
+            throw new InvalidOperationException("Firebase.CloudFirestore.Firestore.GetCollection returned null.");
+        }
+
+        if (!query.RespondsToSelector(new Selector(queryCountSelector)))
+        {
+            throw new InvalidOperationException($"Native FIRQuery does not respond to expected selector '{queryCountSelector}'.");
+        }
+
+        if (!query.RespondsToSelector(new Selector(aggregateSelector)))
+        {
+            throw new InvalidOperationException($"Native FIRQuery does not respond to expected selector '{aggregateSelector}'.");
+        }
+
+        NSException? marshaledException = null;
+        MarshalObjectiveCExceptionMode? marshaledExceptionMode = null;
+        var seedWriteCompletionSource = new TaskCompletionSource<NSError?>(TaskCreationOptions.RunContinuationsAsynchronously);
+        var serverCountCompletionSource = new TaskCompletionSource<(AggregateQuerySnapshot? Snapshot, NSError? Error)>(TaskCreationOptions.RunContinuationsAsynchronously);
+
+        void OnMarshalObjectiveCException(object? sender, MarshalObjectiveCExceptionEventArgs args)
+        {
+            marshaledException ??= args.Exception;
+            marshaledExceptionMode ??= args.ExceptionMode;
+        }
+
+        Runtime.MarshalObjectiveCException += OnMarshalObjectiveCException;
+        try
+        {
+            AggregateField countField;
+            AggregateField sumByNameField;
+            AggregateField sumByPathField;
+            AggregateField averageByNameField;
+            AggregateField averageByPathField;
+            AggregateQuery countQuery;
+            AggregateQuery aggregateQuery;
+            Query countUnderlyingQuery;
+            Query aggregateUnderlyingQuery;
+            var seedWriteCompletionInvoked = false;
+            NSError? seedWriteError = null;
+            var serverCountCompletionInvoked = false;
+            AggregateQuerySnapshot? serverCountSnapshot = null;
+            NSError? serverCountError = null;
+
+            try
+            {
+                var seedDocument = query.GetDocument("aggregate-count-seed");
+                using var scoreKey = new NSString("score");
+                using var markerKey = new NSString("marker");
+                using var scoreValue = NSNumber.FromInt32(1);
+                using var markerValue = new NSString("aggregate-count");
+                using var seedData = NSDictionary<NSString, NSObject>.FromObjectsAndKeys(
+                    new NSObject[] { scoreValue, markerValue },
+                    new[] { scoreKey, markerKey },
+                    2);
+                seedDocument.SetData(seedData, error =>
+                {
+                    seedWriteCompletionInvoked = true;
+                    seedWriteError = error;
+                    seedWriteCompletionSource.TrySetResult(error);
+                });
+
+                var completedSeedWriteTask = await Task.WhenAny(seedWriteCompletionSource.Task, Task.Delay(AsyncTimeout));
+                if (completedSeedWriteTask != seedWriteCompletionSource.Task)
+                {
+                    throw new TimeoutException(
+                        "Cloud Firestore seed document write did not invoke its completion callback " +
+                        $"within {AsyncTimeout.TotalSeconds} seconds.");
+                }
+
+                if (!seedWriteCompletionInvoked)
+                {
+                    throw new InvalidOperationException(
+                        "Cloud Firestore seed document write completed without throwing, but the completion callback was never marked as invoked.");
+                }
+
+                var completedSeedWriteError = await seedWriteCompletionSource.Task;
+                if (!ReferenceEquals(seedWriteError, completedSeedWriteError))
+                {
+                    throw new InvalidOperationException("Cloud Firestore seed document write callback state did not match the completed task payload.");
+                }
+
+                if (completedSeedWriteError is not null)
+                {
+                    throw new InvalidOperationException(
+                        $"Cloud Firestore seed document write reached native completion with Firebase error {FormatNSError(completedSeedWriteError)}.");
+                }
+
+                using var fieldPath = new FieldPath(new[] { "score" });
+                countField = AggregateField.Count;
+                sumByNameField = AggregateField.Sum("score");
+                sumByPathField = AggregateField.Sum(fieldPath);
+                averageByNameField = AggregateField.Average("score");
+                averageByPathField = AggregateField.Average(fieldPath);
+
+                countQuery = query.Count;
+                aggregateQuery = query.Aggregate(new[]
+                {
+                    countField,
+                    sumByNameField,
+                    sumByPathField,
+                    averageByNameField,
+                    averageByPathField,
+                });
+                countUnderlyingQuery = countQuery.Query;
+                aggregateUnderlyingQuery = aggregateQuery.Query;
+
+                countQuery.GetAggregation(AggregateSource.Server, (snapshot, error) =>
+                {
+                    serverCountCompletionInvoked = true;
+                    serverCountSnapshot = snapshot;
+                    serverCountError = error;
+                    serverCountCompletionSource.TrySetResult((snapshot, error));
+                });
+            }
+            catch (ObjCException ex)
+            {
+                throw new InvalidOperationException(
+                    $"Firestore aggregate selectors should not throw after the missing bindings are added, but observed {ex.GetType().FullName}. " +
+                    $"Selectors exercised: setData:completion:, '{queryCountSelector}', '{aggregateSelector}', '{aggregateQueryQuerySelector}', '{getAggregationSelector}', aggregateFieldForCount, aggregateFieldForSumOfField:, aggregateFieldForSumOfFieldPath:, aggregateFieldForAverageOfField:, aggregateFieldForAverageOfFieldPath:. " +
+                    $"NSException.Name: {FormatDetail(marshaledException?.Name?.ToString())}. " +
+                    $"NSException.Reason: {FormatDetail(marshaledException?.Reason)}. " +
+                    $"Marshal mode: {FormatDetail(marshaledExceptionMode?.ToString())}.",
+                    ex);
+            }
+
+            if (marshaledException is not null)
+            {
+                throw new InvalidOperationException(
+                    $"Firestore aggregate selectors completed, but Runtime.MarshalObjectiveCException captured unexpected NSException.Name '{marshaledException.Name}'. " +
+                    $"Reason: {FormatDetail(marshaledException.Reason)}. Marshal mode: {FormatDetail(marshaledExceptionMode?.ToString())}.");
+            }
+
+            if (countQuery is null)
+            {
+                throw new InvalidOperationException($"Selector '{queryCountSelector}' returned null.");
+            }
+
+            if (aggregateQuery is null)
+            {
+                throw new InvalidOperationException($"Selector '{aggregateSelector}' returned null.");
+            }
+
+            if (countUnderlyingQuery is null)
+            {
+                throw new InvalidOperationException($"Selector '{aggregateQueryQuerySelector}' returned null for the count aggregate query.");
+            }
+
+            if (aggregateUnderlyingQuery is null)
+            {
+                throw new InvalidOperationException($"Selector '{aggregateQueryQuerySelector}' returned null for the multi-field aggregate query.");
+            }
+
+            if (!countQuery.RespondsToSelector(new Selector(getAggregationSelector)))
+            {
+                throw new InvalidOperationException($"Native FIRAggregateQuery does not respond to expected selector '{getAggregationSelector}'.");
+            }
+
+            var completedTask = await Task.WhenAny(serverCountCompletionSource.Task, Task.Delay(AsyncTimeout));
+            if (completedTask != serverCountCompletionSource.Task)
+            {
+                throw new TimeoutException(
+                    $"Selector '{getAggregationSelector}' did not invoke its completion callback within {AsyncTimeout.TotalSeconds} seconds.");
+            }
+
+            if (!serverCountCompletionInvoked)
+            {
+                throw new InvalidOperationException(
+                    $"Selector '{getAggregationSelector}' completed without throwing, but the completion callback was never marked as invoked.");
+            }
+
+            var (completedServerCountSnapshot, completedServerCountError) = await serverCountCompletionSource.Task;
+            if (!ReferenceEquals(serverCountSnapshot, completedServerCountSnapshot) || !ReferenceEquals(serverCountError, completedServerCountError))
+            {
+                throw new InvalidOperationException("Server count aggregation callback state did not match the completed task payload.");
+            }
+
+            if (marshaledException is not null)
+            {
+                throw new InvalidOperationException(
+                    $"Firestore aggregate server query completed, but Runtime.MarshalObjectiveCException captured unexpected NSException.Name '{marshaledException.Name}'. " +
+                    $"Reason: {FormatDetail(marshaledException.Reason)}. Marshal mode: {FormatDetail(marshaledExceptionMode?.ToString())}.");
+            }
+
+            var serverResultDetail = completedServerCountError is not null
+                ? $"Server count aggregation reached native Firestore completion with Firebase error {FormatNSError(completedServerCountError)}."
+                : completedServerCountSnapshot is not null
+                    ? $"Server count aggregation returned snapshot count {completedServerCountSnapshot.Count.Int64Value} with query type {completedServerCountSnapshot.Query.GetType().FullName}."
+                    : "Server count aggregation completed without either a snapshot or an NSError.";
+
+            if (completedServerCountSnapshot is null && completedServerCountError is null)
+            {
+                throw new InvalidOperationException(
+                    $"Selector '{getAggregationSelector}' completed without either a snapshot or an NSError.");
+            }
+
+            if (completedServerCountError is not null)
+            {
+                throw new InvalidOperationException(serverResultDetail);
+            }
+
+            var serverCount = completedServerCountSnapshot!.Count.Int64Value;
+            if (serverCount <= 0)
+            {
+                throw new InvalidOperationException(
+                    $"Server count aggregation returned {serverCount}; expected a non-zero count after seeding document 'aggregate-count-seed'.");
+            }
+
+            return
+                $"Selectors '{queryCountSelector}' and '{aggregateSelector}' returned aggregate query objects without ObjC exception. " +
+                $"Aggregate field types: {countField.GetType().FullName}, {sumByNameField.GetType().FullName}, {sumByPathField.GetType().FullName}, {averageByNameField.GetType().FullName}, {averageByPathField.GetType().FullName}. " +
+                $"Count query type: {countQuery.GetType().FullName}. Aggregate query type: {aggregateQuery.GetType().FullName}. " +
+                $"Underlying query types: {countUnderlyingQuery.GetType().FullName}, {aggregateUnderlyingQuery.GetType().FullName}. " +
+                $"Seed document write completed without Firebase error. Aggregate query get selector present: {getAggregationSelector}. " +
+                serverResultDetail;
+        }
+        finally
+        {
+            Runtime.MarshalObjectiveCException -= OnMarshalObjectiveCException;
+        }
+    }
+
+    static string FormatNSError(NSError error)
+    {
+        return $"{error.Domain} ({error.Code}): {error.LocalizedDescription}";
     }
 #endif
 
