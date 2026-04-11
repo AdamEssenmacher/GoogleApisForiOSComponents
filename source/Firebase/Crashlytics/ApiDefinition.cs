@@ -39,6 +39,10 @@ namespace Firebase.Crashlytics {
 		[Export ("recordError:")]
 		void RecordError (NSError error);
 
+		// -(void)recordError:(NSError * _Nonnull)error userInfo:(NSDictionary<NSString *,id> * _Nullable)userInfo __attribute__((swift_name("record(error:userInfo:)")));
+		[Export ("recordError:userInfo:")]
+		void RecordError (NSError error, [NullAllowed] NSDictionary<NSString, NSObject> userInfo);
+
 		// -(void)recordExceptionModel:(FIRExceptionModel * _Nonnull)exceptionModel __attribute__((swift_name("record(exceptionModel:)")));
 		[Export ("recordExceptionModel:")]
 		void RecordExceptionModel (ExceptionModel exceptionModel);
