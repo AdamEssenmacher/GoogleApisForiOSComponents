@@ -424,6 +424,201 @@ namespace Firebase.CloudFirestore
 		NSObject GetValue (AggregateField aggregateField);
 	}
 
+	// @interface FIRFilter : NSObject
+	[BaseType (typeof (NSObject), Name = "FIRFilter")]
+	interface Filter
+	{
+		// +(FIRFilter * _Nonnull)filterWhereField:(NSString * _Nonnull)field isEqualTo:(id _Nonnull)value;
+		[Static]
+		[Export ("filterWhereField:isEqualTo:")]
+		Filter WhereEqualsTo (string field, NSObject nsValue);
+
+		[Static]
+		[Wrap ("WhereEqualsTo (field, FromObject (value))")]
+		Filter WhereEqualsTo (string field, object value);
+
+		// +(FIRFilter * _Nonnull)filterWhereFieldPath:(FIRFieldPath * _Nonnull)path isEqualTo:(id _Nonnull)value;
+		[Static]
+		[Export ("filterWhereFieldPath:isEqualTo:")]
+		Filter WhereEqualsTo (FieldPath path, NSObject nsValue);
+
+		[Static]
+		[Wrap ("WhereEqualsTo (path, FromObject (value))")]
+		Filter WhereEqualsTo (FieldPath path, object value);
+
+		// +(FIRFilter * _Nonnull)filterWhereField:(NSString * _Nonnull)field isNotEqualTo:(id _Nonnull)value;
+		[Static]
+		[Export ("filterWhereField:isNotEqualTo:")]
+		Filter WhereNotEqualTo (string field, NSObject nsValue);
+
+		[Static]
+		[Wrap ("WhereNotEqualTo (field, FromObject (value))")]
+		Filter WhereNotEqualTo (string field, object value);
+
+		// +(FIRFilter * _Nonnull)filterWhereFieldPath:(FIRFieldPath * _Nonnull)path isNotEqualTo:(id _Nonnull)value;
+		[Static]
+		[Export ("filterWhereFieldPath:isNotEqualTo:")]
+		Filter WhereNotEqualTo (FieldPath path, NSObject nsValue);
+
+		[Static]
+		[Wrap ("WhereNotEqualTo (path, FromObject (value))")]
+		Filter WhereNotEqualTo (FieldPath path, object value);
+
+		// +(FIRFilter * _Nonnull)filterWhereField:(NSString * _Nonnull)field isGreaterThan:(id _Nonnull)value;
+		[Static]
+		[Export ("filterWhereField:isGreaterThan:")]
+		Filter WhereGreaterThan (string field, NSObject nsValue);
+
+		[Static]
+		[Wrap ("WhereGreaterThan (field, FromObject (value))")]
+		Filter WhereGreaterThan (string field, object value);
+
+		// +(FIRFilter * _Nonnull)filterWhereFieldPath:(FIRFieldPath * _Nonnull)path isGreaterThan:(id _Nonnull)value;
+		[Static]
+		[Export ("filterWhereFieldPath:isGreaterThan:")]
+		Filter WhereGreaterThan (FieldPath path, NSObject nsValue);
+
+		[Static]
+		[Wrap ("WhereGreaterThan (path, FromObject (value))")]
+		Filter WhereGreaterThan (FieldPath path, object value);
+
+		// +(FIRFilter * _Nonnull)filterWhereField:(NSString * _Nonnull)field isGreaterThanOrEqualTo:(id _Nonnull)value;
+		[Static]
+		[Export ("filterWhereField:isGreaterThanOrEqualTo:")]
+		Filter WhereGreaterThanOrEqualsTo (string field, NSObject nsValue);
+
+		[Static]
+		[Wrap ("WhereGreaterThanOrEqualsTo (field, FromObject (value))")]
+		Filter WhereGreaterThanOrEqualsTo (string field, object value);
+
+		// +(FIRFilter * _Nonnull)filterWhereFieldPath:(FIRFieldPath * _Nonnull)path isGreaterThanOrEqualTo:(id _Nonnull)value;
+		[Static]
+		[Export ("filterWhereFieldPath:isGreaterThanOrEqualTo:")]
+		Filter WhereGreaterThanOrEqualsTo (FieldPath path, NSObject nsValue);
+
+		[Static]
+		[Wrap ("WhereGreaterThanOrEqualsTo (path, FromObject (value))")]
+		Filter WhereGreaterThanOrEqualsTo (FieldPath path, object value);
+
+		// +(FIRFilter * _Nonnull)filterWhereField:(NSString * _Nonnull)field isLessThan:(id _Nonnull)value;
+		[Static]
+		[Export ("filterWhereField:isLessThan:")]
+		Filter WhereLessThan (string field, NSObject nsValue);
+
+		[Static]
+		[Wrap ("WhereLessThan (field, FromObject (value))")]
+		Filter WhereLessThan (string field, object value);
+
+		// +(FIRFilter * _Nonnull)filterWhereFieldPath:(FIRFieldPath * _Nonnull)path isLessThan:(id _Nonnull)value;
+		[Static]
+		[Export ("filterWhereFieldPath:isLessThan:")]
+		Filter WhereLessThan (FieldPath path, NSObject nsValue);
+
+		[Static]
+		[Wrap ("WhereLessThan (path, FromObject (value))")]
+		Filter WhereLessThan (FieldPath path, object value);
+
+		// +(FIRFilter * _Nonnull)filterWhereField:(NSString * _Nonnull)field isLessThanOrEqualTo:(id _Nonnull)value;
+		[Static]
+		[Export ("filterWhereField:isLessThanOrEqualTo:")]
+		Filter WhereLessThanOrEqualsTo (string field, NSObject nsValue);
+
+		[Static]
+		[Wrap ("WhereLessThanOrEqualsTo (field, FromObject (value))")]
+		Filter WhereLessThanOrEqualsTo (string field, object value);
+
+		// +(FIRFilter * _Nonnull)filterWhereFieldPath:(FIRFieldPath * _Nonnull)path isLessThanOrEqualTo:(id _Nonnull)value;
+		[Static]
+		[Export ("filterWhereFieldPath:isLessThanOrEqualTo:")]
+		Filter WhereLessThanOrEqualsTo (FieldPath path, NSObject nsValue);
+
+		[Static]
+		[Wrap ("WhereLessThanOrEqualsTo (path, FromObject (value))")]
+		Filter WhereLessThanOrEqualsTo (FieldPath path, object value);
+
+		// +(FIRFilter * _Nonnull)filterWhereField:(NSString * _Nonnull)field arrayContains:(id _Nonnull)value;
+		[Static]
+		[Export ("filterWhereField:arrayContains:")]
+		Filter WhereArrayContains (string field, NSObject nsValue);
+
+		[Static]
+		[Wrap ("WhereArrayContains (field, FromObject (value))")]
+		Filter WhereArrayContains (string field, object value);
+
+		// +(FIRFilter * _Nonnull)filterWhereFieldPath:(FIRFieldPath * _Nonnull)path arrayContains:(id _Nonnull)value;
+		[Static]
+		[Export ("filterWhereFieldPath:arrayContains:")]
+		Filter WhereArrayContains (FieldPath path, NSObject nsValue);
+
+		[Static]
+		[Wrap ("WhereArrayContains (path, FromObject (value))")]
+		Filter WhereArrayContains (FieldPath path, object value);
+
+		// +(FIRFilter * _Nonnull)filterWhereField:(NSString * _Nonnull)field arrayContainsAny:(NSArray<id> * _Nonnull)values;
+		[Static]
+		[Export ("filterWhereField:arrayContainsAny:")]
+		Filter WhereArrayContainsAny (string field, NSObject [] values);
+
+		[Static]
+		[Wrap ("WhereArrayContainsAny (field, CloudFirestoreHelper.GetNSObjects (values))")]
+		Filter WhereArrayContainsAny (string field, object [] values);
+
+		// +(FIRFilter * _Nonnull)filterWhereFieldPath:(FIRFieldPath * _Nonnull)path arrayContainsAny:(NSArray<id> * _Nonnull)values;
+		[Static]
+		[Export ("filterWhereFieldPath:arrayContainsAny:")]
+		Filter WhereArrayContainsAny (FieldPath path, NSObject [] values);
+
+		[Static]
+		[Wrap ("WhereArrayContainsAny (path, CloudFirestoreHelper.GetNSObjects (values))")]
+		Filter WhereArrayContainsAny (FieldPath path, object [] values);
+
+		// +(FIRFilter * _Nonnull)filterWhereField:(NSString * _Nonnull)field in:(NSArray<id> * _Nonnull)values;
+		[Static]
+		[Export ("filterWhereField:in:")]
+		Filter WhereFieldIn (string field, NSObject [] values);
+
+		[Static]
+		[Wrap ("WhereFieldIn (field, CloudFirestoreHelper.GetNSObjects (values))")]
+		Filter WhereFieldIn (string field, object [] values);
+
+		// +(FIRFilter * _Nonnull)filterWhereFieldPath:(FIRFieldPath * _Nonnull)path in:(NSArray<id> * _Nonnull)values;
+		[Static]
+		[Export ("filterWhereFieldPath:in:")]
+		Filter WhereFieldIn (FieldPath path, NSObject [] values);
+
+		[Static]
+		[Wrap ("WhereFieldIn (path, CloudFirestoreHelper.GetNSObjects (values))")]
+		Filter WhereFieldIn (FieldPath path, object [] values);
+
+		// +(FIRFilter * _Nonnull)filterWhereField:(NSString * _Nonnull)field notIn:(NSArray<id> * _Nonnull)values;
+		[Static]
+		[Export ("filterWhereField:notIn:")]
+		Filter WhereFieldNotIn (string field, NSObject [] values);
+
+		[Static]
+		[Wrap ("WhereFieldNotIn (field, CloudFirestoreHelper.GetNSObjects (values))")]
+		Filter WhereFieldNotIn (string field, object [] values);
+
+		// +(FIRFilter * _Nonnull)filterWhereFieldPath:(FIRFieldPath * _Nonnull)path notIn:(NSArray<id> * _Nonnull)values;
+		[Static]
+		[Export ("filterWhereFieldPath:notIn:")]
+		Filter WhereFieldNotIn (FieldPath path, NSObject [] values);
+
+		[Static]
+		[Wrap ("WhereFieldNotIn (path, CloudFirestoreHelper.GetNSObjects (values))")]
+		Filter WhereFieldNotIn (FieldPath path, object [] values);
+
+		// +(FIRFilter * _Nonnull)orFilterWithFilters:(NSArray<FIRFilter *> * _Nonnull)filters;
+		[Static]
+		[Export ("orFilterWithFilters:")]
+		Filter Or (Filter [] filters);
+
+		// +(FIRFilter * _Nonnull)andFilterWithFilters:(NSArray<FIRFilter *> * _Nonnull)filters;
+		[Static]
+		[Export ("andFilterWithFilters:")]
+		Filter And (Filter [] filters);
+	}
+
 	// void (^)(id _Nullable result, NSError *_Nullable error)
 	delegate void TransactionCompletionHandler ([NullAllowed] NSObject result, [NullAllowed] NSError error);
 	// (nullable void (^)(FIRLoadBundleTaskProgress *_Nullable progress, NSError *_Nullable error)
@@ -667,6 +862,10 @@ namespace Firebase.CloudFirestore
 		[Export ("addSnapshotListenerWithIncludeMetadataChanges:listener:")]
 		IListenerRegistration AddSnapshotListener (bool includeMetadataChanges, QuerySnapshotHandler listener);
 
+		// -(FIRQuery * _Nonnull)queryWhereFilter:(FIRFilter * _Nonnull)filter;
+		[Export ("queryWhereFilter:")]
+		Query FilteredBy (Filter filter);
+
 		// -(FIRQuery * _Nonnull)queryWhereField:(NSString * _Nonnull)field isEqualTo:(id _Nonnull)value;
 		[Export ("queryWhereField:isEqualTo:")]
 		Query WhereEqualsTo (string field, NSObject nsValue);
@@ -680,6 +879,20 @@ namespace Firebase.CloudFirestore
 
 		[Wrap ("WhereEqualsTo (path, FromObject (value))")]
 		Query WhereEqualsTo (FieldPath path, object value);
+
+		// -(FIRQuery * _Nonnull)queryWhereField:(NSString * _Nonnull)field isNotEqualTo:(id _Nonnull)value;
+		[Export ("queryWhereField:isNotEqualTo:")]
+		Query WhereNotEqualTo (string field, NSObject nsValue);
+
+		[Wrap ("WhereNotEqualTo (field, FromObject (value))")]
+		Query WhereNotEqualTo (string field, object value);
+
+		// -(FIRQuery * _Nonnull)queryWhereFieldPath:(FIRFieldPath * _Nonnull)path isNotEqualTo:(id _Nonnull)value;
+		[Export ("queryWhereFieldPath:isNotEqualTo:")]
+		Query WhereNotEqualTo (FieldPath path, NSObject nsValue);
+
+		[Wrap ("WhereNotEqualTo (path, FromObject (value))")]
+		Query WhereNotEqualTo (FieldPath path, object value);
 
 		// -(FIRQuery * _Nonnull)queryWhereField:(NSString * _Nonnull)field isLessThan:(id _Nonnull)value;
 		[Export ("queryWhereField:isLessThan:")]
@@ -778,6 +991,20 @@ namespace Firebase.CloudFirestore
 
 		[Wrap ("WhereFieldIn (path, CloudFirestoreHelper.GetNSObjects (values))")]
 		Query WhereFieldIn (FieldPath path, object [] values);
+
+		// -(FIRQuery * _Nonnull)queryWhereField:(NSString * _Nonnull)field notIn:(NSArray<id> * _Nonnull)values;
+		[Export ("queryWhereField:notIn:")]
+		Query WhereFieldNotIn (string field, NSObject [] values);
+
+		[Wrap ("WhereFieldNotIn (field, CloudFirestoreHelper.GetNSObjects (values))")]
+		Query WhereFieldNotIn (string field, object [] values);
+
+		// -(FIRQuery * _Nonnull)queryWhereFieldPath:(FIRFieldPath * _Nonnull)path notIn:(NSArray<id> * _Nonnull)values;
+		[Export ("queryWhereFieldPath:notIn:")]
+		Query WhereFieldNotIn (FieldPath path, NSObject [] values);
+
+		[Wrap ("WhereFieldNotIn (path, CloudFirestoreHelper.GetNSObjects (values))")]
+		Query WhereFieldNotIn (FieldPath path, object [] values);
 
 		// -(FIRQuery * _Nonnull)queryFilteredUsingPredicate:(NSPredicate * _Nonnull)predicate;
 		[Export ("queryFilteredUsingPredicate:")]
