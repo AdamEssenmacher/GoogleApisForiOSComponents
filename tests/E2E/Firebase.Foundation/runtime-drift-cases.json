@@ -13,6 +13,17 @@
       "packages": []
     },
     {
+      "id": "appcheck-limited-use-tokens",
+      "method": "VerifyAppCheckLimitedUseTokensAsync",
+      "bindingPackage": "AdamE.Firebase.iOS.AppCheck",
+      "packages": [
+        {
+          "id": "AdamE.Firebase.iOS.AppCheck",
+          "version": "12.6.0"
+        }
+      ]
+    },
+    {
       "id": "remoteconfig-realtime-customsignals",
       "method": "VerifyRemoteConfigRealtimeCustomSignalsAsync",
       "bindingPackage": "AdamE.Firebase.iOS.RemoteConfig",

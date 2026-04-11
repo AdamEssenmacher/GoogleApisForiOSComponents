@@ -12,6 +12,13 @@ using Foundation;
 using ObjCRuntime;
 #endif
 
+#if ENABLE_RUNTIME_DRIFT_CASE_APPCHECK_LIMITED_USE_TOKENS
+using Firebase.AppCheck;
+using FirebaseCoreApp = Firebase.Core.App;
+using Foundation;
+using ObjCRuntime;
+#endif
+
 #if ENABLE_RUNTIME_DRIFT_CASE_REMOTECONFIG_REALTIME_CUSTOMSIGNALS
 using Firebase.RemoteConfig;
 using Foundation;
@@ -333,6 +340,160 @@ static class FirebaseRuntimeDriftCases
         finally
         {
             Runtime.MarshalObjectiveCException -= OnMarshalObjectiveCException;
+        }
+    }
+#endif
+
+#if ENABLE_RUNTIME_DRIFT_CASE_APPCHECK_LIMITED_USE_TOKENS
+    static async Task<string> VerifyAppCheckLimitedUseTokensAsync()
+    {
+        const string limitedUseSelector = "limitedUseTokenWithCompletion:";
+        const string providerLimitedUseSelector = "getLimitedUseTokenWithCompletion:";
+
+        RequireVoidMethod(
+            typeof(AppCheck),
+            nameof(AppCheck.LimitedUseTokenWithCompletion),
+            new[] { typeof(TokenCompletionHandler) },
+            limitedUseSelector);
+        RequireVoidMethod(
+            typeof(AppCheckProvider),
+            nameof(AppCheckProvider.GetLimitedUseTokenWithCompletion),
+            new[] { typeof(TokenCompletionHandler) },
+            providerLimitedUseSelector);
+        RequireVoidMethod(
+            typeof(AppCheckDebugProvider),
+            nameof(AppCheckDebugProvider.GetLimitedUseTokenWithCompletion),
+            new[] { typeof(TokenCompletionHandler) },
+            providerLimitedUseSelector);
+        RequireVoidMethod(
+            typeof(DeviceCheckProvider),
+            nameof(DeviceCheckProvider.GetLimitedUseTokenWithCompletion),
+            new[] { typeof(TokenCompletionHandler) },
+            providerLimitedUseSelector);
+        RequireVoidMethod(
+            typeof(AppAttestProvider),
+            nameof(AppAttestProvider.GetLimitedUseTokenWithCompletion),
+            new[] { typeof(TokenCompletionHandler) },
+            providerLimitedUseSelector);
+
+        var defaultApp = FirebaseCoreApp.DefaultInstance
+            ?? throw new InvalidOperationException("Firebase.Core.App.DefaultInstance returned null before App Check limited-use validation.");
+        var appCheck = AppCheck.SharedInstance
+            ?? throw new InvalidOperationException("Firebase.AppCheck.AppCheck.SharedInstance returned null after App.Configure().");
+
+        if (!appCheck.RespondsToSelector(new Selector(limitedUseSelector)))
+        {
+            throw new InvalidOperationException($"Native FIRAppCheck does not respond to expected selector '{limitedUseSelector}'.");
+        }
+
+        var debugProvider = new AppCheckDebugProvider(defaultApp);
+        if (debugProvider.Handle != NativeHandle.Zero && !debugProvider.RespondsToSelector(new Selector(providerLimitedUseSelector)))
+        {
+            throw new InvalidOperationException($"Native FIRAppCheckDebugProvider does not respond to expected selector '{providerLimitedUseSelector}'.");
+        }
+
+        var completionInvoked = false;
+        var debugProviderCompletionInvoked = false;
+        AppCheckToken? completionToken = null;
+        NSError? completionError = null;
+        NSException? marshaledException = null;
+        MarshalObjectiveCExceptionMode? marshaledExceptionMode = null;
+        var completionSource = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+
+        void OnMarshalObjectiveCException(object? sender, MarshalObjectiveCExceptionEventArgs args)
+        {
+            marshaledException ??= args.Exception;
+            marshaledExceptionMode ??= args.ExceptionMode;
+        }
+
+        Runtime.MarshalObjectiveCException += OnMarshalObjectiveCException;
+        try
+        {
+            try
+            {
+                appCheck.LimitedUseTokenWithCompletion((token, error) =>
+                {
+                    completionInvoked = true;
+                    completionToken = token;
+                    completionError = error;
+                    completionSource.TrySetResult(true);
+                });
+            }
+            catch (ObjCException ex)
+            {
+                throw new InvalidOperationException(
+                    $"Selector '{limitedUseSelector}' should not throw after the missing binding is added, but observed {ex.GetType().FullName}. " +
+                    $"Completion delegate type: {typeof(TokenCompletionHandler).FullName}. " +
+                    $"NSException.Name: {FormatDetail(marshaledException?.Name?.ToString())}. " +
+                    $"NSException.Reason: {FormatDetail(marshaledException?.Reason)}. " +
+                    $"Marshal mode: {FormatDetail(marshaledExceptionMode?.ToString())}.",
+                    ex);
+            }
+
+            if (debugProvider.Handle != NativeHandle.Zero)
+            {
+                try
+                {
+                    debugProvider.GetLimitedUseTokenWithCompletion((token, error) =>
+                    {
+                        debugProviderCompletionInvoked = true;
+                    });
+                }
+                catch (ObjCException ex)
+                {
+                    throw new InvalidOperationException(
+                        $"Selector '{providerLimitedUseSelector}' on FIRAppCheckDebugProvider should not throw after the missing binding is added, " +
+                        $"but observed {ex.GetType().FullName}. Completion delegate type: {typeof(TokenCompletionHandler).FullName}. " +
+                        $"NSException.Name: {FormatDetail(marshaledException?.Name?.ToString())}. " +
+                        $"NSException.Reason: {FormatDetail(marshaledException?.Reason)}. " +
+                        $"Marshal mode: {FormatDetail(marshaledExceptionMode?.ToString())}.",
+                        ex);
+                }
+            }
+
+            var completedTask = await Task.WhenAny(completionSource.Task, Task.Delay(AsyncTimeout));
+            if (completedTask != completionSource.Task)
+            {
+                throw new TimeoutException(
+                    $"Selector '{limitedUseSelector}' did not invoke its completion callback within {AsyncTimeout.TotalSeconds} seconds. " +
+                    $"Completion delegate type: {typeof(TokenCompletionHandler).FullName}.");
+            }
+
+            if (!completionInvoked)
+            {
+                throw new InvalidOperationException(
+                    $"Selector '{limitedUseSelector}' completed without throwing, but the completion callback was never marked as invoked.");
+            }
+
+            if (marshaledException is not null)
+            {
+                throw new InvalidOperationException(
+                    $"Selector '{limitedUseSelector}' completed, but Runtime.MarshalObjectiveCException captured unexpected NSException.Name '{marshaledException.Name}'. " +
+                    $"Reason: {FormatDetail(marshaledException.Reason)}. Marshal mode: {FormatDetail(marshaledExceptionMode?.ToString())}.");
+            }
+
+            return
+                $"Selector '{limitedUseSelector}' crossed the native boundary and invoked its completion callback. " +
+                $"Completion delegate type: {typeof(TokenCompletionHandler).FullName}. " +
+                $"Token returned: {completionToken is not null}. " +
+                $"NSError: {FormatDetail(completionError?.LocalizedDescription)}. " +
+                $"Provider selector '{providerLimitedUseSelector}' was present on FIRAppCheckDebugProvider: {debugProvider.Handle != NativeHandle.Zero}. " +
+                $"Debug provider callback invoked during probe: {debugProviderCompletionInvoked}.";
+        }
+        finally
+        {
+            Runtime.MarshalObjectiveCException -= OnMarshalObjectiveCException;
+        }
+
+        static void RequireVoidMethod(Type type, string methodName, Type[] parameterTypes, string selector)
+        {
+            var method = type.GetMethod(methodName, BindingFlags.Instance | BindingFlags.Public, binder: null, types: parameterTypes, modifiers: null);
+            if (method?.ReturnType != typeof(void))
+            {
+                throw new InvalidOperationException(
+                    $"Expected managed API '{type.FullName}.{methodName}({string.Join(", ", parameterTypes.Select(parameterType => parameterType.FullName))})' " +
+                    $"to return void for selector '{selector}', observed '{method?.ReturnType.FullName ?? "<missing>"}'.");
+            }
         }
     }
 #endif
