@@ -20,6 +20,19 @@ namespace Firebase.RemoteConfig
 	// typedef void (^_Nullable)(BOOL changed, NSError *_Nullable error);
 	delegate void RemoteConfigActivateCompletionHandler (bool changed, [NullAllowed] NSError error);
 
+	// typedef void (^FIRRemoteConfigUpdateCompletion)(FIRRemoteConfigUpdate * _Nullable, NSError * _Nullable);
+	delegate void RemoteConfigUpdateCompletionHandler ([NullAllowed] RemoteConfigUpdate configUpdate, [NullAllowed] NSError error);
+
+	// @interface FIRConfigUpdateListenerRegistration : NSObject
+	[DisableDefaultCtor]
+	[BaseType (typeof (NSObject), Name = "FIRConfigUpdateListenerRegistration")]
+	interface ConfigUpdateListenerRegistration
+	{
+		// - (void)remove;
+		[Export ("remove")]
+		void Remove ();
+	}
+
 	// @interface FIRRemoteConfigValue : NSObject <NSCopying>
 	[DisableDefaultCtor]
 	[BaseType (typeof (NSObject), Name = "FIRRemoteConfigValue")]
@@ -64,6 +77,16 @@ namespace Firebase.RemoteConfig
 		double FetchTimeout { get; set; }
 	}
 
+	// @interface FIRRemoteConfigUpdate : NSObject
+	[DisableDefaultCtor]
+	[BaseType (typeof (NSObject), Name = "FIRRemoteConfigUpdate")]
+	interface RemoteConfigUpdate
+	{
+		// @property(nonatomic, readonly, nonnull) NSSet<NSString *> *updatedKeys;
+		[Export ("updatedKeys")]
+		NSSet<NSString> UpdatedKeys { get; }
+	}
+
 	// @interface FIRRemoteConfig : NSObject <NSFastEnumeration>
 	[DisableDefaultCtor]
 	[BaseType (typeof (NSObject), Name = "FIRRemoteConfig")]
@@ -80,6 +103,14 @@ namespace Firebase.RemoteConfig
 		// extern NSString *const _Nonnull FIRRemoteConfigErrorDomain;
 		[Field ("FIRRemoteConfigErrorDomain", "__Internal")]
 		NSString ErrorDomain { get; }
+
+		// extern NSString *const _Nonnull FIRRemoteConfigUpdateErrorDomain;
+		[Field ("FIRRemoteConfigUpdateErrorDomain", "__Internal")]
+		NSString UpdateErrorDomain { get; }
+
+		// extern NSString *const _Nonnull FIRRemoteConfigCustomSignalsErrorDomain;
+		[Field ("FIRRemoteConfigCustomSignalsErrorDomain", "__Internal")]
+		NSString CustomSignalsErrorDomain { get; }
 
 		// @property(nonatomic, readonly, strong, nullable) NSDate *lastFetchTime;
 		[NullAllowed]
@@ -167,5 +198,14 @@ namespace Firebase.RemoteConfig
 		[return: NullAllowed]
 		[Export ("defaultValueForKey:")]
 		RemoteConfigValue GetDefaultValue ([NullAllowed] string key);
+
+		// - (FIRConfigUpdateListenerRegistration *_Nonnull)addOnConfigUpdateListener:(FIRRemoteConfigUpdateCompletion _Nonnull)listener;
+		[Export ("addOnConfigUpdateListener:")]
+		ConfigUpdateListenerRegistration AddOnConfigUpdateListener (RemoteConfigUpdateCompletionHandler listener);
+
+		// - (void)setCustomSignals:(nonnull NSDictionary<NSString *, NSObject *> *)customSignals withCompletion:(void (^_Nullable)(NSError *_Nullable error))completionHandler;
+		[Async]
+		[Export ("setCustomSignals:withCompletion:")]
+		void SetCustomSignals (NSDictionary<NSString, NSObject> customSignals, [NullAllowed] Action<NSError> completionHandler);
 	}
 }

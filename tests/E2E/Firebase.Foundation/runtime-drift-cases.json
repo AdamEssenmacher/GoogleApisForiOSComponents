@@ -13,6 +13,21 @@
       "packages": []
     },
     {
+      "id": "remoteconfig-realtime-customsignals",
+      "method": "VerifyRemoteConfigRealtimeCustomSignalsAsync",
+      "bindingPackage": "AdamE.Firebase.iOS.RemoteConfig",
+      "packages": [
+        {
+          "id": "AdamE.Firebase.iOS.RemoteConfig",
+          "version": "12.6.0"
+        },
+        {
+          "id": "AdamE.Firebase.iOS.ABTesting",
+          "version": "12.6.0"
+        }
+      ]
+    },
+    {
       "id": "database-servervalue-increment",
       "method": "VerifyDatabaseServerValueIncrementAsync",
       "bindingPackage": "AdamE.Firebase.iOS.Database",

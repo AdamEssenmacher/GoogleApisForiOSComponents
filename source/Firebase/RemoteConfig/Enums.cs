@@ -29,6 +29,23 @@ namespace Firebase.RemoteConfig
 	}
 
 	[Native]
+	public enum RemoteConfigUpdateError : long
+	{
+		StreamError = 8001,
+		NotFetched = 8002,
+		MessageInvalid = 8003,
+		Unavailable = 8004
+	}
+
+	[Native]
+	public enum RemoteConfigCustomSignalsError : long
+	{
+		Unknown = 8101,
+		InvalidValueType = 8102,
+		LimitExceeded = 8103
+	}
+
+	[Native]
 	public enum RemoteConfigSource : long
 	{
 		Remote,
