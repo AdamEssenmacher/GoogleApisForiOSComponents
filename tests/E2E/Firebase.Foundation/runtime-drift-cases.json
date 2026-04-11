@@ -7,6 +7,12 @@
       "packages": []
     },
     {
+      "id": "analytics-ondeviceconversion",
+      "method": "VerifyAnalyticsOnDeviceConversionAsync",
+      "bindingPackage": "AdamE.Firebase.iOS.Analytics",
+      "packages": []
+    },
+    {
       "id": "database-servervalue-increment",
       "method": "VerifyDatabaseServerValueIncrementAsync",
       "bindingPackage": "AdamE.Firebase.iOS.Database",

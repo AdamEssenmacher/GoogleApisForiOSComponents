@@ -6,6 +6,12 @@ using Foundation;
 using ObjCRuntime;
 #endif
 
+#if ENABLE_RUNTIME_DRIFT_CASE_ANALYTICS_ONDEVICECONVERSION
+using Firebase.Analytics;
+using Foundation;
+using ObjCRuntime;
+#endif
+
 #if ENABLE_RUNTIME_DRIFT_CASE_DATABASE_SERVERVALUE_INCREMENT
 using Firebase.Database;
 using Foundation;
@@ -181,6 +187,106 @@ static class FirebaseRuntimeDriftCases
                 $"Completion delegate type: {typeof(Action<long, NSError>).FullName}. " +
                 $"SessionId: {callbackSessionId}. " +
                 $"NSError: {callbackError?.LocalizedDescription ?? "<null>"}.";
+        }
+        finally
+        {
+            Runtime.MarshalObjectiveCException -= OnMarshalObjectiveCException;
+        }
+    }
+#endif
+
+#if ENABLE_RUNTIME_DRIFT_CASE_ANALYTICS_ONDEVICECONVERSION
+    static Task<string> VerifyAnalyticsOnDeviceConversionAsync()
+    {
+        var expectedSignatures = new (string MethodName, Type[] ParameterTypes, string Selector)[]
+        {
+            (
+                nameof(Analytics.InitiateOnDeviceConversionMeasurementWithEmailAddress),
+                new[] { typeof(string) },
+                "initiateOnDeviceConversionMeasurementWithEmailAddress:"),
+            (
+                nameof(Analytics.InitiateOnDeviceConversionMeasurementWithPhoneNumber),
+                new[] { typeof(string) },
+                "initiateOnDeviceConversionMeasurementWithPhoneNumber:"),
+            (
+                nameof(Analytics.InitiateOnDeviceConversionMeasurementWithHashedEmailAddress),
+                new[] { typeof(NSData) },
+                "initiateOnDeviceConversionMeasurementWithHashedEmailAddress:"),
+            (
+                nameof(Analytics.InitiateOnDeviceConversionMeasurementWithHashedPhoneNumber),
+                new[] { typeof(NSData) },
+                "initiateOnDeviceConversionMeasurementWithHashedPhoneNumber:"),
+        };
+
+        foreach (var (methodName, parameterTypes, selector) in expectedSignatures)
+        {
+            var signature = typeof(Analytics).GetMethod(
+                methodName,
+                BindingFlags.Static | BindingFlags.Public,
+                binder: null,
+                types: parameterTypes,
+                modifiers: null);
+            if (signature is null)
+            {
+                throw new InvalidOperationException(
+                    $"Expected managed API '{methodName}({string.Join(", ", parameterTypes.Select(type => type.FullName))})' was not found for selector '{selector}'.");
+            }
+        }
+
+        var marshaledExceptionCaptured = false;
+        MarshalObjectiveCExceptionMode? marshaledExceptionMode = null;
+
+        void OnMarshalObjectiveCException(object? sender, MarshalObjectiveCExceptionEventArgs args)
+        {
+            marshaledExceptionCaptured = true;
+            marshaledExceptionMode ??= args.ExceptionMode;
+        }
+
+        Runtime.MarshalObjectiveCException += OnMarshalObjectiveCException;
+        try
+        {
+            using var hashedEmailAddress = NSData.FromArray(new byte[]
+            {
+                0x9a, 0x79, 0x2f, 0x3d, 0xa4, 0x18, 0x7e, 0x1b,
+                0x02, 0xb7, 0x83, 0xfd, 0x0b, 0x41, 0x77, 0x57,
+                0x97, 0x7a, 0x2a, 0xaf, 0x62, 0x94, 0x6d, 0x12,
+                0x9d, 0x4c, 0xd2, 0x5a, 0x73, 0xb1, 0x3f, 0x31,
+            });
+            using var hashedPhoneNumber = NSData.FromArray(new byte[]
+            {
+                0x2d, 0x71, 0x16, 0x42, 0xb7, 0x26, 0xb0, 0x44,
+                0x01, 0x62, 0x7c, 0xa9, 0xfb, 0xac, 0x32, 0xf5,
+                0xc8, 0x53, 0x0f, 0x8d, 0x89, 0xc4, 0x6c, 0x2e,
+                0x42, 0xb8, 0x6e, 0xfd, 0xb0, 0x33, 0x84, 0xa8,
+            });
+
+            try
+            {
+                Analytics.InitiateOnDeviceConversionMeasurementWithEmailAddress("codex@example.com");
+                Analytics.InitiateOnDeviceConversionMeasurementWithPhoneNumber("+15555550100");
+                Analytics.InitiateOnDeviceConversionMeasurementWithHashedEmailAddress(hashedEmailAddress);
+                Analytics.InitiateOnDeviceConversionMeasurementWithHashedPhoneNumber(hashedPhoneNumber);
+            }
+            catch (ObjCException ex)
+            {
+                throw new InvalidOperationException(
+                    "Analytics on-device conversion selectors should not throw after the missing bindings are added, " +
+                    $"but observed {ex.GetType().FullName}. " +
+                    $"String argument type: {typeof(string).FullName}. Hashed argument type: {typeof(NSData).FullName}. " +
+                    $"Marshal mode: {FormatDetail(marshaledExceptionMode?.ToString())}.",
+                    ex);
+            }
+
+            if (marshaledExceptionCaptured)
+            {
+                throw new InvalidOperationException(
+                    "Analytics on-device conversion selectors completed, but Runtime.MarshalObjectiveCException captured an unexpected Objective-C exception. " +
+                    $"Marshal mode: {FormatDetail(marshaledExceptionMode?.ToString())}.");
+            }
+
+            return Task.FromResult(
+                "Analytics on-device conversion selectors completed without ObjC exception. " +
+                $"String argument type: {typeof(string).FullName}. Hashed argument type: {typeof(NSData).FullName}.");
         }
         finally
         {
