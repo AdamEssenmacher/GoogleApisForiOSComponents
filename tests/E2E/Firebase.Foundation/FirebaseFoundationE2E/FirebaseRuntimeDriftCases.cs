@@ -12,6 +12,12 @@ using Foundation;
 using ObjCRuntime;
 #endif
 
+#if ENABLE_RUNTIME_DRIFT_CASE_REMOTECONFIG_REALTIME_CUSTOMSIGNALS
+using Firebase.RemoteConfig;
+using Foundation;
+using ObjCRuntime;
+#endif
+
 #if ENABLE_RUNTIME_DRIFT_CASE_DATABASE_SERVERVALUE_INCREMENT
 using Firebase.Database;
 using Foundation;
@@ -287,6 +293,168 @@ static class FirebaseRuntimeDriftCases
             return Task.FromResult(
                 "Analytics on-device conversion selectors completed without ObjC exception. " +
                 $"String argument type: {typeof(string).FullName}. Hashed argument type: {typeof(NSData).FullName}.");
+        }
+        finally
+        {
+            Runtime.MarshalObjectiveCException -= OnMarshalObjectiveCException;
+        }
+    }
+#endif
+
+#if ENABLE_RUNTIME_DRIFT_CASE_REMOTECONFIG_REALTIME_CUSTOMSIGNALS
+    static async Task<string> VerifyRemoteConfigRealtimeCustomSignalsAsync()
+    {
+        const string listenerSelector = "addOnConfigUpdateListener:";
+        const string customSignalsSelector = "setCustomSignals:withCompletion:";
+
+        var listenerSignature = typeof(RemoteConfig).GetMethod(
+            nameof(RemoteConfig.AddOnConfigUpdateListener),
+            BindingFlags.Instance | BindingFlags.Public,
+            binder: null,
+            types: new[] { typeof(RemoteConfigUpdateCompletionHandler) },
+            modifiers: null);
+        if (listenerSignature is null)
+        {
+            throw new InvalidOperationException(
+                $"Expected managed API '{nameof(RemoteConfig.AddOnConfigUpdateListener)}({typeof(RemoteConfigUpdateCompletionHandler).FullName})' was not found.");
+        }
+
+        if (listenerSignature.ReturnType != typeof(ConfigUpdateListenerRegistration))
+        {
+            throw new InvalidOperationException(
+                $"Managed signature regression: expected '{nameof(RemoteConfig.AddOnConfigUpdateListener)}' to return '{typeof(ConfigUpdateListenerRegistration).FullName}', observed '{listenerSignature.ReturnType.FullName}'.");
+        }
+
+        var customSignalsSignature = typeof(RemoteConfig).GetMethod(
+            nameof(RemoteConfig.SetCustomSignals),
+            BindingFlags.Instance | BindingFlags.Public,
+            binder: null,
+            types: new[] { typeof(NSDictionary<NSString, NSObject>), typeof(Action<NSError>) },
+            modifiers: null);
+        if (customSignalsSignature is null)
+        {
+            throw new InvalidOperationException(
+                $"Expected managed API '{nameof(RemoteConfig.SetCustomSignals)}({typeof(NSDictionary<NSString, NSObject>).FullName}, {typeof(Action<NSError>).FullName})' was not found.");
+        }
+
+        var remoteConfig = RemoteConfig.SharedInstance;
+        if (remoteConfig is null)
+        {
+            throw new InvalidOperationException("Firebase.RemoteConfig.RemoteConfig.SharedInstance returned null after App.Configure().");
+        }
+
+        if (!remoteConfig.RespondsToSelector(new Selector(listenerSelector)))
+        {
+            throw new InvalidOperationException($"Native FIRRemoteConfig does not respond to expected selector '{listenerSelector}'.");
+        }
+
+        if (!remoteConfig.RespondsToSelector(new Selector(customSignalsSelector)))
+        {
+            throw new InvalidOperationException($"Native FIRRemoteConfig does not respond to expected selector '{customSignalsSelector}'.");
+        }
+
+        var listenerInvoked = false;
+        var listenerUpdateWasNull = false;
+        NSError? listenerError = null;
+        var customSignalsCompletionInvoked = false;
+        NSError? customSignalsCompletionError = null;
+        NSException? marshaledException = null;
+        MarshalObjectiveCExceptionMode? marshaledExceptionMode = null;
+        var customSignalsCompletionSource = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+
+        void OnMarshalObjectiveCException(object? sender, MarshalObjectiveCExceptionEventArgs args)
+        {
+            marshaledException ??= args.Exception;
+            marshaledExceptionMode ??= args.ExceptionMode;
+        }
+
+        Runtime.MarshalObjectiveCException += OnMarshalObjectiveCException;
+        try
+        {
+            using var signalKey = new NSString("codex_signal");
+            using var signalValue = new NSString("enabled");
+            using var customSignals = NSDictionary<NSString, NSObject>.FromObjectsAndKeys(
+                new NSObject[] { signalValue },
+                new[] { signalKey },
+                1);
+
+            ConfigUpdateListenerRegistration registration;
+            try
+            {
+                registration = remoteConfig.AddOnConfigUpdateListener((configUpdate, error) =>
+                {
+                    listenerInvoked = true;
+                    listenerUpdateWasNull = configUpdate is null;
+                    listenerError = error;
+                });
+            }
+            catch (ObjCException ex)
+            {
+                throw new InvalidOperationException(
+                    $"Selector '{listenerSelector}' should not throw after the missing binding is added, but observed {ex.GetType().FullName}. " +
+                    $"Listener delegate type: {typeof(RemoteConfigUpdateCompletionHandler).FullName}. " +
+                    $"NSException.Name: {FormatDetail(marshaledException?.Name?.ToString())}. " +
+                    $"NSException.Reason: {FormatDetail(marshaledException?.Reason)}. " +
+                    $"Marshal mode: {FormatDetail(marshaledExceptionMode?.ToString())}.",
+                    ex);
+            }
+
+            using (registration)
+            {
+                if (registration is null)
+                {
+                    throw new InvalidOperationException($"Selector '{listenerSelector}' returned null registration.");
+                }
+
+                registration.Remove();
+            }
+
+            try
+            {
+                remoteConfig.SetCustomSignals(customSignals, error =>
+                {
+                    customSignalsCompletionInvoked = true;
+                    customSignalsCompletionError = error;
+                    customSignalsCompletionSource.TrySetResult(true);
+                });
+            }
+            catch (ObjCException ex)
+            {
+                throw new InvalidOperationException(
+                    $"Selector '{customSignalsSelector}' should not throw after the missing binding is added, but observed {ex.GetType().FullName}. " +
+                    $"Signals dictionary type: {customSignals.GetType().FullName}. Completion delegate type: {typeof(Action<NSError>).FullName}. " +
+                    $"NSException.Name: {FormatDetail(marshaledException?.Name?.ToString())}. " +
+                    $"NSException.Reason: {FormatDetail(marshaledException?.Reason)}. " +
+                    $"Marshal mode: {FormatDetail(marshaledExceptionMode?.ToString())}.",
+                    ex);
+            }
+
+            var completedTask = await Task.WhenAny(customSignalsCompletionSource.Task, Task.Delay(AsyncTimeout));
+            if (marshaledException is not null)
+            {
+                throw new InvalidOperationException(
+                    $"RemoteConfig missing-surface selectors completed, but Runtime.MarshalObjectiveCException captured unexpected NSException.Name '{marshaledException.Name}'. " +
+                    $"Reason: {FormatDetail(marshaledException.Reason)}. Marshal mode: {FormatDetail(marshaledExceptionMode?.ToString())}.");
+            }
+
+            if (completedTask != customSignalsCompletionSource.Task)
+            {
+                throw new TimeoutException(
+                    $"Selector '{customSignalsSelector}' did not invoke its completion callback within {AsyncTimeout.TotalSeconds} seconds. " +
+                    $"Signals dictionary type: {customSignals.GetType().FullName}. Completion delegate type: {typeof(Action<NSError>).FullName}.");
+            }
+
+            return
+                $"Selectors '{listenerSelector}' and '{customSignalsSelector}' completed without ObjC exception after the missing bindings were added. " +
+                $"Listener delegate type: {typeof(RemoteConfigUpdateCompletionHandler).FullName}. " +
+                $"Registration type: {typeof(ConfigUpdateListenerRegistration).FullName}. " +
+                $"Update type: {typeof(RemoteConfigUpdate).FullName}. " +
+                $"Signals dictionary type: {customSignals.GetType().FullName}. " +
+                $"Custom signals callback observed: {completedTask == customSignalsCompletionSource.Task}. " +
+                $"Custom signals callback invoked: {customSignalsCompletionInvoked}. " +
+                $"Custom signals NSError: {FormatDetail(customSignalsCompletionError?.LocalizedDescription)}. " +
+                $"Listener invoked: {listenerInvoked}. Listener update was null: {listenerUpdateWasNull}. " +
+                $"Listener NSError: {FormatDetail(listenerError?.LocalizedDescription)}.";
         }
         finally
         {
