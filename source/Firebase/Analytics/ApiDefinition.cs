@@ -45,6 +45,26 @@ namespace Firebase.Analytics
 		[Export ("sessionIDWithCompletion:")]
 		void SessionIdWithCompletion (Action<long, NSError> completion);
 
+		// +(void)initiateOnDeviceConversionMeasurementWithEmailAddress:(NSString * _Nonnull)emailAddress;
+		[Static]
+		[Export ("initiateOnDeviceConversionMeasurementWithEmailAddress:")]
+		void InitiateOnDeviceConversionMeasurementWithEmailAddress (string emailAddress);
+
+		// +(void)initiateOnDeviceConversionMeasurementWithPhoneNumber:(NSString * _Nonnull)phoneNumber;
+		[Static]
+		[Export ("initiateOnDeviceConversionMeasurementWithPhoneNumber:")]
+		void InitiateOnDeviceConversionMeasurementWithPhoneNumber (string phoneNumber);
+
+		// +(void)initiateOnDeviceConversionMeasurementWithHashedEmailAddress:(NSData * _Nonnull)hashedEmailAddress;
+		[Static]
+		[Export ("initiateOnDeviceConversionMeasurementWithHashedEmailAddress:")]
+		void InitiateOnDeviceConversionMeasurementWithHashedEmailAddress (NSData hashedEmailAddress);
+
+		// +(void)initiateOnDeviceConversionMeasurementWithHashedPhoneNumber:(NSData * _Nonnull)hashedPhoneNumber;
+		[Static]
+		[Export ("initiateOnDeviceConversionMeasurementWithHashedPhoneNumber:")]
+		void InitiateOnDeviceConversionMeasurementWithHashedPhoneNumber (NSData hashedPhoneNumber);
+
 		// + (nullable NSString *)appInstanceID;
 		[Static]
 		[NullAllowed]
