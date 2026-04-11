@@ -1080,6 +1080,7 @@ static class FirebaseRuntimeDriftCases
 
         NSException? marshaledException = null;
         MarshalObjectiveCExceptionMode? marshaledExceptionMode = null;
+        var seedWriteCompletionSource = new TaskCompletionSource<NSError?>(TaskCreationOptions.RunContinuationsAsynchronously);
         var serverCountCompletionSource = new TaskCompletionSource<(AggregateQuerySnapshot? Snapshot, NSError? Error)>(TaskCreationOptions.RunContinuationsAsynchronously);
 
         void OnMarshalObjectiveCException(object? sender, MarshalObjectiveCExceptionEventArgs args)
@@ -1100,12 +1101,56 @@ static class FirebaseRuntimeDriftCases
             AggregateQuery aggregateQuery;
             Query countUnderlyingQuery;
             Query aggregateUnderlyingQuery;
+            var seedWriteCompletionInvoked = false;
+            NSError? seedWriteError = null;
             var serverCountCompletionInvoked = false;
             AggregateQuerySnapshot? serverCountSnapshot = null;
             NSError? serverCountError = null;
 
             try
             {
+                var seedDocument = query.GetDocument("aggregate-count-seed");
+                using var scoreKey = new NSString("score");
+                using var markerKey = new NSString("marker");
+                using var scoreValue = NSNumber.FromInt32(1);
+                using var markerValue = new NSString("aggregate-count");
+                using var seedData = NSDictionary<NSString, NSObject>.FromObjectsAndKeys(
+                    new NSObject[] { scoreValue, markerValue },
+                    new[] { scoreKey, markerKey },
+                    2);
+                seedDocument.SetData(seedData, error =>
+                {
+                    seedWriteCompletionInvoked = true;
+                    seedWriteError = error;
+                    seedWriteCompletionSource.TrySetResult(error);
+                });
+
+                var completedSeedWriteTask = await Task.WhenAny(seedWriteCompletionSource.Task, Task.Delay(AsyncTimeout));
+                if (completedSeedWriteTask != seedWriteCompletionSource.Task)
+                {
+                    throw new TimeoutException(
+                        "Cloud Firestore seed document write did not invoke its completion callback " +
+                        $"within {AsyncTimeout.TotalSeconds} seconds.");
+                }
+
+                if (!seedWriteCompletionInvoked)
+                {
+                    throw new InvalidOperationException(
+                        "Cloud Firestore seed document write completed without throwing, but the completion callback was never marked as invoked.");
+                }
+
+                var completedSeedWriteError = await seedWriteCompletionSource.Task;
+                if (!ReferenceEquals(seedWriteError, completedSeedWriteError))
+                {
+                    throw new InvalidOperationException("Cloud Firestore seed document write callback state did not match the completed task payload.");
+                }
+
+                if (completedSeedWriteError is not null)
+                {
+                    throw new InvalidOperationException(
+                        $"Cloud Firestore seed document write reached native completion with Firebase error {FormatNSError(completedSeedWriteError)}.");
+                }
+
                 using var fieldPath = new FieldPath(new[] { "score" });
                 countField = AggregateField.Count;
                 sumByNameField = AggregateField.Sum("score");
@@ -1137,7 +1182,7 @@ static class FirebaseRuntimeDriftCases
             {
                 throw new InvalidOperationException(
                     $"Firestore aggregate selectors should not throw after the missing bindings are added, but observed {ex.GetType().FullName}. " +
-                    $"Selectors exercised: '{queryCountSelector}', '{aggregateSelector}', '{aggregateQueryQuerySelector}', '{getAggregationSelector}', aggregateFieldForCount, aggregateFieldForSumOfField:, aggregateFieldForSumOfFieldPath:, aggregateFieldForAverageOfField:, aggregateFieldForAverageOfFieldPath:. " +
+                    $"Selectors exercised: setData:completion:, '{queryCountSelector}', '{aggregateSelector}', '{aggregateQueryQuerySelector}', '{getAggregationSelector}', aggregateFieldForCount, aggregateFieldForSumOfField:, aggregateFieldForSumOfFieldPath:, aggregateFieldForAverageOfField:, aggregateFieldForAverageOfFieldPath:. " +
                     $"NSException.Name: {FormatDetail(marshaledException?.Name?.ToString())}. " +
                     $"NSException.Reason: {FormatDetail(marshaledException?.Reason)}. " +
                     $"Marshal mode: {FormatDetail(marshaledExceptionMode?.ToString())}.",
@@ -1214,12 +1259,24 @@ static class FirebaseRuntimeDriftCases
                     $"Selector '{getAggregationSelector}' completed without either a snapshot or an NSError.");
             }
 
+            if (completedServerCountError is not null)
+            {
+                throw new InvalidOperationException(serverResultDetail);
+            }
+
+            var serverCount = completedServerCountSnapshot!.Count.Int64Value;
+            if (serverCount <= 0)
+            {
+                throw new InvalidOperationException(
+                    $"Server count aggregation returned {serverCount}; expected a non-zero count after seeding document 'aggregate-count-seed'.");
+            }
+
             return
                 $"Selectors '{queryCountSelector}' and '{aggregateSelector}' returned aggregate query objects without ObjC exception. " +
                 $"Aggregate field types: {countField.GetType().FullName}, {sumByNameField.GetType().FullName}, {sumByPathField.GetType().FullName}, {averageByNameField.GetType().FullName}, {averageByPathField.GetType().FullName}. " +
                 $"Count query type: {countQuery.GetType().FullName}. Aggregate query type: {aggregateQuery.GetType().FullName}. " +
                 $"Underlying query types: {countUnderlyingQuery.GetType().FullName}, {aggregateUnderlyingQuery.GetType().FullName}. " +
-                $"Aggregate query get selector present: {getAggregationSelector}. " +
+                $"Seed document write completed without Firebase error. Aggregate query get selector present: {getAggregationSelector}. " +
                 serverResultDetail;
         }
         finally
