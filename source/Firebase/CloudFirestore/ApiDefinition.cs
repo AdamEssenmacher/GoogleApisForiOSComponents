@@ -665,6 +665,11 @@ namespace Firebase.CloudFirestore
 		[Export ("app", ArgumentSemantic.Strong)]
 		Firebase.Core.App App { get; }
 
+		// @property (nonatomic, readonly, nullable) FIRPersistentCacheIndexManager * _Nullable persistentCacheIndexManager;
+		[NullAllowed]
+		[Export ("persistentCacheIndexManager")]
+		PersistentCacheIndexManager PersistentCacheIndexManager { get; }
+
 		// -(FIRCollectionReference * _Nonnull)collectionWithPath:(NSString * _Nonnull)collectionPath;
 		[Export ("collectionWithPath:")]
 		CollectionReference GetCollection (string collectionPath);
@@ -814,6 +819,61 @@ namespace Firebase.CloudFirestore
 		// @property (assign, nonatomic) int64_t cacheSizeBytes;
 		[Export ("cacheSizeBytes")]
 		long CacheSizeBytes { get; set; }
+
+		// @property(nonatomic, strong) id<FIRLocalCacheSettings, NSObject> _Nonnull cacheSettings;
+		[Export ("cacheSettings", ArgumentSemantic.Strong)]
+		NSObject CacheSettings { get; set; }
+	}
+
+	// @interface FIRPersistentCacheSettings : NSObject <NSCopying, FIRLocalCacheSettings>
+	[BaseType (typeof (NSObject), Name = "FIRPersistentCacheSettings")]
+	interface PersistentCacheSettings : INSCopying
+	{
+		// - (instancetype _Nonnull)initWithSizeBytes:(NSNumber * _Nonnull)size;
+		[Export ("initWithSizeBytes:")]
+		NativeHandle Constructor (NSNumber size);
+	}
+
+	// @interface FIRMemoryEagerGCSettings : NSObject <NSCopying, FIRMemoryGarbageCollectorSettings>
+	[BaseType (typeof (NSObject), Name = "FIRMemoryEagerGCSettings")]
+	interface MemoryEagerGCSettings : INSCopying
+	{
+	}
+
+	// @interface FIRMemoryLRUGCSettings : NSObject <NSCopying, FIRMemoryGarbageCollectorSettings>
+	[BaseType (typeof (NSObject), Name = "FIRMemoryLRUGCSettings")]
+	interface MemoryLRUGCSettings : INSCopying
+	{
+		// - (instancetype _Nonnull)initWithSizeBytes:(NSNumber * _Nonnull)size;
+		[Export ("initWithSizeBytes:")]
+		NativeHandle Constructor (NSNumber size);
+	}
+
+	// @interface FIRMemoryCacheSettings : NSObject <NSCopying, FIRLocalCacheSettings>
+	[BaseType (typeof (NSObject), Name = "FIRMemoryCacheSettings")]
+	interface MemoryCacheSettings : INSCopying
+	{
+		// - (instancetype _Nonnull)initWithGarbageCollectorSettings:(id<FIRMemoryGarbageCollectorSettings, NSObject> _Nonnull)settings;
+		[Export ("initWithGarbageCollectorSettings:")]
+		NativeHandle Constructor (NSObject settings);
+	}
+
+	// @interface FIRPersistentCacheIndexManager : NSObject
+	[DisableDefaultCtor]
+	[BaseType (typeof (NSObject), Name = "FIRPersistentCacheIndexManager")]
+	interface PersistentCacheIndexManager
+	{
+		// - (void)enableIndexAutoCreation;
+		[Export ("enableIndexAutoCreation")]
+		void EnableIndexAutoCreation ();
+
+		// - (void)disableIndexAutoCreation;
+		[Export ("disableIndexAutoCreation")]
+		void DisableIndexAutoCreation ();
+
+		// - (void)deleteAllIndexes;
+		[Export ("deleteAllIndexes")]
+		void DeleteAllIndexes ();
 	}
 
 	// @interface FIRGeoPoint : NSObject <NSCopying>

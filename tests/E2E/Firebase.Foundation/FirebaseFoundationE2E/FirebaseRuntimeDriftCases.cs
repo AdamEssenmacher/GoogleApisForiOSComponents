@@ -78,6 +78,12 @@ using Foundation;
 using ObjCRuntime;
 #endif
 
+#if ENABLE_RUNTIME_DRIFT_CASE_CLOUDFIRESTORE_CACHE_SETTINGS
+using Firebase.CloudFirestore;
+using Foundation;
+using ObjCRuntime;
+#endif
+
 #if ENABLE_RUNTIME_DRIFT_CASE_CLOUDFUNCTIONS_USEFUNCTIONSEMULATORORIGIN
 using Firebase.CloudFunctions;
 using Foundation;
@@ -1990,6 +1996,217 @@ static class FirebaseRuntimeDriftCases
         finally
         {
             Runtime.MarshalObjectiveCException -= OnMarshalObjectiveCException;
+        }
+    }
+#endif
+
+#if ENABLE_RUNTIME_DRIFT_CASE_CLOUDFIRESTORE_CACHE_SETTINGS
+    static Task<string> VerifyCloudFirestoreCacheSettingsAsync()
+    {
+        const string cacheSettingsSelector = "cacheSettings";
+        const string setCacheSettingsSelector = "setCacheSettings:";
+        const string persistentCacheIndexManagerSelector = "persistentCacheIndexManager";
+        const string enableIndexAutoCreationSelector = "enableIndexAutoCreation";
+        const string disableIndexAutoCreationSelector = "disableIndexAutoCreation";
+        const string deleteAllIndexesSelector = "deleteAllIndexes";
+
+        var cacheSettingsProperty = typeof(FirestoreSettings).GetProperty(
+            nameof(FirestoreSettings.CacheSettings),
+            BindingFlags.Instance | BindingFlags.Public);
+        if (cacheSettingsProperty?.PropertyType != typeof(NSObject))
+        {
+            throw new InvalidOperationException(
+                $"Expected managed API '{typeof(FirestoreSettings).FullName}.{nameof(FirestoreSettings.CacheSettings)}' " +
+                $"to return '{typeof(NSObject).FullName}' for selector '{cacheSettingsSelector}', " +
+                $"observed '{cacheSettingsProperty?.PropertyType.FullName ?? "<missing>"}'.");
+        }
+
+        var persistentCacheIndexManagerProperty = typeof(Firestore).GetProperty(
+            nameof(Firestore.PersistentCacheIndexManager),
+            BindingFlags.Instance | BindingFlags.Public);
+        if (persistentCacheIndexManagerProperty?.PropertyType != typeof(PersistentCacheIndexManager))
+        {
+            throw new InvalidOperationException(
+                $"Expected managed API '{typeof(Firestore).FullName}.{nameof(Firestore.PersistentCacheIndexManager)}' " +
+                $"to return '{typeof(PersistentCacheIndexManager).FullName}' for selector '{persistentCacheIndexManagerSelector}', " +
+                $"observed '{persistentCacheIndexManagerProperty?.PropertyType.FullName ?? "<missing>"}'.");
+        }
+
+        RequireConstructor(typeof(PersistentCacheSettings), Type.EmptyTypes, "init");
+        RequireConstructor(typeof(PersistentCacheSettings), new[] { typeof(NSNumber) }, "initWithSizeBytes:");
+        RequireConstructor(typeof(MemoryEagerGCSettings), Type.EmptyTypes, "init");
+        RequireConstructor(typeof(MemoryLRUGCSettings), Type.EmptyTypes, "init");
+        RequireConstructor(typeof(MemoryLRUGCSettings), new[] { typeof(NSNumber) }, "initWithSizeBytes:");
+        RequireConstructor(typeof(MemoryCacheSettings), Type.EmptyTypes, "init");
+        RequireConstructor(typeof(MemoryCacheSettings), new[] { typeof(NSObject) }, "initWithGarbageCollectorSettings:");
+        RequireVoidMethod(typeof(PersistentCacheIndexManager), nameof(PersistentCacheIndexManager.EnableIndexAutoCreation), enableIndexAutoCreationSelector);
+        RequireVoidMethod(typeof(PersistentCacheIndexManager), nameof(PersistentCacheIndexManager.DisableIndexAutoCreation), disableIndexAutoCreationSelector);
+        RequireVoidMethod(typeof(PersistentCacheIndexManager), nameof(PersistentCacheIndexManager.DeleteAllIndexes), deleteAllIndexesSelector);
+
+        var firestore = Firestore.SharedInstance;
+        if (firestore is null)
+        {
+            throw new InvalidOperationException("Firebase.CloudFirestore.Firestore.SharedInstance returned null after App.Configure().");
+        }
+
+        if (!firestore.RespondsToSelector(new Selector(persistentCacheIndexManagerSelector)))
+        {
+            throw new InvalidOperationException(
+                $"Native FIRFirestore does not respond to expected selector '{persistentCacheIndexManagerSelector}'.");
+        }
+
+        NSException? marshaledException = null;
+        MarshalObjectiveCExceptionMode? marshaledExceptionMode = null;
+
+        void OnMarshalObjectiveCException(object? sender, MarshalObjectiveCExceptionEventArgs args)
+        {
+            marshaledException ??= args.Exception;
+            marshaledExceptionMode ??= args.ExceptionMode;
+        }
+
+        Runtime.MarshalObjectiveCException += OnMarshalObjectiveCException;
+        try
+        {
+            string cacheSettingsRuntimeTypes;
+            string managerRuntimeType;
+            try
+            {
+                using var sizeBytes = NSNumber.FromInt64(100 * 1024 * 1024);
+                using var settings = new FirestoreSettings();
+
+                if (!settings.RespondsToSelector(new Selector(cacheSettingsSelector)))
+                {
+                    throw new InvalidOperationException(
+                        $"Native FIRFirestoreSettings does not respond to expected selector '{cacheSettingsSelector}'.");
+                }
+
+                if (!settings.RespondsToSelector(new Selector(setCacheSettingsSelector)))
+                {
+                    throw new InvalidOperationException(
+                        $"Native FIRFirestoreSettings does not respond to expected selector '{setCacheSettingsSelector}'.");
+                }
+
+                using var persistentDefault = new PersistentCacheSettings();
+                using var persistentSized = new PersistentCacheSettings(sizeBytes);
+                using var eagerGc = new MemoryEagerGCSettings();
+                using var lruGcDefault = new MemoryLRUGCSettings();
+                using var lruGcSized = new MemoryLRUGCSettings(sizeBytes);
+                using var memoryDefault = new MemoryCacheSettings();
+                using var memoryEager = new MemoryCacheSettings(eagerGc);
+                using var memoryLruDefault = new MemoryCacheSettings(lruGcDefault);
+                using var memoryLru = new MemoryCacheSettings(lruGcSized);
+                var observedCacheSettingsTypes = new List<string>();
+
+                settings.CacheSettings = persistentDefault;
+                observedCacheSettingsTypes.Add(RequireCacheSettings(settings, nameof(PersistentCacheSettings)));
+
+                settings.CacheSettings = persistentSized;
+                observedCacheSettingsTypes.Add(RequireCacheSettings(settings, nameof(PersistentCacheSettings)));
+
+                settings.CacheSettings = memoryDefault;
+                observedCacheSettingsTypes.Add(RequireCacheSettings(settings, nameof(MemoryCacheSettings)));
+
+                settings.CacheSettings = memoryEager;
+                observedCacheSettingsTypes.Add(RequireCacheSettings(settings, nameof(MemoryCacheSettings)));
+
+                settings.CacheSettings = memoryLruDefault;
+                observedCacheSettingsTypes.Add(RequireCacheSettings(settings, nameof(MemoryCacheSettings)));
+
+                settings.CacheSettings = memoryLru;
+                observedCacheSettingsTypes.Add(RequireCacheSettings(settings, nameof(MemoryCacheSettings)));
+                cacheSettingsRuntimeTypes = string.Join(", ", observedCacheSettingsTypes);
+
+                var manager = firestore.PersistentCacheIndexManager;
+                if (manager is null)
+                {
+                    throw new InvalidOperationException(
+                        $"Selector '{persistentCacheIndexManagerSelector}' returned null for the default persistent Firestore cache.");
+                }
+
+                managerRuntimeType = manager.GetType().FullName ?? "<unknown>";
+
+                if (!manager.RespondsToSelector(new Selector(enableIndexAutoCreationSelector)))
+                {
+                    throw new InvalidOperationException(
+                        $"Native FIRPersistentCacheIndexManager does not respond to expected selector '{enableIndexAutoCreationSelector}'.");
+                }
+
+                if (!manager.RespondsToSelector(new Selector(disableIndexAutoCreationSelector)))
+                {
+                    throw new InvalidOperationException(
+                        $"Native FIRPersistentCacheIndexManager does not respond to expected selector '{disableIndexAutoCreationSelector}'.");
+                }
+
+                if (!manager.RespondsToSelector(new Selector(deleteAllIndexesSelector)))
+                {
+                    throw new InvalidOperationException(
+                        $"Native FIRPersistentCacheIndexManager does not respond to expected selector '{deleteAllIndexesSelector}'.");
+                }
+
+                manager.EnableIndexAutoCreation();
+                manager.DisableIndexAutoCreation();
+                manager.DeleteAllIndexes();
+            }
+            catch (ObjCException ex)
+            {
+                throw new InvalidOperationException(
+                    $"Firestore cache settings selectors should not throw after the missing bindings are added, but observed {ex.GetType().FullName}. " +
+                    $"Selectors exercised: '{cacheSettingsSelector}', '{setCacheSettingsSelector}', '{persistentCacheIndexManagerSelector}', " +
+                    $"'{enableIndexAutoCreationSelector}', '{disableIndexAutoCreationSelector}', '{deleteAllIndexesSelector}', " +
+                    $"initWithSizeBytes:, initWithGarbageCollectorSettings:. " +
+                    $"NSException.Name: {FormatDetail(marshaledException?.Name?.ToString())}. " +
+                    $"NSException.Reason: {FormatDetail(marshaledException?.Reason)}. " +
+                    $"Marshal mode: {FormatDetail(marshaledExceptionMode?.ToString())}.",
+                    ex);
+            }
+
+            if (marshaledException is not null)
+            {
+                throw new InvalidOperationException(
+                    $"Firestore cache settings selectors completed, but Runtime.MarshalObjectiveCException captured unexpected NSException.Name '{marshaledException.Name}'. " +
+                    $"Reason: {FormatDetail(marshaledException.Reason)}. Marshal mode: {FormatDetail(marshaledExceptionMode?.ToString())}.");
+            }
+
+            return Task.FromResult(
+                $"Firestore cache settings and persistent cache index manager APIs crossed the native selector boundary. " +
+                $"Observed cache settings runtime types: {cacheSettingsRuntimeTypes}. " +
+                $"Index manager runtime type: {managerRuntimeType}. " +
+                $"Selectors exercised: '{cacheSettingsSelector}', '{setCacheSettingsSelector}', '{persistentCacheIndexManagerSelector}', " +
+                $"'{enableIndexAutoCreationSelector}', '{disableIndexAutoCreationSelector}', '{deleteAllIndexesSelector}'.");
+        }
+        finally
+        {
+            Runtime.MarshalObjectiveCException -= OnMarshalObjectiveCException;
+        }
+
+        static void RequireConstructor(Type type, Type[] parameterTypes, string selector)
+        {
+            var constructor = type.GetConstructor(parameterTypes);
+            if (constructor is null)
+            {
+                throw new InvalidOperationException(
+                    $"Expected managed constructor '{type.FullName}({string.Join(", ", parameterTypes.Select(parameterType => parameterType.FullName))})' " +
+                    $"was not found for selector '{selector}'.");
+            }
+        }
+
+        static void RequireVoidMethod(Type type, string methodName, string selector)
+        {
+            var method = type.GetMethod(methodName, BindingFlags.Instance | BindingFlags.Public, binder: null, Type.EmptyTypes, modifiers: null);
+            if (method?.ReturnType != typeof(void))
+            {
+                throw new InvalidOperationException(
+                    $"Expected managed API '{type.FullName}.{methodName}()' to return void for selector '{selector}', " +
+                    $"observed '{method?.ReturnType.FullName ?? "<missing>"}'.");
+            }
+        }
+
+        static string RequireCacheSettings(FirestoreSettings settings, string assignedRuntimeTypeName)
+        {
+            var cacheSettings = settings.CacheSettings
+                ?? throw new InvalidOperationException($"FirestoreSettings.CacheSettings returned null after assigning {assignedRuntimeTypeName}.");
+
+            return cacheSettings.GetType().FullName ?? assignedRuntimeTypeName;
         }
     }
 #endif
