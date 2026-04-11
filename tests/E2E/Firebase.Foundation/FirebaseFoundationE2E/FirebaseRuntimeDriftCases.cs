@@ -60,6 +60,12 @@ using Foundation;
 using ObjCRuntime;
 #endif
 
+#if ENABLE_RUNTIME_DRIFT_CASE_CLOUDFIRESTORE_QUERY_FILTERS
+using Firebase.CloudFirestore;
+using Foundation;
+using ObjCRuntime;
+#endif
+
 #if ENABLE_RUNTIME_DRIFT_CASE_CLOUDFUNCTIONS_USEFUNCTIONSEMULATORORIGIN
 using Firebase.CloudFunctions;
 using Foundation;
@@ -982,6 +988,317 @@ static class FirebaseRuntimeDriftCases
     }
 #endif
 
+#if ENABLE_RUNTIME_DRIFT_CASE_CLOUDFIRESTORE_QUERY_FILTERS
+    static async Task<string> VerifyCloudFirestoreQueryFiltersAsync()
+    {
+        const string queryWhereFilterSelector = "queryWhereFilter:";
+        const string queryWhereFieldNotEqualSelector = "queryWhereField:isNotEqualTo:";
+        const string queryWhereFieldPathNotEqualSelector = "queryWhereFieldPath:isNotEqualTo:";
+        const string queryWhereFieldNotInSelector = "queryWhereField:notIn:";
+        const string queryWhereFieldPathNotInSelector = "queryWhereFieldPath:notIn:";
+        const string filterWhereFieldNotInSelector = "filterWhereField:notIn:";
+
+        var expectedQuerySignatures = new (string MethodName, Type[] ParameterTypes, string Selector)[]
+        {
+            (
+                nameof(Query.FilteredBy),
+                new[] { typeof(Filter) },
+                queryWhereFilterSelector),
+            (
+                nameof(Query.WhereNotEqualTo),
+                new[] { typeof(string), typeof(NSObject) },
+                queryWhereFieldNotEqualSelector),
+            (
+                nameof(Query.WhereNotEqualTo),
+                new[] { typeof(FieldPath), typeof(NSObject) },
+                queryWhereFieldPathNotEqualSelector),
+            (
+                nameof(Query.WhereFieldNotIn),
+                new[] { typeof(string), typeof(NSObject[]) },
+                queryWhereFieldNotInSelector),
+            (
+                nameof(Query.WhereFieldNotIn),
+                new[] { typeof(FieldPath), typeof(NSObject[]) },
+                queryWhereFieldPathNotInSelector),
+        };
+
+        foreach (var (methodName, parameterTypes, selector) in expectedQuerySignatures)
+        {
+            var signature = typeof(Query).GetMethod(
+                methodName,
+                BindingFlags.Instance | BindingFlags.Public,
+                binder: null,
+                types: parameterTypes,
+                modifiers: null);
+            if (signature?.ReturnType != typeof(Query))
+            {
+                throw new InvalidOperationException(
+                    $"Expected managed API '{typeof(Query).FullName}.{methodName}({string.Join(", ", parameterTypes.Select(type => type.FullName))})' " +
+                    $"to return '{typeof(Query).FullName}' for selector '{selector}', observed '{signature?.ReturnType.FullName ?? "<missing>"}'.");
+            }
+        }
+
+        var expectedFilterSignatures = new (string MethodName, Type[] ParameterTypes, string Selector)[]
+        {
+            (
+                nameof(Filter.WhereNotEqualTo),
+                new[] { typeof(string), typeof(NSObject) },
+                "filterWhereField:isNotEqualTo:"),
+            (
+                nameof(Filter.WhereFieldNotIn),
+                new[] { typeof(string), typeof(NSObject[]) },
+                filterWhereFieldNotInSelector),
+        };
+
+        foreach (var (methodName, parameterTypes, selector) in expectedFilterSignatures)
+        {
+            var signature = typeof(Filter).GetMethod(
+                methodName,
+                BindingFlags.Static | BindingFlags.Public,
+                binder: null,
+                types: parameterTypes,
+                modifiers: null);
+            if (signature?.ReturnType != typeof(Filter))
+            {
+                throw new InvalidOperationException(
+                    $"Expected managed API '{typeof(Filter).FullName}.{methodName}({string.Join(", ", parameterTypes.Select(type => type.FullName))})' " +
+                    $"to return '{typeof(Filter).FullName}' for selector '{selector}', observed '{signature?.ReturnType.FullName ?? "<missing>"}'.");
+            }
+        }
+
+        var firestore = Firestore.SharedInstance;
+        if (firestore is null)
+        {
+            throw new InvalidOperationException("Firebase.CloudFirestore.Firestore.SharedInstance returned null after App.Configure().");
+        }
+
+        var collectionName = $"codex-query-filter-e2e-{Guid.NewGuid():N}";
+        var collection = firestore.GetCollection(collectionName);
+        if (collection is null)
+        {
+            throw new InvalidOperationException("Firebase.CloudFirestore.Firestore.GetCollection returned null.");
+        }
+
+        if (!collection.RespondsToSelector(new Selector(queryWhereFilterSelector)))
+        {
+            throw new InvalidOperationException($"Native FIRQuery does not respond to expected selector '{queryWhereFilterSelector}'.");
+        }
+
+        if (!collection.RespondsToSelector(new Selector(queryWhereFieldNotEqualSelector)))
+        {
+            throw new InvalidOperationException($"Native FIRQuery does not respond to expected selector '{queryWhereFieldNotEqualSelector}'.");
+        }
+
+        if (!collection.RespondsToSelector(new Selector(queryWhereFieldPathNotEqualSelector)))
+        {
+            throw new InvalidOperationException($"Native FIRQuery does not respond to expected selector '{queryWhereFieldPathNotEqualSelector}'.");
+        }
+
+        if (!collection.RespondsToSelector(new Selector(queryWhereFieldNotInSelector)))
+        {
+            throw new InvalidOperationException($"Native FIRQuery does not respond to expected selector '{queryWhereFieldNotInSelector}'.");
+        }
+
+        if (!collection.RespondsToSelector(new Selector(queryWhereFieldPathNotInSelector)))
+        {
+            throw new InvalidOperationException($"Native FIRQuery does not respond to expected selector '{queryWhereFieldPathNotInSelector}'.");
+        }
+
+        NSException? marshaledException = null;
+        MarshalObjectiveCExceptionMode? marshaledExceptionMode = null;
+
+        void OnMarshalObjectiveCException(object? sender, MarshalObjectiveCExceptionEventArgs args)
+        {
+            marshaledException ??= args.Exception;
+            marshaledExceptionMode ??= args.ExceptionMode;
+        }
+
+        Runtime.MarshalObjectiveCException += OnMarshalObjectiveCException;
+        try
+        {
+            Query stringNotEqualQuery;
+            Query pathNotEqualQuery;
+            Query stringNotInQuery;
+            Query pathNotInQuery;
+            Query filterNotInQuery;
+
+            try
+            {
+                await SetSeedDocumentAsync("alpha", "include", "red", 1);
+                await SetSeedDocumentAsync("beta", "exclude", "blue", 2);
+                await SetSeedDocumentAsync("gamma", "include", "green", 3);
+
+                using var groupPath = new FieldPath(new[] { "group" });
+                using var colorPath = new FieldPath(new[] { "color" });
+
+                stringNotEqualQuery = collection.WhereNotEqualTo("group", "exclude");
+                pathNotEqualQuery = collection.WhereNotEqualTo(groupPath, "exclude");
+                stringNotInQuery = collection.WhereFieldNotIn("color", new object[] { "red", "blue" });
+                pathNotInQuery = collection.WhereFieldNotIn(colorPath, new object[] { "red", "blue" });
+
+                var notInFilter = Filter.WhereFieldNotIn("color", new object[] { "red", "blue" });
+                filterNotInQuery = collection.FilteredBy(notInFilter);
+            }
+            catch (ObjCException ex)
+            {
+                throw new InvalidOperationException(
+                    $"Firestore query filter selectors should not throw after the missing bindings are added, but observed {ex.GetType().FullName}. " +
+                    $"Selectors exercised: setData:completion:, '{queryWhereFilterSelector}', '{queryWhereFieldNotEqualSelector}', " +
+                    $"'{queryWhereFieldPathNotEqualSelector}', '{queryWhereFieldNotInSelector}', '{queryWhereFieldPathNotInSelector}', '{filterWhereFieldNotInSelector}'. " +
+                    $"NSException.Name: {FormatDetail(marshaledException?.Name?.ToString())}. " +
+                    $"NSException.Reason: {FormatDetail(marshaledException?.Reason)}. " +
+                    $"Marshal mode: {FormatDetail(marshaledExceptionMode?.ToString())}.",
+                    ex);
+            }
+
+            if (marshaledException is not null)
+            {
+                throw new InvalidOperationException(
+                    $"Firestore query filter selectors completed, but Runtime.MarshalObjectiveCException captured unexpected NSException.Name '{marshaledException.Name}'. " +
+                    $"Reason: {FormatDetail(marshaledException.Reason)}. Marshal mode: {FormatDetail(marshaledExceptionMode?.ToString())}.");
+            }
+
+            var stringNotEqualCount = await GetServerCountAsync(stringNotEqualQuery, "string notEqualTo query");
+            var pathNotEqualCount = await GetServerCountAsync(pathNotEqualQuery, "FieldPath notEqualTo query");
+            var stringNotInCount = await GetServerCountAsync(stringNotInQuery, "string notIn query");
+            var pathNotInCount = await GetServerCountAsync(pathNotInQuery, "FieldPath notIn query");
+            var filterNotInCount = await GetServerCountAsync(filterNotInQuery, "Filter notIn query");
+
+            RequireCount(stringNotEqualCount, 2, "string notEqualTo query");
+            RequireCount(pathNotEqualCount, 2, "FieldPath notEqualTo query");
+            RequireCount(stringNotInCount, 1, "string notIn query");
+            RequireCount(pathNotInCount, 1, "FieldPath notIn query");
+            RequireCount(filterNotInCount, 1, "Filter notIn query");
+
+            return
+                $"Firestore query filter APIs crossed the native selector boundary and reached the backend. " +
+                $"Collection: {collectionName}. " +
+                $"Counts: string notEqualTo={stringNotEqualCount}, FieldPath notEqualTo={pathNotEqualCount}, " +
+                $"string notIn={stringNotInCount}, FieldPath notIn={pathNotInCount}, Filter notIn={filterNotInCount}.";
+        }
+        finally
+        {
+            Runtime.MarshalObjectiveCException -= OnMarshalObjectiveCException;
+        }
+
+        async Task SetSeedDocumentAsync(string documentId, string group, string color, int score)
+        {
+            var completionSource = new TaskCompletionSource<NSError?>(TaskCreationOptions.RunContinuationsAsynchronously);
+            var completionInvoked = false;
+            NSError? callbackError = null;
+
+            var document = collection.GetDocument(documentId);
+            using var groupKey = new NSString("group");
+            using var colorKey = new NSString("color");
+            using var scoreKey = new NSString("score");
+            using var groupValue = new NSString(group);
+            using var colorValue = new NSString(color);
+            using var scoreValue = NSNumber.FromInt32(score);
+            using var data = NSDictionary<NSString, NSObject>.FromObjectsAndKeys(
+                new NSObject[] { groupValue, colorValue, scoreValue },
+                new[] { groupKey, colorKey, scoreKey },
+                3);
+
+            document.SetData(data, error =>
+            {
+                completionInvoked = true;
+                callbackError = error;
+                completionSource.TrySetResult(error);
+            });
+
+            var completedTask = await Task.WhenAny(completionSource.Task, Task.Delay(AsyncTimeout));
+            if (completedTask != completionSource.Task)
+            {
+                throw new TimeoutException(
+                    $"Cloud Firestore seed document '{documentId}' write did not invoke its completion callback within {AsyncTimeout.TotalSeconds} seconds.");
+            }
+
+            if (!completionInvoked)
+            {
+                throw new InvalidOperationException(
+                    $"Cloud Firestore seed document '{documentId}' write completed without throwing, but the completion callback was never marked as invoked.");
+            }
+
+            var completedError = await completionSource.Task;
+            if (!ReferenceEquals(callbackError, completedError))
+            {
+                throw new InvalidOperationException(
+                    $"Cloud Firestore seed document '{documentId}' write callback state did not match the completed task payload.");
+            }
+
+            if (completedError is not null)
+            {
+                throw new InvalidOperationException(
+                    $"Cloud Firestore seed document '{documentId}' write reached native completion with Firebase error {FormatNSError(completedError)}.");
+            }
+        }
+
+        async Task<int> GetServerCountAsync(Query query, string label)
+        {
+            var completionSource = new TaskCompletionSource<(QuerySnapshot? Snapshot, NSError? Error)>(TaskCreationOptions.RunContinuationsAsynchronously);
+            var completionInvoked = false;
+            QuerySnapshot? callbackSnapshot = null;
+            NSError? callbackError = null;
+
+            query.GetDocuments(FirestoreSource.Server, (snapshot, error) =>
+            {
+                completionInvoked = true;
+                callbackSnapshot = snapshot;
+                callbackError = error;
+                completionSource.TrySetResult((snapshot, error));
+            });
+
+            var completedTask = await Task.WhenAny(completionSource.Task, Task.Delay(AsyncTimeout));
+            if (completedTask != completionSource.Task)
+            {
+                throw new TimeoutException(
+                    $"Cloud Firestore {label} did not invoke its completion callback within {AsyncTimeout.TotalSeconds} seconds.");
+            }
+
+            if (!completionInvoked)
+            {
+                throw new InvalidOperationException(
+                    $"Cloud Firestore {label} completed without throwing, but the completion callback was never marked as invoked.");
+            }
+
+            var (completedSnapshot, completedError) = await completionSource.Task;
+            if (!ReferenceEquals(callbackSnapshot, completedSnapshot) || !ReferenceEquals(callbackError, completedError))
+            {
+                throw new InvalidOperationException($"Cloud Firestore {label} callback state did not match the completed task payload.");
+            }
+
+            if (completedError is not null)
+            {
+                throw new InvalidOperationException(
+                    $"Cloud Firestore {label} reached native completion with Firebase error {FormatNSError(completedError)}.");
+            }
+
+            if (completedSnapshot is null)
+            {
+                throw new InvalidOperationException($"Cloud Firestore {label} completed without either a snapshot or an NSError.");
+            }
+
+            if (marshaledException is not null)
+            {
+                throw new InvalidOperationException(
+                    $"Cloud Firestore {label} completed, but Runtime.MarshalObjectiveCException captured unexpected NSException.Name '{marshaledException.Name}'. " +
+                    $"Reason: {FormatDetail(marshaledException.Reason)}. Marshal mode: {FormatDetail(marshaledExceptionMode?.ToString())}.");
+            }
+
+            return (int)completedSnapshot.Count;
+        }
+
+        static void RequireCount(int actual, int expected, string label)
+        {
+            if (actual != expected)
+            {
+                throw new InvalidOperationException(
+                    $"Cloud Firestore {label} returned {actual} documents; expected {expected} after deterministic seed writes.");
+            }
+        }
+    }
+#endif
+
 #if ENABLE_RUNTIME_DRIFT_CASE_CLOUDFIRESTORE_AGGREGATE_QUERY
     static async Task<string> VerifyCloudFirestoreAggregateQueryAsync()
     {
@@ -1285,10 +1602,6 @@ static class FirebaseRuntimeDriftCases
         }
     }
 
-    static string FormatNSError(NSError error)
-    {
-        return $"{error.Domain} ({error.Code}): {error.LocalizedDescription}";
-    }
 #endif
 
 #if ENABLE_RUNTIME_DRIFT_CASE_CLOUDFUNCTIONS_USEFUNCTIONSEMULATORORIGIN
@@ -1445,6 +1758,11 @@ static class FirebaseRuntimeDriftCases
         }
     }
 #endif
+
+    static string FormatNSError(Foundation.NSError error)
+    {
+        return $"{error.Domain} ({error.Code}): {error.LocalizedDescription}";
+    }
 
     static string FormatDetail(string? value)
     {
