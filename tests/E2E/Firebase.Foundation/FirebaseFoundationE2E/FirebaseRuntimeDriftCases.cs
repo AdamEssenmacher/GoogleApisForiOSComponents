@@ -48,6 +48,12 @@ using Foundation;
 using ObjCRuntime;
 #endif
 
+#if ENABLE_RUNTIME_DRIFT_CASE_CLOUDFIRESTORE_FIELDVALUE_VECTORWITHARRAY
+using Firebase.CloudFirestore;
+using Foundation;
+using ObjCRuntime;
+#endif
+
 #if ENABLE_RUNTIME_DRIFT_CASE_CLOUDFUNCTIONS_USEFUNCTIONSEMULATORORIGIN
 using Firebase.CloudFunctions;
 using Foundation;
@@ -863,6 +869,105 @@ static class FirebaseRuntimeDriftCases
                 $"CallbackInvoked: {callbackInvoked}. " +
                 $"ReturnedQueryWasNull: {returnedQueryWasNull}. " +
                 $"ReturnedQueryType: {returnedQuery?.GetType().FullName ?? "<null>"}.";
+        }
+        finally
+        {
+            Runtime.MarshalObjectiveCException -= OnMarshalObjectiveCException;
+        }
+    }
+#endif
+
+#if ENABLE_RUNTIME_DRIFT_CASE_CLOUDFIRESTORE_FIELDVALUE_VECTORWITHARRAY
+    static Task<string> VerifyCloudFirestoreFieldValueVectorWithArrayAsync()
+    {
+        const string selector = "vectorWithArray:";
+
+        var signature = typeof(FieldValue).GetMethod(
+            nameof(FieldValue.VectorWithArray),
+            BindingFlags.Static | BindingFlags.Public,
+            binder: null,
+            types: new[] { typeof(NSNumber[]) },
+            modifiers: null);
+        if (signature is null)
+        {
+            throw new InvalidOperationException(
+                $"Expected managed API '{nameof(FieldValue.VectorWithArray)}({typeof(NSNumber[]).FullName})' was not found.");
+        }
+
+        if (signature.ReturnType != typeof(VectorValue))
+        {
+            throw new InvalidOperationException(
+                $"Managed signature regression: expected '{nameof(FieldValue.VectorWithArray)}' to return '{typeof(VectorValue).FullName}', observed '{signature.ReturnType.FullName}'.");
+        }
+
+        var vectorConstructor = typeof(VectorValue).GetConstructor(
+            BindingFlags.Instance | BindingFlags.Public,
+            binder: null,
+            types: new[] { typeof(NSNumber[]) },
+            modifiers: null);
+        if (vectorConstructor is null)
+        {
+            throw new InvalidOperationException(
+                $"Expected managed API '{nameof(VectorValue)}({typeof(NSNumber[]).FullName})' was not found.");
+        }
+
+        using var first = NSNumber.FromInt64(1);
+        using var second = NSNumber.FromInt64(2);
+        var values = new[] { first, second };
+        NSException? marshaledException = null;
+        MarshalObjectiveCExceptionMode? marshaledExceptionMode = null;
+        var vectorArrayLength = 0;
+
+        void OnMarshalObjectiveCException(object? sender, MarshalObjectiveCExceptionEventArgs args)
+        {
+            marshaledException ??= args.Exception;
+            marshaledExceptionMode ??= args.ExceptionMode;
+        }
+
+        Runtime.MarshalObjectiveCException += OnMarshalObjectiveCException;
+        try
+        {
+            try
+            {
+                using var fieldValue = FieldValue.VectorWithArray(values);
+                if (fieldValue is null)
+                {
+                    throw new InvalidOperationException(
+                        $"Selector '{selector}' returned null for a valid NSNumber array.");
+                }
+
+                using var vectorValue = new VectorValue(values);
+                var vectorArray = vectorValue.Array;
+                vectorArrayLength = vectorArray.Length;
+                if (vectorArrayLength != values.Length)
+                {
+                    throw new InvalidOperationException(
+                        $"VectorValue.Array returned {vectorArrayLength} values, expected {values.Length}.");
+                }
+            }
+            catch (ObjCException ex)
+            {
+                throw new InvalidOperationException(
+                    $"Selector '{selector}' should not throw after the missing binding is added, but observed {ex.GetType().FullName}. " +
+                    $"Managed vector argument type: {values.GetType().FullName}. " +
+                    $"Vector value type: {typeof(VectorValue).FullName}. " +
+                    $"NSException.Name: {FormatDetail(marshaledException?.Name?.ToString())}. " +
+                    $"NSException.Reason: {FormatDetail(marshaledException?.Reason)}. " +
+                    $"Marshal mode: {FormatDetail(marshaledExceptionMode?.ToString())}.",
+                    ex);
+            }
+
+            if (marshaledException is not null)
+            {
+                throw new InvalidOperationException(
+                    $"Selector '{selector}' completed, but Runtime.MarshalObjectiveCException captured unexpected NSException.Name '{marshaledException.Name}'. " +
+                    $"Reason: {FormatDetail(marshaledException.Reason)}. Marshal mode: {FormatDetail(marshaledExceptionMode?.ToString())}.");
+            }
+
+            return Task.FromResult(
+                $"Selector '{selector}' returned a VectorValue without ObjC exception after the missing binding was added. " +
+                $"Managed vector argument type: {values.GetType().FullName}. " +
+                $"Return type: {signature.ReturnType.FullName}. Vector array length: {vectorArrayLength}.");
         }
         finally
         {

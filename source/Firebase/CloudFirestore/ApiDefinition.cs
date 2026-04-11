@@ -337,6 +337,24 @@ namespace Firebase.CloudFirestore
 		[Export ("fieldValueForIntegerIncrement:")]
 		FieldValue FromIntegerIncrement (long l);
 
+		// +(FIRVectorValue * _Nonnull)vectorWithArray:(NSArray<NSNumber *> * _Nonnull)array;
+		[Static]
+		[Export ("vectorWithArray:")]
+		VectorValue VectorWithArray (NSNumber [] array);
+	}
+
+	// @interface FIRVectorValue : NSObject
+	[DisableDefaultCtor]
+	[BaseType (typeof (NSObject), Name = "FIRVectorValue")]
+	interface VectorValue
+	{
+		// @property (atomic, readonly) NSArray<NSNumber *> * _Nonnull array;
+		[Export ("array")]
+		NSNumber [] Array { get; }
+
+		// -(instancetype _Nonnull)initWithArray:(NSArray<NSNumber *> * _Nonnull)array;
+		[Export ("initWithArray:")]
+		NativeHandle Constructor (NSNumber [] array);
 	}
 
 	// void (^)(id _Nullable result, NSError *_Nullable error)

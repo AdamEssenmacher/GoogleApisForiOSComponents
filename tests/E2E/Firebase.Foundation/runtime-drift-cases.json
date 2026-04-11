@@ -83,6 +83,17 @@
       ]
     },
     {
+      "id": "cloudfirestore-fieldvalue-vectorwitharray",
+      "method": "VerifyCloudFirestoreFieldValueVectorWithArrayAsync",
+      "bindingPackage": "AdamE.Firebase.iOS.CloudFirestore",
+      "packages": [
+        {
+          "id": "AdamE.Firebase.iOS.CloudFirestore",
+          "version": "12.6.0"
+        }
+      ]
+    },
+    {
       "id": "cloudfunctions-usefunctionsemulatororigin",
       "method": "VerifyCloudFunctionsUseFunctionsEmulatorOriginAsync",
       "bindingPackage": "AdamE.Firebase.iOS.CloudFunctions",
