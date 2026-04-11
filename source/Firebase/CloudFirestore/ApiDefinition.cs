@@ -687,6 +687,11 @@ namespace Firebase.CloudFirestore
 		[Export ("runTransactionWithBlock:completion:")]
 		void _RunTransaction (Func<Transaction, IntPtr, NSObject> updateHandler, TransactionCompletionHandler completion);
 
+		// -(void)runTransactionWithOptions:(FIRTransactionOptions * _Nullable)options block:(id  _Nullable (^ _Nonnull)(FIRTransaction * _Nonnull, NSError * _Nullable * _Nullable))updateBlock completion:(void (^ _Nonnull)(id _Nullable, NSError * _Nullable))completion;
+		[Internal]
+		[Export ("runTransactionWithOptions:block:completion:")]
+		void _RunTransaction ([NullAllowed] TransactionOptions options, Func<Transaction, IntPtr, NSObject> updateHandler, TransactionCompletionHandler completion);
+
 		// -(FIRWriteBatch * _Nonnull)batch;
 		[Export ("batch")]
 		WriteBatch CreateBatch ();
@@ -856,6 +861,15 @@ namespace Firebase.CloudFirestore
 		// - (instancetype _Nonnull)initWithGarbageCollectorSettings:(id<FIRMemoryGarbageCollectorSettings, NSObject> _Nonnull)settings;
 		[Export ("initWithGarbageCollectorSettings:")]
 		NativeHandle Constructor (NSObject settings);
+	}
+
+	// @interface FIRTransactionOptions : NSObject <NSCopying>
+	[BaseType (typeof (NSObject), Name = "FIRTransactionOptions")]
+	interface TransactionOptions : INSCopying
+	{
+		// @property(nonatomic, assign) NSInteger maxAttempts;
+		[Export ("maxAttempts")]
+		nint MaxAttempts { get; set; }
 	}
 
 	// @interface FIRPersistentCacheIndexManager : NSObject

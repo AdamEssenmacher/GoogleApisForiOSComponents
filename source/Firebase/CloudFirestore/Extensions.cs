@@ -46,10 +46,41 @@ namespace Firebase.CloudFirestore
 			}
 		}
 
+		public void RunTransaction (TransactionOptions options, TransactionUpdateHandler updateHandler, TransactionCompletionHandler completion)
+		{
+			_RunTransaction (options, InternalUpdateHandler, completion);
+
+			NSObject InternalUpdateHandler (Transaction transaction, IntPtr pError)
+			{
+				if (updateHandler == null)
+					return null;
+
+				NSError error = null;
+				var result = updateHandler (transaction, ref error);
+
+				if (error != null)
+					Marshal.WriteIntPtr (pError, error.Handle);
+
+				return result;
+			}
+		}
+
 		public Task<NSObject> RunTransactionAsync (TransactionUpdateHandler updateHandler)
 		{
 			var tcs = new TaskCompletionSource<NSObject> ();
 			RunTransaction (updateHandler, (result_, error_) => {
+				if (error_ != null)
+					tcs.SetException (new NSErrorException (error_));
+				else
+					tcs.SetResult (result_);
+			});
+			return tcs.Task;
+		}
+
+		public Task<NSObject> RunTransactionAsync (TransactionOptions options, TransactionUpdateHandler updateHandler)
+		{
+			var tcs = new TaskCompletionSource<NSObject> ();
+			RunTransaction (options, updateHandler, (result_, error_) => {
 				if (error_ != null)
 					tcs.SetException (new NSErrorException (error_));
 				else
