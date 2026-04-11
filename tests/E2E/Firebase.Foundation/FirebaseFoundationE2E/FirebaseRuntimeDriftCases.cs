@@ -437,6 +437,13 @@ static class FirebaseRuntimeDriftCases
                     $"Reason: {FormatDetail(marshaledException.Reason)}. Marshal mode: {FormatDetail(marshaledExceptionMode?.ToString())}.");
             }
 
+            if (completedTask != customSignalsCompletionSource.Task)
+            {
+                throw new TimeoutException(
+                    $"Selector '{customSignalsSelector}' did not invoke its completion callback within {AsyncTimeout.TotalSeconds} seconds. " +
+                    $"Signals dictionary type: {customSignals.GetType().FullName}. Completion delegate type: {typeof(Action<NSError>).FullName}.");
+            }
+
             return
                 $"Selectors '{listenerSelector}' and '{customSignalsSelector}' completed without ObjC exception after the missing bindings were added. " +
                 $"Listener delegate type: {typeof(RemoteConfigUpdateCompletionHandler).FullName}. " +
