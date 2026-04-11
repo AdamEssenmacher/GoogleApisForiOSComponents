@@ -56,6 +56,13 @@ namespace Firebase.CloudFirestore
 	}
 
 	[Native]
+	public enum ListenSource : ulong
+	{
+		Default,
+		Cache
+	}
+
+	[Native]
 	public enum LoadBundleTaskState : long
 	{
 		Error,

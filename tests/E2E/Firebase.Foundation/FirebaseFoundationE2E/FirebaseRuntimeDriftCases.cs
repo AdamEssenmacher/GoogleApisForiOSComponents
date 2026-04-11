@@ -66,6 +66,12 @@ using Foundation;
 using ObjCRuntime;
 #endif
 
+#if ENABLE_RUNTIME_DRIFT_CASE_CLOUDFIRESTORE_SNAPSHOT_LISTEN_OPTIONS
+using Firebase.CloudFirestore;
+using Foundation;
+using ObjCRuntime;
+#endif
+
 #if ENABLE_RUNTIME_DRIFT_CASE_CLOUDFUNCTIONS_USEFUNCTIONSEMULATORORIGIN
 using Firebase.CloudFunctions;
 using Foundation;
@@ -1295,6 +1301,271 @@ static class FirebaseRuntimeDriftCases
                 throw new InvalidOperationException(
                     $"Cloud Firestore {label} returned {actual} documents; expected {expected} after deterministic seed writes.");
             }
+        }
+    }
+#endif
+
+#if ENABLE_RUNTIME_DRIFT_CASE_CLOUDFIRESTORE_SNAPSHOT_LISTEN_OPTIONS
+    static async Task<string> VerifyCloudFirestoreSnapshotListenOptionsAsync()
+    {
+        const string addSnapshotListenerWithOptionsSelector = "addSnapshotListenerWithOptions:listener:";
+        const string optionsWithIncludeMetadataChangesSelector = "optionsWithIncludeMetadataChanges:";
+        const string optionsWithSourceSelector = "optionsWithSource:";
+
+        var constructor = typeof(SnapshotListenOptions).GetConstructor(Type.EmptyTypes);
+        if (constructor is null)
+        {
+            throw new InvalidOperationException(
+                $"Expected managed API '{typeof(SnapshotListenOptions).FullName}()' was not found.");
+        }
+
+        var includeMetadataChangesSignature = typeof(SnapshotListenOptions).GetMethod(
+            nameof(SnapshotListenOptions.OptionsWithIncludeMetadataChanges),
+            BindingFlags.Instance | BindingFlags.Public,
+            binder: null,
+            types: new[] { typeof(bool) },
+            modifiers: null);
+        if (includeMetadataChangesSignature?.ReturnType != typeof(SnapshotListenOptions))
+        {
+            throw new InvalidOperationException(
+                $"Expected managed API '{nameof(SnapshotListenOptions.OptionsWithIncludeMetadataChanges)}({typeof(bool).FullName})' " +
+                $"to return '{typeof(SnapshotListenOptions).FullName}' for selector '{optionsWithIncludeMetadataChangesSelector}', " +
+                $"observed '{includeMetadataChangesSignature?.ReturnType.FullName ?? "<missing>"}'.");
+        }
+
+        var sourceSignature = typeof(SnapshotListenOptions).GetMethod(
+            nameof(SnapshotListenOptions.OptionsWithSource),
+            BindingFlags.Instance | BindingFlags.Public,
+            binder: null,
+            types: new[] { typeof(ListenSource) },
+            modifiers: null);
+        if (sourceSignature?.ReturnType != typeof(SnapshotListenOptions))
+        {
+            throw new InvalidOperationException(
+                $"Expected managed API '{nameof(SnapshotListenOptions.OptionsWithSource)}({typeof(ListenSource).FullName})' " +
+                $"to return '{typeof(SnapshotListenOptions).FullName}' for selector '{optionsWithSourceSelector}', " +
+                $"observed '{sourceSignature?.ReturnType.FullName ?? "<missing>"}'.");
+        }
+
+        var documentListenerSignature = typeof(DocumentReference).GetMethod(
+            nameof(DocumentReference.AddSnapshotListener),
+            BindingFlags.Instance | BindingFlags.Public,
+            binder: null,
+            types: new[] { typeof(SnapshotListenOptions), typeof(DocumentSnapshotHandler) },
+            modifiers: null);
+        if (documentListenerSignature?.ReturnType != typeof(IListenerRegistration))
+        {
+            throw new InvalidOperationException(
+                $"Expected managed API '{typeof(DocumentReference).FullName}.{nameof(DocumentReference.AddSnapshotListener)}" +
+                $"({typeof(SnapshotListenOptions).FullName}, {typeof(DocumentSnapshotHandler).FullName})' to return " +
+                $"'{typeof(IListenerRegistration).FullName}' for selector '{addSnapshotListenerWithOptionsSelector}', " +
+                $"observed '{documentListenerSignature?.ReturnType.FullName ?? "<missing>"}'.");
+        }
+
+        var queryListenerSignature = typeof(Query).GetMethod(
+            nameof(Query.AddSnapshotListener),
+            BindingFlags.Instance | BindingFlags.Public,
+            binder: null,
+            types: new[] { typeof(SnapshotListenOptions), typeof(QuerySnapshotHandler) },
+            modifiers: null);
+        if (queryListenerSignature?.ReturnType != typeof(IListenerRegistration))
+        {
+            throw new InvalidOperationException(
+                $"Expected managed API '{typeof(Query).FullName}.{nameof(Query.AddSnapshotListener)}" +
+                $"({typeof(SnapshotListenOptions).FullName}, {typeof(QuerySnapshotHandler).FullName})' to return " +
+                $"'{typeof(IListenerRegistration).FullName}' for selector '{addSnapshotListenerWithOptionsSelector}', " +
+                $"observed '{queryListenerSignature?.ReturnType.FullName ?? "<missing>"}'.");
+        }
+
+        var firestore = Firestore.SharedInstance;
+        if (firestore is null)
+        {
+            throw new InvalidOperationException("Firebase.CloudFirestore.Firestore.SharedInstance returned null after App.Configure().");
+        }
+
+        var collectionName = $"codex-snapshot-options-e2e-{Guid.NewGuid():N}";
+        var collection = firestore.GetCollection(collectionName);
+        if (collection is null)
+        {
+            throw new InvalidOperationException("Firebase.CloudFirestore.Firestore.GetCollection returned null.");
+        }
+
+        var document = collection.GetDocument("listener-target");
+        if (document is null)
+        {
+            throw new InvalidOperationException("Firebase.CloudFirestore.CollectionReference.GetDocument returned null.");
+        }
+
+        using var defaultOptions = new SnapshotListenOptions();
+        if (defaultOptions.Source != ListenSource.Default)
+        {
+            throw new InvalidOperationException(
+                $"New SnapshotListenOptions.Source returned '{defaultOptions.Source}', expected '{ListenSource.Default}'.");
+        }
+
+        if (defaultOptions.IncludeMetadataChanges)
+        {
+            throw new InvalidOperationException("New SnapshotListenOptions.IncludeMetadataChanges returned true, expected false.");
+        }
+
+        if (!defaultOptions.RespondsToSelector(new Selector(optionsWithIncludeMetadataChangesSelector)))
+        {
+            throw new InvalidOperationException(
+                $"Native FIRSnapshotListenOptions does not respond to expected selector '{optionsWithIncludeMetadataChangesSelector}'.");
+        }
+
+        if (!defaultOptions.RespondsToSelector(new Selector(optionsWithSourceSelector)))
+        {
+            throw new InvalidOperationException(
+                $"Native FIRSnapshotListenOptions does not respond to expected selector '{optionsWithSourceSelector}'.");
+        }
+
+        if (!document.RespondsToSelector(new Selector(addSnapshotListenerWithOptionsSelector)))
+        {
+            throw new InvalidOperationException(
+                $"Native FIRDocumentReference does not respond to expected selector '{addSnapshotListenerWithOptionsSelector}'.");
+        }
+
+        if (!collection.RespondsToSelector(new Selector(addSnapshotListenerWithOptionsSelector)))
+        {
+            throw new InvalidOperationException(
+                $"Native FIRQuery does not respond to expected selector '{addSnapshotListenerWithOptionsSelector}'.");
+        }
+
+        NSException? marshaledException = null;
+        MarshalObjectiveCExceptionMode? marshaledExceptionMode = null;
+
+        void OnMarshalObjectiveCException(object? sender, MarshalObjectiveCExceptionEventArgs args)
+        {
+            marshaledException ??= args.Exception;
+            marshaledExceptionMode ??= args.ExceptionMode;
+        }
+
+        Runtime.MarshalObjectiveCException += OnMarshalObjectiveCException;
+        IListenerRegistration? documentRegistration = null;
+        IListenerRegistration? queryRegistration = null;
+        var documentCallbackSource = new TaskCompletionSource<(DocumentSnapshot? Snapshot, NSError? Error)>(TaskCreationOptions.RunContinuationsAsynchronously);
+        var queryCallbackSource = new TaskCompletionSource<(QuerySnapshot? Snapshot, NSError? Error)>(TaskCreationOptions.RunContinuationsAsynchronously);
+
+        try
+        {
+            SnapshotListenOptions metadataOptions;
+            SnapshotListenOptions cacheOptions;
+            try
+            {
+                metadataOptions = defaultOptions.OptionsWithIncludeMetadataChanges(true);
+                cacheOptions = metadataOptions.OptionsWithSource(ListenSource.Cache);
+
+                if (metadataOptions is null)
+                {
+                    throw new InvalidOperationException($"Selector '{optionsWithIncludeMetadataChangesSelector}' returned null.");
+                }
+
+                if (cacheOptions is null)
+                {
+                    throw new InvalidOperationException($"Selector '{optionsWithSourceSelector}' returned null.");
+                }
+
+                if (!metadataOptions.IncludeMetadataChanges)
+                {
+                    throw new InvalidOperationException(
+                        $"Selector '{optionsWithIncludeMetadataChangesSelector}' returned options with IncludeMetadataChanges=false.");
+                }
+
+                if (cacheOptions.Source != ListenSource.Cache)
+                {
+                    throw new InvalidOperationException(
+                        $"Selector '{optionsWithSourceSelector}' returned options with Source='{cacheOptions.Source}', expected '{ListenSource.Cache}'.");
+                }
+
+                if (!cacheOptions.IncludeMetadataChanges)
+                {
+                    throw new InvalidOperationException(
+                        $"Selector '{optionsWithSourceSelector}' did not preserve IncludeMetadataChanges=true.");
+                }
+
+                documentRegistration = document.AddSnapshotListener(cacheOptions, (snapshot, error) =>
+                {
+                    documentCallbackSource.TrySetResult((snapshot, error));
+                });
+                queryRegistration = collection.AddSnapshotListener(cacheOptions, (snapshot, error) =>
+                {
+                    queryCallbackSource.TrySetResult((snapshot, error));
+                });
+            }
+            catch (ObjCException ex)
+            {
+                throw new InvalidOperationException(
+                    $"Firestore snapshot listen option selectors should not throw after the missing bindings are added, but observed {ex.GetType().FullName}. " +
+                    $"Selectors exercised: '{optionsWithIncludeMetadataChangesSelector}', '{optionsWithSourceSelector}', '{addSnapshotListenerWithOptionsSelector}'. " +
+                    $"NSException.Name: {FormatDetail(marshaledException?.Name?.ToString())}. " +
+                    $"NSException.Reason: {FormatDetail(marshaledException?.Reason)}. " +
+                    $"Marshal mode: {FormatDetail(marshaledExceptionMode?.ToString())}.",
+                    ex);
+            }
+
+            if (documentRegistration is null)
+            {
+                throw new InvalidOperationException(
+                    $"DocumentReference selector '{addSnapshotListenerWithOptionsSelector}' returned null listener registration.");
+            }
+
+            if (queryRegistration is null)
+            {
+                throw new InvalidOperationException(
+                    $"Query selector '{addSnapshotListenerWithOptionsSelector}' returned null listener registration.");
+            }
+
+            await Task.WhenAny(
+                Task.WhenAll(documentCallbackSource.Task, queryCallbackSource.Task),
+                Task.Delay(TimeSpan.FromMilliseconds(500)));
+
+            if (marshaledException is not null)
+            {
+                throw new InvalidOperationException(
+                    $"Firestore snapshot listen option selectors completed, but Runtime.MarshalObjectiveCException captured unexpected NSException.Name '{marshaledException.Name}'. " +
+                    $"Reason: {FormatDetail(marshaledException.Reason)}. Marshal mode: {FormatDetail(marshaledExceptionMode?.ToString())}.");
+            }
+
+            var documentCallbackDetail = documentCallbackSource.Task.IsCompletedSuccessfully
+                ? FormatDocumentCallback(documentCallbackSource.Task.Result)
+                : "not observed before listener removal";
+            var queryCallbackDetail = queryCallbackSource.Task.IsCompletedSuccessfully
+                ? FormatQueryCallback(queryCallbackSource.Task.Result)
+                : "not observed before listener removal";
+
+            return
+                $"Firestore snapshot listen option APIs crossed the native selector boundary. " +
+                $"Options: Source={ListenSource.Cache}, IncludeMetadataChanges=true. " +
+                $"Document registration type: {documentRegistration.GetType().FullName}. " +
+                $"Query registration type: {queryRegistration.GetType().FullName}. " +
+                $"Document callback: {documentCallbackDetail}. Query callback: {queryCallbackDetail}.";
+        }
+        finally
+        {
+            try
+            {
+                documentRegistration?.Remove();
+            }
+            finally
+            {
+                queryRegistration?.Remove();
+                Runtime.MarshalObjectiveCException -= OnMarshalObjectiveCException;
+            }
+        }
+
+        static string FormatDocumentCallback((DocumentSnapshot? Snapshot, NSError? Error) callback)
+        {
+            return callback.Error is null
+                ? $"snapshot type {callback.Snapshot?.GetType().FullName ?? "<null>"}"
+                : $"Firebase error {FormatNSError(callback.Error)}";
+        }
+
+        static string FormatQueryCallback((QuerySnapshot? Snapshot, NSError? Error) callback)
+        {
+            return callback.Error is null
+                ? $"snapshot type {callback.Snapshot?.GetType().FullName ?? "<null>"}"
+                : $"Firebase error {FormatNSError(callback.Error)}";
         }
     }
 #endif
