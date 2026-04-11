@@ -72,6 +72,12 @@ using Foundation;
 using ObjCRuntime;
 #endif
 
+#if ENABLE_RUNTIME_DRIFT_CASE_CLOUDFIRESTORE_NAMED_DATABASE
+using Firebase.CloudFirestore;
+using Foundation;
+using ObjCRuntime;
+#endif
+
 #if ENABLE_RUNTIME_DRIFT_CASE_CLOUDFUNCTIONS_USEFUNCTIONSEMULATORORIGIN
 using Firebase.CloudFunctions;
 using Foundation;
@@ -1873,6 +1879,119 @@ static class FirebaseRuntimeDriftCases
         }
     }
 
+#endif
+
+#if ENABLE_RUNTIME_DRIFT_CASE_CLOUDFIRESTORE_NAMED_DATABASE
+    static Task<string> VerifyCloudFirestoreNamedDatabaseAsync()
+    {
+        const string firestoreForDatabaseSelector = "firestoreForDatabase:";
+        const string firestoreForAppDatabaseSelector = "firestoreForApp:database:";
+        const string databaseId = "(default)";
+
+        var databaseSignature = typeof(Firestore).GetMethod(
+            nameof(Firestore.Create),
+            BindingFlags.Static | BindingFlags.Public,
+            binder: null,
+            types: new[] { typeof(string) },
+            modifiers: null);
+        if (databaseSignature?.ReturnType != typeof(Firestore))
+        {
+            throw new InvalidOperationException(
+                $"Expected managed API '{typeof(Firestore).FullName}.{nameof(Firestore.Create)}({typeof(string).FullName})' " +
+                $"to return '{typeof(Firestore).FullName}' for selector '{firestoreForDatabaseSelector}', " +
+                $"observed '{databaseSignature?.ReturnType.FullName ?? "<missing>"}'.");
+        }
+
+        var appDatabaseSignature = typeof(Firestore).GetMethod(
+            nameof(Firestore.Create),
+            BindingFlags.Static | BindingFlags.Public,
+            binder: null,
+            types: new[] { typeof(Firebase.Core.App), typeof(string) },
+            modifiers: null);
+        if (appDatabaseSignature?.ReturnType != typeof(Firestore))
+        {
+            throw new InvalidOperationException(
+                $"Expected managed API '{typeof(Firestore).FullName}.{nameof(Firestore.Create)}({typeof(Firebase.Core.App).FullName}, {typeof(string).FullName})' " +
+                $"to return '{typeof(Firestore).FullName}' for selector '{firestoreForAppDatabaseSelector}', " +
+                $"observed '{appDatabaseSignature?.ReturnType.FullName ?? "<missing>"}'.");
+        }
+
+        var defaultApp = Firebase.Core.App.DefaultInstance
+            ?? throw new InvalidOperationException("Firebase.Core.App.DefaultInstance returned null after App.Configure().");
+        NSException? marshaledException = null;
+        MarshalObjectiveCExceptionMode? marshaledExceptionMode = null;
+
+        void OnMarshalObjectiveCException(object? sender, MarshalObjectiveCExceptionEventArgs args)
+        {
+            marshaledException ??= args.Exception;
+            marshaledExceptionMode ??= args.ExceptionMode;
+        }
+
+        Runtime.MarshalObjectiveCException += OnMarshalObjectiveCException;
+        try
+        {
+            Firestore? defaultNamedDatabase = null;
+            Firestore? appNamedDatabase = null;
+            try
+            {
+                defaultNamedDatabase = Firestore.Create(databaseId);
+                appNamedDatabase = Firestore.Create(defaultApp, databaseId);
+            }
+            catch (ObjCException ex)
+            {
+                throw new InvalidOperationException(
+                    $"Firestore named-database selectors should not throw after the missing bindings are added, but observed {ex.GetType().FullName}. " +
+                    $"Selectors exercised: '{firestoreForDatabaseSelector}', '{firestoreForAppDatabaseSelector}'. " +
+                    $"Database id: {databaseId}. " +
+                    $"NSException.Name: {FormatDetail(marshaledException?.Name?.ToString())}. " +
+                    $"NSException.Reason: {FormatDetail(marshaledException?.Reason)}. " +
+                    $"Marshal mode: {FormatDetail(marshaledExceptionMode?.ToString())}.",
+                    ex);
+            }
+
+            if (defaultNamedDatabase is null)
+            {
+                throw new InvalidOperationException($"Selector '{firestoreForDatabaseSelector}' returned null.");
+            }
+
+            if (appNamedDatabase is null)
+            {
+                throw new InvalidOperationException($"Selector '{firestoreForAppDatabaseSelector}' returned null.");
+            }
+
+            var defaultCollection = defaultNamedDatabase.GetCollection($"codex-named-database-default-{Guid.NewGuid():N}");
+            if (defaultCollection is null)
+            {
+                throw new InvalidOperationException(
+                    $"Firestore instance from selector '{firestoreForDatabaseSelector}' could not create a collection reference.");
+            }
+
+            var appCollection = appNamedDatabase.GetCollection($"codex-named-database-app-{Guid.NewGuid():N}");
+            if (appCollection is null)
+            {
+                throw new InvalidOperationException(
+                    $"Firestore instance from selector '{firestoreForAppDatabaseSelector}' could not create a collection reference.");
+            }
+
+            if (marshaledException is not null)
+            {
+                throw new InvalidOperationException(
+                    $"Firestore named-database selectors completed, but Runtime.MarshalObjectiveCException captured unexpected NSException.Name '{marshaledException.Name}'. " +
+                    $"Reason: {FormatDetail(marshaledException.Reason)}. Marshal mode: {FormatDetail(marshaledExceptionMode?.ToString())}.");
+            }
+
+            return Task.FromResult(
+                $"Firestore named-database factory APIs crossed the native selector boundary. " +
+                $"Database id: {databaseId}. " +
+                $"Default-app selector returned: {defaultNamedDatabase.GetType().FullName}. " +
+                $"Explicit-app selector returned: {appNamedDatabase.GetType().FullName}. " +
+                $"Collection references: {defaultCollection.Path}, {appCollection.Path}.");
+        }
+        finally
+        {
+            Runtime.MarshalObjectiveCException -= OnMarshalObjectiveCException;
+        }
+    }
 #endif
 
 #if ENABLE_RUNTIME_DRIFT_CASE_CLOUDFUNCTIONS_USEFUNCTIONSEMULATORORIGIN

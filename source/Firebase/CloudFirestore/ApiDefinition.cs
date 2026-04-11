@@ -647,6 +647,16 @@ namespace Firebase.CloudFirestore
 		[Export ("firestoreForApp:")]
 		Firestore Create (Firebase.Core.App app);
 
+		// +(instancetype _Nonnull)firestoreForApp:(FIRApp * _Nonnull)app database:(NSString * _Nonnull)database;
+		[Static]
+		[Export ("firestoreForApp:database:")]
+		Firestore Create (Firebase.Core.App app, string database);
+
+		// +(instancetype _Nonnull)firestoreForDatabase:(NSString * _Nonnull)database;
+		[Static]
+		[Export ("firestoreForDatabase:")]
+		Firestore Create (string database);
+
 		// @property (copy, nonatomic) FIRFirestoreSettings * _Nonnull settings;
 		[Export ("settings", ArgumentSemantic.Copy)]
 		FirestoreSettings Settings { get; set; }
