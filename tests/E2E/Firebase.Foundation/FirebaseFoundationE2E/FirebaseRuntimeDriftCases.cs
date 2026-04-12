@@ -815,27 +815,30 @@ static class FirebaseRuntimeDriftCases
             }
 
             var completedTask = await Task.WhenAny(completionSource.Task, Task.Delay(AsyncTimeout));
-            var callbackDetail = "completion callback did not complete within the binding-boundary timeout";
-            if (completedTask == completionSource.Task)
+            if (completedTask != completionSource.Task)
             {
-                var (completedError, completedSnapshot) = await completionSource.Task;
-                if (!completionInvoked)
-                {
-                    throw new InvalidOperationException(
-                        $"Selector '{selector}' completed without throwing, but the completion callback was never marked as invoked.");
-                }
-
-                if (!ReferenceEquals(callbackError, completedError) || !ReferenceEquals(callbackSnapshot, completedSnapshot))
-                {
-                    throw new InvalidOperationException("Database query getData callback state did not match the completed task payload.");
-                }
-
-                callbackDetail = completedError is not null
-                    ? $"completion callback returned Firebase error {FormatNSError(completedError)}"
-                    : completedSnapshot is not null
-                        ? $"completion callback returned snapshot type {completedSnapshot.GetType().FullName} with key '{FormatDetail(completedSnapshot.Key)}'"
-                        : "completion callback returned neither snapshot nor Firebase error";
+                throw new TimeoutException(
+                    $"Selector '{selector}' did not invoke its completion callback within {AsyncTimeout.TotalSeconds} seconds after crossing the native DatabaseQuery boundary.");
             }
+
+            string callbackDetail;
+            var (completedError, completedSnapshot) = await completionSource.Task;
+            if (!completionInvoked)
+            {
+                throw new InvalidOperationException(
+                    $"Selector '{selector}' completed without throwing, but the completion callback was never marked as invoked.");
+            }
+
+            if (!ReferenceEquals(callbackError, completedError) || !ReferenceEquals(callbackSnapshot, completedSnapshot))
+            {
+                throw new InvalidOperationException("Database query getData callback state did not match the completed task payload.");
+            }
+
+            callbackDetail = completedError is not null
+                ? $"completion callback returned Firebase error {FormatNSError(completedError)}"
+                : completedSnapshot is not null
+                    ? $"completion callback returned snapshot type {completedSnapshot.GetType().FullName} with key '{FormatDetail(completedSnapshot.Key)}'"
+                    : "completion callback returned neither snapshot nor Firebase error";
 
             if (marshaledException is not null)
             {
