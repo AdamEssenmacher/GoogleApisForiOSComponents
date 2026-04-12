@@ -25,8 +25,9 @@ using Foundation;
 using ObjCRuntime;
 #endif
 
-#if ENABLE_RUNTIME_DRIFT_CASE_DATABASE_SERVERVALUE_INCREMENT
+#if ENABLE_RUNTIME_DRIFT_CASE_DATABASE_SERVERVALUE_INCREMENT || ENABLE_RUNTIME_DRIFT_CASE_DATABASE_QUERY_GETDATA
 using Firebase.Database;
+using FirebaseCoreOptions = Firebase.Core.Options;
 using Foundation;
 using ObjCRuntime;
 #endif
@@ -728,6 +729,129 @@ static class FirebaseRuntimeDriftCases
             return Task.FromResult(
                 $"Selector '{selector}' returned a non-empty placeholder dictionary. " +
                 $"Managed delta argument type: {delta.GetType().FullName}. Placeholder count: {placeholder.Count}.");
+        }
+        finally
+        {
+            Runtime.MarshalObjectiveCException -= OnMarshalObjectiveCException;
+        }
+    }
+#endif
+
+#if ENABLE_RUNTIME_DRIFT_CASE_DATABASE_QUERY_GETDATA
+    static async Task<string> VerifyDatabaseQueryGetDataAsync()
+    {
+        const string selector = "getDataWithCompletionBlock:";
+
+        var signature = typeof(DatabaseQuery).GetMethod(
+            nameof(DatabaseQuery.GetData),
+            BindingFlags.Instance | BindingFlags.Public,
+            binder: null,
+            types: new[] { typeof(DataSnapshotCompletionHandler) },
+            modifiers: null);
+        if (signature?.ReturnType != typeof(void))
+        {
+            throw new InvalidOperationException(
+                $"Expected managed API '{typeof(DatabaseQuery).FullName}.{nameof(DatabaseQuery.GetData)}({typeof(DataSnapshotCompletionHandler).FullName})' " +
+                $"to return void for selector '{selector}', observed '{signature?.ReturnType.FullName ?? "<missing>"}'.");
+        }
+
+        var projectId = FirebaseCoreOptions.DefaultInstance?.ProjectId
+            ?? throw new InvalidOperationException("Firebase.Core.Options.ProjectId returned null before Database query validation.");
+        var database = Firebase.Database.Database.From($"https://{projectId}-default-rtdb.firebaseio.com");
+        var root = database.GetRootReference();
+        var query = root.GetQueryOrderedByKey();
+        if (query is null)
+        {
+            throw new InvalidOperationException("Firebase.Database.DatabaseReference.GetQueryOrderedByKey returned null.");
+        }
+
+        if (!query.RespondsToSelector(new Selector(selector)))
+        {
+            throw new InvalidOperationException($"Native FIRDatabaseQuery does not respond to expected selector '{selector}'.");
+        }
+
+        var completionSource = new TaskCompletionSource<(NSError? Error, DataSnapshot? Snapshot)>(TaskCreationOptions.RunContinuationsAsynchronously);
+        var completionInvoked = false;
+        NSError? callbackError = null;
+        DataSnapshot? callbackSnapshot = null;
+        NSException? marshaledException = null;
+        MarshalObjectiveCExceptionMode? marshaledExceptionMode = null;
+
+        void OnMarshalObjectiveCException(object? sender, MarshalObjectiveCExceptionEventArgs args)
+        {
+            marshaledException ??= args.Exception;
+            marshaledExceptionMode ??= args.ExceptionMode;
+        }
+
+        Runtime.MarshalObjectiveCException += OnMarshalObjectiveCException;
+        try
+        {
+            try
+            {
+                query.GetData((error, snapshot) =>
+                {
+                    completionInvoked = true;
+                    callbackError = error;
+                    callbackSnapshot = snapshot;
+                    completionSource.TrySetResult((error, snapshot));
+                });
+            }
+            catch (ObjCException ex)
+            {
+                throw new InvalidOperationException(
+                    $"Selector '{selector}' should not throw after the missing DatabaseQuery binding is added, but observed {ex.GetType().FullName}. " +
+                    $"Managed query runtime type: {query.GetType().FullName}. " +
+                    $"NSException.Name: {FormatDetail(marshaledException?.Name?.ToString())}. " +
+                    $"NSException.Reason: {FormatDetail(marshaledException?.Reason)}. " +
+                    $"Marshal mode: {FormatDetail(marshaledExceptionMode?.ToString())}.",
+                    ex);
+            }
+
+            if (marshaledException is not null)
+            {
+                throw new InvalidOperationException(
+                    $"Selector '{selector}' completed, but Runtime.MarshalObjectiveCException captured unexpected NSException.Name '{marshaledException.Name}'. " +
+                    $"Reason: {FormatDetail(marshaledException.Reason)}. Marshal mode: {FormatDetail(marshaledExceptionMode?.ToString())}.");
+            }
+
+            var completedTask = await Task.WhenAny(completionSource.Task, Task.Delay(AsyncTimeout));
+            if (completedTask != completionSource.Task)
+            {
+                throw new TimeoutException(
+                    $"Selector '{selector}' did not invoke its completion callback within {AsyncTimeout.TotalSeconds} seconds after crossing the native DatabaseQuery boundary.");
+            }
+
+            string callbackDetail;
+            var (completedError, completedSnapshot) = await completionSource.Task;
+            if (!completionInvoked)
+            {
+                throw new InvalidOperationException(
+                    $"Selector '{selector}' completed without throwing, but the completion callback was never marked as invoked.");
+            }
+
+            if (!ReferenceEquals(callbackError, completedError) || !ReferenceEquals(callbackSnapshot, completedSnapshot))
+            {
+                throw new InvalidOperationException("Database query getData callback state did not match the completed task payload.");
+            }
+
+            callbackDetail = completedError is not null
+                ? $"completion callback returned Firebase error {FormatNSError(completedError)}"
+                : completedSnapshot is not null
+                    ? $"completion callback returned snapshot type {completedSnapshot.GetType().FullName} with key '{FormatDetail(completedSnapshot.Key)}'"
+                    : "completion callback returned neither snapshot nor Firebase error";
+
+            if (marshaledException is not null)
+            {
+                throw new InvalidOperationException(
+                    $"Selector '{selector}' completed, but Runtime.MarshalObjectiveCException captured unexpected NSException.Name '{marshaledException.Name}'. " +
+                    $"Reason: {FormatDetail(marshaledException.Reason)}. Marshal mode: {FormatDetail(marshaledExceptionMode?.ToString())}.");
+            }
+
+            return
+                $"Selector '{selector}' crossed the native DatabaseQuery boundary. " +
+                $"Managed query runtime type: {query.GetType().FullName}. " +
+                $"Query reference URL: {query.Reference.Url}. " +
+                $"Callback detail: {callbackDetail}.";
         }
         finally
         {
