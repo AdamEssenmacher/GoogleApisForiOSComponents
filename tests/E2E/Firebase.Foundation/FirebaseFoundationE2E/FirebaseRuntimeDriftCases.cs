@@ -91,6 +91,12 @@ using Foundation;
 using ObjCRuntime;
 #endif
 
+#if ENABLE_RUNTIME_DRIFT_CASE_CLOUDFIRESTORE_INDEX_CONFIGURATION
+using Firebase.CloudFirestore;
+using Foundation;
+using ObjCRuntime;
+#endif
+
 #if ENABLE_RUNTIME_DRIFT_CASE_CLOUDFUNCTIONS_USEFUNCTIONSEMULATORORIGIN
 using Firebase.CloudFunctions;
 using Foundation;
@@ -2154,6 +2160,162 @@ static class FirebaseRuntimeDriftCases
                 $"Default-app selector returned: {defaultNamedDatabase.GetType().FullName}. " +
                 $"Explicit-app selector returned: {appNamedDatabase.GetType().FullName}. " +
                 $"Collection references: {defaultCollection.Path}, {appCollection.Path}.");
+        }
+        finally
+        {
+            Runtime.MarshalObjectiveCException -= OnMarshalObjectiveCException;
+        }
+    }
+#endif
+
+#if ENABLE_RUNTIME_DRIFT_CASE_CLOUDFIRESTORE_INDEX_CONFIGURATION
+    static async Task<string> VerifyCloudFirestoreIndexConfigurationAsync()
+    {
+        const string jsonSelector = "setIndexConfigurationFromJSON:completion:";
+        const string streamSelector = "setIndexConfigurationFromStream:completion:";
+        const string indexConfigurationJson = """
+        {
+          "indexes": [],
+          "fieldOverrides": []
+        }
+        """;
+
+        var jsonSignature = typeof(Firestore).GetMethod(
+            nameof(Firestore.SetIndexConfiguration),
+            BindingFlags.Instance | BindingFlags.Public,
+            binder: null,
+            types: new[] { typeof(string), typeof(Action<NSError>) },
+            modifiers: null);
+        if (jsonSignature?.ReturnType != typeof(void))
+        {
+            throw new InvalidOperationException(
+                $"Expected managed API '{typeof(Firestore).FullName}.{nameof(Firestore.SetIndexConfiguration)}({typeof(string).FullName}, {typeof(Action<NSError>).FullName})' " +
+                $"to return void for selector '{jsonSelector}', observed '{jsonSignature?.ReturnType.FullName ?? "<missing>"}'.");
+        }
+
+        var streamSignature = typeof(Firestore).GetMethod(
+            nameof(Firestore.SetIndexConfiguration),
+            BindingFlags.Instance | BindingFlags.Public,
+            binder: null,
+            types: new[] { typeof(NSInputStream), typeof(Action<NSError>) },
+            modifiers: null);
+        if (streamSignature?.ReturnType != typeof(void))
+        {
+            throw new InvalidOperationException(
+                $"Expected managed API '{typeof(Firestore).FullName}.{nameof(Firestore.SetIndexConfiguration)}({typeof(NSInputStream).FullName}, {typeof(Action<NSError>).FullName})' " +
+                $"to return void for selector '{streamSelector}', observed '{streamSignature?.ReturnType.FullName ?? "<missing>"}'.");
+        }
+
+        var firestore = Firestore.SharedInstance;
+        if (firestore is null)
+        {
+            throw new InvalidOperationException("Firebase.CloudFirestore.Firestore.SharedInstance returned null after App.Configure().");
+        }
+
+        if (!firestore.RespondsToSelector(new Selector(jsonSelector)))
+        {
+            throw new InvalidOperationException($"Native FIRFirestore does not respond to expected selector '{jsonSelector}'.");
+        }
+
+        if (!firestore.RespondsToSelector(new Selector(streamSelector)))
+        {
+            throw new InvalidOperationException($"Native FIRFirestore does not respond to expected selector '{streamSelector}'.");
+        }
+
+        using var indexConfigurationData = NSData.FromString(indexConfigurationJson, NSStringEncoding.UTF8);
+        using var indexConfigurationStream = NSInputStream.FromData(indexConfigurationData);
+        if (indexConfigurationStream is null)
+        {
+            throw new InvalidOperationException("Foundation.NSInputStream.FromData returned null for the Firestore index configuration JSON.");
+        }
+
+        var jsonCompletionSource = new TaskCompletionSource<NSError?>(TaskCreationOptions.RunContinuationsAsynchronously);
+        var streamCompletionSource = new TaskCompletionSource<NSError?>(TaskCreationOptions.RunContinuationsAsynchronously);
+        var jsonCompletionInvoked = false;
+        var streamCompletionInvoked = false;
+        NSError? jsonCallbackError = null;
+        NSError? streamCallbackError = null;
+        NSException? marshaledException = null;
+        MarshalObjectiveCExceptionMode? marshaledExceptionMode = null;
+
+        void OnMarshalObjectiveCException(object? sender, MarshalObjectiveCExceptionEventArgs args)
+        {
+            marshaledException ??= args.Exception;
+            marshaledExceptionMode ??= args.ExceptionMode;
+        }
+
+        Runtime.MarshalObjectiveCException += OnMarshalObjectiveCException;
+        try
+        {
+            try
+            {
+                firestore.SetIndexConfiguration(indexConfigurationJson, error =>
+                {
+                    jsonCompletionInvoked = true;
+                    jsonCallbackError = error;
+                    jsonCompletionSource.TrySetResult(error);
+                });
+
+                firestore.SetIndexConfiguration(indexConfigurationStream, error =>
+                {
+                    streamCompletionInvoked = true;
+                    streamCallbackError = error;
+                    streamCompletionSource.TrySetResult(error);
+                });
+            }
+            catch (ObjCException ex)
+            {
+                throw new InvalidOperationException(
+                    $"Firestore index-configuration selectors should not throw after the missing bindings are added, but observed {ex.GetType().FullName}. " +
+                    $"Selectors exercised: '{jsonSelector}', '{streamSelector}'. " +
+                    $"NSException.Name: {FormatDetail(marshaledException?.Name?.ToString())}. " +
+                    $"NSException.Reason: {FormatDetail(marshaledException?.Reason)}. " +
+                    $"Marshal mode: {FormatDetail(marshaledExceptionMode?.ToString())}.",
+                    ex);
+            }
+
+            var completionsTask = Task.WhenAll(jsonCompletionSource.Task, streamCompletionSource.Task);
+            var completedTask = await Task.WhenAny(completionsTask, Task.Delay(AsyncTimeout));
+            if (completedTask != completionsTask)
+            {
+                throw new TimeoutException(
+                    $"Firestore index-configuration selectors did not both invoke their completion callbacks within {AsyncTimeout.TotalSeconds} seconds. " +
+                    $"JSON callback invoked: {jsonCompletionInvoked}. Stream callback invoked: {streamCompletionInvoked}.");
+            }
+
+            var completedErrors = await completionsTask;
+            var completedJsonError = completedErrors[0];
+            var completedStreamError = completedErrors[1];
+            if (!jsonCompletionInvoked || !streamCompletionInvoked)
+            {
+                throw new InvalidOperationException(
+                    $"Firestore index-configuration completion state did not match completed task state. " +
+                    $"JSON callback invoked: {jsonCompletionInvoked}. Stream callback invoked: {streamCompletionInvoked}.");
+            }
+
+            if (!ReferenceEquals(jsonCallbackError, completedJsonError) || !ReferenceEquals(streamCallbackError, completedStreamError))
+            {
+                throw new InvalidOperationException("Firestore index-configuration callback state did not match the completed task payload.");
+            }
+
+            if (marshaledException is not null)
+            {
+                throw new InvalidOperationException(
+                    $"Firestore index-configuration selectors completed, but Runtime.MarshalObjectiveCException captured unexpected NSException.Name '{marshaledException.Name}'. " +
+                    $"Reason: {FormatDetail(marshaledException.Reason)}. Marshal mode: {FormatDetail(marshaledExceptionMode?.ToString())}.");
+            }
+
+            var jsonResultDetail = completedJsonError is null
+                ? "JSON configuration completed without Firebase NSError"
+                : $"JSON configuration reached native completion with Firebase error {FormatNSError(completedJsonError)}";
+            var streamResultDetail = completedStreamError is null
+                ? "stream configuration completed without Firebase NSError"
+                : $"stream configuration reached native completion with Firebase error {FormatNSError(completedStreamError)}";
+
+            return
+                $"Firestore index-configuration APIs crossed the native selector boundary. " +
+                $"Selectors exercised: '{jsonSelector}', '{streamSelector}'. " +
+                $"{jsonResultDetail}; {streamResultDetail}.";
         }
         finally
         {
