@@ -670,6 +670,16 @@ namespace Firebase.CloudFirestore
 		[Export ("persistentCacheIndexManager")]
 		PersistentCacheIndexManager PersistentCacheIndexManager { get; }
 
+		// - (void)setIndexConfigurationFromJSON:(NSString *)json completion:(nullable void (^)(NSError *_Nullable error))completion;
+		[Async]
+		[Export ("setIndexConfigurationFromJSON:completion:")]
+		void SetIndexConfiguration (string json, [NullAllowed] Action<NSError> completion);
+
+		// - (void)setIndexConfigurationFromStream:(NSInputStream *)stream completion:(nullable void (^)(NSError *_Nullable error))completion;
+		[Async]
+		[Export ("setIndexConfigurationFromStream:completion:")]
+		void SetIndexConfiguration (NSInputStream stream, [NullAllowed] Action<NSError> completion);
+
 		// -(FIRCollectionReference * _Nonnull)collectionWithPath:(NSString * _Nonnull)collectionPath;
 		[Export ("collectionWithPath:")]
 		CollectionReference GetCollection (string collectionPath);
