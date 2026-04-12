@@ -97,8 +97,9 @@ using Foundation;
 using ObjCRuntime;
 #endif
 
-#if ENABLE_RUNTIME_DRIFT_CASE_CRASHLYTICS_STACKFRAMEWITHADDRESS
+#if ENABLE_RUNTIME_DRIFT_CASE_CRASHLYTICS_STACKFRAMEWITHADDRESS || ENABLE_RUNTIME_DRIFT_CASE_CRASHLYTICS_RECORD_ERROR_USER_INFO
 using Firebase.Crashlytics;
+using Foundation;
 using ObjCRuntime;
 #endif
 
@@ -2519,6 +2520,88 @@ static class FirebaseRuntimeDriftCases
             return Task.FromResult(
                 $"Corrected stale selector '{staleSelector}' to native selector '{liveSelector}'. " +
                 $"Runtime address argument type: {typeof(nuint).FullName}; StackFrame.Create returned without ObjC exception.");
+        }
+        finally
+        {
+            Runtime.MarshalObjectiveCException -= OnMarshalObjectiveCException;
+        }
+    }
+#endif
+
+#if ENABLE_RUNTIME_DRIFT_CASE_CRASHLYTICS_RECORD_ERROR_USER_INFO
+    static Task<string> VerifyCrashlyticsRecordErrorUserInfoAsync()
+    {
+        const string selector = "recordError:userInfo:";
+
+        var signature = typeof(Crashlytics).GetMethod(
+            nameof(Crashlytics.RecordError),
+            BindingFlags.Instance | BindingFlags.Public,
+            binder: null,
+            types: new[] { typeof(NSError), typeof(NSDictionary<NSString, NSObject>) },
+            modifiers: null);
+        if (signature is null)
+        {
+            throw new InvalidOperationException(
+                $"Expected managed API '{nameof(Crashlytics.RecordError)}({typeof(NSError).FullName}, {typeof(NSDictionary<NSString, NSObject>).FullName})' was not found.");
+        }
+
+        var crashlytics = Crashlytics.SharedInstance;
+        if (crashlytics is null)
+        {
+            throw new InvalidOperationException("Firebase.Crashlytics.Crashlytics.SharedInstance returned null after App.Configure().");
+        }
+
+        if (!crashlytics.RespondsToSelector(new Selector(selector)))
+        {
+            throw new InvalidOperationException($"Native FIRCrashlytics does not respond to expected selector '{selector}'.");
+        }
+
+        using var domain = new NSString("codex.crashlytics.e2e");
+        using var userInfoKey = new NSString("codex_context");
+        using var userInfoValue = new NSString("record-error-user-info");
+        using var error = new NSError(domain, -130, null);
+        using var userInfo = NSDictionary<NSString, NSObject>.FromObjectsAndKeys(
+            new NSObject[] { userInfoValue },
+            new[] { userInfoKey },
+            1);
+
+        NSException? marshaledException = null;
+        MarshalObjectiveCExceptionMode? marshaledExceptionMode = null;
+
+        void OnMarshalObjectiveCException(object? sender, MarshalObjectiveCExceptionEventArgs args)
+        {
+            marshaledException ??= args.Exception;
+            marshaledExceptionMode ??= args.ExceptionMode;
+        }
+
+        Runtime.MarshalObjectiveCException += OnMarshalObjectiveCException;
+        try
+        {
+            try
+            {
+                crashlytics.RecordError(error, userInfo);
+            }
+            catch (ObjCException ex)
+            {
+                throw new InvalidOperationException(
+                    $"Selector '{selector}' should not throw after the missing binding is added, but observed {ex.GetType().FullName}. " +
+                    $"NSError domain: {error.Domain}. UserInfo type: {userInfo.GetType().FullName}. " +
+                    $"NSException.Name: {FormatDetail(marshaledException?.Name?.ToString())}. " +
+                    $"NSException.Reason: {FormatDetail(marshaledException?.Reason)}. " +
+                    $"Marshal mode: {FormatDetail(marshaledExceptionMode?.ToString())}.",
+                    ex);
+            }
+
+            if (marshaledException is not null)
+            {
+                throw new InvalidOperationException(
+                    $"Selector '{selector}' completed, but Runtime.MarshalObjectiveCException captured unexpected NSException.Name '{marshaledException.Name}'. " +
+                    $"Reason: {FormatDetail(marshaledException.Reason)}. Marshal mode: {FormatDetail(marshaledExceptionMode?.ToString())}.");
+            }
+
+            return Task.FromResult(
+                $"Selector '{selector}' crossed the native boundary without ObjC exception. " +
+                $"NSError domain: {error.Domain}. UserInfo count: {userInfo.Count}.");
         }
         finally
         {
