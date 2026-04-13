@@ -44,7 +44,7 @@
   <ItemGroup>
     <NativeReference Include="..\..\..\externals\FirebaseDatabase.xcframework">
       <Kind>Framework</Kind>
-      <LinkerFlags>-ObjC -lc++</LinkerFlags>
+      <LinkerFlags>-ObjC -lc++ -licucore</LinkerFlags>
       <Frameworks>CFNetwork Security SystemConfiguration</Frameworks>
       <SmartLink>True</SmartLink>
       <ForceLoad>True</ForceLoad>
