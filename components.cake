@@ -182,7 +182,6 @@ void SetArtifactsPodSpecs ()
 		PodSpec.Create ("FirebaseCoreInternal",        "12.6.0", frameworkSource: FrameworkSource.Pods),
 		PodSpec.Create ("FirebaseMessagingInterop",    "12.6.0", frameworkSource: FrameworkSource.Pods),
 		PodSpec.Create ("FirebaseRemoteConfigInterop", "12.6.0", frameworkSource: FrameworkSource.Pods),
-		PodSpec.Create ("FirebaseSessions",            "12.6.0", frameworkSource: FrameworkSource.Pods),
 		PodSpec.Create ("FirebaseSharedSwift",         "12.6.0", frameworkSource: FrameworkSource.Pods),
 		PodSpec.Create ("PromisesSwift",               "2.4.0",  frameworkSource: FrameworkSource.Pods, frameworkName: "Promises", targetName: "PromisesSwift"),
 		PodSpec.Create ("leveldb-library",             "1.22.6", frameworkSource: FrameworkSource.Pods, frameworkName: "leveldb"),
@@ -197,7 +196,8 @@ void SetArtifactsPodSpecs ()
 	//	PodSpec.Create ("Firebase", "8.10.0", frameworkSource: FrameworkSource.Pods, frameworkName: "FirebaseInAppMessaging", targetName: "FirebaseInAppMessaging", subSpecs: new [] { "InAppMessaging" })
 	//};
 	FIREBASE_INSTALLATIONS_ARTIFACT.PodSpecs = new [] {
-		PodSpec.Create ("FirebaseInstallations", "12.6.0", frameworkSource: FrameworkSource.Pods)
+		PodSpec.Create ("FirebaseInstallations", "12.6.0", frameworkSource: FrameworkSource.Pods),
+		PodSpec.Create ("FirebaseSessions",      "12.6.0", frameworkSource: FrameworkSource.Pods)
 	};
 	FIREBASE_PERFORMANCE_MONITORING_ARTIFACT.PodSpecs = new [] {
 		PodSpec.Create ("FirebasePerformance", "12.6.0", frameworkSource: FrameworkSource.Pods)
