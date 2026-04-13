@@ -553,6 +553,7 @@ internal sealed class BindingSyntaxParser
             AddExpandedAliases(aliases, boundType.DisplayName, boundType.ComparisonKey);
             AddExpandedAliases(aliases, boundType.Name, boundType.ComparisonKey);
             AddExpandedAliases(aliases, boundType.ObjectiveCName, boundType.ComparisonKey);
+            AddExpandedAliases(aliases, CreateNamespacePrefixedAlias(boundType.Namespace, boundType.Name), boundType.ComparisonKey);
         }
 
         foreach (var delegateSurface in delegates)
@@ -560,6 +561,7 @@ internal sealed class BindingSyntaxParser
             AddExpandedAliases(aliases, delegateSurface.ComparisonKey, delegateSurface.ComparisonKey);
             AddExpandedAliases(aliases, delegateSurface.DisplayName, delegateSurface.ComparisonKey);
             AddExpandedAliases(aliases, delegateSurface.Name, delegateSurface.ComparisonKey);
+            AddExpandedAliases(aliases, CreateNamespacePrefixedAlias(delegateSurface.Namespace, delegateSurface.Name), delegateSurface.ComparisonKey);
         }
 
         foreach (var enumSurface in enums)
@@ -567,9 +569,25 @@ internal sealed class BindingSyntaxParser
             AddExpandedAliases(aliases, enumSurface.ComparisonKey, enumSurface.ComparisonKey);
             AddExpandedAliases(aliases, enumSurface.DisplayName, enumSurface.ComparisonKey);
             AddExpandedAliases(aliases, enumSurface.Name, enumSurface.ComparisonKey);
+            AddExpandedAliases(aliases, CreateNamespacePrefixedAlias(enumSurface.Namespace, enumSurface.Name), enumSurface.ComparisonKey);
         }
 
         return aliases;
+    }
+
+    private static string? CreateNamespacePrefixedAlias(string namespaceName, string typeName)
+    {
+        var namespaceTail = namespaceName
+            .Split('.', StringSplitOptions.RemoveEmptyEntries)
+            .LastOrDefault();
+
+        if (string.IsNullOrWhiteSpace(namespaceTail) ||
+            typeName.StartsWith(namespaceTail, StringComparison.Ordinal))
+        {
+            return null;
+        }
+
+        return $"{namespaceTail}{typeName}";
     }
 
     private static void AddExpandedAliases(IDictionary<string, string> aliases, string? alias, string comparisonKey)
@@ -913,6 +931,7 @@ internal sealed class BindingSyntaxParser
 internal sealed class SymbolAliasLookup
 {
     private readonly Dictionary<string, List<string>> comparisonKeysByAlias = new(StringComparer.Ordinal);
+    private readonly Dictionary<string, HashSet<string>> lookupKeysByComparisonKey = new(StringComparer.Ordinal);
 
     public void AddAliases(IReadOnlyDictionary<string, string>? aliases)
     {
@@ -931,7 +950,13 @@ internal sealed class SymbolAliasLookup
     public IEnumerable<string> GetEquivalentComparisonKeys(string comparisonKey)
     {
         var seen = new HashSet<string>(StringComparer.Ordinal);
-        foreach (var lookupKey in GetLookupKeys(comparisonKey))
+        var lookupKeys = new HashSet<string>(GetLookupKeys(comparisonKey), StringComparer.Ordinal);
+        if (lookupKeysByComparisonKey.TryGetValue(comparisonKey, out var registeredLookupKeys))
+        {
+            lookupKeys.UnionWith(registeredLookupKeys);
+        }
+
+        foreach (var lookupKey in lookupKeys)
         {
             if (!comparisonKeysByAlias.TryGetValue(lookupKey, out var comparisonKeys))
             {
@@ -1041,6 +1066,14 @@ internal sealed class SymbolAliasLookup
             {
                 comparisonKeys.Add(comparisonKey);
             }
+
+            if (!lookupKeysByComparisonKey.TryGetValue(comparisonKey, out var lookupKeys))
+            {
+                lookupKeys = new HashSet<string>(StringComparer.Ordinal);
+                lookupKeysByComparisonKey[comparisonKey] = lookupKeys;
+            }
+
+            lookupKeys.Add(lookupKey);
         }
     }
 
@@ -1152,6 +1185,11 @@ internal sealed class SymbolAliasLookup
 
 internal sealed class BindingComparer
 {
+    private static readonly HashSet<string> ExternalPlaceholderTypeKeys = new(StringComparer.Ordinal)
+    {
+        "UIApplication"
+    };
+
     public TargetComparisonResult Compare(
         BindingSnapshot baseline,
         BindingSnapshot generated,
@@ -1165,6 +1203,11 @@ internal sealed class BindingComparer
                 .Where(static item => !string.IsNullOrWhiteSpace(item.MatchMemberKey))
                 .Select(static item => CreateManualLookupKey(item.MatchTypeKey, item.MatchMemberKey!)),
             StringComparer.Ordinal);
+        var generatedManualMemberLookup = new HashSet<string>(
+            generated.ManualItems
+                .Where(static item => !string.IsNullOrWhiteSpace(item.MatchMemberKey))
+                .Select(static item => item.MatchMemberKey!),
+            StringComparer.Ordinal);
 
         var smoothedDelegateKeys = new HashSet<string>(StringComparer.Ordinal);
 
@@ -1175,6 +1218,7 @@ internal sealed class BindingComparer
             generated.Delegates,
             aliases,
             baselineManualLookup,
+            generatedManualMemberLookup,
             failures,
             infos,
             smoothedDelegateKeys);
@@ -1217,6 +1261,7 @@ internal sealed class BindingComparer
         IReadOnlyDictionary<string, DelegateSurface> generatedDelegates,
         SymbolAliasLookup aliases,
         IReadOnlySet<string> baselineManualLookup,
+        IReadOnlySet<string> generatedManualMemberLookup,
         List<AuditFinding> failures,
         List<AuditFinding> infos,
         ISet<string> smoothedDelegateKeys)
@@ -1246,6 +1291,7 @@ internal sealed class BindingComparer
                 generatedDelegates,
                 aliases,
                 baselineManualLookup,
+                generatedManualMemberLookup,
                 failures,
                 infos,
                 smoothedDelegateKeys);
@@ -1254,6 +1300,11 @@ internal sealed class BindingComparer
         foreach (var generatedEntry in generated.Values)
         {
             if (ContainsEquivalentEntry(baseline, generatedEntry.ComparisonKey, aliases))
+            {
+                continue;
+            }
+
+            if (IsExternalPlaceholderType(generatedEntry))
             {
                 continue;
             }
@@ -1302,6 +1353,7 @@ internal sealed class BindingComparer
         IReadOnlyDictionary<string, DelegateSurface> generatedDelegates,
         SymbolAliasLookup aliases,
         IReadOnlySet<string> baselineManualLookup,
+        IReadOnlySet<string> generatedManualMemberLookup,
         List<AuditFinding> failures,
         List<AuditFinding> infos,
         ISet<string> smoothedDelegateKeys)
@@ -1310,6 +1362,11 @@ internal sealed class BindingComparer
         {
             if (!TryGetComparableMember(generated.Members, baselineMemberEntry, out var generatedMember))
             {
+                if (IsMatchedGeneratedManualBinding(baselineMemberEntry, generatedManualMemberLookup))
+                {
+                    continue;
+                }
+
                 failures.Add(new AuditFinding(
                     Category: "stale-baseline-binding",
                     Severity: "failure",
@@ -1361,6 +1418,21 @@ internal sealed class BindingComparer
                 ComparisonTypeKey: generated.ComparisonKey,
                 ComparisonMemberKey: generatedMemberEntry.Key));
         }
+    }
+
+    private static bool IsExternalPlaceholderType(BoundTypeSurface type)
+    {
+        return type.Members.Count == 0 &&
+               !type.IsProtocol &&
+               ExternalPlaceholderTypeKeys.Contains(type.ComparisonKey);
+    }
+
+    private static bool IsMatchedGeneratedManualBinding(
+        BindingMemberSurface baselineMember,
+        IReadOnlySet<string> generatedManualMemberLookup)
+    {
+        return string.Equals(baselineMember.BindingAttribute, "Field", StringComparison.Ordinal) &&
+               generatedManualMemberLookup.Contains(baselineMember.Key);
     }
 
     private static bool TryGetComparableMember(

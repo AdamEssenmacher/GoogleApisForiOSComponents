@@ -22,6 +22,8 @@ EOF
 
 chmod +x "${wrapper_path}"
 
+export PATH="${wrapper_dir}:${PATH:-}"
+
 resolved_path="$(command -v sharpie || true)"
 resolved_version="$(sharpie --version 2>&1 || true)"
 

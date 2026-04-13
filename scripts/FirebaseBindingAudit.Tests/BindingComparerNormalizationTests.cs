@@ -106,6 +106,95 @@ public sealed class BindingComparerNormalizationTests
     }
 
     [Fact]
+    public void Compare_MatchesNamespacePrefixedSwiftEnumName()
+    {
+        var result = Compare(
+            """
+            namespace Firebase.AppDistribution;
+
+            [Native]
+            public enum Error : long
+            {
+                Unknown = 0,
+                AuthenticationFailure = 1
+            }
+            """,
+            """
+            namespace FirebaseAppDistribution;
+
+            [Native]
+            public enum FIRAppDistributionError : long
+            {
+                Unknown = 0,
+                AuthenticationFailure = 1
+            }
+            """);
+
+        AssertNoFailures(result);
+    }
+
+    [Fact]
+    public void Compare_MatchesGeneratedFieldConstantsInSeparateStaticContainer()
+    {
+        var result = Compare(
+            """
+            namespace Firebase.AppDistribution;
+
+            [BaseType(typeof(NSObject), Name = "FIRAppDistribution")]
+            public interface AppDistribution
+            {
+                [Field("FIRAppDistributionErrorDomain", "__Internal")]
+                NSString ErrorDomain { get; }
+            }
+            """,
+            """
+            namespace FirebaseAppDistribution;
+
+            [BaseType(typeof(NSObject))]
+            public interface FIRAppDistribution
+            {
+            }
+
+            public static class FirebaseAppDistributionConstants
+            {
+                [Field("FIRAppDistributionErrorDomain", "__Internal")]
+                public static NSString FIRAppDistributionErrorDomain { get; }
+            }
+            """);
+
+        AssertNoFailures(result);
+    }
+
+    [Fact]
+    public void Compare_IgnoresGeneratedEmptyPlatformTypePlaceholder()
+    {
+        var result = Compare(
+            """
+            namespace Firebase.AppDistribution;
+
+            [BaseType(typeof(NSObject), Name = "FIRAppDistribution")]
+            public interface AppDistribution
+            {
+            }
+            """,
+            """
+            namespace FirebaseAppDistribution;
+
+            [BaseType(typeof(NSObject))]
+            public interface FIRAppDistribution
+            {
+            }
+
+            [BaseType(typeof(NSObject))]
+            public interface UIApplication
+            {
+            }
+            """);
+
+        AssertNoFailures(result);
+    }
+
+    [Fact]
     public void Compare_MatchesNormalizedTypeReferencesInExportedMembers()
     {
         var result = Compare(

@@ -54,6 +54,18 @@
       "sharpieMode": "auto"
     },
     {
+      "id": "AppDistribution",
+      "packageId": "Firebase.AppDistribution",
+      "xcframework": "FirebaseAppDistribution",
+      "baselineDirectory": "source/Firebase/AppDistribution",
+      "baselineFiles": [
+        "ApiDefinition.cs",
+        "Enums.cs"
+      ],
+      "helperFiles": [],
+      "sharpieMode": "auto"
+    },
+    {
       "id": "Auth",
       "packageId": "Firebase.Auth",
       "xcframework": "FirebaseAuth",
