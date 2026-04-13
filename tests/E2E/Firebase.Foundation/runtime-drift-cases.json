@@ -1,6 +1,12 @@
 {
   "cases": [
     {
+      "id": "core-configuration-loggerlevel",
+      "method": "VerifyCoreConfigurationLoggerLevelAsync",
+      "bindingPackage": "AdamE.Firebase.iOS.Core",
+      "packages": []
+    },
+    {
       "id": "analytics-sessionidwithcompletion",
       "method": "VerifyAnalyticsSessionIdWithCompletionAsync",
       "bindingPackage": "AdamE.Firebase.iOS.Analytics",

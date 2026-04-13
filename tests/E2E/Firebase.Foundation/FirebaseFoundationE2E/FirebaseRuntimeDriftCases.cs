@@ -1,5 +1,11 @@
 using System.Reflection;
 
+#if ENABLE_RUNTIME_DRIFT_CASE_CORE_CONFIGURATION_LOGGERLEVEL
+using Firebase.Core;
+using Foundation;
+using ObjCRuntime;
+#endif
+
 #if ENABLE_RUNTIME_DRIFT_CASE_ANALYTICS_SESSIONIDWITHCOMPLETION
 using Firebase.Analytics;
 using Foundation;
@@ -157,6 +163,119 @@ static class FirebaseRuntimeDriftCases
             .FirstOrDefault(attribute => string.Equals(attribute.Key, key, StringComparison.Ordinal))
             ?.Value;
     }
+
+#if ENABLE_RUNTIME_DRIFT_CASE_CORE_CONFIGURATION_LOGGERLEVEL
+    static Task<string> VerifyCoreConfigurationLoggerLevelAsync()
+    {
+        const string loggerLevelSelector = "loggerLevel";
+        const string setLoggerLevelSelector = "setLoggerLevel:";
+        const LoggerLevel requestedLevel = LoggerLevel.Warning;
+
+        var loggerLevelProperty = typeof(Configuration).GetProperty(
+            nameof(Configuration.LoggerLevel),
+            BindingFlags.Instance | BindingFlags.Public);
+        if (loggerLevelProperty?.PropertyType != typeof(LoggerLevel))
+        {
+            throw new InvalidOperationException(
+                $"Expected managed API '{typeof(Configuration).FullName}.{nameof(Configuration.LoggerLevel)}' " +
+                $"to return '{typeof(LoggerLevel).FullName}' for selector '{loggerLevelSelector}', " +
+                $"observed '{loggerLevelProperty?.PropertyType.FullName ?? "<missing>"}'.");
+        }
+
+        var setter = typeof(Configuration).GetMethod(
+            nameof(Configuration.SetLoggerLevel),
+            BindingFlags.Instance | BindingFlags.Public,
+            binder: null,
+            types: new[] { typeof(LoggerLevel) },
+            modifiers: null);
+        if (setter?.ReturnType != typeof(void))
+        {
+            throw new InvalidOperationException(
+                $"Expected managed API '{typeof(Configuration).FullName}.{nameof(Configuration.SetLoggerLevel)}({typeof(LoggerLevel).FullName})' " +
+                $"to return void for selector '{setLoggerLevelSelector}', observed '{setter?.ReturnType.FullName ?? "<missing>"}'.");
+        }
+
+        var configuration = Configuration.SharedInstance;
+        if (configuration is null)
+        {
+            throw new InvalidOperationException("Firebase.Core.Configuration.SharedInstance returned null.");
+        }
+
+        if (!configuration.RespondsToSelector(new Selector(loggerLevelSelector)))
+        {
+            throw new InvalidOperationException($"Native FIRConfiguration does not respond to expected selector '{loggerLevelSelector}'.");
+        }
+
+        if (!configuration.RespondsToSelector(new Selector(setLoggerLevelSelector)))
+        {
+            throw new InvalidOperationException($"Native FIRConfiguration does not respond to expected selector '{setLoggerLevelSelector}'.");
+        }
+
+        NSException? marshaledException = null;
+        MarshalObjectiveCExceptionMode? marshaledExceptionMode = null;
+
+        void OnMarshalObjectiveCException(object? sender, MarshalObjectiveCExceptionEventArgs args)
+        {
+            marshaledException ??= args.Exception;
+            marshaledExceptionMode ??= args.ExceptionMode;
+        }
+
+        Runtime.MarshalObjectiveCException += OnMarshalObjectiveCException;
+        try
+        {
+            LoggerLevel originalLevel = default;
+            var originalLevelRead = false;
+            LoggerLevel observedLevel;
+
+            try
+            {
+                originalLevel = configuration.LoggerLevel;
+                originalLevelRead = true;
+                configuration.SetLoggerLevel(requestedLevel);
+                observedLevel = configuration.LoggerLevel;
+            }
+            catch (ObjCException ex)
+            {
+                throw new InvalidOperationException(
+                    $"Core configuration logger-level selectors should not throw after the missing getter binding is added, but observed {ex.GetType().FullName}. " +
+                    $"Selectors exercised: '{loggerLevelSelector}', '{setLoggerLevelSelector}'. " +
+                    $"NSException.Name: {FormatDetail(marshaledException?.Name?.ToString())}. " +
+                    $"NSException.Reason: {FormatDetail(marshaledException?.Reason)}. " +
+                    $"Marshal mode: {FormatDetail(marshaledExceptionMode?.ToString())}.",
+                    ex);
+            }
+            finally
+            {
+                if (originalLevelRead)
+                {
+                    configuration.SetLoggerLevel(originalLevel);
+                }
+            }
+
+            if (observedLevel != requestedLevel)
+            {
+                throw new InvalidOperationException(
+                    $"Selector '{loggerLevelSelector}' returned '{observedLevel}' after setting '{requestedLevel}'.");
+            }
+
+            if (marshaledException is not null)
+            {
+                throw new InvalidOperationException(
+                    $"Core configuration logger-level selectors completed, but Runtime.MarshalObjectiveCException captured unexpected NSException.Name '{marshaledException.Name}'. " +
+                    $"Reason: {FormatDetail(marshaledException.Reason)}. Marshal mode: {FormatDetail(marshaledExceptionMode?.ToString())}.");
+            }
+
+            return Task.FromResult(
+                $"Core configuration logger-level selectors crossed the native boundary. " +
+                $"Selectors exercised: '{loggerLevelSelector}', '{setLoggerLevelSelector}'. " +
+                $"Observed level after set: {observedLevel}.");
+        }
+        finally
+        {
+            Runtime.MarshalObjectiveCException -= OnMarshalObjectiveCException;
+        }
+    }
+#endif
 
 #if ENABLE_RUNTIME_DRIFT_CASE_ANALYTICS_SESSIONIDWITHCOMPLETION
     static async Task<string> VerifyAnalyticsSessionIdWithCompletionAsync()
