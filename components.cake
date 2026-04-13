@@ -184,7 +184,6 @@ void SetArtifactsPodSpecs ()
 		PodSpec.Create ("FirebaseRemoteConfigInterop", "12.6.0", frameworkSource: FrameworkSource.Pods),
 		PodSpec.Create ("FirebaseSessions",            "12.6.0", frameworkSource: FrameworkSource.Pods),
 		PodSpec.Create ("FirebaseSharedSwift",         "12.6.0", frameworkSource: FrameworkSource.Pods),
-		PodSpec.Create ("GoogleAppMeasurement",        "12.6.0"),
 		PodSpec.Create ("PromisesSwift",               "2.4.0",  frameworkSource: FrameworkSource.Pods, frameworkName: "Promises", targetName: "PromisesSwift"),
 		PodSpec.Create ("leveldb-library",             "1.22.6", frameworkSource: FrameworkSource.Pods, frameworkName: "leveldb"),
 	};
