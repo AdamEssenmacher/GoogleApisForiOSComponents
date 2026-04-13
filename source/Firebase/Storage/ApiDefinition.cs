@@ -169,11 +169,6 @@ namespace Firebase.Storage
 		[Export ("updated", ArgumentSemantic.Copy)]
 		NSDate Updated { get; }
 
-		// @property (readonly, nonatomic, strong) FIRStorageReference * _Nullable storageReference;
-		[NullAllowed]
-		[Export ("storageReference", ArgumentSemantic.Strong)]
-		StorageReference StorageReference { get; }
-
 		// -(instancetype _Nullable)initWithDictionary:(NSDictionary * _Nonnull)dictionary __attribute__((objc_designated_initializer));
 		[DesignatedInitializer]
 		[Export ("initWithDictionary:")]
