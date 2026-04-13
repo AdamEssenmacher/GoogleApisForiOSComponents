@@ -1,15 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
-
 using Foundation;
 using ObjCRuntime;
+using UIKit;
 
 namespace Firebase.AppDistribution
 {
 	// (void (^)(NSError *_Nullable error))completion
 	delegate void ErrorHandler ([NullAllowed] NSError error);
 
-	// (void (^)(FIRAppDistributionRelease *_Nullable release, NSError *_Nullable error))completion
+	// (void (^)(FIRAppDistributionRelease *_Nullable_result release, NSError *_Nullable error))completion
 	delegate void AppDistributionReleaseHandler ([NullAllowed] AppDistributionRelease release, [NullAllowed] NSError error);
 
 	// @interface FIRAppDistribution : NSObject
@@ -25,32 +24,36 @@ namespace Firebase.AppDistribution
 		[Field ("FIRAppDistributionErrorDetailsKey", "__Internal")]
 		NSString ErrorDetailsKey { get; }
 
-		// + (instancetype)appDistribution
+		// + (instancetype)appDistribution NS_SWIFT_NAME(appDistribution());
 		[Static]
-		[Export("appDistribution")]
+		[Export ("appDistribution")]
 		AppDistribution SharedInstance { get; }
 
 		// @property(nonatomic, readonly) BOOL isTesterSignedIn;
 		[Export ("isTesterSignedIn")]
 		bool IsTesterSignedIn { get; }
 
-		// - (void)signInTesterWithCompletion: (void (^)(NSError *_Nullable error))completion
+		// - (void)signInTesterWithCompletion:(void (^)(NSError *_Nullable error))completion NS_SWIFT_NAME(signInTester(completion:));
 		[Export ("signInTesterWithCompletion:")]
-		void SigInTester (ErrorHandler completion);
+		void SignInTester (ErrorHandler completion);
 
-		// - (void)checkForUpdateWithCompletion: (void (^)(FIRAppDistributionRelease *_Nullable release, NSError *_Nullable error))completion;
+		// - (void)checkForUpdateWithCompletion:(void (^)(FIRAppDistributionRelease *_Nullable_result release, NSError *_Nullable error))completion NS_SWIFT_NAME(checkForUpdate(completion:));
 		[Export ("checkForUpdateWithCompletion:")]
-		void SigInTester (AppDistributionReleaseHandler completion);
+		void CheckForUpdate (AppDistributionReleaseHandler completion);
 
 		// - (void)signOutTester;
-		[Export ("signOutTester:")]
+		[Export ("signOutTester")]
 		void SignOutTester ();
+
+		// - (BOOL)application:(UIApplication *)application openURL:(NSURL *)url options:(NSDictionary<NSString *, id> *)options;
+		[Export ("application:openURL:options:")]
+		bool OpenUrl (UIApplication application, NSUrl url, NSDictionary<NSString, NSObject> options);
 	}
 
 	// @interface FIRAppDistributionRelease : NSObject
 	[DisableDefaultCtor]
 	[BaseType (typeof (NSObject), Name = "FIRAppDistributionRelease")]
-	interface Release
+	interface AppDistributionRelease
 	{
 		// @property(nonatomic, copy, readonly) NSString *displayVersion;
 		[Export ("displayVersion")]
@@ -60,13 +63,14 @@ namespace Firebase.AppDistribution
 		[Export ("buildVersion")]
 		string BuildVersion { get; }
 
-		// @property(nonatomic, copy, readonly) NSString *releaseNotes;
+		// @property(nonatomic, nullable, copy, readonly) NSString *releaseNotes;
+		[NullAllowed]
 		[Export ("releaseNotes")]
 		string ReleaseNotes { get; }
 
 		// @property(nonatomic, strong, readonly) NSURL *downloadURL;
-		[Export ("displayVersion")]
-		NSURL DownloadUrl { get; }
+		[Export ("downloadURL")]
+		NSUrl DownloadUrl { get; }
 
 		// @property(nonatomic, readonly) BOOL isExpired;
 		[Export ("isExpired")]

@@ -1,18 +1,18 @@
-﻿<Project Sdk="Xamarin.Legacy.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>xamarin.ios10;net6.0-ios</TargetFrameworks>
-    <NoNFloatUsing Condition="'$(TargetFramework)' == 'xamarin.ios10'">true</NoNFloatUsing>
+    <TargetFrameworks>net9.0-ios;net10.0-ios;net9.0-maccatalyst;net10.0-maccatalyst</TargetFrameworks>
     <Nullable>enable</Nullable>
     <ImplicitUsings>true</ImplicitUsings>
     <IsBindingProject>true</IsBindingProject>
     <NoBindingEmbedding>true</NoBindingEmbedding>
-    <SupportedOSPlatformVersion>11.0</SupportedOSPlatformVersion>
+    <SupportedOSPlatformVersion>15.0</SupportedOSPlatformVersion>
     <RootNamespace>Firebase.AppDistribution</RootNamespace>
     <AssemblyName>Firebase.AppDistribution</AssemblyName>
-    <AssemblyVersion>1.0.0.0</AssemblyVersion>
-    <FileVersion>8.10.0</FileVersion>
+    <AssemblyVersion>12.6.0</AssemblyVersion>
+    <FileVersion>12.6.0</FileVersion>
     <IPhoneResourcePrefix>Resources</IPhoneResourcePrefix>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <CompressBindingResourcePackage>true</CompressBindingResourcePackage>
   </PropertyGroup>
   <PropertyGroup>
     <PackageId>AdamE.Firebase.iOS.AppDistribution</PackageId>
@@ -27,7 +27,7 @@
     <PackageLicenseFile>License.md</PackageLicenseFile>
     <PackageReadmeFile>NUGET_README.md</PackageReadmeFile>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-    <PackageVersion>8.10.0</PackageVersion>
+    <PackageVersion>12.6.0</PackageVersion>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="..\..\AssemblyInfo.cs" />
@@ -43,6 +43,7 @@
   <ItemGroup>
     <NativeReference Include="..\..\..\externals\FirebaseAppDistribution.xcframework">
       <Kind>Framework</Kind>
+      <Frameworks>UIKit</Frameworks>
       <SmartLink>True</SmartLink>
       <ForceLoad>True</ForceLoad>
       <LinkerFlags>-ObjC</LinkerFlags>
@@ -53,9 +54,6 @@
   </ItemGroup>
   <ItemGroup>
     <ObjcBindingApiDefinition Include="ApiDefinition.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="Xamarin.Build.Download" Version="0.11.0" PrivateAssets="None" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Core\Core.csproj" PrivateAssets="None" />

@@ -4,10 +4,11 @@ using ObjCRuntime;
 namespace Firebase.AppDistribution
 {
 	[Native]
-    public enum Error : uint {
+	public enum Error : long
+	{
 		Unknown = 0,
 		AuthenticationFailure = 1,
 		AuthenticationCancelled = 2,
 		NetworkFailure = 3,
-    }
+	}
 }
