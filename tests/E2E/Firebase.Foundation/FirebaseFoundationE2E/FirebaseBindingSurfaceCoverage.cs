@@ -81,6 +81,7 @@ public static partial class FirebaseBindingSurfaceCoverage
             "ABTesting" => VerifyABTestingBindingSurfaceAsync(document),
             "Analytics" => VerifyAnalyticsBindingSurfaceAsync(document),
             "AppCheck" => VerifyAppCheckBindingSurfaceAsync(document),
+            "AppDistribution" => VerifyAppDistributionBindingSurfaceAsync(document),
             "Auth" => VerifyAuthBindingSurfaceAsync(document),
             "CloudFirestore" => VerifyCloudFirestoreBindingSurfaceAsync(document),
             "CloudFunctions" => VerifyCloudFunctionsBindingSurfaceAsync(document),
@@ -249,26 +250,10 @@ public static partial class FirebaseBindingSurfaceCoverage
         const BindingFlags flags = BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance | BindingFlags.FlattenHierarchy;
         if (string.Equals(surface.Kind, "property", StringComparison.Ordinal))
         {
-            var property = type.GetProperty(surface.MemberName, flags);
+            var property = FindProperty(type, surface, flags);
             if (property is null)
             {
                 throw new MissingMemberException(type.FullName, surface.MemberName);
-            }
-
-            if (!string.IsNullOrWhiteSpace(surface.ReturnType) &&
-                !TypeMatches(property.PropertyType, surface.ReturnType))
-            {
-                throw new MissingMemberException(type.FullName, surface.Signature);
-            }
-
-            if (surface.HasGetter && property.GetMethod is null)
-            {
-                throw new MissingMemberException(type.FullName, "get_" + surface.MemberName);
-            }
-
-            if (surface.HasSetter && property.SetMethod is null)
-            {
-                throw new MissingMemberException(type.FullName, "set_" + surface.MemberName);
             }
 
             return;
@@ -416,6 +401,16 @@ public static partial class FirebaseBindingSurfaceCoverage
 
     static void TouchManualSurface(Type type, BindingSurfaceDescriptor surface)
     {
+        if (string.Equals(surface.Kind, "manual-delegate", StringComparison.Ordinal))
+        {
+            if (!typeof(Delegate).IsAssignableFrom(type))
+            {
+                throw new TypeLoadException($"Managed type '{type.FullName}' is not a delegate.");
+            }
+
+            return;
+        }
+
         var memberName = surface.MemberName;
         if (string.IsNullOrWhiteSpace(memberName))
         {
@@ -423,8 +418,18 @@ public static partial class FirebaseBindingSurfaceCoverage
         }
 
         const BindingFlags flags = BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance | BindingFlags.FlattenHierarchy;
-        var property = type.GetProperty(memberName, flags);
-        if (property?.GetMethod?.IsStatic == true)
+        if (string.Equals(surface.Kind, "manual-constructor", StringComparison.Ordinal))
+        {
+            if (!type.GetConstructors(flags).Any(constructor => ParametersMatch(constructor.GetParameters(), surface)))
+            {
+                throw new MissingMethodException(type.FullName, surface.Signature);
+            }
+
+            return;
+        }
+
+        var property = FindProperty(type, surface, flags);
+        if (property?.GetMethod?.IsStatic == true && property.GetIndexParameters().Length == 0)
         {
             _ = property.GetValue(null);
             return;
@@ -453,6 +458,22 @@ public static partial class FirebaseBindingSurfaceCoverage
         }
 
         throw new MissingMethodException(type.FullName, surface.Signature);
+    }
+
+    static PropertyInfo? FindProperty(Type type, BindingSurfaceDescriptor surface, BindingFlags flags) =>
+        type.GetProperties(flags).FirstOrDefault(property => PropertyMatchesSurface(property, surface));
+
+    static bool PropertyMatchesSurface(PropertyInfo property, BindingSurfaceDescriptor surface)
+    {
+        if (!string.Equals(property.Name, surface.MemberName, StringComparison.Ordinal))
+        {
+            return false;
+        }
+
+        return ReturnTypeMatches(property.PropertyType, surface) &&
+               ParametersMatch(property.GetIndexParameters(), surface) &&
+               (!surface.HasGetter || property.GetMethod is not null) &&
+               (!surface.HasSetter || property.SetMethod is not null);
     }
 
     static bool MethodMatchesSurface(MethodInfo method, BindingSurfaceDescriptor surface)
@@ -595,7 +616,11 @@ public static partial class FirebaseBindingSurfaceCoverage
         }
 
         const BindingFlags flags = BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy;
-        var property = type.GetProperty(memberName, flags);
+        var property = type
+            .GetProperties(flags)
+            .FirstOrDefault(property =>
+                string.Equals(property.Name, memberName, StringComparison.Ordinal) &&
+                property.GetIndexParameters().Length == 0);
         if (property?.GetMethod is not null)
         {
             _ = property.GetValue(null);

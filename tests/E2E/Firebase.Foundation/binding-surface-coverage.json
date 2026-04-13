@@ -32,6 +32,16 @@
       "requiredExtraPackages": []
     },
     {
+      "id": "AppDistribution",
+      "packageId": "AdamE.Firebase.iOS.AppDistribution",
+      "coverageCaseMethod": "VerifyAppDistributionBindingSurfaceAsync",
+      "sourceFiles": [
+        "source/Firebase/AppDistribution/ApiDefinition.cs",
+        "source/Firebase/AppDistribution/Enums.cs"
+      ],
+      "requiredExtraPackages": []
+    },
+    {
       "id": "Auth",
       "packageId": "AdamE.Firebase.iOS.Auth",
       "coverageCaseMethod": "VerifyAuthBindingSurfaceAsync",

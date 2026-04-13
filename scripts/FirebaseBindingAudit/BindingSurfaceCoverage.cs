@@ -574,17 +574,40 @@ internal sealed class BindingSurfaceCoverageBuilder
 
             var syntaxTree = CSharpSyntaxTree.ParseText(File.ReadAllText(helperFile), path: helperFile);
             var root = syntaxTree.GetCompilationUnitRoot();
+            foreach (var delegateDeclaration in root.DescendantNodes().OfType<DelegateDeclarationSyntax>())
+            {
+                if (!IsEffectivelyPublic(delegateDeclaration))
+                {
+                    continue;
+                }
+
+                var namespaceName = GetContainingNamespace(delegateDeclaration);
+                var typeName = GetQualifiedTypeName(delegateDeclaration, delegateDeclaration.Identifier.Text);
+                var parameterTypes = GetParameterTypes(delegateDeclaration.ParameterList);
+                var signature = $"delegate {delegateDeclaration.Identifier.Text}({string.Join(", ", parameterTypes)}) -> {delegateDeclaration.ReturnType.WithoutTrivia()}";
+                yield return CreatePublicHelperSurface(
+                    target,
+                    helperFile,
+                    typeName,
+                    namespaceName,
+                    surfaceId: $"{target}:manual-delegate:{typeName}:{CreateSurfaceIdKey(signature)}",
+                    memberName: null,
+                    signature: signature,
+                    parameterTypes: parameterTypes,
+                    returnType: delegateDeclaration.ReturnType.WithoutTrivia().ToString(),
+                    isStatic: false,
+                    kind: "manual-delegate");
+            }
+
             foreach (var typeDeclaration in root.DescendantNodes().OfType<TypeDeclarationSyntax>())
             {
-                if (!typeDeclaration.Modifiers.Any(static modifier => modifier.IsKind(Microsoft.CodeAnalysis.CSharp.SyntaxKind.PublicKeyword)))
+                if (!IsEffectivelyPublic(typeDeclaration))
                 {
                     continue;
                 }
 
                 var namespaceName = GetContainingNamespace(typeDeclaration);
-                var typeName = string.IsNullOrWhiteSpace(namespaceName)
-                    ? typeDeclaration.Identifier.Text
-                    : $"{namespaceName}.{typeDeclaration.Identifier.Text}";
+                var typeName = GetQualifiedTypeName(typeDeclaration, typeDeclaration.Identifier.Text);
                 yield return CreatePublicHelperSurface(
                     target,
                     helperFile,
@@ -599,7 +622,7 @@ internal sealed class BindingSurfaceCoverageBuilder
 
                 foreach (var property in typeDeclaration.Members.OfType<PropertyDeclarationSyntax>())
                 {
-                    if (!property.Modifiers.Any(static modifier => modifier.IsKind(Microsoft.CodeAnalysis.CSharp.SyntaxKind.PublicKeyword)))
+                    if (!IsPublic(property))
                     {
                         continue;
                     }
@@ -614,19 +637,68 @@ internal sealed class BindingSurfaceCoverageBuilder
                         signature: $"{property.Type.WithoutTrivia()} {property.Identifier.Text} {{ get; }}",
                         parameterTypes: [],
                         returnType: property.Type.WithoutTrivia().ToString(),
-                        isStatic: property.Modifiers.Any(static modifier => modifier.IsKind(Microsoft.CodeAnalysis.CSharp.SyntaxKind.StaticKeyword)));
+                        isStatic: property.Modifiers.Any(static modifier => modifier.IsKind(Microsoft.CodeAnalysis.CSharp.SyntaxKind.StaticKeyword)),
+                        kind: "manual-property",
+                        hasGetter: HasGetter(property.AccessorList),
+                        hasSetter: HasSetter(property.AccessorList));
                 }
 
-                foreach (var method in typeDeclaration.Members.OfType<MethodDeclarationSyntax>())
+                foreach (var indexer in typeDeclaration.Members.OfType<IndexerDeclarationSyntax>())
                 {
-                    if (!method.Modifiers.Any(static modifier => modifier.IsKind(Microsoft.CodeAnalysis.CSharp.SyntaxKind.PublicKeyword)))
+                    if (!IsPublic(indexer))
                     {
                         continue;
                     }
 
-                    var parameterTypes = method.ParameterList.Parameters
-                        .Select(static parameter => parameter.Type?.WithoutTrivia().ToString() ?? "object")
-                        .ToList();
+                    var parameterTypes = GetParameterTypes(indexer.ParameterList);
+                    var signature = $"{indexer.Type.WithoutTrivia()} this[{string.Join(", ", parameterTypes)}] {{ get; }}";
+                    yield return CreatePublicHelperSurface(
+                        target,
+                        helperFile,
+                        typeName,
+                        namespaceName,
+                        surfaceId: $"{target}:manual-indexer:{typeName}:{CreateSurfaceIdKey(signature)}",
+                        memberName: "Item",
+                        signature: signature,
+                        parameterTypes: parameterTypes,
+                        returnType: indexer.Type.WithoutTrivia().ToString(),
+                        isStatic: false,
+                        kind: "manual-indexer",
+                        hasGetter: HasGetter(indexer.AccessorList),
+                        hasSetter: HasSetter(indexer.AccessorList));
+                }
+
+                foreach (var constructor in typeDeclaration.Members.OfType<ConstructorDeclarationSyntax>())
+                {
+                    if (!IsPublic(constructor))
+                    {
+                        continue;
+                    }
+
+                    var parameterTypes = GetParameterTypes(constructor.ParameterList);
+                    var signature = $"{constructor.Identifier.Text}({string.Join(", ", parameterTypes)})";
+                    yield return CreatePublicHelperSurface(
+                        target,
+                        helperFile,
+                        typeName,
+                        namespaceName,
+                        surfaceId: $"{target}:manual-constructor:{typeName}:{constructor.ParameterList.Parameters.Count}:{CreateSurfaceIdKey(signature)}",
+                        memberName: ".ctor",
+                        signature: signature,
+                        parameterTypes: parameterTypes,
+                        returnType: null,
+                        isStatic: false,
+                        kind: "manual-constructor");
+                }
+
+                foreach (var method in typeDeclaration.Members.OfType<MethodDeclarationSyntax>())
+                {
+                    if (!IsPublic(method))
+                    {
+                        continue;
+                    }
+
+                    var parameterTypes = GetParameterTypes(method.ParameterList);
                     var signature = $"{method.Identifier.Text}({string.Join(", ", parameterTypes)}) -> {method.ReturnType.WithoutTrivia()}";
                     yield return CreatePublicHelperSurface(
                         target,
@@ -638,12 +710,13 @@ internal sealed class BindingSurfaceCoverageBuilder
                         signature: signature,
                         parameterTypes: parameterTypes,
                         returnType: method.ReturnType.WithoutTrivia().ToString(),
-                        isStatic: method.Modifiers.Any(static modifier => modifier.IsKind(Microsoft.CodeAnalysis.CSharp.SyntaxKind.StaticKeyword)));
+                        isStatic: method.Modifiers.Any(static modifier => modifier.IsKind(Microsoft.CodeAnalysis.CSharp.SyntaxKind.StaticKeyword)),
+                        kind: "manual-method");
                 }
 
                 foreach (var field in typeDeclaration.Members.OfType<FieldDeclarationSyntax>())
                 {
-                    if (!field.Modifiers.Any(static modifier => modifier.IsKind(Microsoft.CodeAnalysis.CSharp.SyntaxKind.PublicKeyword)))
+                    if (!IsPublic(field))
                     {
                         continue;
                     }
@@ -661,7 +734,8 @@ internal sealed class BindingSurfaceCoverageBuilder
                             parameterTypes: [],
                             returnType: field.Declaration.Type.WithoutTrivia().ToString(),
                             isStatic: field.Modifiers.Any(static modifier => modifier.IsKind(Microsoft.CodeAnalysis.CSharp.SyntaxKind.StaticKeyword)) ||
-                                      field.Modifiers.Any(static modifier => modifier.IsKind(Microsoft.CodeAnalysis.CSharp.SyntaxKind.ConstKeyword)));
+                                      field.Modifiers.Any(static modifier => modifier.IsKind(Microsoft.CodeAnalysis.CSharp.SyntaxKind.ConstKeyword)),
+                            kind: "manual-field");
                     }
                 }
             }
@@ -678,11 +752,14 @@ internal sealed class BindingSurfaceCoverageBuilder
         string signature,
         IReadOnlyList<string> parameterTypes,
         string? returnType,
-        bool isStatic) =>
+        bool isStatic,
+        string? kind = null,
+        bool hasGetter = false,
+        bool hasSetter = false) =>
         new(
             Target: target,
             SurfaceId: surfaceId,
-            Kind: memberName is null ? "manual" : "manual-member",
+            Kind: kind ?? (memberName is null ? "manual" : "manual-member"),
             TypeName: typeName,
             RuntimeTypeName: typeName,
             AssemblyName: ResolveAssemblyName(namespaceName),
@@ -693,14 +770,52 @@ internal sealed class BindingSurfaceCoverageBuilder
             MemberName: memberName,
             BindingAttribute: null,
             BindingValue: null,
-            HasGetter: false,
-            HasSetter: false,
+            HasGetter: hasGetter,
+            HasSetter: hasSetter,
             ParameterCount: parameterTypes.Count,
             ParameterTypes: parameterTypes,
             ReturnType: returnType,
             NativeSelectors: EmptySelectors,
             SourceFile: helperFile,
             Signature: signature);
+
+    private static IReadOnlyList<string> GetParameterTypes(BaseParameterListSyntax parameterList) =>
+        parameterList.Parameters
+            .Select(static parameter => parameter.Type?.WithoutTrivia().ToString() ?? "object")
+            .ToList();
+
+    private static bool IsEffectivelyPublic(MemberDeclarationSyntax member) =>
+        IsPublic(member) &&
+        member.Ancestors().OfType<TypeDeclarationSyntax>().All(IsPublic);
+
+    private static bool IsPublic(MemberDeclarationSyntax member) =>
+        member.Modifiers.Any(static modifier => modifier.IsKind(Microsoft.CodeAnalysis.CSharp.SyntaxKind.PublicKeyword));
+
+    private static bool HasGetter(AccessorListSyntax? accessorList) =>
+        accessorList is null ||
+        accessorList.Accessors.Any(static accessor => accessor.IsKind(Microsoft.CodeAnalysis.CSharp.SyntaxKind.GetAccessorDeclaration));
+
+    private static bool HasSetter(AccessorListSyntax? accessorList) =>
+        accessorList?.Accessors.Any(static accessor => accessor.IsKind(Microsoft.CodeAnalysis.CSharp.SyntaxKind.SetAccessorDeclaration)) == true;
+
+    private static string GetQualifiedTypeName(SyntaxNode node, string typeName)
+    {
+        var containingTypes = new List<string>();
+        for (var current = node.Parent; current is not null; current = current.Parent)
+        {
+            if (current is TypeDeclarationSyntax typeDeclaration)
+            {
+                containingTypes.Insert(0, typeDeclaration.Identifier.Text);
+            }
+        }
+
+        containingTypes.Add(typeName);
+        var nestedTypeName = string.Join("+", containingTypes);
+        var namespaceName = GetContainingNamespace(node);
+        return string.IsNullOrWhiteSpace(namespaceName)
+            ? nestedTypeName
+            : $"{namespaceName}.{nestedTypeName}";
+    }
 
     private static string GetTypeDeclarationKind(TypeDeclarationSyntax typeDeclaration) =>
         typeDeclaration switch
