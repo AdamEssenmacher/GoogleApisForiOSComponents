@@ -61,6 +61,13 @@ public sealed class AuditRunnerTests
     }
 
     [Fact]
+    public void ShouldStageSharpieFrameworkSlices_SkipsWhenSharpieIsDisabled()
+    {
+        Assert.False(AuditRunner.ShouldStageSharpieFrameworkSlices(CreateAuditOptions(disableSharpie: true)));
+        Assert.True(AuditRunner.ShouldStageSharpieFrameworkSlices(CreateAuditOptions(disableSharpie: false)));
+    }
+
+    [Fact]
     public void TryResolveSharpieCompanionFrameworkPath_UsesLaterExistingImport()
     {
         var tempRoot = Path.Combine(Path.GetTempPath(), $"firebase-binding-audit-companion-{Guid.NewGuid():N}");
@@ -98,4 +105,16 @@ public sealed class AuditRunnerTests
             }
         }
     }
+
+    private static AuditOptions CreateAuditOptions(bool disableSharpie) =>
+        new(
+            RepoRoot: string.Empty,
+            OutputDirectory: string.Empty,
+            GeneratorVersion: "0.7.0",
+            SelectedTargets: null,
+            KeepTemp: false,
+            SharpiePath: null,
+            SharpieVersion: "26.3.0.11",
+            DisableSharpie: disableSharpie,
+            DisableSuppressions: false);
 }

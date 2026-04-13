@@ -126,7 +126,10 @@ internal sealed class AuditRunner
             var stagedFrameworksDirectory = Path.Combine(tempRoot, "frameworks");
             StageXcframeworks(options.RepoRoot, stagedFrameworksDirectory);
             var sharpieFrameworkSearchDirectory = Path.Combine(tempRoot, "sharpie-frameworks");
-            StageSharpieFrameworkSlices(stagedFrameworksDirectory, sharpieFrameworkSearchDirectory);
+            if (ShouldStageSharpieFrameworkSlices(options))
+            {
+                StageSharpieFrameworkSlices(stagedFrameworksDirectory, sharpieFrameworkSearchDirectory);
+            }
 
             var sharedAliases = BuildSharedAliases(options.RepoRoot);
             var results = new List<TargetAuditResult>();
@@ -386,6 +389,9 @@ internal sealed class AuditRunner
                string.Equals(sharpieRun.Status, "succeeded", StringComparison.Ordinal) &&
                sharpieRun.Comparison is not null;
     }
+
+    internal static bool ShouldStageSharpieFrameworkSlices(AuditOptions options) =>
+        !options.DisableSharpie;
 
     private static ConfidenceSummary BuildConfidenceSummary(IReadOnlyList<AuditFinding> findings)
     {

@@ -193,6 +193,43 @@ public sealed class SuppressionEngineTests
     }
 
     [Fact]
+    public void Apply_DoesNotReportRulesForUnauditedTargetsAsStale()
+    {
+        var result = CreateResult(
+            "Core",
+            CreateFailureFinding(
+                typeName: "Firebase.Core.App",
+                memberName: "DefaultInstance",
+                selector: "defaultApp"));
+
+        var config = new SuppressionConfiguration
+        {
+            Suppressions =
+            [
+                new SuppressionRule
+                {
+                    Id = "rule-unselected",
+                    Target = "RemoteConfig",
+                    Category = "attribute-drift",
+                    TypeName = "Firebase.RemoteConfig.RemoteConfigValue",
+                    MemberName = "JsonValue",
+                    Selector = "JSONValue",
+                    Reason = "target was not part of this audit run",
+                    Evidence = ["header"]
+                }
+            ]
+        };
+
+        var application = SuppressionEngine.Apply([result], config, disableSuppressions: false);
+
+        Assert.Equal(1, application.Summary.RuleCount);
+        Assert.Equal(0, application.Summary.StaleRuleCount);
+        Assert.Equal(0, application.Summary.InvalidRuleCount);
+        Assert.Equal(0, application.Summary.MatchedRuleCount);
+        Assert.Single(application.Results.Single().Findings);
+    }
+
+    [Fact]
     public void Apply_DisableSuppressionsLeavesFindingsUnsuppressed()
     {
         var result = CreateResult(

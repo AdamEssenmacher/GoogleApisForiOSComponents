@@ -200,9 +200,17 @@ internal static class SuppressionEngine
         var invalidRules = new List<InvalidSuppressionRule>();
         var appliedRules = new HashSet<string>(StringComparer.Ordinal);
         var suppressionMap = new Dictionary<(string Target, int Index), SuppressionRule>();
+        var auditedTargets = results
+            .Select(static result => result.Target)
+            .ToHashSet(StringComparer.Ordinal);
 
         foreach (var rule in suppressionConfiguration.Suppressions)
         {
+            if (!auditedTargets.Contains(rule.Target))
+            {
+                continue;
+            }
+
             var matches = candidates
                 .Where(candidate => Matches(rule, candidate))
                 .ToList();
