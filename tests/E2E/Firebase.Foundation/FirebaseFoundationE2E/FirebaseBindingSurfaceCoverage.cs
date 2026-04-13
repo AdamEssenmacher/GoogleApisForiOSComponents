@@ -242,6 +242,12 @@ public static partial class FirebaseBindingSurfaceCoverage
 
     static void ResolveManagedMember(Type type, BindingSurfaceDescriptor surface)
     {
+        if (IsDelegateSurface(surface))
+        {
+            VerifyDelegateSurface(type, surface);
+            return;
+        }
+
         if (string.IsNullOrWhiteSpace(surface.MemberName))
         {
             return;
@@ -403,11 +409,7 @@ public static partial class FirebaseBindingSurfaceCoverage
     {
         if (string.Equals(surface.Kind, "manual-delegate", StringComparison.Ordinal))
         {
-            if (!typeof(Delegate).IsAssignableFrom(type))
-            {
-                throw new TypeLoadException($"Managed type '{type.FullName}' is not a delegate.");
-            }
-
+            VerifyDelegateSurface(type, surface);
             return;
         }
 
@@ -483,8 +485,32 @@ public static partial class FirebaseBindingSurfaceCoverage
             return false;
         }
 
-        return ParametersMatch(method.GetParameters(), surface) &&
+        return method.IsStatic == surface.IsStatic &&
+               ParametersMatch(method.GetParameters(), surface) &&
                ReturnTypeMatches(method.ReturnType, surface);
+    }
+
+    static bool IsDelegateSurface(BindingSurfaceDescriptor surface) =>
+        string.Equals(surface.Kind, "delegate", StringComparison.Ordinal) ||
+        string.Equals(surface.Kind, "manual-delegate", StringComparison.Ordinal);
+
+    static void VerifyDelegateSurface(Type type, BindingSurfaceDescriptor surface)
+    {
+        if (!typeof(Delegate).IsAssignableFrom(type))
+        {
+            throw new TypeLoadException($"Managed type '{type.FullName}' is not a delegate.");
+        }
+
+        var invokeMethod = type.GetMethod(
+            "Invoke",
+            BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
+        if (invokeMethod is null ||
+            invokeMethod.IsStatic != surface.IsStatic ||
+            !ParametersMatch(invokeMethod.GetParameters(), surface) ||
+            !ReturnTypeMatches(invokeMethod.ReturnType, surface))
+        {
+            throw new MissingMethodException(type.FullName, surface.Signature);
+        }
     }
 
     static bool ReturnTypeMatches(Type returnType, BindingSurfaceDescriptor surface)
