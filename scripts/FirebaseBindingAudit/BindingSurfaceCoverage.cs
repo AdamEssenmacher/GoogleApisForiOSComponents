@@ -77,6 +77,7 @@ internal sealed record BindingSurfaceDescriptor(
     bool HasSetter,
     int ParameterCount,
     IReadOnlyList<string> ParameterTypes,
+    string? ReturnType,
     IReadOnlyList<BindingSurfaceNativeSelector> NativeSelectors,
     string SourceFile,
     string Signature);
@@ -353,6 +354,7 @@ internal sealed class BindingSurfaceCoverageBuilder
                 HasSetter: false,
                 ParameterCount: 0,
                 ParameterTypes: [],
+                ReturnType: null,
                 NativeSelectors: EmptySelectors,
                 SourceFile: boundType.SourceFile,
                 Signature: $"{boundType.ContainerKind} {boundType.Name}");
@@ -379,6 +381,7 @@ internal sealed class BindingSurfaceCoverageBuilder
                     HasSetter: member.HasSetter,
                     ParameterCount: member.Parameters.Count,
                     ParameterTypes: member.Parameters.Select(static parameter => parameter.Type).ToList(),
+                    ReturnType: member.ReturnType,
                     NativeSelectors: BuildNativeSelectors(boundType, member).ToList(),
                     SourceFile: member.SourceFile,
                     Signature: member.Signature);
@@ -411,6 +414,7 @@ internal sealed class BindingSurfaceCoverageBuilder
                 HasSetter: false,
                 ParameterCount: delegateSurface.Parameters.Count,
                 ParameterTypes: delegateSurface.Parameters.Select(static parameter => parameter.Type).ToList(),
+                ReturnType: delegateSurface.ReturnType,
                 NativeSelectors: EmptySelectors,
                 SourceFile: delegateSurface.SourceFile,
                 Signature: delegateSurface.Signature);
@@ -436,6 +440,7 @@ internal sealed class BindingSurfaceCoverageBuilder
                 HasSetter: false,
                 ParameterCount: 0,
                 ParameterTypes: [],
+                ReturnType: null,
                 NativeSelectors: EmptySelectors,
                 SourceFile: enumSurface.SourceFile,
                 Signature: $"enum {enumSurface.Name}");
@@ -460,6 +465,7 @@ internal sealed class BindingSurfaceCoverageBuilder
                     HasSetter: false,
                     ParameterCount: 0,
                     ParameterTypes: [],
+                    ReturnType: null,
                     NativeSelectors: EmptySelectors,
                     SourceFile: enumMember.SourceFile,
                     Signature: $"{enumSurface.Name}.{enumMember.Name}");
@@ -498,6 +504,7 @@ internal sealed class BindingSurfaceCoverageBuilder
                 HasSetter: false,
                 ParameterCount: manualItem.ParameterTypes.Count,
                 ParameterTypes: manualItem.ParameterTypes,
+                ReturnType: manualItem.ReturnType,
                 NativeSelectors: string.Equals(bindingAttribute, "Export", StringComparison.Ordinal) && !string.IsNullOrWhiteSpace(bindingValue)
                     ? [new BindingSurfaceNativeSelector(bindingValue!, IsStatic: false, IsProtocol: false)]
                     : EmptySelectors,
@@ -587,6 +594,7 @@ internal sealed class BindingSurfaceCoverageBuilder
                     memberName: null,
                     signature: $"{GetTypeDeclarationKind(typeDeclaration)} {typeDeclaration.Identifier.Text}",
                     parameterTypes: [],
+                    returnType: null,
                     isStatic: typeDeclaration.Modifiers.Any(static modifier => modifier.IsKind(Microsoft.CodeAnalysis.CSharp.SyntaxKind.StaticKeyword)));
 
                 foreach (var property in typeDeclaration.Members.OfType<PropertyDeclarationSyntax>())
@@ -605,6 +613,7 @@ internal sealed class BindingSurfaceCoverageBuilder
                         memberName: property.Identifier.Text,
                         signature: $"{property.Type.WithoutTrivia()} {property.Identifier.Text} {{ get; }}",
                         parameterTypes: [],
+                        returnType: property.Type.WithoutTrivia().ToString(),
                         isStatic: property.Modifiers.Any(static modifier => modifier.IsKind(Microsoft.CodeAnalysis.CSharp.SyntaxKind.StaticKeyword)));
                 }
 
@@ -628,6 +637,7 @@ internal sealed class BindingSurfaceCoverageBuilder
                         memberName: method.Identifier.Text,
                         signature: signature,
                         parameterTypes: parameterTypes,
+                        returnType: method.ReturnType.WithoutTrivia().ToString(),
                         isStatic: method.Modifiers.Any(static modifier => modifier.IsKind(Microsoft.CodeAnalysis.CSharp.SyntaxKind.StaticKeyword)));
                 }
 
@@ -649,6 +659,7 @@ internal sealed class BindingSurfaceCoverageBuilder
                             memberName: variable.Identifier.Text,
                             signature: $"{field.Declaration.Type.WithoutTrivia()} {variable.Identifier.Text}",
                             parameterTypes: [],
+                            returnType: field.Declaration.Type.WithoutTrivia().ToString(),
                             isStatic: field.Modifiers.Any(static modifier => modifier.IsKind(Microsoft.CodeAnalysis.CSharp.SyntaxKind.StaticKeyword)) ||
                                       field.Modifiers.Any(static modifier => modifier.IsKind(Microsoft.CodeAnalysis.CSharp.SyntaxKind.ConstKeyword)));
                     }
@@ -666,6 +677,7 @@ internal sealed class BindingSurfaceCoverageBuilder
         string? memberName,
         string signature,
         IReadOnlyList<string> parameterTypes,
+        string? returnType,
         bool isStatic) =>
         new(
             Target: target,
@@ -685,6 +697,7 @@ internal sealed class BindingSurfaceCoverageBuilder
             HasSetter: false,
             ParameterCount: parameterTypes.Count,
             ParameterTypes: parameterTypes,
+            ReturnType: returnType,
             NativeSelectors: EmptySelectors,
             SourceFile: helperFile,
             Signature: signature);

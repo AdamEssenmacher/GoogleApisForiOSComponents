@@ -36,6 +36,7 @@ public sealed class BindingSurfaceCoverageBuilderTests
 
             Assert.Equal(2, surface.ParameterCount);
             Assert.Equal(["string", "bool"], surface.ParameterTypes);
+            Assert.Equal("string", surface.ReturnType);
             Assert.Equal("SignIn(string, bool) -> string", surface.Signature);
         }
         finally

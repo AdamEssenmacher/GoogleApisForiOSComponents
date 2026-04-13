@@ -255,6 +255,12 @@ public static partial class FirebaseBindingSurfaceCoverage
                 throw new MissingMemberException(type.FullName, surface.MemberName);
             }
 
+            if (!string.IsNullOrWhiteSpace(surface.ReturnType) &&
+                !TypeMatches(property.PropertyType, surface.ReturnType))
+            {
+                throw new MissingMemberException(type.FullName, surface.Signature);
+            }
+
             if (surface.HasGetter && property.GetMethod is null)
             {
                 throw new MissingMemberException(type.FullName, "get_" + surface.MemberName);
@@ -456,7 +462,14 @@ public static partial class FirebaseBindingSurfaceCoverage
             return false;
         }
 
-        return ParametersMatch(method.GetParameters(), surface);
+        return ParametersMatch(method.GetParameters(), surface) &&
+               ReturnTypeMatches(method.ReturnType, surface);
+    }
+
+    static bool ReturnTypeMatches(Type returnType, BindingSurfaceDescriptor surface)
+    {
+        return string.IsNullOrWhiteSpace(surface.ReturnType) ||
+               TypeMatches(returnType, surface.ReturnType);
     }
 
     static bool ParametersMatch(ParameterInfo[] parameters, BindingSurfaceDescriptor surface)
@@ -727,6 +740,7 @@ public static partial class FirebaseBindingSurfaceCoverage
         public bool HasSetter { get; set; }
         public int ParameterCount { get; set; }
         public List<string> ParameterTypes { get; set; } = [];
+        public string? ReturnType { get; set; }
         public List<BindingSurfaceNativeSelector> NativeSelectors { get; set; } = [];
         public string SourceFile { get; set; } = string.Empty;
         public string Signature { get; set; } = string.Empty;
