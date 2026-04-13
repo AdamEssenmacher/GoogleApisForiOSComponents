@@ -1,0 +1,236 @@
+{
+  "suppressions": [
+    {
+      "id": "cloudmessaging-apnstoken-nullability-false-positive",
+      "target": "CloudMessaging",
+      "category": "attribute-drift",
+      "typeName": "Firebase.CloudMessaging.Messaging",
+      "memberName": "ApnsToken",
+      "selector": "APNSToken",
+      "reason": "The Firebase header declares APNSToken nullable, but generator output currently emits it as non-null.",
+      "evidence": [
+        "externals/FirebaseMessaging.xcframework/ios-arm64/FirebaseMessaging.framework/Headers/FIRMessaging.h#L206"
+      ]
+    },
+    {
+      "id": "cloudmessaging-fcmtoken-nullability-false-positive",
+      "target": "CloudMessaging",
+      "category": "attribute-drift",
+      "typeName": "Firebase.CloudMessaging.Messaging",
+      "memberName": "FcmToken",
+      "selector": "FCMToken",
+      "reason": "The Firebase header declares FCMToken nullable, but generator output currently emits it as non-null.",
+      "evidence": [
+        "externals/FirebaseMessaging.xcframework/ios-arm64/FirebaseMessaging.framework/Headers/FIRMessaging.h#L254"
+      ]
+    },
+    {
+      "id": "core-options-apikey-nullability-false-positive",
+      "target": "Core",
+      "category": "attribute-drift",
+      "typeName": "Firebase.Core.Options",
+      "memberName": "ApiKey",
+      "selector": "APIKey",
+      "reason": "The Firebase header declares APIKey nullable, but generator output currently emits it as non-null.",
+      "evidence": [
+        "externals/FirebaseCore.xcframework/ios-arm64/FirebaseCore.framework/Headers/FIROptions.h#L38"
+      ]
+    },
+    {
+      "id": "remoteconfig-jsonvalue-nullability-false-positive",
+      "target": "RemoteConfig",
+      "category": "attribute-drift",
+      "typeName": "Firebase.RemoteConfig.RemoteConfigValue",
+      "memberName": "JsonValue",
+      "selector": "JSONValue",
+      "reason": "The Firebase header declares JSONValue nullable, but generator output currently emits it as non-null.",
+      "evidence": [
+        "externals/FirebaseRemoteConfig.xcframework/ios-arm64/FirebaseRemoteConfig.framework/Headers/FIRRemoteConfig.h#L164"
+      ]
+    },
+    {
+      "id": "cloudfunctions-functions-swift-header-generator-empty",
+      "target": "CloudFunctions",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.CloudFunctions.CloudFunctions",
+      "comparisonTypeKey": "FIRFunctions",
+      "reason": "The CloudFunctions audit generator produced zero comparable types for this Swift-generated framework, but the FirebaseFunctions Swift header still declares FIRFunctions.",
+      "evidence": [
+        "externals/FirebaseFunctions.xcframework/ios-arm64_x86_64-simulator/FirebaseFunctions.framework/Headers/FirebaseFunctions-Swift.h#L321"
+      ]
+    },
+    {
+      "id": "cloudfunctions-httpscallable-swift-header-generator-empty",
+      "target": "CloudFunctions",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.CloudFunctions.HttpsCallable",
+      "comparisonTypeKey": "FIRHTTPSCallable",
+      "reason": "The CloudFunctions audit generator produced zero comparable types for this Swift-generated framework, but the FirebaseFunctions Swift header still declares FIRHTTPSCallable.",
+      "evidence": [
+        "externals/FirebaseFunctions.xcframework/ios-arm64_x86_64-simulator/FirebaseFunctions.framework/Headers/FirebaseFunctions-Swift.h#L466"
+      ]
+    },
+    {
+      "id": "cloudfunctions-httpscallableresult-swift-header-generator-empty",
+      "target": "CloudFunctions",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.CloudFunctions.HttpsCallableResult",
+      "comparisonTypeKey": "FIRHTTPSCallableResult",
+      "reason": "The CloudFunctions audit generator produced zero comparable types for this Swift-generated framework, but the FirebaseFunctions Swift header still declares FIRHTTPSCallableResult.",
+      "evidence": [
+        "externals/FirebaseFunctions.xcframework/ios-arm64_x86_64-simulator/FirebaseFunctions.framework/Headers/FirebaseFunctions-Swift.h#L532"
+      ]
+    },
+    {
+      "id": "cloudfunctions-httpscallableresulthandler-swift-header-generator-empty",
+      "target": "CloudFunctions",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.CloudFunctions.HttpsCallableResultHandler",
+      "comparisonTypeKey": "HttpsCallableResultHandler",
+      "reason": "The CloudFunctions audit generator produced zero comparable types for this Swift-generated framework, but the FirebaseFunctions Swift header still declares completion blocks using FIRHTTPSCallableResult and NSError.",
+      "evidence": [
+        "externals/FirebaseFunctions.xcframework/ios-arm64_x86_64-simulator/FirebaseFunctions.framework/Headers/FirebaseFunctions-Swift.h#L499",
+        "externals/FirebaseFunctions.xcframework/ios-arm64_x86_64-simulator/FirebaseFunctions.framework/Headers/FirebaseFunctions-Swift.h#L511"
+      ]
+    },
+    {
+      "id": "cloudfunctions-errorcode-swift-header-generator-empty",
+      "target": "CloudFunctions",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.CloudFunctions.CloudFunctionsErrorCode",
+      "comparisonTypeKey": "CloudFunctionsErrorCode",
+      "reason": "The CloudFunctions audit generator produced zero comparable types for this Swift-generated framework, but the FirebaseFunctions Swift header still declares FIRFunctionsErrorCode.",
+      "evidence": [
+        "externals/FirebaseFunctions.xcframework/ios-arm64_x86_64-simulator/FirebaseFunctions.framework/Headers/FirebaseFunctions-Swift.h#L417"
+      ]
+    },
+    {
+      "id": "storage-downloadtask-base-generator-false-positive",
+      "target": "Storage",
+      "category": "attribute-drift",
+      "typeName": "Firebase.Storage.StorageDownloadTask",
+      "comparisonTypeKey": "FIRStorageDownloadTask",
+      "reason": "The fresh generator flattened FIRStorageDownloadTask to NSObject, but the FirebaseStorage Swift header declares FIRStorageDownloadTask inheriting FIRStorageObservableTask.",
+      "evidence": [
+        "externals/FirebaseStorage.xcframework/ios-arm64_x86_64-simulator/FirebaseStorage.framework/Headers/FirebaseStorage-Swift.h#L485"
+      ]
+    },
+    {
+      "id": "storage-uploadtask-base-generator-false-positive",
+      "target": "Storage",
+      "category": "attribute-drift",
+      "typeName": "Firebase.Storage.StorageUploadTask",
+      "comparisonTypeKey": "FIRStorageUploadTask",
+      "reason": "The fresh generator flattened FIRStorageUploadTask to NSObject, but the FirebaseStorage Swift header declares FIRStorageUploadTask inheriting FIRStorageObservableTask.",
+      "evidence": [
+        "externals/FirebaseStorage.xcframework/ios-arm64_x86_64-simulator/FirebaseStorage.framework/Headers/FirebaseStorage-Swift.h#L861"
+      ]
+    },
+    {
+      "id": "appcheck-debugprovider-gettoken-inherited-protocol-false-positive",
+      "target": "AppCheck",
+      "category": "missing-baseline-binding",
+      "comparisonTypeKey": "FIRAppCheckDebugProvider",
+      "comparisonMemberKey": "export|getTokenWithCompletion:",
+      "reason": "FIRAppCheckDebugProvider conforms to FIRAppCheckProvider, and the baseline exposes getTokenWithCompletion: through the inherited AppCheckProvider protocol binding.",
+      "evidence": [
+        "externals/FirebaseAppCheck.xcframework/ios-arm64_x86_64-simulator/FirebaseAppCheck.framework/Headers/FIRAppCheckDebugProvider.h#L64",
+        "externals/FirebaseAppCheck.xcframework/ios-arm64_x86_64-simulator/FirebaseAppCheck.framework/Headers/FIRAppCheckProvider.h#L31",
+        "source/Firebase/AppCheck/ApiDefinition.cs#L64",
+        "source/Firebase/AppCheck/ApiDefinition.cs#L103"
+      ]
+    },
+    {
+      "id": "appcheck-debugprovider-getlimitedusetoken-inherited-protocol-false-positive",
+      "target": "AppCheck",
+      "category": "missing-baseline-binding",
+      "comparisonTypeKey": "FIRAppCheckDebugProvider",
+      "comparisonMemberKey": "export|getLimitedUseTokenWithCompletion:",
+      "reason": "FIRAppCheckDebugProvider conforms to FIRAppCheckProvider, and the baseline exposes getLimitedUseTokenWithCompletion: through the inherited AppCheckProvider protocol binding.",
+      "evidence": [
+        "externals/FirebaseAppCheck.xcframework/ios-arm64_x86_64-simulator/FirebaseAppCheck.framework/Headers/FIRAppCheckDebugProvider.h#L64",
+        "externals/FirebaseAppCheck.xcframework/ios-arm64_x86_64-simulator/FirebaseAppCheck.framework/Headers/FIRAppCheckProvider.h#L43",
+        "source/Firebase/AppCheck/ApiDefinition.cs#L69",
+        "source/Firebase/AppCheck/ApiDefinition.cs#L103"
+      ]
+    },
+    {
+      "id": "appcheck-devicecheckprovider-gettoken-inherited-protocol-false-positive",
+      "target": "AppCheck",
+      "category": "missing-baseline-binding",
+      "comparisonTypeKey": "FIRDeviceCheckProvider",
+      "comparisonMemberKey": "export|getTokenWithCompletion:",
+      "reason": "FIRDeviceCheckProvider conforms to FIRAppCheckProvider, and the baseline exposes getTokenWithCompletion: through the inherited AppCheckProvider protocol binding.",
+      "evidence": [
+        "externals/FirebaseAppCheck.xcframework/ios-arm64_x86_64-simulator/FirebaseAppCheck.framework/Headers/FIRDeviceCheckProvider.h#L34",
+        "externals/FirebaseAppCheck.xcframework/ios-arm64_x86_64-simulator/FirebaseAppCheck.framework/Headers/FIRAppCheckProvider.h#L31",
+        "source/Firebase/AppCheck/ApiDefinition.cs#L64",
+        "source/Firebase/AppCheck/ApiDefinition.cs#L127"
+      ]
+    },
+    {
+      "id": "appcheck-devicecheckprovider-getlimitedusetoken-inherited-protocol-false-positive",
+      "target": "AppCheck",
+      "category": "missing-baseline-binding",
+      "comparisonTypeKey": "FIRDeviceCheckProvider",
+      "comparisonMemberKey": "export|getLimitedUseTokenWithCompletion:",
+      "reason": "FIRDeviceCheckProvider conforms to FIRAppCheckProvider, and the baseline exposes getLimitedUseTokenWithCompletion: through the inherited AppCheckProvider protocol binding.",
+      "evidence": [
+        "externals/FirebaseAppCheck.xcframework/ios-arm64_x86_64-simulator/FirebaseAppCheck.framework/Headers/FIRDeviceCheckProvider.h#L34",
+        "externals/FirebaseAppCheck.xcframework/ios-arm64_x86_64-simulator/FirebaseAppCheck.framework/Headers/FIRAppCheckProvider.h#L43",
+        "source/Firebase/AppCheck/ApiDefinition.cs#L69",
+        "source/Firebase/AppCheck/ApiDefinition.cs#L127"
+      ]
+    },
+    {
+      "id": "appcheck-appattestprovider-gettoken-inherited-protocol-false-positive",
+      "target": "AppCheck",
+      "category": "missing-baseline-binding",
+      "comparisonTypeKey": "FIRAppAttestProvider",
+      "comparisonMemberKey": "export|getTokenWithCompletion:",
+      "reason": "FIRAppAttestProvider conforms to FIRAppCheckProvider, and the baseline exposes getTokenWithCompletion: through the inherited AppCheckProvider protocol binding.",
+      "evidence": [
+        "externals/FirebaseAppCheck.xcframework/ios-arm64_x86_64-simulator/FirebaseAppCheck.framework/Headers/FIRAppAttestProvider.h#L33",
+        "externals/FirebaseAppCheck.xcframework/ios-arm64_x86_64-simulator/FirebaseAppCheck.framework/Headers/FIRAppCheckProvider.h#L31",
+        "source/Firebase/AppCheck/ApiDefinition.cs#L64",
+        "source/Firebase/AppCheck/ApiDefinition.cs#L138"
+      ]
+    },
+    {
+      "id": "appcheck-appattestprovider-getlimitedusetoken-inherited-protocol-false-positive",
+      "target": "AppCheck",
+      "category": "missing-baseline-binding",
+      "comparisonTypeKey": "FIRAppAttestProvider",
+      "comparisonMemberKey": "export|getLimitedUseTokenWithCompletion:",
+      "reason": "FIRAppAttestProvider conforms to FIRAppCheckProvider, and the baseline exposes getLimitedUseTokenWithCompletion: through the inherited AppCheckProvider protocol binding.",
+      "evidence": [
+        "externals/FirebaseAppCheck.xcframework/ios-arm64_x86_64-simulator/FirebaseAppCheck.framework/Headers/FIRAppAttestProvider.h#L33",
+        "externals/FirebaseAppCheck.xcframework/ios-arm64_x86_64-simulator/FirebaseAppCheck.framework/Headers/FIRAppCheckProvider.h#L43",
+        "source/Firebase/AppCheck/ApiDefinition.cs#L69",
+        "source/Firebase/AppCheck/ApiDefinition.cs#L138"
+      ]
+    },
+    {
+      "id": "crashlytics-logwithformatarguments-va-list-intentionally-unbound",
+      "target": "Crashlytics",
+      "category": "missing-baseline-binding",
+      "comparisonTypeKey": "FIRCrashlytics",
+      "comparisonMemberKey": "export|logWithFormat:arguments:",
+      "reason": "The native selector takes a va_list argument. That is not a safe or useful thin C# binding surface, and Crashlytics already exposes the supported log: API.",
+      "evidence": [
+        "externals/FirebaseCrashlytics.xcframework/ios-arm64_x86_64-simulator/FirebaseCrashlytics.framework/Headers/FIRCrashlytics.h#L74-L76"
+      ]
+    },
+    {
+      "id": "crashlytics-report-logwithformatarguments-va-list-intentionally-unbound",
+      "target": "Crashlytics",
+      "category": "missing-baseline-binding",
+      "comparisonTypeKey": "FIRCrashlyticsReport",
+      "comparisonMemberKey": "export|logWithFormat:arguments:",
+      "reason": "The native selector takes a va_list argument. That is not a safe or useful thin C# binding surface, and CrashlyticsReport already exposes the supported log: API.",
+      "evidence": [
+        "externals/FirebaseCrashlytics.xcframework/ios-arm64_x86_64-simulator/FirebaseCrashlytics.framework/Headers/FIRCrashlyticsReport.h#L71-L73"
+      ]
+    }
+  ]
+}
