@@ -95,7 +95,7 @@ namespace Firebase.Core
 		[Export ("defaultOptions")]
 		Options DefaultInstance { get; }
 
-		// @property (readonly, copy, nonatomic) NSString * APIKey;
+		// @property(nonatomic, copy, nullable) NSString *APIKey NS_SWIFT_NAME(apiKey);
 		[NullAllowed]
 		[Export ("APIKey")]
 		string ApiKey { get; set; }
@@ -104,30 +104,30 @@ namespace Firebase.Core
 		[Export ("bundleID")]
 		string BundleId { get; set; }
 
-		// @property (readonly, copy, nonatomic) NSString * clientID;
+		// @property(nonatomic, copy, nullable) NSString *clientID;
 		[NullAllowed]
 		[Export ("clientID")]
 		string ClientId { get; set; }
 
-		// @property (readonly, copy, nonatomic) NSString * GCMSenderID;
+		// @property(nonatomic, copy) NSString *GCMSenderID NS_SWIFT_NAME(gcmSenderID);
 		[Export ("GCMSenderID")]
 		string GcmSenderId { get; set; }
 
-		// @property(nonatomic, readonly, copy) NSString *projectID;
+		// @property(nonatomic, copy, nullable) NSString *projectID;
 		[NullAllowed]
 		[Export ("projectID")]
 		string ProjectId { get; set; }
 
-		// @property (readonly, copy, nonatomic) NSString * googleAppID;
+		// @property(nonatomic, copy) NSString *googleAppID;
 		[Export ("googleAppID")]
 		string GoogleAppId { get; set; }
 
-		// @property (readonly, copy, nonatomic) NSString * databaseURL;
+		// @property(nonatomic, copy, nullable) NSString *databaseURL;
 		[NullAllowed]
 		[Export ("databaseURL")]
 		string DatabaseUrl { get; set; }
 
-		// @property (readonly, copy, nonatomic) NSString * storageBucket;
+		// @property(nonatomic, copy, nullable) NSString *storageBucket;
 		[NullAllowed]
 		[Export ("storageBucket")]
 		string StorageBucket { get; set; }

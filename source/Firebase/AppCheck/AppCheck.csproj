@@ -47,12 +47,13 @@
       <Kind>Framework</Kind>
       <SmartLink>True</SmartLink>
       <ForceLoad>True</ForceLoad>
+      <WeakFrameworks>DeviceCheck</WeakFrameworks>
       <LinkerFlags>-ObjC</LinkerFlags>
     </NativeReference>
   </ItemGroup>
   <ItemGroup>
     <ObjcBindingApiDefinition Include="ApiDefinition.cs" />
-    <ObjcBindingApiDefinition Include="Enums.cs" />
+    <ObjcBindingCoreSource Include="Enums.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Core\Core.csproj" PrivateAssets="None">

@@ -130,7 +130,7 @@ namespace Firebase.Storage
 		// @property(copy, nonatomic, nullable, readonly) NSString *md5Hash;
 		[NullAllowed]
 		[Export ("md5Hash")]
-		string Md5Hash { get; set; }
+		string Md5Hash { get; }
 
 		// @property (readonly) int64_t generation;
 		[Export ("generation")]
@@ -169,11 +169,6 @@ namespace Firebase.Storage
 		[Export ("updated", ArgumentSemantic.Copy)]
 		NSDate Updated { get; }
 
-		// @property (readonly, nonatomic, strong) FIRStorageReference * _Nullable storageReference;
-		[NullAllowed]
-		[Export ("storageReference", ArgumentSemantic.Strong)]
-		StorageReference StorageReference { get; }
-
 		// -(instancetype _Nullable)initWithDictionary:(NSDictionary * _Nonnull)dictionary __attribute__((objc_designated_initializer));
 		[DesignatedInitializer]
 		[Export ("initWithDictionary:")]
@@ -183,11 +178,11 @@ namespace Firebase.Storage
 		[Export ("dictionaryRepresentation")]
 		NSDictionary DictionaryRepresentation { get; }
 
-		// @property (readonly, getter = isFile) BOOL file;
+		// @property (nonatomic, readonly) BOOL isFile;
 		[Export ("isFile")]
 		bool IsFile { get; }
 
-		// @property (readonly, getter = isFolder) BOOL folder;
+		// @property (nonatomic, readonly) BOOL isFolder;
 		[Export ("isFolder")]
 		bool IsFolder { get; }
 	}

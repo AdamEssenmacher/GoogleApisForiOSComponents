@@ -51,7 +51,7 @@
     </NativeReference>
     <NativeReference Include="..\..\..\externals\FirebaseFirestoreInternal.xcframework">
       <Kind>Framework</Kind>
-      <Frameworks>MobileCoreServices SystemConfiguration</Frameworks>
+      <Frameworks>MobileCoreServices SystemConfiguration UIKit</Frameworks>
       <SmartLink>True</SmartLink>
       <ForceLoad>True</ForceLoad>
       <LinkerFlags>-ObjC -lc++</LinkerFlags>
@@ -66,6 +66,7 @@
       <Kind>Framework</Kind>
       <SmartLink>True</SmartLink>
       <ForceLoad>True</ForceLoad>
+      <LinkerFlags>-lc++</LinkerFlags>
     </NativeReference>
     <NativeReference Include="..\..\..\externals\openssl_grpc.xcframework">
       <Kind>Framework</Kind>

@@ -54,6 +54,7 @@
       <Kind>Framework</Kind>
       <SmartLink>True</SmartLink>
       <ForceLoad>True</ForceLoad>
+      <LinkerFlags>-lc++</LinkerFlags>
     </NativeReference>
     <NativeReference Include="..\..\..\externals\FirebaseAppCheckInterop.xcframework">
       <Kind>Framework</Kind>
