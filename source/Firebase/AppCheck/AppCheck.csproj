@@ -47,6 +47,7 @@
       <Kind>Framework</Kind>
       <SmartLink>True</SmartLink>
       <ForceLoad>True</ForceLoad>
+      <WeakFrameworks>DeviceCheck</WeakFrameworks>
       <LinkerFlags>-ObjC</LinkerFlags>
     </NativeReference>
   </ItemGroup>
