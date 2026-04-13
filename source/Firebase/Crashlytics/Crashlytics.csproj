@@ -25,6 +25,7 @@
     <PackageIcon>firebaseioscrashlytics_128x128.png</PackageIcon>
     <PackageProjectUrl>https://github.com/AdamEssenmacher/GoogleApisForiOSComponents</PackageProjectUrl>
     <PackageLicenseFile>License.md</PackageLicenseFile>
+    <PackageReadmeFile>NUGET_README.md</PackageReadmeFile>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     <PackageVersion>12.6.0</PackageVersion>
   </PropertyGroup>
@@ -41,6 +42,7 @@
     <None Include="Crashlytics.props" Pack="True" PackagePath="buildTransitive/AdamE.Firebase.iOS.Crashlytics.props" />
     <None Include="readme.txt" Pack="True" PackagePath="readme.txt" />
     <None Include="License.md" Pack="True" PackagePath="License.md" />
+    <None Include="../../../docs/Firebase/NuGet/Crashlytics.md" Pack="True" PackagePath="NUGET_README.md" />
     <None Include="../../../icons/firebaseioscrashlytics_128x128.png" Pack="True" PackagePath="firebaseioscrashlytics_128x128.png" />
   </ItemGroup>
   <ItemGroup>
