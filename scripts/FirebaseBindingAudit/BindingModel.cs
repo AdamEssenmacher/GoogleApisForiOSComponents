@@ -1206,7 +1206,7 @@ internal sealed class BindingComparer
         var generatedManualMemberLookup = new HashSet<string>(
             generated.ManualItems
                 .Where(static item => !string.IsNullOrWhiteSpace(item.MatchMemberKey))
-                .Select(static item => item.MatchMemberKey!),
+                .Select(static item => CreateManualLookupKey(item.MatchTypeKey, item.MatchMemberKey!)),
             StringComparer.Ordinal);
 
         var smoothedDelegateKeys = new HashSet<string>(StringComparer.Ordinal);
@@ -1362,7 +1362,7 @@ internal sealed class BindingComparer
         {
             if (!TryGetComparableMember(generated.Members, baselineMemberEntry, out var generatedMember))
             {
-                if (IsMatchedGeneratedManualBinding(baselineMemberEntry, generatedManualMemberLookup))
+                if (IsMatchedGeneratedManualBinding(baseline.ComparisonKey, baselineMemberEntry, generatedManualMemberLookup, aliases))
                 {
                     continue;
                 }
@@ -1428,11 +1428,27 @@ internal sealed class BindingComparer
     }
 
     private static bool IsMatchedGeneratedManualBinding(
+        string baselineTypeKey,
         BindingMemberSurface baselineMember,
-        IReadOnlySet<string> generatedManualMemberLookup)
+        IReadOnlySet<string> generatedManualMemberLookup,
+        SymbolAliasLookup aliases)
     {
-        return string.Equals(baselineMember.BindingAttribute, "Field", StringComparison.Ordinal) &&
-               generatedManualMemberLookup.Contains(baselineMember.Key);
+        if (!string.Equals(baselineMember.BindingAttribute, "Field", StringComparison.Ordinal))
+        {
+            return false;
+        }
+
+        return GetEquivalentManualLookupTypeKeys(baselineTypeKey, aliases)
+            .Any(typeKey => generatedManualMemberLookup.Contains(CreateManualLookupKey(typeKey, baselineMember.Key)));
+    }
+
+    private static IEnumerable<string> GetEquivalentManualLookupTypeKeys(string typeKey, SymbolAliasLookup aliases)
+    {
+        yield return typeKey;
+        foreach (var equivalentTypeKey in aliases.GetEquivalentComparisonKeys(typeKey))
+        {
+            yield return equivalentTypeKey;
+        }
     }
 
     private static bool TryGetComparableMember(

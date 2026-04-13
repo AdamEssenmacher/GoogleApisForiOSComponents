@@ -68,6 +68,17 @@ public sealed class AuditRunnerTests
     }
 
     [Fact]
+    public void CreateTempRootPath_ReturnsUniqueAuditWorkspacePaths()
+    {
+        var firstPath = AuditRunner.CreateTempRootPath();
+        var secondPath = AuditRunner.CreateTempRootPath();
+
+        Assert.NotEqual(firstPath, secondPath);
+        Assert.EndsWith("firebase-binding-audit", Directory.GetParent(firstPath)!.Name);
+        Assert.Contains("-", Path.GetFileName(firstPath), StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void TryResolveSharpieCompanionFrameworkPath_UsesLaterExistingImport()
     {
         var tempRoot = Path.Combine(Path.GetTempPath(), $"firebase-binding-audit-companion-{Guid.NewGuid():N}");

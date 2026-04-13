@@ -134,7 +134,36 @@ public sealed class BindingComparerNormalizationTests
     }
 
     [Fact]
-    public void Compare_MatchesGeneratedFieldConstantsInSeparateStaticContainer()
+    public void Compare_MatchesGeneratedManualFieldOnSameType()
+    {
+        var result = Compare(
+            """
+            namespace Firebase.AppDistribution;
+
+            [BaseType(typeof(NSObject), Name = "FIRAppDistribution")]
+            public interface AppDistribution
+            {
+                [Field("FIRAppDistributionErrorDomain", "__Internal")]
+                NSString ErrorDomain { get; }
+            }
+            """,
+            """
+            namespace FirebaseAppDistribution;
+
+            [BaseType(typeof(NSObject))]
+            public interface FIRAppDistribution
+            {
+                [Internal]
+                [Field("FIRAppDistributionErrorDomain", "__Internal")]
+                NSString ErrorDomain { get; }
+            }
+            """);
+
+        AssertNoFailures(result);
+    }
+
+    [Fact]
+    public void Compare_DoesNotMatchGeneratedManualFieldOnDifferentType()
     {
         var result = Compare(
             """
@@ -162,7 +191,11 @@ public sealed class BindingComparerNormalizationTests
             }
             """);
 
-        AssertNoFailures(result);
+        Assert.Contains(
+            result.Failures,
+            static failure => failure.Category == "stale-baseline-binding" &&
+                              failure.ComparisonTypeKey == "FIRAppDistribution" &&
+                              failure.ComparisonMemberKey == "field|FIRAppDistributionErrorDomain");
     }
 
     [Fact]

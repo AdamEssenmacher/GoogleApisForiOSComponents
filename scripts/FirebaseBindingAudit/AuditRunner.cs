@@ -109,7 +109,7 @@ internal sealed class AuditRunner
         PrepareOutputDirectory(outputDirectory, detailsDirectory, logsDirectory);
 
         var selectedTargets = SelectTargets(options.SelectedTargets);
-        var tempRoot = Path.Combine(Path.GetTempPath(), "firebase-binding-audit", DateTime.UtcNow.ToString("yyyyMMddHHmmss"));
+        var tempRoot = CreateTempRootPath();
         Directory.CreateDirectory(tempRoot);
         var sharedNugetPackages = Path.Combine(Path.GetTempPath(), "firebase-binding-audit", "nuget-packages");
         var dotnetEnvironment = new Dictionary<string, string>(StringComparer.Ordinal)
@@ -392,6 +392,9 @@ internal sealed class AuditRunner
 
     internal static bool ShouldStageSharpieFrameworkSlices(AuditOptions options) =>
         !options.DisableSharpie;
+
+    internal static string CreateTempRootPath() =>
+        Path.Combine(Path.GetTempPath(), "firebase-binding-audit", $"{DateTime.UtcNow:yyyyMMddHHmmss}-{Guid.NewGuid():N}");
 
     private static ConfidenceSummary BuildConfidenceSummary(IReadOnlyList<AuditFinding> findings)
     {
