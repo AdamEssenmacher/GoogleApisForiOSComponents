@@ -156,11 +156,11 @@ namespace Firebase.Auth
 		[Export ("languageCode")]
 		string LanguageCode { get; }
 
-		// +(instancetype _Nullable)actionCodeURLWithLink:(NSString * _Nonnull)link;
-		[Static]
+		// -(instancetype _Nullable)actionCodeURLWithLink:(NSString * _Nonnull)link OBJC_DESIGNATED_INITIALIZER;
+		[DesignatedInitializer]
 		[return: NullAllowed]
 		[Export ("actionCodeURLWithLink:")]
-		ActionCodeUrl Create (string link);
+		NativeHandle Constructor (string link);
 	}
 
 	// typedef void (^FIRCheckActionCodeCallBack)(FIRActionCodeInfo * _Nullable, NSError * _Nullable);
