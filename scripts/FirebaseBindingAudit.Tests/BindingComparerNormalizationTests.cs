@@ -316,6 +316,41 @@ public sealed class BindingComparerNormalizationTests
         Assert.Contains(result.Failures, static failure => failure.Category == "signature-drift");
     }
 
+    [Fact]
+    public void Parse_HonorsConfiguredBindingAttributes()
+    {
+        var baselineFile = Path.Combine(Path.GetTempPath(), $"firebase-binding-audit-baseline-{Guid.NewGuid():N}.cs");
+
+        try
+        {
+            File.WriteAllText(
+                baselineFile,
+                """
+                [BaseType(typeof(NSObject), Name = "FIRThing")]
+                public interface Thing
+                {
+                    [BindMe("doThing:")]
+                    void DoThing(string value);
+                }
+                """);
+
+            var parser = new BindingSyntaxParser(ManualAttributes, ["BindMe"]);
+            var snapshot = parser.Parse([baselineFile], []);
+            var type = Assert.Single(snapshot.BoundTypes.Values);
+            var member = Assert.Single(type.Members.Values);
+
+            Assert.Equal("BindMe", member.BindingAttribute);
+            Assert.Equal("doThing:", member.BindingValue);
+        }
+        finally
+        {
+            if (File.Exists(baselineFile))
+            {
+                File.Delete(baselineFile);
+            }
+        }
+    }
+
     private static TargetComparisonResult Compare(string baselineSource, string generatedSource)
     {
         var baselineFile = Path.Combine(Path.GetTempPath(), $"firebase-binding-audit-baseline-{Guid.NewGuid():N}.cs");

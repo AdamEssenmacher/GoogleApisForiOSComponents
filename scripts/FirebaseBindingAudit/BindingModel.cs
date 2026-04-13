@@ -85,10 +85,14 @@ internal sealed record ManualSurfaceItem(
 internal sealed class BindingSyntaxParser
 {
     private readonly HashSet<string> manualAttributes;
+    private readonly List<string> bindingAttributes;
 
     public BindingSyntaxParser(IEnumerable<string> manualAttributes, IEnumerable<string> bindingAttributes)
     {
         this.manualAttributes = new HashSet<string>(manualAttributes, StringComparer.Ordinal);
+        this.bindingAttributes = bindingAttributes
+            .Distinct(StringComparer.Ordinal)
+            .ToList();
     }
 
     public BindingSnapshot Parse(IEnumerable<string> comparableFiles, IEnumerable<string> helperFiles)
@@ -511,21 +515,14 @@ internal sealed class BindingSyntaxParser
         return string.IsNullOrWhiteSpace(baseTypeName) ? typeName : baseTypeName;
     }
 
-    private static string? GetPrimaryBindingAttribute(SyntaxList<AttributeListSyntax> attributeLists)
+    private string? GetPrimaryBindingAttribute(SyntaxList<AttributeListSyntax> attributeLists)
     {
-        if (HasAttribute(attributeLists, "Export"))
+        foreach (var bindingAttribute in bindingAttributes)
         {
-            return "Export";
-        }
-
-        if (HasAttribute(attributeLists, "Field"))
-        {
-            return "Field";
-        }
-
-        if (HasAttribute(attributeLists, "Notification"))
-        {
-            return "Notification";
+            if (HasAttribute(attributeLists, bindingAttribute))
+            {
+                return bindingAttribute;
+            }
         }
 
         return null;
@@ -533,13 +530,7 @@ internal sealed class BindingSyntaxParser
 
     private static string? GetBindingValue(SyntaxList<AttributeListSyntax> attributeLists, string attributeName)
     {
-        return attributeName switch
-        {
-            "Export" => GetAttributeStringValue(attributeLists, "Export"),
-            "Field" => GetAttributeStringValue(attributeLists, "Field"),
-            "Notification" => GetAttributeStringValue(attributeLists, "Notification"),
-            _ => null
-        };
+        return GetAttributeStringValue(attributeLists, attributeName);
     }
 
     private static BindingParameterSurface CreateParameter(ParameterSyntax parameter)

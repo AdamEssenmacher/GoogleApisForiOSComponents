@@ -5,6 +5,62 @@ namespace FirebaseBindingAudit.Tests;
 public sealed class AuditRunnerTests
 {
     [Fact]
+    public void ShouldUseSharpieComparisonFallback_UsesForceFallbackWhenPrimaryComparisonSucceeded()
+    {
+        var target = new AuditTargetDefinition
+        {
+            UseSharpieComparisonFallback = true
+        };
+
+        var sharpieRun = new SharpieRunResult(
+            Status: "succeeded",
+            FrameworkPath: null,
+            ProcessResult: null,
+            Comparison: new TargetComparisonResult([], []),
+            Snapshot: null,
+            GeneratedFiles: [],
+            WarningFindings: [],
+            Message: null);
+
+        var shouldFallback = AuditRunner.ShouldUseSharpieComparisonFallback(
+            target,
+            sharpieMode: "forceFallback",
+            primaryFailed: false,
+            primaryComparableSurfaceEmpty: false,
+            sharpieRun);
+
+        Assert.True(shouldFallback);
+    }
+
+    [Fact]
+    public void ShouldUseSharpieComparisonFallback_DoesNotUseAutoWhenPrimaryComparisonSucceeded()
+    {
+        var target = new AuditTargetDefinition
+        {
+            UseSharpieComparisonFallback = true
+        };
+
+        var sharpieRun = new SharpieRunResult(
+            Status: "succeeded",
+            FrameworkPath: null,
+            ProcessResult: null,
+            Comparison: new TargetComparisonResult([], []),
+            Snapshot: null,
+            GeneratedFiles: [],
+            WarningFindings: [],
+            Message: null);
+
+        var shouldFallback = AuditRunner.ShouldUseSharpieComparisonFallback(
+            target,
+            sharpieMode: "auto",
+            primaryFailed: false,
+            primaryComparableSurfaceEmpty: false,
+            sharpieRun);
+
+        Assert.False(shouldFallback);
+    }
+
+    [Fact]
     public void TryResolveSharpieCompanionFrameworkPath_UsesLaterExistingImport()
     {
         var tempRoot = Path.Combine(Path.GetTempPath(), $"firebase-binding-audit-companion-{Guid.NewGuid():N}");

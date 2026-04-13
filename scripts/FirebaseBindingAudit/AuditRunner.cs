@@ -322,7 +322,12 @@ internal sealed class AuditRunner
         }
 
         var effectiveFindings = new List<AuditFinding>(diagnosticFindings);
-        if (ShouldUseSharpieComparisonFallback(target, primaryFailed, primaryComparableSurfaceEmpty, sharpieRun))
+        if (ShouldUseSharpieComparisonFallback(
+                target,
+                target.EffectiveSharpieMode(configuration.Sharpie),
+                primaryFailed,
+                primaryComparableSurfaceEmpty,
+                sharpieRun))
         {
             comparisonSource = "sharpie-fallback";
             generationStatus = GetFallbackGenerationStatus(generationStatus, primaryFailed, primaryComparableSurfaceEmpty);
@@ -366,14 +371,17 @@ internal sealed class AuditRunner
         return primaryFailed || primaryComparableSurfaceEmpty;
     }
 
-    private static bool ShouldUseSharpieComparisonFallback(
+    internal static bool ShouldUseSharpieComparisonFallback(
         AuditTargetDefinition target,
+        string sharpieMode,
         bool primaryFailed,
         bool primaryComparableSurfaceEmpty,
         SharpieRunResult? sharpieRun)
     {
+        var forceFallback = string.Equals(sharpieMode, "forceFallback", StringComparison.OrdinalIgnoreCase);
+
         return target.UseSharpieComparisonFallback &&
-               (primaryFailed || primaryComparableSurfaceEmpty) &&
+               (forceFallback || primaryFailed || primaryComparableSurfaceEmpty) &&
                sharpieRun is not null &&
                string.Equals(sharpieRun.Status, "succeeded", StringComparison.Ordinal) &&
                sharpieRun.Comparison is not null;
