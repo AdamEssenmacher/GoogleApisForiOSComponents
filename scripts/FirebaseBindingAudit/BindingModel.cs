@@ -85,6 +85,7 @@ internal sealed record ManualSurfaceItem(
     string Signature,
     string SourceFile)
 {
+    public string? ObjectiveCName { get; init; }
     public string Kind { get; init; } = "manual";
     public bool HasGetter { get; init; }
     public bool HasSetter { get; init; }
@@ -321,6 +322,7 @@ internal sealed class BindingSyntaxParser
                 SourceFile: member.SourceFile)
             {
                 Kind = ToManualMemberKind(member.Kind),
+                ObjectiveCName = string.Equals(member.BindingAttribute, "Export", StringComparison.Ordinal) ? typeMatchKey : null,
                 HasGetter = member.HasGetter,
                 HasSetter = member.HasSetter
             });
@@ -367,6 +369,7 @@ internal sealed class BindingSyntaxParser
                 Signature: signature,
                 SourceFile: filePath)
             {
+                ObjectiveCName = string.Equals(bindingAttribute, "Export", StringComparison.Ordinal) ? containingTypeMatchKey : null,
                 Kind = methodDeclaration.Identifier.Text == "Constructor" ? "manual-constructor" : "manual-method",
                 ManualAttributes = manualAttributeNames
             });
@@ -434,6 +437,7 @@ internal sealed class BindingSyntaxParser
                 Signature: signature,
                 SourceFile: filePath)
             {
+                ObjectiveCName = string.Equals(bindingAttribute, "Export", StringComparison.Ordinal) ? containingTypeMatchKey : null,
                 Kind = "manual-property",
                 HasGetter = propertyDeclaration.AccessorList?.Accessors.Any(static accessor => accessor.IsKind(SyntaxKind.GetAccessorDeclaration)) == true,
                 HasSetter = propertyDeclaration.AccessorList?.Accessors.Any(static accessor => accessor.IsKind(SyntaxKind.SetAccessorDeclaration)) == true,

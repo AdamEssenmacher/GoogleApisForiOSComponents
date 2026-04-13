@@ -127,10 +127,62 @@ public sealed class BindingSurfaceCoverageBuilderTests
                 static surface => surface.MemberName == "FetchSignInMethods");
 
             Assert.Equal("manual-method", surface.Kind);
+            Assert.Equal("FIRAuth", surface.ObjectiveCName);
             Assert.True(surface.IsStatic);
             var nativeSelector = Assert.Single(surface.NativeSelectors);
             Assert.Equal("fetchSignInMethodsForEmail:completion:", nativeSelector.Selector);
             Assert.True(nativeSelector.IsStatic);
+        }
+        finally
+        {
+            if (Directory.Exists(repoRoot))
+            {
+                Directory.Delete(repoRoot, recursive: true);
+            }
+        }
+    }
+
+    [Fact]
+    public void Build_IncludesDelegatesReferencedByManualMembers()
+    {
+        var repoRoot = Path.Combine(Path.GetTempPath(), $"firebase-binding-surface-builder-{Guid.NewGuid():N}");
+
+        try
+        {
+            var sourceDirectory = Path.Combine(repoRoot, "source", "Firebase", "Auth");
+            Directory.CreateDirectory(sourceDirectory);
+            File.WriteAllText(
+                Path.Combine(sourceDirectory, "ApiDefinition.cs"),
+                """
+                namespace Firebase.Auth;
+
+                public delegate void SignInMethodQueryHandler(string[] methods, NSError error);
+
+                [BaseType(typeof(NSObject), Name = "FIRAuth")]
+                public interface Auth
+                {
+                    [Async]
+                    [Export("fetchSignInMethodsForEmail:completion:")]
+                    void FetchSignInMethods(string email, SignInMethodQueryHandler completion);
+                }
+                """);
+
+            var document = new BindingSurfaceCoverageBuilder(CreateConfiguration()).Build(
+                repoRoot,
+                CreateManifest(),
+                "Auth");
+
+            var surfaces = document.Targets.Single().Surfaces;
+            Assert.Contains(
+                surfaces,
+                static surface => surface.Kind == "delegate" &&
+                                  surface.TypeName == "Firebase.Auth.SignInMethodQueryHandler" &&
+                                  surface.ParameterTypes.SequenceEqual(["string[]", "NSError"]));
+            Assert.Contains(
+                surfaces,
+                static surface => surface.Kind == "manual-method" &&
+                                  surface.MemberName == "FetchSignInMethods" &&
+                                  surface.ParameterTypes.SequenceEqual(["string", "SignInMethodQueryHandler"]));
         }
         finally
         {
@@ -174,13 +226,15 @@ public sealed class BindingSurfaceCoverageBuilderTests
                 static surface => surface.MemberName == "SetExperimentEventName");
 
             Assert.Equal("manual-property", surface.Kind);
+            Assert.Equal("FIRLifecycleEvents", surface.ObjectiveCName);
             Assert.Equal("Export", surface.BindingAttribute);
             Assert.Equal("setExperimentEventName", surface.BindingValue);
             Assert.True(surface.HasGetter);
             Assert.True(surface.HasSetter);
             Assert.Equal("NSString", surface.ReturnType);
-            var nativeSelector = Assert.Single(surface.NativeSelectors);
-            Assert.Equal("setExperimentEventName", nativeSelector.Selector);
+            Assert.Equal(
+                ["setExperimentEventName", "setSetExperimentEventName:"],
+                surface.NativeSelectors.Select(static selector => selector.Selector).ToArray());
         }
         finally
         {

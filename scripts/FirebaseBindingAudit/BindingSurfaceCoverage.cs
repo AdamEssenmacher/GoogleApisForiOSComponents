@@ -511,7 +511,7 @@ internal sealed class BindingSurfaceCoverageBuilder
                 TypeName: manualItem.TypeName,
                 RuntimeTypeName: manualItem.TypeName,
                 AssemblyName: ResolveAssemblyName(ExtractNamespace(manualItem.TypeName)),
-                ObjectiveCName: null,
+                ObjectiveCName: manualItem.ObjectiveCName,
                 ContainerKind: "manual",
                 IsProtocol: false,
                 IsStatic: manualItem.IsStatic,
@@ -523,9 +523,7 @@ internal sealed class BindingSurfaceCoverageBuilder
                 ParameterCount: manualItem.ParameterTypes.Count,
                 ParameterTypes: manualItem.ParameterTypes,
                 ReturnType: manualItem.ReturnType,
-                NativeSelectors: string.Equals(bindingAttribute, "Export", StringComparison.Ordinal) && !string.IsNullOrWhiteSpace(bindingValue)
-                    ? [new BindingSurfaceNativeSelector(bindingValue!, manualItem.IsStatic, IsProtocol: false)]
-                    : EmptySelectors,
+                NativeSelectors: BuildManualNativeSelectors(manualItem, bindingAttribute, bindingValue),
                 SourceFile: manualItem.SourceFile,
                 Signature: manualItem.Signature);
         }
@@ -546,6 +544,15 @@ internal sealed class BindingSurfaceCoverageBuilder
             }
         }
 
+        foreach (var manualItem in snapshot.ManualItems)
+        {
+            AddTypeNameVariants(usedDelegateNames, manualItem.ReturnType);
+            foreach (var parameterType in manualItem.ParameterTypes)
+            {
+                AddTypeNameVariants(usedDelegateNames, parameterType);
+            }
+        }
+
         return usedDelegateNames;
     }
 
@@ -554,8 +561,13 @@ internal sealed class BindingSurfaceCoverageBuilder
         usedDelegateNames.Contains(delegateSurface.DisplayName) ||
         usedDelegateNames.Contains(delegateSurface.ComparisonKey);
 
-    private static void AddTypeNameVariants(HashSet<string> typeNames, string typeName)
+    private static void AddTypeNameVariants(HashSet<string> typeNames, string? typeName)
     {
+        if (string.IsNullOrWhiteSpace(typeName))
+        {
+            return;
+        }
+
         var normalizedTypeName = NormalizeCoverageTypeName(typeName);
         if (string.IsNullOrWhiteSpace(normalizedTypeName))
         {
@@ -886,6 +898,36 @@ internal sealed class BindingSurfaceCoverageBuilder
         }
 
         yield return new BindingSurfaceNativeSelector(member.BindingValue, member.IsStatic, boundType.IsProtocol);
+    }
+
+    private static IReadOnlyList<BindingSurfaceNativeSelector> BuildManualNativeSelectors(
+        ManualSurfaceItem manualItem,
+        string? bindingAttribute,
+        string? bindingValue)
+    {
+        if (!string.Equals(bindingAttribute, "Export", StringComparison.Ordinal) ||
+            string.IsNullOrWhiteSpace(bindingValue))
+        {
+            return EmptySelectors;
+        }
+
+        if (string.Equals(manualItem.Kind, "manual-property", StringComparison.Ordinal))
+        {
+            var selectors = new List<BindingSurfaceNativeSelector>();
+            if (manualItem.HasGetter)
+            {
+                selectors.Add(new BindingSurfaceNativeSelector(bindingValue!, manualItem.IsStatic, IsProtocol: false));
+            }
+
+            if (manualItem.HasSetter)
+            {
+                selectors.Add(new BindingSurfaceNativeSelector(CreateSetterSelector(bindingValue!), manualItem.IsStatic, IsProtocol: false));
+            }
+
+            return selectors;
+        }
+
+        return [new BindingSurfaceNativeSelector(bindingValue!, manualItem.IsStatic, IsProtocol: false)];
     }
 
     private static string CreateSetterSelector(string getterSelector)
