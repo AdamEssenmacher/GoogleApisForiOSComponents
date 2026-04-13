@@ -105,7 +105,7 @@ namespace Firebase.Analytics
 		void HandleUserActivity (NSObject userActivity);
 
 		///
-		/// This method comes from a category (FIRAnalytics+Constent.h)
+		/// This method comes from a category (FIRAnalytics+Consent.h)
 		///
 
 		// + (void)setConsent:(NSDictionary<FIRConsentType, FIRConsentStatus> *)consentSettings;

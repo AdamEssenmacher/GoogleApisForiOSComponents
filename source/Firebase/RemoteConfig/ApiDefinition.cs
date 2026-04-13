@@ -54,7 +54,7 @@ namespace Firebase.RemoteConfig
 		[Export ("boolValue")]
 		bool BoolValue { get; }
 
-		// @property (readonly, nonatomic) id _Nullable JSONValue __attribute__((swift_name("jsonValue")));
+		// @property(nonatomic, readonly, nullable) id JSONValue NS_SWIFT_NAME(jsonValue);
 		[NullAllowed]
 		[Export ("JSONValue")]
 		NSObject JsonValue { get; }

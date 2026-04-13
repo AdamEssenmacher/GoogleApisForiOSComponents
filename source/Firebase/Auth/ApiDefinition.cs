@@ -20,23 +20,22 @@ namespace Firebase.Auth
 		[Export ("handleCodeInApp")]
 		bool HandleCodeInApp { get; set; }
 
-		// @property (readonly, copy, nonatomic) NSString * _Nullable iOSBundleID;
-		// -(void)setIOSBundleID:(NSString * _Nonnull)iOSBundleID;
+		// @property (nonatomic, copy) NSString * _Nullable iOSBundleID;
 		[NullAllowed]
 		[Export ("iOSBundleID")]
 		string IOSBundleId { get; set; }
 
-		// @property (readonly, copy, nonatomic) NSString * _Nullable androidPackageName;
+		// @property (nonatomic, copy) NSString * _Nullable androidPackageName;
 		[NullAllowed]
 		[Export ("androidPackageName")]
 		string AndroidPackageName { get; }
 
-		// @property (readonly, copy, nonatomic) NSString * _Nullable androidMinimumVersion;
+		// @property (nonatomic, copy) NSString * _Nullable androidMinimumVersion;
 		[NullAllowed]
 		[Export ("androidMinimumVersion")]
 		string AndroidMinimumVersion { get; }
 
-		// @property (readonly, assign, nonatomic) BOOL androidInstallIfNotAvailable;
+		// @property (nonatomic) BOOL androidInstallIfNotAvailable;
 		[Export ("androidInstallIfNotAvailable")]
 		bool AndroidInstallIfNotAvailable { get; }
 
@@ -64,7 +63,7 @@ namespace Firebase.Auth
 		[Export ("username")]
 		string Username { get; }
 
-		// @property (readonly, getter = isNewUser, nonatomic) BOOL newUser;
+		// @property (nonatomic, readonly) BOOL isNewUser;
 		[Export ("isNewUser")]
 		bool IsNewUser { get; }
 	}
@@ -156,7 +155,7 @@ namespace Firebase.Auth
 		[Export ("languageCode")]
 		string LanguageCode { get; }
 
-		// -(instancetype _Nullable)actionCodeURLWithLink:(NSString * _Nonnull)link OBJC_DESIGNATED_INITIALIZER;
+		// - (nullable instancetype)actionCodeURLWithLink:(NSString * _Nonnull)link OBJC_DESIGNATED_INITIALIZER SWIFT_METHOD_FAMILY(init);
 		[DesignatedInitializer]
 		[return: NullAllowed]
 		[Export ("actionCodeURLWithLink:")]
@@ -409,7 +408,7 @@ namespace Firebase.Auth
 	// @interface FIRAuthSettings : NSObject
 	[BaseType (typeof (NSObject), Name = "FIRAuthSettings")]
 	interface AuthSettings {
-		// @property (getter = isAppVerificationDisabledForTesting, assign, nonatomic) BOOL appVerificationDisabledForTesting;
+		// @property (nonatomic) BOOL appVerificationDisabledForTesting;
 		[Export ("appVerificationDisabledForTesting")]
 		bool AppVerificationDisabledForTesting { [Bind ("isAppVerificationDisabledForTesting")] get; set; }
 	}
@@ -417,31 +416,31 @@ namespace Firebase.Auth
 	// @interface FIRAuthTokenResult : NSObject
 	[BaseType (typeof (NSObject), Name = "FIRAuthTokenResult")]
 	interface AuthTokenResult {
-		// @property (readonly, nonatomic) NSString * _Nonnull token;
+		// @property (nonatomic, copy) NSString * _Nonnull token;
 		[Export ("token")]
 		string Token { get; }
 
-		// @property (readonly, nonatomic) NSDate * _Nonnull expirationDate;
+		// @property (nonatomic, copy) NSDate * _Nonnull expirationDate;
 		[Export ("expirationDate")]
 		NSDate ExpirationDate { get; }
 
-		// @property (readonly, nonatomic) NSDate * _Nonnull authDate;
+		// @property (nonatomic, copy) NSDate * _Nonnull authDate;
 		[Export ("authDate")]
 		NSDate AuthDate { get; }
 
-		// @property (readonly, nonatomic) NSDate * _Nonnull issuedAtDate;
+		// @property (nonatomic, copy) NSDate * _Nonnull issuedAtDate;
 		[Export ("issuedAtDate")]
 		NSDate IssuedAtDate { get; }
 
-		// @property (readonly, nonatomic) NSString * _Nonnull signInProvider;
+		// @property (nonatomic, copy) NSString * _Nonnull signInProvider;
 		[Export ("signInProvider")]
 		string SignInProvider { get; }
 
-		// @property (readonly, nonatomic) NSString * _Nonnull signInSecondFactor;
+		// @property (nonatomic, copy) NSString * _Nonnull signInSecondFactor;
 		[Export ("signInSecondFactor")]
 		string SignInSecondFactor { get; }
 
-		// @property (readonly, nonatomic) NSDictionary<NSString *,id> * _Nonnull claims;
+		// @property (nonatomic, copy) NSDictionary<NSString *, id> * _Nonnull claims;
 		[Export ("claims")]
 		NSDictionary<NSString, NSObject> Claims { get; }
 	}
@@ -597,7 +596,7 @@ namespace Firebase.Auth
 		[Field ("FIRPhoneMultiFactorID", "__Internal")]
 		NSString PhoneMultiFactorId { get; }
 
-		// @property (readonly, nonatomic) NSArray<FIRMultiFactorInfo *> * _Nonnull enrolledFactors;
+		// @property (nonatomic, copy) NSArray<FIRMultiFactorInfo *> * _Nonnull enrolledFactors;
 		[Export ("enrolledFactors")]
 		MultiFactorInfo [] EnrolledFactors { get; }
 
@@ -622,7 +621,7 @@ namespace Firebase.Auth
 	[BaseType (typeof(NSObject), Name = "FIRMultiFactorAssertion")]
 	interface MultiFactorAssertion
 	{
-		// @property (readonly, nonatomic) NSString * _Nonnull factorID;
+		// @property (nonatomic, copy) NSString * _Nonnull factorID;
 		[Export ("factorID")]
 		string FactorId { get; }
 	}
@@ -821,7 +820,7 @@ namespace Firebase.Auth
 	[BaseType (typeof(MultiFactorInfo), Name = "FIRPhoneMultiFactorInfo")]
 	interface PhoneMultiFactorInfo
 	{
-		// @property (readonly, nonatomic) NSString * _Nonnull phoneNumber;
+		// @property (nonatomic, copy) NSString * _Nonnull phoneNumber;
 		[Export ("phoneNumber")]
 		string PhoneNumber { get; }
 	}
@@ -862,11 +861,11 @@ namespace Firebase.Auth
 	[BaseType (typeof (NSObject), Name = "FIRUser")]
 	interface User : UserInfo
 	{
-		// @property (readonly, getter = isAnonymous, nonatomic) BOOL anonymous;
+		// @property (nonatomic, readonly) BOOL isAnonymous;
 		[Export ("anonymous")]
 		bool IsAnonymous { [Bind ("isAnonymous")] get; }
 
-		// @property (readonly, getter = isEmailVerified, nonatomic) BOOL emailVerified;
+		// @property (nonatomic, readonly) BOOL isEmailVerified;
 		[Export ("emailVerified")]
 		bool IsEmailVerified { [Bind ("isEmailVerified")] get; }
 

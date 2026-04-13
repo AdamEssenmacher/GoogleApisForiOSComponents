@@ -178,11 +178,11 @@ namespace Firebase.Storage
 		[Export ("dictionaryRepresentation")]
 		NSDictionary DictionaryRepresentation { get; }
 
-		// @property (readonly, getter = isFile) BOOL file;
+		// @property (nonatomic, readonly) BOOL isFile;
 		[Export ("isFile")]
 		bool IsFile { get; }
 
-		// @property (readonly, getter = isFolder) BOOL folder;
+		// @property (nonatomic, readonly) BOOL isFolder;
 		[Export ("isFolder")]
 		bool IsFolder { get; }
 	}
