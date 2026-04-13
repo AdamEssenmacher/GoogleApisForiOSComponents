@@ -46,6 +46,11 @@
       <ForceLoad>True</ForceLoad>
       <Frameworks>Security</Frameworks>
     </NativeReference>
+    <NativeReference Include="..\..\..\externals\FirebaseSessions.xcframework">
+      <Kind>Framework</Kind>
+      <SmartLink>True</SmartLink>
+      <ForceLoad>True</ForceLoad>
+    </NativeReference>
   </ItemGroup>
   <ItemGroup>
     <ObjcBindingCoreSource Include="Enums.cs" />
