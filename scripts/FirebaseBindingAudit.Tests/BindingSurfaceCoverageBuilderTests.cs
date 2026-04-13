@@ -126,10 +126,61 @@ public sealed class BindingSurfaceCoverageBuilderTests
                 document.Targets.Single().Surfaces,
                 static surface => surface.MemberName == "FetchSignInMethods");
 
+            Assert.Equal("manual-method", surface.Kind);
             Assert.True(surface.IsStatic);
             var nativeSelector = Assert.Single(surface.NativeSelectors);
             Assert.Equal("fetchSignInMethodsForEmail:completion:", nativeSelector.Selector);
             Assert.True(nativeSelector.IsStatic);
+        }
+        finally
+        {
+            if (Directory.Exists(repoRoot))
+            {
+                Directory.Delete(repoRoot, recursive: true);
+            }
+        }
+    }
+
+    [Fact]
+    public void Build_PreservesManualExportPropertyKind()
+    {
+        var repoRoot = Path.Combine(Path.GetTempPath(), $"firebase-binding-surface-builder-{Guid.NewGuid():N}");
+
+        try
+        {
+            var sourceDirectory = Path.Combine(repoRoot, "source", "Firebase", "Auth");
+            Directory.CreateDirectory(sourceDirectory);
+            File.WriteAllText(
+                Path.Combine(sourceDirectory, "ApiDefinition.cs"),
+                """
+                namespace Firebase.Auth;
+
+                [BaseType(typeof(NSObject), Name = "FIRLifecycleEvents")]
+                public interface LifecycleEvents
+                {
+                    [Advice("Prefer the default event name.")]
+                    [Export("setExperimentEventName", ArgumentSemantic = ArgumentSemantic.Copy)]
+                    NSString SetExperimentEventName { get; set; }
+                }
+                """);
+
+            var document = new BindingSurfaceCoverageBuilder(CreateConfiguration()).Build(
+                repoRoot,
+                CreateManifest(),
+                "Auth");
+
+            var surface = Assert.Single(
+                document.Targets.Single().Surfaces,
+                static surface => surface.MemberName == "SetExperimentEventName");
+
+            Assert.Equal("manual-property", surface.Kind);
+            Assert.Equal("Export", surface.BindingAttribute);
+            Assert.Equal("setExperimentEventName", surface.BindingValue);
+            Assert.True(surface.HasGetter);
+            Assert.True(surface.HasSetter);
+            Assert.Equal("NSString", surface.ReturnType);
+            var nativeSelector = Assert.Single(surface.NativeSelectors);
+            Assert.Equal("setExperimentEventName", nativeSelector.Selector);
         }
         finally
         {
@@ -312,7 +363,7 @@ public sealed class BindingSurfaceCoverageBuilderTests
     private static AuditConfiguration CreateConfiguration(string[]? helperFiles = null) =>
         new()
         {
-            ManualAttributes = ["Wrap", "Async"],
+            ManualAttributes = ["Wrap", "Advice", "Async"],
             BindingAttributes = ["Export", "Field", "Notification"],
             Targets =
             [

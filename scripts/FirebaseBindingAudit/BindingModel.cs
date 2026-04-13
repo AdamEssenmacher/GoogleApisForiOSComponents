@@ -85,6 +85,9 @@ internal sealed record ManualSurfaceItem(
     string Signature,
     string SourceFile)
 {
+    public string Kind { get; init; } = "manual";
+    public bool HasGetter { get; init; }
+    public bool HasSetter { get; init; }
     public IReadOnlyList<string> ManualAttributes { get; init; } = [];
 }
 
@@ -296,7 +299,10 @@ internal sealed class BindingSyntaxParser
                 ParameterTypes: [],
                 ReturnType: null,
                 Signature: $"{containerKind} {typeName}",
-                SourceFile: filePath));
+                SourceFile: filePath)
+            {
+                Kind = "manual-type"
+            });
             return;
         }
 
@@ -312,9 +318,23 @@ internal sealed class BindingSyntaxParser
                 ParameterTypes: member.Parameters.Select(static parameter => parameter.Type).ToList(),
                 ReturnType: member.ReturnType,
                 Signature: member.Signature,
-                SourceFile: member.SourceFile));
+                SourceFile: member.SourceFile)
+            {
+                Kind = ToManualMemberKind(member.Kind),
+                HasGetter = member.HasGetter,
+                HasSetter = member.HasSetter
+            });
         }
     }
+
+    private static string ToManualMemberKind(string memberKind) =>
+        memberKind switch
+        {
+            "constructor" => "manual-constructor",
+            "property" => "manual-property",
+            "method" => "manual-method",
+            _ => "manual"
+        };
 
     private void ParseMethod(
         MethodDeclarationSyntax methodDeclaration,
@@ -347,6 +367,7 @@ internal sealed class BindingSyntaxParser
                 Signature: signature,
                 SourceFile: filePath)
             {
+                Kind = methodDeclaration.Identifier.Text == "Constructor" ? "manual-constructor" : "manual-method",
                 ManualAttributes = manualAttributeNames
             });
             return;
@@ -413,6 +434,9 @@ internal sealed class BindingSyntaxParser
                 Signature: signature,
                 SourceFile: filePath)
             {
+                Kind = "manual-property",
+                HasGetter = propertyDeclaration.AccessorList?.Accessors.Any(static accessor => accessor.IsKind(SyntaxKind.GetAccessorDeclaration)) == true,
+                HasSetter = propertyDeclaration.AccessorList?.Accessors.Any(static accessor => accessor.IsKind(SyntaxKind.SetAccessorDeclaration)) == true,
                 ManualAttributes = manualAttributeNames
             });
             return;
@@ -468,7 +492,10 @@ internal sealed class BindingSyntaxParser
                 ParameterTypes: delegateDeclaration.ParameterList.Parameters.Select(NormalizeParameterType).ToList(),
                 ReturnType: NormalizeType(delegateDeclaration.ReturnType),
                 Signature: BuildDelegateSignature(delegateDeclaration),
-                SourceFile: filePath));
+                SourceFile: filePath)
+            {
+                Kind = "manual-delegate"
+            });
             return;
         }
 
@@ -505,7 +532,10 @@ internal sealed class BindingSyntaxParser
                 ParameterTypes: [],
                 ReturnType: null,
                 Signature: $"enum {enumDeclaration.Identifier.Text}",
-                SourceFile: filePath));
+                SourceFile: filePath)
+            {
+                Kind = "manual-type"
+            });
             return;
         }
 
