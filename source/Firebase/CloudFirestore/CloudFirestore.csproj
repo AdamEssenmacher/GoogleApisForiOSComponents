@@ -25,6 +25,7 @@
     <PackageIcon>firebaseioscloudfirestore_128x128.png</PackageIcon>
     <PackageProjectUrl>https://github.com/AdamEssenmacher/GoogleApisForiOSComponents</PackageProjectUrl>
     <PackageLicenseFile>License.md</PackageLicenseFile>
+    <PackageReadmeFile>NUGET_README.md</PackageReadmeFile>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     <PackageVersion>12.6.0</PackageVersion>
   </PropertyGroup>
@@ -37,6 +38,7 @@
   <ItemGroup>
     <None Include="External-Dependency-Info.txt" Pack="True" PackagePath="THIRD-PARTY-NOTICES.txt" />
     <None Include="License.md" Pack="True" PackagePath="License.md" />
+    <None Include="../../../docs/Firebase/NuGet/CloudFirestore.md" Pack="True" PackagePath="NUGET_README.md" />
     <None Include="../../../icons/firebaseioscloudfirestore_128x128.png" Pack="True" PackagePath="firebaseioscloudfirestore_128x128.png" />
   </ItemGroup>
   <ItemGroup>
