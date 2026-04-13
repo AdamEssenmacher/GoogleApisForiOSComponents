@@ -270,18 +270,16 @@ public static partial class FirebaseBindingSurfaceCoverage
 
         if (string.Equals(surface.Kind, "method", StringComparison.Ordinal))
         {
-            if (!type.GetMethods(flags).Any(method =>
-                    string.Equals(method.Name, surface.MemberName, StringComparison.Ordinal) &&
-                    method.GetParameters().Length == surface.ParameterCount))
+            if (!type.GetMethods(flags).Any(method => MethodMatchesSurface(method, surface)))
             {
-                throw new MissingMethodException(type.FullName, surface.MemberName);
+                throw new MissingMethodException(type.FullName, surface.Signature);
             }
 
             return;
         }
 
         if (string.Equals(surface.Kind, "constructor", StringComparison.Ordinal) &&
-            !type.GetConstructors(flags).Any(constructor => constructor.GetParameters().Length == surface.ParameterCount))
+            !type.GetConstructors(flags).Any(constructor => ParametersMatch(constructor.GetParameters(), surface)))
         {
             throw new MissingMethodException(type.FullName, ".ctor");
         }
@@ -443,7 +441,7 @@ public static partial class FirebaseBindingSurfaceCoverage
             return;
         }
 
-        if (type.GetMethods(flags).Any(method => MethodMatchesManualSurface(method, surface)))
+        if (type.GetMethods(flags).Any(method => MethodMatchesSurface(method, surface)))
         {
             return;
         }
@@ -451,14 +449,18 @@ public static partial class FirebaseBindingSurfaceCoverage
         throw new MissingMethodException(type.FullName, surface.Signature);
     }
 
-    static bool MethodMatchesManualSurface(MethodInfo method, BindingSurfaceDescriptor surface)
+    static bool MethodMatchesSurface(MethodInfo method, BindingSurfaceDescriptor surface)
     {
         if (!string.Equals(method.Name, surface.MemberName, StringComparison.Ordinal))
         {
             return false;
         }
 
-        var parameters = method.GetParameters();
+        return ParametersMatch(method.GetParameters(), surface);
+    }
+
+    static bool ParametersMatch(ParameterInfo[] parameters, BindingSurfaceDescriptor surface)
+    {
         if (parameters.Length != surface.ParameterCount)
         {
             return false;
