@@ -46,7 +46,7 @@ When multi-targeting, condition the package reference so it only restores for Ap
 
 ```xml
 <ItemGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios' Or $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">
-  <PackageReference Include="AdamE.Firebase.iOS.AppDistribution" Version="8.10.0" />
+  <PackageReference Include="AdamE.Firebase.iOS.AppDistribution" Version="12.6.0" />
 </ItemGroup>
 ```
 
@@ -60,8 +60,6 @@ dotnet add package AdamE.Firebase.iOS.AppDistribution
 
 This package does not itself perform Firebase app initialization; call `Firebase.Core.App.Configure()` from the app before using Firebase feature APIs.
 
-The current binding exposes `signInTesterWithCompletion:` as `SigInTester(...)` and declares a second `SigInTester(...)` overload for the native update-check selector.
-
 ```csharp
 using System;
 using Firebase.Core;
@@ -72,7 +70,7 @@ var appDistribution = Firebase.AppDistribution.AppDistribution.SharedInstance;
 
 if (!appDistribution.IsTesterSignedIn)
 {
-    appDistribution.SigInTester(error =>
+    appDistribution.SignInTester(error =>
     {
         if (error is not null)
         {
@@ -90,7 +88,7 @@ if (!appDistribution.IsTesterSignedIn)
 - `AdamE.Firebase.iOS.Core` - Firebase app initialization.
 - `AdamE.Firebase.iOS.Installations` - package metadata references Firebase Installations for underlying Firebase identity support.
 
-This package currently uses the `8.10` package line in this repository. Verify compatibility carefully before combining it with Firebase packages from a different MAJOR.MINOR package line.
+This package is part of the Firebase `12.6.0` package line. Firebase's `12.6.0` aggregate CocoaPods spec exposes App Distribution through `Firebase/AppDistribution`, which resolves the native `FirebaseAppDistribution` pod at `12.6.0-beta`.
 
 ## Firebase app configuration
 
@@ -127,7 +125,7 @@ Google and Firebase Apple SDKs share native dependencies. Avoid mixing multiple 
 
 ## API surface notes
 
-The public namespace is `Firebase.AppDistribution`. API names closely mirror the native Firebase App Distribution SDK surface, with the binding-specific `SigInTester(...)` overload naming noted above.
+The public namespace is `Firebase.AppDistribution`. API names closely mirror the native Firebase App Distribution SDK surface.
 
 ## Repository / support
 

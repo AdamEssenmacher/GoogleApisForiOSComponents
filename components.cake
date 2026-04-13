@@ -13,7 +13,7 @@ Artifact FIREBASE_INSTALLATIONS_ARTIFACT           = new Artifact ("Firebase.Ins
 Artifact FIREBASE_PERFORMANCE_MONITORING_ARTIFACT  = new Artifact ("Firebase.PerformanceMonitoring",  "12.6.0",  "15.0", ComponentGroup.Firebase, csprojName: "PerformanceMonitoring");
 Artifact FIREBASE_REMOTE_CONFIG_ARTIFACT           = new Artifact ("Firebase.RemoteConfig",           "12.6.0",  "15.0", ComponentGroup.Firebase, csprojName: "RemoteConfig");
 Artifact FIREBASE_STORAGE_ARTIFACT                 = new Artifact ("Firebase.Storage",                "12.6.0",  "15.0", ComponentGroup.Firebase, csprojName: "Storage");
-//Artifact FIREBASE_APP_DISTRIBUTION_ARTIFACT      = new Artifact ("Firebase.AppDistribution",        "8.10.0.1", "15.0", ComponentGroup.Firebase, csprojName: "AppDistribution");
+Artifact FIREBASE_APP_DISTRIBUTION_ARTIFACT        = new Artifact ("Firebase.AppDistribution",        "12.6.0",  "15.0", ComponentGroup.Firebase, csprojName: "AppDistribution");
 Artifact FIREBASE_APP_CHECK_ARTIFACT               = new Artifact ("Firebase.AppCheck",               "12.6.0",  "15.0", ComponentGroup.Firebase, csprojName: "AppCheck");
 
 // Google artifacts available to be built. These artifacts generate NuGets.
@@ -64,7 +64,7 @@ var ARTIFACTS = new Dictionary<string, Artifact> {
 	{ "Firebase.PerformanceMonitoring",  FIREBASE_PERFORMANCE_MONITORING_ARTIFACT },
 	{ "Firebase.RemoteConfig",           FIREBASE_REMOTE_CONFIG_ARTIFACT },
 	{ "Firebase.Storage",                FIREBASE_STORAGE_ARTIFACT },
-	// { "Firebase.AppDistribution",        FIREBASE_APP_DISTRIBUTION_ARTIFACT },
+	{ "Firebase.AppDistribution",        FIREBASE_APP_DISTRIBUTION_ARTIFACT },
 	{ "Firebase.AppCheck",               FIREBASE_APP_CHECK_ARTIFACT },
 
     { "Google.GoogleAppMeasurement",  GOOGLE_GOOGLE_APP_MEASUREMENT_ARTIFACT },
@@ -114,7 +114,7 @@ void SetArtifactsDependencies ()
 	FIREBASE_PERFORMANCE_MONITORING_ARTIFACT.Dependencies  = new [] { FIREBASE_CORE_ARTIFACT, FIREBASE_INSTALLATIONS_ARTIFACT, FIREBASE_AB_TESTING_ARTIFACT, FIREBASE_REMOTE_CONFIG_ARTIFACT };
 	FIREBASE_REMOTE_CONFIG_ARTIFACT.Dependencies           = new [] { FIREBASE_CORE_ARTIFACT, FIREBASE_INSTALLATIONS_ARTIFACT, FIREBASE_AB_TESTING_ARTIFACT };
 	FIREBASE_STORAGE_ARTIFACT.Dependencies                 = new [] { FIREBASE_CORE_ARTIFACT, FIREBASE_DATABASE_ARTIFACT, GOOGLE_GTM_SESSION_FETCHER_ARTIFACT /* Needed for sample FIREBASE_AUTH_ARTIFACT */ };
-	// FIREBASE_APP_DISTRIBUTION_ARTIFACT.Dependencies        = new [] { FIREBASE_CORE_ARTIFACT, FIREBASE_INSTALLATIONS_ARTIFACT };
+	FIREBASE_APP_DISTRIBUTION_ARTIFACT.Dependencies        = new [] { FIREBASE_CORE_ARTIFACT, FIREBASE_INSTALLATIONS_ARTIFACT };
 	FIREBASE_APP_CHECK_ARTIFACT.Dependencies               = new [] { FIREBASE_CORE_ARTIFACT, FIREBASE_INSTALLATIONS_ARTIFACT, GOOGLE_APP_CHECK_CORE_ARTIFACT };
 
 	GOOGLE_ANALYTICS_ARTIFACT.Dependencies             = null;
@@ -208,9 +208,9 @@ void SetArtifactsPodSpecs ()
 	FIREBASE_STORAGE_ARTIFACT.PodSpecs = new [] {
 		PodSpec.Create ("FirebaseStorage", "12.6.0", frameworkSource: FrameworkSource.Pods)
 	};
-	// FIREBASE_APP_DISTRIBUTION_ARTIFACT.PodSpecs = new [] {
-	// 	PodSpec.Create ("Firebase", "8.10.0", frameworkSource: FrameworkSource.Pods, frameworkName: "FirebaseAppDistribution", targetName: "FirebaseAppDistribution", subSpecs: new [] { "AppDistribution" })		
-	// };
+	FIREBASE_APP_DISTRIBUTION_ARTIFACT.PodSpecs = new [] {
+		PodSpec.Create ("Firebase", "12.6.0", frameworkSource: FrameworkSource.Pods, frameworkName: "FirebaseAppDistribution", targetName: "FirebaseAppDistribution", subSpecs: new [] { "AppDistribution" })
+	};
 	FIREBASE_APP_CHECK_ARTIFACT.PodSpecs = new [] {
 		PodSpec.Create ("FirebaseAppCheck", "12.6.0", frameworkSource: FrameworkSource.Pods)
 	};
@@ -376,7 +376,7 @@ void SetArtifactsExtraPodfileLines ()
 	GOOGLE_NANOPB_ARTIFACT.ExtraPodfileLines = extraPodfileLines.ToArray ();
 	GOOGLE_GOOGLE_UTILITIES_ARTIFACT.ExtraPodfileLines = extraPodfileLines.ToArray ();
 	GOOGLE_GOOGLE_DATA_TRANSPORT_ARTIFACT.ExtraPodfileLines = extraPodfileLines.ToArray ();
-	// FIREBASE_APP_DISTRIBUTION_ARTIFACT.ExtraPodfileLines = dynamicFrameworkLines;
+	FIREBASE_APP_DISTRIBUTION_ARTIFACT.ExtraPodfileLines = extraPodfileLines.ToArray ();
 	// FIREBASE_APP_CHECK_ARTIFACT.ExtraPodfileLines = dynamicFrameworkLines;
 	
 	var inAppMessagingWorkaround = new [] {
@@ -424,7 +424,7 @@ void SetArtifactsSamples ()
 	FIREBASE_PERFORMANCE_MONITORING_ARTIFACT.Samples  = new [] { "PerformanceMonitoringSample" };
 	FIREBASE_REMOTE_CONFIG_ARTIFACT.Samples           = new [] { "RemoteConfigSample" };
 	FIREBASE_STORAGE_ARTIFACT.Samples                 = new [] { "StorageSample" };
-	//FIREBASE_APP_DISTRIBUTION_ARTIFACT.Samples        = new [] { "AppDistributionSample" };
+	FIREBASE_APP_DISTRIBUTION_ARTIFACT.Samples        = null;
 	FIREBASE_APP_CHECK_ARTIFACT.Samples                = new [] { "AppCheckSample" };
 
 	// Google components
