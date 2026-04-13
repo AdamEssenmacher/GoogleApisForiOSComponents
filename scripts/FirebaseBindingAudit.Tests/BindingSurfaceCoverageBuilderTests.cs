@@ -211,13 +211,19 @@ public sealed class BindingSurfaceCoverageBuilderTests
 
                 public partial class Auth
                 {
-                    public delegate string TokenFactory(int index);
+                    public delegate string TokenFactory(int index, ref NSError error);
 
                     public Auth(string name)
                     {
                     }
 
                     public string this[int index] => "";
+
+                    public bool TryGetToken(out NSError error)
+                    {
+                        error = null;
+                        return false;
+                    }
                 }
                 """);
 
@@ -232,8 +238,12 @@ public sealed class BindingSurfaceCoverageBuilderTests
 
             var helperDelegate = Assert.Single(surfaces, static surface => surface.Kind == "manual-delegate");
             Assert.Equal("Firebase.Auth.Auth+TokenFactory", helperDelegate.RuntimeTypeName);
-            Assert.Equal(["int"], helperDelegate.ParameterTypes);
+            Assert.Equal(["int", "ref NSError"], helperDelegate.ParameterTypes);
             Assert.Equal("string", helperDelegate.ReturnType);
+
+            var helperMethod = Assert.Single(surfaces, static surface => surface.MemberName == "TryGetToken");
+            Assert.Equal(["out NSError"], helperMethod.ParameterTypes);
+            Assert.Equal("bool", helperMethod.ReturnType);
 
             var helperConstructor = Assert.Single(surfaces, static surface => surface.Kind == "manual-constructor");
             Assert.Equal("Firebase.Auth.Auth", helperConstructor.RuntimeTypeName);

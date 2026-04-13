@@ -799,8 +799,18 @@ internal sealed class BindingSurfaceCoverageBuilder
 
     private static IReadOnlyList<string> GetParameterTypes(BaseParameterListSyntax parameterList) =>
         parameterList.Parameters
-            .Select(static parameter => parameter.Type?.WithoutTrivia().ToString() ?? "object")
+            .Select(GetParameterType)
             .ToList();
+
+    private static string GetParameterType(ParameterSyntax parameter)
+    {
+        var parameterType = parameter.Type?.WithoutTrivia().ToString() ?? "object";
+        var modifier = parameter.Modifiers.FirstOrDefault(static modifier =>
+            modifier.IsKind(SyntaxKind.RefKeyword) ||
+            modifier.IsKind(SyntaxKind.OutKeyword) ||
+            modifier.IsKind(SyntaxKind.InKeyword));
+        return modifier.RawKind == 0 ? parameterType : $"{modifier.Text} {parameterType}";
+    }
 
     private static bool IsEffectivelyPublic(MemberDeclarationSyntax member) =>
         IsPublic(member) &&

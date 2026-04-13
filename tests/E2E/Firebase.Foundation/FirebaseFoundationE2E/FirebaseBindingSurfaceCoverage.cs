@@ -553,8 +553,44 @@ public static partial class FirebaseBindingSurfaceCoverage
         }
 
         return parameters
-            .Zip(surface.ParameterTypes, static (parameter, expectedType) => TypeMatches(parameter.ParameterType, expectedType))
+            .Zip(surface.ParameterTypes, static (parameter, expectedType) => ParameterMatches(parameter, expectedType))
             .All(static matches => matches);
+    }
+
+    static bool ParameterMatches(ParameterInfo parameter, string expectedParameterType)
+    {
+        var (expectedModifier, expectedType) = SplitParameterType(expectedParameterType);
+        return string.Equals(GetParameterModifier(parameter), expectedModifier, StringComparison.Ordinal) &&
+               TypeMatches(parameter.ParameterType, expectedType);
+    }
+
+    static (string Modifier, string Type) SplitParameterType(string parameterType)
+    {
+        foreach (var modifier in new[] { "ref", "out", "in" })
+        {
+            var prefix = $"{modifier} ";
+            if (parameterType.StartsWith(prefix, StringComparison.Ordinal))
+            {
+                return (modifier, parameterType[prefix.Length..]);
+            }
+        }
+
+        return (string.Empty, parameterType);
+    }
+
+    static string GetParameterModifier(ParameterInfo parameter)
+    {
+        if (!parameter.ParameterType.IsByRef)
+        {
+            return string.Empty;
+        }
+
+        if (parameter.IsOut)
+        {
+            return "out";
+        }
+
+        return parameter.IsIn ? "in" : "ref";
     }
 
     static bool TypeMatches(Type actualType, string expectedType)
