@@ -18,7 +18,7 @@ namespace Firebase.CloudFunctions
 		[Export("functions")]
 		CloudFunctions DefaultInstance { get; }
 
-		// + (FIRFunctions *)functionsForApp:(FIRAPP *)app;
+		// + (FIRFunctions *)functionsForApp:(FIRApp *)app;
 		[Static]
 		[Export("functionsForApp:")]
 		CloudFunctions From(App app);

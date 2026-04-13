@@ -765,7 +765,7 @@ namespace Firebase.CloudFirestore
 		void GetQueryNamed (string name, Action<Query> completion);
 	}
 
-	// @interface FIRTimestamp : NSObject <NSCopying>
+	// @interface FIRLoadBundleTaskProgress : NSObject
 	[DisableDefaultCtor]
 	[BaseType (typeof (NSObject), Name = "FIRLoadBundleTaskProgress")]
 	interface LoadBundleTaskProgress {
@@ -785,16 +785,16 @@ namespace Firebase.CloudFirestore
 		[Export ("totalBytes")]
 		nint TotalBytes { get; }
 
-		//@property(readonly, nonatomic) FIRLoadBundleTaskState state;
+		// @property(readonly, nonatomic) FIRLoadBundleTaskState state;
 		[Export ("state")]
 		LoadBundleTaskState State { get; }
 	}
 
-	// @interface FIRTimestamp : NSObject <NSCopying>
+	// @interface FIRLoadBundleTask : NSObject
 	[DisableDefaultCtor]
 	[BaseType (typeof (NSObject), Name = "FIRLoadBundleTask")]
 	interface LoadBundleTask {
-		// - (FIRLoadBundleObserverHandle):(void (^)(FIRLoadBundleTaskProgress *progress))observer
+		// - (FIRLoadBundleObserverHandle)addObserver:(void (^)(FIRLoadBundleTaskProgress *progress))observer NS_SWIFT_NAME(addObserver(_:));
 		[Export ("addObserver:")]
 		nint AddObserver (Action<LoadBundleTaskProgress> observer);
 
