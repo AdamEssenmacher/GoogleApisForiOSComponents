@@ -1,7 +1,9 @@
 #if ENABLE_BINDING_SURFACE_COVERAGE
+#if ENABLE_BINDING_SURFACE_COVERAGE_APPDISTRIBUTION
 using FirebaseAppDistributionClient = Firebase.AppDistribution.AppDistribution;
 using Foundation;
 using UIKit;
+#endif
 
 namespace FirebaseFoundationE2E;
 
@@ -10,10 +12,13 @@ public static partial class FirebaseBindingSurfaceCoverage
     static async Task<BindingSurfaceCoverageTargetResult> VerifyAppDistributionBindingSurfaceAsync(BindingSurfaceCoverageDocument document)
     {
         var result = await ExecuteTargetAsync(document, "AppDistribution");
+#if ENABLE_BINDING_SURFACE_COVERAGE_APPDISTRIBUTION
         await ExerciseAppDistributionBoundaryAsync();
+#endif
         return result;
     }
 
+#if ENABLE_BINDING_SURFACE_COVERAGE_APPDISTRIBUTION
     static async Task ExerciseAppDistributionBoundaryAsync()
     {
         var appDistribution = FirebaseAppDistributionClient.SharedInstance
@@ -55,5 +60,6 @@ public static partial class FirebaseBindingSurfaceCoverage
             _ = await updateCompletion.Task;
         }
     }
+#endif
 }
 #endif

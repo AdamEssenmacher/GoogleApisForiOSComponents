@@ -1,3 +1,4 @@
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Xml.Linq;
@@ -287,11 +288,15 @@ internal sealed class BindingSurfaceCoverageBuilder
             .Distinct(StringComparer.Ordinal)
             .OrderBy(static assemblyName => assemblyName, StringComparer.Ordinal)
             .ToList();
+        var defineConstants = string.Join(
+            ";",
+            new[] { "$(DefineConstants)", "ENABLE_BINDING_SURFACE_COVERAGE" }
+                .Concat(document.Targets.Select(static target => CreateTargetCompileConstant(target.Id))));
 
         var project = new XElement("Project",
             new XElement("PropertyGroup",
                 new XElement("BindingSurfaceCoverageTarget", selectedTarget),
-                new XElement("DefineConstants", "$(DefineConstants);ENABLE_BINDING_SURFACE_COVERAGE")),
+                new XElement("DefineConstants", defineConstants)),
             new XElement("ItemGroup",
                 new XElement("BundleResource",
                     new XAttribute("Include", Path.GetFullPath(coverageOutputPath)),
@@ -307,6 +312,19 @@ internal sealed class BindingSurfaceCoverageBuilder
                         new XAttribute("Include", assemblyName)))));
 
         return new XDocument(project);
+    }
+
+    private static string CreateTargetCompileConstant(string targetId)
+    {
+        var builder = new StringBuilder("ENABLE_BINDING_SURFACE_COVERAGE_");
+        foreach (var character in targetId)
+        {
+            builder.Append(char.IsLetterOrDigit(character)
+                ? char.ToUpperInvariant(character)
+                : '_');
+        }
+
+        return builder.ToString();
     }
 
     private static IReadOnlyList<BindingSurfaceCoverageTargetManifest> SelectTargets(
@@ -496,7 +514,7 @@ internal sealed class BindingSurfaceCoverageBuilder
                 ObjectiveCName: null,
                 ContainerKind: "manual",
                 IsProtocol: false,
-                IsStatic: false,
+                IsStatic: manualItem.IsStatic,
                 MemberName: manualItem.MemberName,
                 BindingAttribute: bindingAttribute,
                 BindingValue: bindingValue,
@@ -506,7 +524,7 @@ internal sealed class BindingSurfaceCoverageBuilder
                 ParameterTypes: manualItem.ParameterTypes,
                 ReturnType: manualItem.ReturnType,
                 NativeSelectors: string.Equals(bindingAttribute, "Export", StringComparison.Ordinal) && !string.IsNullOrWhiteSpace(bindingValue)
-                    ? [new BindingSurfaceNativeSelector(bindingValue!, IsStatic: false, IsProtocol: false)]
+                    ? [new BindingSurfaceNativeSelector(bindingValue!, manualItem.IsStatic, IsProtocol: false)]
                     : EmptySelectors,
                 SourceFile: manualItem.SourceFile,
                 Signature: manualItem.Signature);
