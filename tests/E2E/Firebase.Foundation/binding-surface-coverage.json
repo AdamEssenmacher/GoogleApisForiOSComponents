@@ -1,0 +1,160 @@
+{
+  "targets": [
+    {
+      "id": "ABTesting",
+      "packageId": "AdamE.Firebase.iOS.ABTesting",
+      "coverageCaseMethod": "VerifyABTestingBindingSurfaceAsync",
+      "sourceFiles": [
+        "source/Firebase/ABTesting/ApiDefinition.cs",
+        "source/Firebase/ABTesting/Enums.cs"
+      ],
+      "requiredExtraPackages": []
+    },
+    {
+      "id": "Analytics",
+      "packageId": "AdamE.Firebase.iOS.Analytics",
+      "coverageCaseMethod": "VerifyAnalyticsBindingSurfaceAsync",
+      "sourceFiles": [
+        "source/Firebase/Analytics/ApiDefinition.cs",
+        "source/Firebase/Analytics/Enums.cs",
+        "source/Firebase/Analytics/Extension.cs"
+      ],
+      "requiredExtraPackages": []
+    },
+    {
+      "id": "AppCheck",
+      "packageId": "AdamE.Firebase.iOS.AppCheck",
+      "coverageCaseMethod": "VerifyAppCheckBindingSurfaceAsync",
+      "sourceFiles": [
+        "source/Firebase/AppCheck/ApiDefinition.cs",
+        "source/Firebase/AppCheck/Enums.cs"
+      ],
+      "requiredExtraPackages": []
+    },
+    {
+      "id": "Auth",
+      "packageId": "AdamE.Firebase.iOS.Auth",
+      "coverageCaseMethod": "VerifyAuthBindingSurfaceAsync",
+      "sourceFiles": [
+        "source/Firebase/Auth/ApiDefinition.cs",
+        "source/Firebase/Auth/Enums.cs",
+        "source/Firebase/Auth/Extension.cs"
+      ],
+      "requiredExtraPackages": []
+    },
+    {
+      "id": "CloudFirestore",
+      "packageId": "AdamE.Firebase.iOS.CloudFirestore",
+      "coverageCaseMethod": "VerifyCloudFirestoreBindingSurfaceAsync",
+      "sourceFiles": [
+        "source/Firebase/CloudFirestore/ApiDefinition.cs",
+        "source/Firebase/CloudFirestore/Enums.cs",
+        "source/Firebase/CloudFirestore/Extensions.cs"
+      ],
+      "requiredExtraPackages": []
+    },
+    {
+      "id": "CloudFunctions",
+      "packageId": "AdamE.Firebase.iOS.CloudFunctions",
+      "coverageCaseMethod": "VerifyCloudFunctionsBindingSurfaceAsync",
+      "sourceFiles": [
+        "source/Firebase/CloudFunctions/ApiDefinition.cs",
+        "source/Firebase/CloudFunctions/Enums.cs",
+        "source/Firebase/CloudFunctions/Extension.cs"
+      ],
+      "requiredExtraPackages": []
+    },
+    {
+      "id": "CloudMessaging",
+      "packageId": "AdamE.Firebase.iOS.CloudMessaging",
+      "coverageCaseMethod": "VerifyCloudMessagingBindingSurfaceAsync",
+      "sourceFiles": [
+        "source/Firebase/CloudMessaging/ApiDefinition.cs",
+        "source/Firebase/CloudMessaging/Enums.cs"
+      ],
+      "requiredExtraPackages": []
+    },
+    {
+      "id": "Core",
+      "packageId": "AdamE.Firebase.iOS.Core",
+      "coverageCaseMethod": "VerifyCoreBindingSurfaceAsync",
+      "sourceFiles": [
+        "source/Firebase/Core/ApiDefinition.cs",
+        "source/Firebase/Core/Enums.cs",
+        "source/Firebase/Core/Extension.cs"
+      ],
+      "requiredExtraPackages": []
+    },
+    {
+      "id": "Crashlytics",
+      "packageId": "AdamE.Firebase.iOS.Crashlytics",
+      "coverageCaseMethod": "VerifyCrashlyticsBindingSurfaceAsync",
+      "sourceFiles": [
+        "source/Firebase/Crashlytics/ApiDefinition.cs",
+        "source/Firebase/Crashlytics/Enums.cs",
+        "source/Firebase/Crashlytics/Extensions.cs"
+      ],
+      "requiredExtraPackages": []
+    },
+    {
+      "id": "Database",
+      "packageId": "AdamE.Firebase.iOS.Database",
+      "coverageCaseMethod": "VerifyDatabaseBindingSurfaceAsync",
+      "sourceFiles": [
+        "source/Firebase/Database/ApiDefinition.cs",
+        "source/Firebase/Database/Enums.cs",
+        "source/Firebase/Database/Extension.cs"
+      ],
+      "requiredExtraPackages": []
+    },
+    {
+      "id": "Installations",
+      "packageId": "AdamE.Firebase.iOS.Installations",
+      "coverageCaseMethod": "VerifyInstallationsBindingSurfaceAsync",
+      "sourceFiles": [
+        "source/Firebase/Installations/ApiDefinition.cs",
+        "source/Firebase/Installations/Enums.cs"
+      ],
+      "requiredExtraPackages": []
+    },
+    {
+      "id": "PerformanceMonitoring",
+      "packageId": "AdamE.Firebase.iOS.PerformanceMonitoring",
+      "coverageCaseMethod": "VerifyPerformanceMonitoringBindingSurfaceAsync",
+      "sourceFiles": [
+        "source/Firebase/PerformanceMonitoring/ApiDefinition.cs",
+        "source/Firebase/PerformanceMonitoring/Enums.cs",
+        "source/Firebase/PerformanceMonitoring/Extensions.cs"
+      ],
+      "requiredExtraPackages": []
+    },
+    {
+      "id": "RemoteConfig",
+      "packageId": "AdamE.Firebase.iOS.RemoteConfig",
+      "coverageCaseMethod": "VerifyRemoteConfigBindingSurfaceAsync",
+      "sourceFiles": [
+        "source/Firebase/RemoteConfig/ApiDefinition.cs",
+        "source/Firebase/RemoteConfig/Enums.cs",
+        "source/Firebase/RemoteConfig/Extension.cs"
+      ],
+      "requiredExtraPackages": [
+        {
+          "id": "AdamE.Firebase.iOS.ABTesting",
+          "version": "12.6.0"
+        }
+      ]
+    },
+    {
+      "id": "Storage",
+      "packageId": "AdamE.Firebase.iOS.Storage",
+      "coverageCaseMethod": "VerifyStorageBindingSurfaceAsync",
+      "sourceFiles": [
+        "source/Firebase/Storage/ApiDefinition.cs",
+        "source/Firebase/Storage/Enums.cs",
+        "source/Firebase/Storage/Extension.cs"
+      ],
+      "requiredExtraPackages": []
+    }
+  ],
+  "waivers": []
+}

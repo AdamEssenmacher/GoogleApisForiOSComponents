@@ -80,7 +80,10 @@ internal sealed record ManualSurfaceItem(
     string? MatchMemberKey,
     string? MemberName,
     string Signature,
-    string SourceFile);
+    string SourceFile)
+{
+    public IReadOnlyList<string> ManualAttributes { get; init; } = [];
+}
 
 internal sealed class BindingSyntaxParser
 {
@@ -316,7 +319,8 @@ internal sealed class BindingSyntaxParser
     {
         var bindingAttribute = GetPrimaryBindingAttribute(methodDeclaration.AttributeLists);
         var bindingValue = bindingAttribute is null ? null : GetBindingValue(methodDeclaration.AttributeLists, bindingAttribute);
-        var isManual = isHelperFile || HasAnyAttribute(methodDeclaration.AttributeLists, manualAttributes);
+        var manualAttributeNames = GetMatchingManualAttributes(methodDeclaration.AttributeLists);
+        var isManual = isHelperFile || manualAttributeNames.Count > 0;
         var signature = BuildMethodSignature(methodDeclaration);
 
         if (isManual)
@@ -328,7 +332,10 @@ internal sealed class BindingSyntaxParser
                 MatchMemberKey: bindingAttribute is null ? null : CreateMemberKey(bindingAttribute, bindingValue, methodDeclaration.Identifier.Text, methodDeclaration.ParameterList.Parameters.Count),
                 MemberName: methodDeclaration.Identifier.Text,
                 Signature: signature,
-                SourceFile: filePath));
+                SourceFile: filePath)
+            {
+                ManualAttributes = manualAttributeNames
+            });
             return;
         }
 
@@ -373,7 +380,8 @@ internal sealed class BindingSyntaxParser
     {
         var bindingAttribute = GetPrimaryBindingAttribute(propertyDeclaration.AttributeLists);
         var bindingValue = bindingAttribute is null ? null : GetBindingValue(propertyDeclaration.AttributeLists, bindingAttribute);
-        var isManual = isHelperFile || HasAnyAttribute(propertyDeclaration.AttributeLists, manualAttributes);
+        var manualAttributeNames = GetMatchingManualAttributes(propertyDeclaration.AttributeLists);
+        var isManual = isHelperFile || manualAttributeNames.Count > 0;
         var signature = BuildPropertySignature(propertyDeclaration);
 
         if (isManual)
@@ -385,7 +393,10 @@ internal sealed class BindingSyntaxParser
                 MatchMemberKey: bindingAttribute is null ? null : CreateMemberKey(bindingAttribute, bindingValue, propertyDeclaration.Identifier.Text, 0),
                 MemberName: propertyDeclaration.Identifier.Text,
                 Signature: signature,
-                SourceFile: filePath));
+                SourceFile: filePath)
+            {
+                ManualAttributes = manualAttributeNames
+            });
             return;
         }
 
@@ -771,20 +782,22 @@ internal sealed class BindingSyntaxParser
         return string.IsNullOrWhiteSpace(currentNamespace) ? childNamespace : $"{currentNamespace}.{childNamespace}";
     }
 
-    private bool HasAnyAttribute(SyntaxList<AttributeListSyntax> attributeLists, HashSet<string> attributeNames)
+    private IReadOnlyList<string> GetMatchingManualAttributes(SyntaxList<AttributeListSyntax> attributeLists)
     {
+        var matchingAttributes = new List<string>();
         foreach (var attributeList in attributeLists)
         {
             foreach (var attribute in attributeList.Attributes)
             {
-                if (attributeNames.Contains(NormalizeAttributeName(attribute.Name)))
+                var attributeName = NormalizeAttributeName(attribute.Name);
+                if (manualAttributes.Contains(attributeName))
                 {
-                    return true;
+                    matchingAttributes.Add(attributeName);
                 }
             }
         }
 
-        return false;
+        return matchingAttributes;
     }
 
     private static bool HasAttribute(SyntaxList<AttributeListSyntax> attributeLists, string attributeName)

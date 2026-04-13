@@ -26,6 +26,9 @@ public static class FirebaseSelfTestRunner
 #if ENABLE_NULLABILITY_VALIDATION
         await statusViewController.AppendLineAsync("Firebase nullability validation mode enabled.");
 #endif
+#if ENABLE_BINDING_SURFACE_COVERAGE
+        await statusViewController.AppendLineAsync("Firebase binding surface coverage mode enabled.");
+#endif
         var runtimeDriftCase = FirebaseRuntimeDriftCases.GetConfiguredCaseId();
         if (!string.IsNullOrWhiteSpace(runtimeDriftCase))
         {
@@ -54,6 +57,13 @@ public static class FirebaseSelfTestRunner
                 await ExecuteCaseAsync(result, statusViewController, $"RuntimeDrift:{runtimeDriftCase}", () =>
                     FirebaseRuntimeDriftCases.ExecuteConfiguredCaseAsync());
             }
+#if ENABLE_BINDING_SURFACE_COVERAGE
+            else if (!string.IsNullOrWhiteSpace(FirebaseBindingSurfaceCoverage.GetConfiguredTarget()))
+            {
+                await ExecuteCaseAsync(result, statusViewController, "BindingSurfaceCoverage", () =>
+                    FirebaseBindingSurfaceCoverage.VerifyConfiguredAsync(result));
+            }
+#endif
             else
             {
                 await ExecuteCaseAsync(result, statusViewController, "CoreSurface", async () =>

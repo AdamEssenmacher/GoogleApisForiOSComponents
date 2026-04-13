@@ -14,11 +14,36 @@ internal static class ProgramEntry
             }
 
             var repoRoot = parsedArguments.RepoRoot ?? throw new InvalidOperationException("--repo-root is required.");
-            var outputDirectory = parsedArguments.OutputDirectory ?? throw new InvalidOperationException("--output-dir is required.");
             var configPath = Path.Combine(repoRoot, "scripts", "firebase-binding-audit.json");
             var suppressionPath = Path.Combine(repoRoot, "scripts", "firebase-binding-audit-suppressions.json");
 
             var configuration = ConfigurationLoader.Load(configPath);
+            if (parsedArguments.GenerateBindingSurfaceCoverage)
+            {
+                var coverageManifestPath = parsedArguments.CoverageManifest ?? throw new InvalidOperationException("--coverage-manifest is required.");
+                var coverageOutputPath = parsedArguments.CoverageOutput ?? throw new InvalidOperationException("--coverage-output is required.");
+                var coveragePropsOutputPath = parsedArguments.CoveragePropsOutput ?? throw new InvalidOperationException("--coverage-props-output is required.");
+                var bindingSurfaceTarget = parsedArguments.BindingSurfaceTarget ?? throw new InvalidOperationException("--binding-surface-target is required.");
+                var manifest = BindingSurfaceCoverageManifestLoader.Load(coverageManifestPath);
+                var document = new BindingSurfaceCoverageBuilder(configuration).Build(repoRoot, manifest, bindingSurfaceTarget);
+                BindingSurfaceCoverageValidator.ThrowIfInvalid(BindingSurfaceCoverageValidator.Validate(document));
+                await BindingSurfaceCoverageBuilder.WriteAsync(
+                    document,
+                    coverageOutputPath,
+                    coveragePropsOutputPath,
+                    bindingSurfaceTarget);
+
+                Console.WriteLine($"Binding surface coverage document: {coverageOutputPath}");
+                Console.WriteLine($"Binding surface coverage props: {coveragePropsOutputPath}");
+                foreach (var package in document.Targets.SelectMany(static target => target.RequiredPackages).DistinctBy(static package => package.Id).OrderBy(static package => package.Id, StringComparer.Ordinal))
+                {
+                    Console.WriteLine($"Package: {package.Id} {package.Version}");
+                }
+
+                return 0;
+            }
+
+            var outputDirectory = parsedArguments.OutputDirectory ?? throw new InvalidOperationException("--output-dir is required.");
             var suppressions = File.Exists(suppressionPath)
                 ? SuppressionLoader.Load(suppressionPath)
                 : new SuppressionConfiguration();
@@ -102,6 +127,21 @@ internal static class ProgramEntry
                 case "--disable-suppressions":
                     parsed.DisableSuppressions = true;
                     break;
+                case "--generate-binding-surface-coverage":
+                    parsed.GenerateBindingSurfaceCoverage = true;
+                    break;
+                case "--coverage-manifest":
+                    parsed.CoverageManifest = GetRequiredValue(args, ++index, "--coverage-manifest");
+                    break;
+                case "--coverage-output":
+                    parsed.CoverageOutput = GetRequiredValue(args, ++index, "--coverage-output");
+                    break;
+                case "--coverage-props-output":
+                    parsed.CoveragePropsOutput = GetRequiredValue(args, ++index, "--coverage-props-output");
+                    break;
+                case "--binding-surface-target":
+                    parsed.BindingSurfaceTarget = GetRequiredValue(args, ++index, "--binding-surface-target");
+                    break;
                 case "--help":
                 case "-h":
                     parsed.ShowHelp = true;
@@ -127,6 +167,7 @@ internal static class ProgramEntry
     private static void PrintUsage()
     {
         Console.WriteLine("Usage: FirebaseBindingAudit --repo-root <path> --output-dir <path> [--targets a,b] [--generator-version 0.7.0] [--keep-temp] [--sharpie-path /path/to/sharpie] [--sharpie-version 26.3.0.11] [--disable-sharpie] [--disable-suppressions]");
+        Console.WriteLine("       FirebaseBindingAudit --generate-binding-surface-coverage --repo-root <path> --coverage-manifest <path> --coverage-output <path> --coverage-props-output <path> --binding-surface-target <target|all>");
     }
 
     private sealed class ParsedArguments
@@ -148,6 +189,16 @@ internal static class ProgramEntry
         public bool DisableSharpie { get; set; }
 
         public bool DisableSuppressions { get; set; }
+
+        public bool GenerateBindingSurfaceCoverage { get; set; }
+
+        public string? CoverageManifest { get; set; }
+
+        public string? CoverageOutput { get; set; }
+
+        public string? CoveragePropsOutput { get; set; }
+
+        public string? BindingSurfaceTarget { get; set; }
 
         public bool ShowHelp { get; set; }
     }
