@@ -79,6 +79,7 @@ internal sealed record ManualSurfaceItem(
     string MatchTypeKey,
     string? MatchMemberKey,
     string? MemberName,
+    IReadOnlyList<string> ParameterTypes,
     string Signature,
     string SourceFile)
 {
@@ -289,6 +290,7 @@ internal sealed class BindingSyntaxParser
                 MatchTypeKey: typeMatchKey,
                 MatchMemberKey: null,
                 MemberName: null,
+                ParameterTypes: [],
                 Signature: $"{containerKind} {typeName}",
                 SourceFile: filePath));
             return;
@@ -302,6 +304,7 @@ internal sealed class BindingSyntaxParser
                 MatchTypeKey: typeMatchKey,
                 MatchMemberKey: member.Key,
                 MemberName: member.Name,
+                ParameterTypes: member.Parameters.Select(static parameter => parameter.Type).ToList(),
                 Signature: member.Signature,
                 SourceFile: member.SourceFile));
         }
@@ -331,6 +334,7 @@ internal sealed class BindingSyntaxParser
                 MatchTypeKey: containingTypeMatchKey,
                 MatchMemberKey: bindingAttribute is null ? null : CreateMemberKey(bindingAttribute, bindingValue, methodDeclaration.Identifier.Text, methodDeclaration.ParameterList.Parameters.Count),
                 MemberName: methodDeclaration.Identifier.Text,
+                ParameterTypes: methodDeclaration.ParameterList.Parameters.Select(static parameter => NormalizeType(parameter.Type)).ToList(),
                 Signature: signature,
                 SourceFile: filePath)
             {
@@ -392,6 +396,7 @@ internal sealed class BindingSyntaxParser
                 MatchTypeKey: containingTypeMatchKey,
                 MatchMemberKey: bindingAttribute is null ? null : CreateMemberKey(bindingAttribute, bindingValue, propertyDeclaration.Identifier.Text, 0),
                 MemberName: propertyDeclaration.Identifier.Text,
+                ParameterTypes: [],
                 Signature: signature,
                 SourceFile: filePath)
             {
@@ -444,6 +449,7 @@ internal sealed class BindingSyntaxParser
                 MatchTypeKey: delegateDeclaration.Identifier.Text,
                 MatchMemberKey: null,
                 MemberName: null,
+                ParameterTypes: delegateDeclaration.ParameterList.Parameters.Select(static parameter => NormalizeType(parameter.Type)).ToList(),
                 Signature: BuildDelegateSignature(delegateDeclaration),
                 SourceFile: filePath));
             return;
@@ -478,6 +484,7 @@ internal sealed class BindingSyntaxParser
                 MatchTypeKey: enumDeclaration.Identifier.Text,
                 MatchMemberKey: null,
                 MemberName: null,
+                ParameterTypes: [],
                 Signature: $"enum {enumDeclaration.Identifier.Text}",
                 SourceFile: filePath));
             return;

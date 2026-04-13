@@ -10,6 +10,27 @@ namespace FirebaseFoundationE2E;
 public static partial class FirebaseBindingSurfaceCoverage
 {
     const string CoverageResourceName = "binding-surface-coverage.generated";
+    static readonly IReadOnlyDictionary<Type, string> CSharpTypeAliases = new Dictionary<Type, string>
+    {
+        [typeof(bool)] = "bool",
+        [typeof(byte)] = "byte",
+        [typeof(sbyte)] = "sbyte",
+        [typeof(char)] = "char",
+        [typeof(decimal)] = "decimal",
+        [typeof(double)] = "double",
+        [typeof(float)] = "float",
+        [typeof(int)] = "int",
+        [typeof(uint)] = "uint",
+        [typeof(long)] = "long",
+        [typeof(ulong)] = "ulong",
+        [typeof(object)] = "object",
+        [typeof(short)] = "short",
+        [typeof(ushort)] = "ushort",
+        [typeof(string)] = "string",
+        [typeof(void)] = "void",
+        [typeof(IntPtr)] = "nint",
+        [typeof(UIntPtr)] = "nuint",
+    };
 
     public static async Task<string> VerifyConfiguredAsync(FirebaseE2ERunResult runResult)
     {
@@ -198,7 +219,7 @@ public static partial class FirebaseBindingSurfaceCoverage
         }
         else if (surface.Kind.StartsWith("manual", StringComparison.Ordinal))
         {
-            TouchManualSurface(type, surface.MemberName);
+            TouchManualSurface(type, surface);
         }
     }
 
@@ -389,8 +410,9 @@ public static partial class FirebaseBindingSurfaceCoverage
         }
     }
 
-    static void TouchManualSurface(Type type, string? memberName)
+    static void TouchManualSurface(Type type, BindingSurfaceDescriptor surface)
     {
+        var memberName = surface.MemberName;
         if (string.IsNullOrWhiteSpace(memberName))
         {
             return;
@@ -421,12 +443,133 @@ public static partial class FirebaseBindingSurfaceCoverage
             return;
         }
 
-        if (type.GetMethods(flags).Any(method => string.Equals(method.Name, memberName, StringComparison.Ordinal)))
+        if (type.GetMethods(flags).Any(method => MethodMatchesManualSurface(method, surface)))
         {
             return;
         }
 
-        throw new MissingMemberException(type.FullName, memberName);
+        throw new MissingMethodException(type.FullName, surface.Signature);
+    }
+
+    static bool MethodMatchesManualSurface(MethodInfo method, BindingSurfaceDescriptor surface)
+    {
+        if (!string.Equals(method.Name, surface.MemberName, StringComparison.Ordinal))
+        {
+            return false;
+        }
+
+        var parameters = method.GetParameters();
+        if (parameters.Length != surface.ParameterCount)
+        {
+            return false;
+        }
+
+        if (surface.ParameterTypes.Count == 0)
+        {
+            return true;
+        }
+
+        if (parameters.Length != surface.ParameterTypes.Count)
+        {
+            return false;
+        }
+
+        return parameters
+            .Zip(surface.ParameterTypes, static (parameter, expectedType) => TypeMatches(parameter.ParameterType, expectedType))
+            .All(static matches => matches);
+    }
+
+    static bool TypeMatches(Type actualType, string expectedType)
+    {
+        var normalizedExpected = NormalizeTypeName(expectedType);
+        return CreateTypeNameCandidates(actualType)
+            .Any(candidate => string.Equals(candidate, normalizedExpected, StringComparison.Ordinal));
+    }
+
+    static IReadOnlyList<string> CreateTypeNameCandidates(Type type)
+    {
+        if (type.IsByRef)
+        {
+            type = type.GetElementType() ?? type;
+        }
+
+        if (type.IsArray)
+        {
+            return CreateTypeNameCandidates(type.GetElementType() ?? type)
+                .Select(static candidate => NormalizeTypeName($"{candidate}[]"))
+                .Distinct(StringComparer.Ordinal)
+                .ToList();
+        }
+
+        var candidates = new List<string>();
+        if (type.IsGenericType)
+        {
+            var genericDefinition = type.GetGenericTypeDefinition();
+            var genericArguments = type.GetGenericArguments();
+            foreach (var genericTypeName in CreateGenericTypeNameCandidates(genericDefinition))
+            {
+                var useFullArgumentNames = genericTypeName.Contains('.', StringComparison.Ordinal);
+                var argumentNames = genericArguments
+                    .Select(argument => SelectTypeNameCandidate(argument, useFullArgumentNames))
+                    .ToList();
+                AddTypeNameCandidate(candidates, $"{genericTypeName}<{string.Join(", ", argumentNames)}>");
+            }
+        }
+        else
+        {
+            if (CSharpTypeAliases.TryGetValue(type, out var alias))
+            {
+                AddTypeNameCandidate(candidates, alias);
+            }
+
+            AddTypeNameCandidate(candidates, type.Name);
+            AddTypeNameCandidate(candidates, type.FullName);
+        }
+
+        return candidates;
+    }
+
+    static IEnumerable<string> CreateGenericTypeNameCandidates(Type genericDefinition)
+    {
+        yield return StripGenericArity(genericDefinition.Name);
+        if (!string.IsNullOrWhiteSpace(genericDefinition.FullName))
+        {
+            yield return StripGenericArity(genericDefinition.FullName);
+        }
+    }
+
+    static string SelectTypeNameCandidate(Type type, bool preferFullName)
+    {
+        var candidates = CreateTypeNameCandidates(type);
+        return preferFullName
+            ? candidates.FirstOrDefault(static candidate => candidate.Contains('.', StringComparison.Ordinal)) ?? candidates[0]
+            : candidates[0];
+    }
+
+    static void AddTypeNameCandidate(List<string> candidates, string? typeName)
+    {
+        var normalizedTypeName = NormalizeTypeName(typeName);
+        if (!string.IsNullOrWhiteSpace(normalizedTypeName) &&
+            !candidates.Contains(normalizedTypeName, StringComparer.Ordinal))
+        {
+            candidates.Add(normalizedTypeName);
+        }
+    }
+
+    static string NormalizeTypeName(string? typeName)
+    {
+        return typeName?
+            .Replace("global::", string.Empty, StringComparison.Ordinal)
+            .Replace("+", ".", StringComparison.Ordinal)
+            .Replace("?", string.Empty, StringComparison.Ordinal)
+            .Replace(" ", string.Empty, StringComparison.Ordinal)
+            .Trim() ?? string.Empty;
+    }
+
+    static string StripGenericArity(string typeName)
+    {
+        var tickIndex = typeName.IndexOf('`', StringComparison.Ordinal);
+        return tickIndex < 0 ? typeName : typeName[..tickIndex];
     }
 
     static void TouchStaticMemberIfAvailable(Type type, string? memberName)
@@ -581,6 +724,7 @@ public static partial class FirebaseBindingSurfaceCoverage
         public bool HasGetter { get; set; }
         public bool HasSetter { get; set; }
         public int ParameterCount { get; set; }
+        public List<string> ParameterTypes { get; set; } = [];
         public List<BindingSurfaceNativeSelector> NativeSelectors { get; set; } = [];
         public string SourceFile { get; set; } = string.Empty;
         public string Signature { get; set; } = string.Empty;
