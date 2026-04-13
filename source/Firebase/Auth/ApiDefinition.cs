@@ -237,9 +237,10 @@ namespace Firebase.Auth
 		[Export ("shareAuthStateAcrossDevices")]
 		bool ShareAuthStateAcrossDevices { get; set; }
 
+		// @property (nonatomic, readonly, copy) NSData * _Nullable APNSToken;
 		[NullAllowed]
-		[Export ("APNSToken", ArgumentSemantic.Strong)]
-		NSData ApnsToken { get; set; }
+		[Export ("APNSToken", ArgumentSemantic.Copy)]
+		NSData ApnsToken { get; }
 
 		// -(void)updateCurrentUser:(FIRUser * _Nonnull)user completion:(FIRUserUpdateCallback _Nullable)completion;
 		[Async]
