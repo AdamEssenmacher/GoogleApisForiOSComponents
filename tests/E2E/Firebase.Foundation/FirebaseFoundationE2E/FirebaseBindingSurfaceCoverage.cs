@@ -430,31 +430,42 @@ public static partial class FirebaseBindingSurfaceCoverage
             return;
         }
 
-        var property = FindProperty(type, surface, flags);
-        if (property?.GetMethod?.IsStatic == true && property.GetIndexParameters().Length == 0)
+        if (IsManualPropertySurface(surface))
         {
-            _ = property.GetValue(null);
-            return;
+            var property = FindProperty(type, surface, flags);
+            if (property?.GetMethod?.IsStatic == true && property.GetIndexParameters().Length == 0)
+            {
+                _ = property.GetValue(null);
+                return;
+            }
+
+            if (property is not null)
+            {
+                return;
+            }
+
+            throw new MissingMemberException(type.FullName, surface.MemberName);
         }
 
-        if (property is not null)
+        if (IsManualFieldSurface(surface))
         {
-            return;
+            var field = FindField(type, surface, flags);
+            if (field?.IsStatic == true)
+            {
+                _ = field.GetValue(null);
+                return;
+            }
+
+            if (field is not null)
+            {
+                return;
+            }
+
+            throw new MissingFieldException(type.FullName, surface.MemberName);
         }
 
-        var field = FindField(type, surface, flags);
-        if (field?.IsStatic == true)
-        {
-            _ = field.GetValue(null);
-            return;
-        }
-
-        if (field is not null)
-        {
-            return;
-        }
-
-        if (type.GetMethods(flags).Any(method => MethodMatchesSurface(method, surface)))
+        if (IsManualMethodSurface(surface) &&
+            type.GetMethods(flags).Any(method => MethodMatchesSurface(method, surface)))
         {
             return;
         }
@@ -505,6 +516,19 @@ public static partial class FirebaseBindingSurfaceCoverage
                ParametersMatch(method.GetParameters(), surface) &&
                ReturnTypeMatches(method.ReturnType, surface);
     }
+
+    static bool IsManualPropertySurface(BindingSurfaceDescriptor surface) =>
+        string.Equals(surface.Kind, "manual-property", StringComparison.Ordinal) ||
+        string.Equals(surface.Kind, "manual-indexer", StringComparison.Ordinal);
+
+    static bool IsManualFieldSurface(BindingSurfaceDescriptor surface) =>
+        string.Equals(surface.Kind, "manual-field", StringComparison.Ordinal);
+
+    static bool IsManualMethodSurface(BindingSurfaceDescriptor surface) =>
+        !IsManualPropertySurface(surface) &&
+        !IsManualFieldSurface(surface) &&
+        !string.Equals(surface.Kind, "manual-constructor", StringComparison.Ordinal) &&
+        !IsDelegateSurface(surface);
 
     static bool IsDelegateSurface(BindingSurfaceDescriptor surface) =>
         string.Equals(surface.Kind, "delegate", StringComparison.Ordinal) ||

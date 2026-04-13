@@ -49,6 +49,51 @@ public sealed class BindingSurfaceCoverageBuilderTests
     }
 
     [Fact]
+    public void Build_RecordsBoundMethodParameterModifiers()
+    {
+        var repoRoot = Path.Combine(Path.GetTempPath(), $"firebase-binding-surface-builder-{Guid.NewGuid():N}");
+
+        try
+        {
+            var sourceDirectory = Path.Combine(repoRoot, "source", "Firebase", "Auth");
+            Directory.CreateDirectory(sourceDirectory);
+            File.WriteAllText(
+                Path.Combine(sourceDirectory, "ApiDefinition.cs"),
+                """
+                namespace Firebase.Auth;
+
+                [BaseType(typeof(NSObject), Name = "FIRAuth")]
+                public interface Auth
+                {
+                    [Export("signOut:")]
+                    bool SignOut([NullAllowed] out NSError error);
+                }
+                """);
+
+            var document = new BindingSurfaceCoverageBuilder(CreateConfiguration()).Build(
+                repoRoot,
+                CreateManifest(),
+                "Auth");
+
+            var surface = Assert.Single(
+                document.Targets.Single().Surfaces,
+                static surface => surface.MemberName == "SignOut");
+
+            Assert.Equal("method", surface.Kind);
+            Assert.Equal(1, surface.ParameterCount);
+            Assert.Equal(["out NSError"], surface.ParameterTypes);
+            Assert.Equal("SignOut(out NSError) -> bool", surface.Signature);
+        }
+        finally
+        {
+            if (Directory.Exists(repoRoot))
+            {
+                Directory.Delete(repoRoot, recursive: true);
+            }
+        }
+    }
+
+    [Fact]
     public void Build_PreservesManualExportStaticness()
     {
         var repoRoot = Path.Combine(Path.GetTempPath(), $"firebase-binding-surface-builder-{Guid.NewGuid():N}");

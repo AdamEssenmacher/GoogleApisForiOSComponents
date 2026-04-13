@@ -342,7 +342,7 @@ internal sealed class BindingSyntaxParser
                 MemberName: methodDeclaration.Identifier.Text,
                 IsStatic: methodDeclaration.Modifiers.Any(static token => token.IsKind(SyntaxKind.StaticKeyword)) ||
                           HasAttribute(methodDeclaration.AttributeLists, "Static"),
-                ParameterTypes: methodDeclaration.ParameterList.Parameters.Select(static parameter => NormalizeType(parameter.Type)).ToList(),
+                ParameterTypes: methodDeclaration.ParameterList.Parameters.Select(NormalizeParameterType).ToList(),
                 ReturnType: NormalizeType(methodDeclaration.ReturnType),
                 Signature: signature,
                 SourceFile: filePath)
@@ -465,7 +465,7 @@ internal sealed class BindingSyntaxParser
                 MatchMemberKey: null,
                 MemberName: null,
                 IsStatic: false,
-                ParameterTypes: delegateDeclaration.ParameterList.Parameters.Select(static parameter => NormalizeType(parameter.Type)).ToList(),
+                ParameterTypes: delegateDeclaration.ParameterList.Parameters.Select(NormalizeParameterType).ToList(),
                 ReturnType: NormalizeType(delegateDeclaration.ReturnType),
                 Signature: BuildDelegateSignature(delegateDeclaration),
                 SourceFile: filePath));
@@ -573,7 +573,7 @@ internal sealed class BindingSyntaxParser
     private static BindingParameterSurface CreateParameter(ParameterSyntax parameter)
     {
         return new BindingParameterSurface(
-            Type: NormalizeType(parameter.Type),
+            Type: NormalizeParameterType(parameter),
             IsNullAllowed: HasNullAllowed(parameter.AttributeLists, null));
     }
 
@@ -753,7 +753,7 @@ internal sealed class BindingSyntaxParser
         var builder = new StringBuilder();
         builder.Append(methodDeclaration.Identifier.Text);
         builder.Append('(');
-        builder.Append(string.Join(", ", methodDeclaration.ParameterList.Parameters.Select(static parameter => NormalizeType(parameter.Type))));
+        builder.Append(string.Join(", ", methodDeclaration.ParameterList.Parameters.Select(NormalizeParameterType)));
         builder.Append(')');
         builder.Append(" -> ");
         builder.Append(NormalizeType(methodDeclaration.ReturnType));
@@ -786,7 +786,7 @@ internal sealed class BindingSyntaxParser
         var builder = new StringBuilder();
         builder.Append(delegateDeclaration.Identifier.Text);
         builder.Append('(');
-        builder.Append(string.Join(", ", delegateDeclaration.ParameterList.Parameters.Select(static parameter => NormalizeType(parameter.Type))));
+        builder.Append(string.Join(", ", delegateDeclaration.ParameterList.Parameters.Select(NormalizeParameterType)));
         builder.Append(')');
         builder.Append(" -> ");
         builder.Append(NormalizeType(delegateDeclaration.ReturnType));
@@ -796,6 +796,16 @@ internal sealed class BindingSyntaxParser
     private static string NormalizeType(TypeSyntax? typeSyntax)
     {
         return typeSyntax?.WithoutTrivia().ToString().Replace("global::", string.Empty, StringComparison.Ordinal) ?? "void";
+    }
+
+    private static string NormalizeParameterType(ParameterSyntax parameter)
+    {
+        var parameterType = NormalizeType(parameter.Type);
+        var modifier = parameter.Modifiers.FirstOrDefault(static modifier =>
+            modifier.IsKind(SyntaxKind.RefKeyword) ||
+            modifier.IsKind(SyntaxKind.OutKeyword) ||
+            modifier.IsKind(SyntaxKind.InKeyword));
+        return modifier.RawKind == 0 ? parameterType : $"{modifier.Text} {parameterType}";
     }
 
     private static string QualifyType(string currentNamespace, string typeName)
@@ -1990,7 +2000,17 @@ internal sealed class BindingComparer
             return string.Empty;
         }
 
-        var compact = typeName.Replace("global::", string.Empty, StringComparison.Ordinal)
+        var cleaned = typeName.Replace("global::", string.Empty, StringComparison.Ordinal).Trim();
+        foreach (var modifier in new[] { "ref", "out", "in" })
+        {
+            var prefix = $"{modifier} ";
+            if (cleaned.StartsWith(prefix, StringComparison.Ordinal))
+            {
+                return $"{modifier} {NormalizeTypeReference(cleaned[prefix.Length..], aliases)}";
+            }
+        }
+
+        var compact = cleaned
             .Replace(" ", string.Empty, StringComparison.Ordinal);
 
         if (compact.EndsWith("[]", StringComparison.Ordinal))
