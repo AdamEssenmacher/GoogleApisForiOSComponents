@@ -118,7 +118,7 @@ using ObjCRuntime;
 
 namespace FirebaseFoundationE2E;
 
-static class FirebaseRuntimeDriftCases
+static partial class FirebaseRuntimeDriftCases
 {
     static readonly TimeSpan AsyncTimeout = TimeSpan.FromSeconds(5);
 
@@ -304,17 +304,9 @@ static class FirebaseRuntimeDriftCases
         var callbackInvoked = false;
         long callbackSessionId = 0;
         NSError? callbackError = null;
-        NSException? marshaledException = null;
-        MarshalObjectiveCExceptionMode? marshaledExceptionMode = null;
         var completionSource = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
 
-        void OnMarshalObjectiveCException(object? sender, MarshalObjectiveCExceptionEventArgs args)
-        {
-            marshaledException ??= args.Exception;
-            marshaledExceptionMode ??= args.ExceptionMode;
-        }
-
-        Runtime.MarshalObjectiveCException += OnMarshalObjectiveCException;
+        var objcExceptionProbe = ObjCExceptionProbe.Attach();
         try
         {
             try
@@ -332,9 +324,9 @@ static class FirebaseRuntimeDriftCases
                 throw new InvalidOperationException(
                     $"Selector '{selector}' should not throw after the missing binding is added, but observed {ex.GetType().FullName}. " +
                     $"Completion delegate type: {typeof(Action<long, NSError>).FullName}. " +
-                    $"NSException.Name: {FormatDetail(marshaledException?.Name?.ToString())}. " +
-                    $"NSException.Reason: {FormatDetail(marshaledException?.Reason)}. " +
-                    $"Marshal mode: {FormatDetail(marshaledExceptionMode?.ToString())}.",
+                    $"NSException.Name: {objcExceptionProbe.Name}. " +
+                    $"NSException.Reason: {objcExceptionProbe.Reason}. " +
+                    $"Marshal mode: {objcExceptionProbe.Mode}.",
                     ex);
             }
 
@@ -351,11 +343,11 @@ static class FirebaseRuntimeDriftCases
                     $"Selector '{selector}' completed without throwing, but the completion callback was never marked as invoked.");
             }
 
-            if (marshaledException is not null)
+            if (objcExceptionProbe.HasException)
             {
                 throw new InvalidOperationException(
-                    $"Selector '{selector}' completed, but Runtime.MarshalObjectiveCException captured unexpected NSException.Name '{marshaledException.Name}'. " +
-                    $"Reason: {FormatDetail(marshaledException.Reason)}. Marshal mode: {FormatDetail(marshaledExceptionMode?.ToString())}.");
+                    $"Selector '{selector}' completed, but Runtime.MarshalObjectiveCException captured unexpected NSException.Name '{objcExceptionProbe.Name}'. " +
+                    $"Reason: {objcExceptionProbe.Reason}. Marshal mode: {objcExceptionProbe.Mode}.");
             }
 
             return
@@ -366,7 +358,7 @@ static class FirebaseRuntimeDriftCases
         }
         finally
         {
-            Runtime.MarshalObjectiveCException -= OnMarshalObjectiveCException;
+            objcExceptionProbe.Dispose();
         }
     }
 #endif
@@ -409,16 +401,7 @@ static class FirebaseRuntimeDriftCases
             }
         }
 
-        var marshaledExceptionCaptured = false;
-        MarshalObjectiveCExceptionMode? marshaledExceptionMode = null;
-
-        void OnMarshalObjectiveCException(object? sender, MarshalObjectiveCExceptionEventArgs args)
-        {
-            marshaledExceptionCaptured = true;
-            marshaledExceptionMode ??= args.ExceptionMode;
-        }
-
-        Runtime.MarshalObjectiveCException += OnMarshalObjectiveCException;
+        var objcExceptionProbe = ObjCExceptionProbe.Attach();
         try
         {
             using var hashedEmailAddress = NSData.FromArray(new byte[]
@@ -449,15 +432,15 @@ static class FirebaseRuntimeDriftCases
                     "Analytics on-device conversion selectors should not throw after the missing bindings are added, " +
                     $"but observed {ex.GetType().FullName}. " +
                     $"String argument type: {typeof(string).FullName}. Hashed argument type: {typeof(NSData).FullName}. " +
-                    $"Marshal mode: {FormatDetail(marshaledExceptionMode?.ToString())}.",
+                    $"Marshal mode: {objcExceptionProbe.Mode}.",
                     ex);
             }
 
-            if (marshaledExceptionCaptured)
+            if (objcExceptionProbe.HasException)
             {
                 throw new InvalidOperationException(
                     "Analytics on-device conversion selectors completed, but Runtime.MarshalObjectiveCException captured an unexpected Objective-C exception. " +
-                    $"Marshal mode: {FormatDetail(marshaledExceptionMode?.ToString())}.");
+                    $"Marshal mode: {objcExceptionProbe.Mode}.");
             }
 
             return Task.FromResult(
@@ -466,7 +449,7 @@ static class FirebaseRuntimeDriftCases
         }
         finally
         {
-            Runtime.MarshalObjectiveCException -= OnMarshalObjectiveCException;
+            objcExceptionProbe.Dispose();
         }
     }
 #endif
@@ -523,17 +506,9 @@ static class FirebaseRuntimeDriftCases
         var debugProviderCompletionInvoked = false;
         AppCheckToken? completionToken = null;
         NSError? completionError = null;
-        NSException? marshaledException = null;
-        MarshalObjectiveCExceptionMode? marshaledExceptionMode = null;
         var completionSource = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
 
-        void OnMarshalObjectiveCException(object? sender, MarshalObjectiveCExceptionEventArgs args)
-        {
-            marshaledException ??= args.Exception;
-            marshaledExceptionMode ??= args.ExceptionMode;
-        }
-
-        Runtime.MarshalObjectiveCException += OnMarshalObjectiveCException;
+        var objcExceptionProbe = ObjCExceptionProbe.Attach();
         try
         {
             try
@@ -551,9 +526,9 @@ static class FirebaseRuntimeDriftCases
                 throw new InvalidOperationException(
                     $"Selector '{limitedUseSelector}' should not throw after the missing binding is added, but observed {ex.GetType().FullName}. " +
                     $"Completion delegate type: {typeof(TokenCompletionHandler).FullName}. " +
-                    $"NSException.Name: {FormatDetail(marshaledException?.Name?.ToString())}. " +
-                    $"NSException.Reason: {FormatDetail(marshaledException?.Reason)}. " +
-                    $"Marshal mode: {FormatDetail(marshaledExceptionMode?.ToString())}.",
+                    $"NSException.Name: {objcExceptionProbe.Name}. " +
+                    $"NSException.Reason: {objcExceptionProbe.Reason}. " +
+                    $"Marshal mode: {objcExceptionProbe.Mode}.",
                     ex);
             }
 
@@ -571,9 +546,9 @@ static class FirebaseRuntimeDriftCases
                     throw new InvalidOperationException(
                         $"Selector '{providerLimitedUseSelector}' on FIRAppCheckDebugProvider should not throw after the missing binding is added, " +
                         $"but observed {ex.GetType().FullName}. Completion delegate type: {typeof(TokenCompletionHandler).FullName}. " +
-                        $"NSException.Name: {FormatDetail(marshaledException?.Name?.ToString())}. " +
-                        $"NSException.Reason: {FormatDetail(marshaledException?.Reason)}. " +
-                        $"Marshal mode: {FormatDetail(marshaledExceptionMode?.ToString())}.",
+                        $"NSException.Name: {objcExceptionProbe.Name}. " +
+                        $"NSException.Reason: {objcExceptionProbe.Reason}. " +
+                        $"Marshal mode: {objcExceptionProbe.Mode}.",
                         ex);
                 }
             }
@@ -592,11 +567,11 @@ static class FirebaseRuntimeDriftCases
                     $"Selector '{limitedUseSelector}' completed without throwing, but the completion callback was never marked as invoked.");
             }
 
-            if (marshaledException is not null)
+            if (objcExceptionProbe.HasException)
             {
                 throw new InvalidOperationException(
-                    $"Selector '{limitedUseSelector}' completed, but Runtime.MarshalObjectiveCException captured unexpected NSException.Name '{marshaledException.Name}'. " +
-                    $"Reason: {FormatDetail(marshaledException.Reason)}. Marshal mode: {FormatDetail(marshaledExceptionMode?.ToString())}.");
+                    $"Selector '{limitedUseSelector}' completed, but Runtime.MarshalObjectiveCException captured unexpected NSException.Name '{objcExceptionProbe.Name}'. " +
+                    $"Reason: {objcExceptionProbe.Reason}. Marshal mode: {objcExceptionProbe.Mode}.");
             }
 
             return
@@ -609,19 +584,9 @@ static class FirebaseRuntimeDriftCases
         }
         finally
         {
-            Runtime.MarshalObjectiveCException -= OnMarshalObjectiveCException;
+            objcExceptionProbe.Dispose();
         }
 
-        static void RequireVoidMethod(Type type, string methodName, Type[] parameterTypes, string selector)
-        {
-            var method = type.GetMethod(methodName, BindingFlags.Instance | BindingFlags.Public, binder: null, types: parameterTypes, modifiers: null);
-            if (method?.ReturnType != typeof(void))
-            {
-                throw new InvalidOperationException(
-                    $"Expected managed API '{type.FullName}.{methodName}({string.Join(", ", parameterTypes.Select(parameterType => parameterType.FullName))})' " +
-                    $"to return void for selector '{selector}', observed '{method?.ReturnType.FullName ?? "<missing>"}'.");
-            }
-        }
     }
 #endif
 
@@ -682,17 +647,9 @@ static class FirebaseRuntimeDriftCases
         NSError? listenerError = null;
         var customSignalsCompletionInvoked = false;
         NSError? customSignalsCompletionError = null;
-        NSException? marshaledException = null;
-        MarshalObjectiveCExceptionMode? marshaledExceptionMode = null;
         var customSignalsCompletionSource = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
 
-        void OnMarshalObjectiveCException(object? sender, MarshalObjectiveCExceptionEventArgs args)
-        {
-            marshaledException ??= args.Exception;
-            marshaledExceptionMode ??= args.ExceptionMode;
-        }
-
-        Runtime.MarshalObjectiveCException += OnMarshalObjectiveCException;
+        var objcExceptionProbe = ObjCExceptionProbe.Attach();
         try
         {
             using var signalKey = new NSString("codex_signal");
@@ -717,9 +674,9 @@ static class FirebaseRuntimeDriftCases
                 throw new InvalidOperationException(
                     $"Selector '{listenerSelector}' should not throw after the missing binding is added, but observed {ex.GetType().FullName}. " +
                     $"Listener delegate type: {typeof(RemoteConfigUpdateCompletionHandler).FullName}. " +
-                    $"NSException.Name: {FormatDetail(marshaledException?.Name?.ToString())}. " +
-                    $"NSException.Reason: {FormatDetail(marshaledException?.Reason)}. " +
-                    $"Marshal mode: {FormatDetail(marshaledExceptionMode?.ToString())}.",
+                    $"NSException.Name: {objcExceptionProbe.Name}. " +
+                    $"NSException.Reason: {objcExceptionProbe.Reason}. " +
+                    $"Marshal mode: {objcExceptionProbe.Mode}.",
                     ex);
             }
 
@@ -747,18 +704,18 @@ static class FirebaseRuntimeDriftCases
                 throw new InvalidOperationException(
                     $"Selector '{customSignalsSelector}' should not throw after the missing binding is added, but observed {ex.GetType().FullName}. " +
                     $"Signals dictionary type: {customSignals.GetType().FullName}. Completion delegate type: {typeof(Action<NSError>).FullName}. " +
-                    $"NSException.Name: {FormatDetail(marshaledException?.Name?.ToString())}. " +
-                    $"NSException.Reason: {FormatDetail(marshaledException?.Reason)}. " +
-                    $"Marshal mode: {FormatDetail(marshaledExceptionMode?.ToString())}.",
+                    $"NSException.Name: {objcExceptionProbe.Name}. " +
+                    $"NSException.Reason: {objcExceptionProbe.Reason}. " +
+                    $"Marshal mode: {objcExceptionProbe.Mode}.",
                     ex);
             }
 
             var completedTask = await Task.WhenAny(customSignalsCompletionSource.Task, Task.Delay(AsyncTimeout));
-            if (marshaledException is not null)
+            if (objcExceptionProbe.HasException)
             {
                 throw new InvalidOperationException(
-                    $"RemoteConfig missing-surface selectors completed, but Runtime.MarshalObjectiveCException captured unexpected NSException.Name '{marshaledException.Name}'. " +
-                    $"Reason: {FormatDetail(marshaledException.Reason)}. Marshal mode: {FormatDetail(marshaledExceptionMode?.ToString())}.");
+                    $"RemoteConfig missing-surface selectors completed, but Runtime.MarshalObjectiveCException captured unexpected NSException.Name '{objcExceptionProbe.Name}'. " +
+                    $"Reason: {objcExceptionProbe.Reason}. Marshal mode: {objcExceptionProbe.Mode}.");
             }
 
             if (completedTask != customSignalsCompletionSource.Task)
@@ -782,7 +739,7 @@ static class FirebaseRuntimeDriftCases
         }
         finally
         {
-            Runtime.MarshalObjectiveCException -= OnMarshalObjectiveCException;
+            objcExceptionProbe.Dispose();
         }
     }
 #endif
@@ -805,16 +762,8 @@ static class FirebaseRuntimeDriftCases
         }
 
         using var delta = NSNumber.FromInt64(1);
-        NSException? marshaledException = null;
-        MarshalObjectiveCExceptionMode? marshaledExceptionMode = null;
 
-        void OnMarshalObjectiveCException(object? sender, MarshalObjectiveCExceptionEventArgs args)
-        {
-            marshaledException ??= args.Exception;
-            marshaledExceptionMode ??= args.ExceptionMode;
-        }
-
-        Runtime.MarshalObjectiveCException += OnMarshalObjectiveCException;
+        var objcExceptionProbe = ObjCExceptionProbe.Attach();
         try
         {
             NSDictionary placeholder;
@@ -827,17 +776,17 @@ static class FirebaseRuntimeDriftCases
                 throw new InvalidOperationException(
                     $"Selector '{selector}' should not throw for a valid NSNumber delta, but observed {ex.GetType().FullName}. " +
                     $"Managed delta argument type: {delta.GetType().FullName}. " +
-                    $"NSException.Name: {FormatDetail(marshaledException?.Name?.ToString())}. " +
-                    $"NSException.Reason: {FormatDetail(marshaledException?.Reason)}. " +
-                    $"Marshal mode: {FormatDetail(marshaledExceptionMode?.ToString())}.",
+                    $"NSException.Name: {objcExceptionProbe.Name}. " +
+                    $"NSException.Reason: {objcExceptionProbe.Reason}. " +
+                    $"Marshal mode: {objcExceptionProbe.Mode}.",
                     ex);
             }
 
-            if (marshaledException is not null)
+            if (objcExceptionProbe.HasException)
             {
                 throw new InvalidOperationException(
-                    $"Selector '{selector}' completed, but Runtime.MarshalObjectiveCException captured unexpected NSException.Name '{marshaledException.Name}'. " +
-                    $"Reason: {FormatDetail(marshaledException.Reason)}. Marshal mode: {FormatDetail(marshaledExceptionMode?.ToString())}.");
+                    $"Selector '{selector}' completed, but Runtime.MarshalObjectiveCException captured unexpected NSException.Name '{objcExceptionProbe.Name}'. " +
+                    $"Reason: {objcExceptionProbe.Reason}. Marshal mode: {objcExceptionProbe.Mode}.");
             }
 
             if (placeholder.Count == 0)
@@ -851,7 +800,7 @@ static class FirebaseRuntimeDriftCases
         }
         finally
         {
-            Runtime.MarshalObjectiveCException -= OnMarshalObjectiveCException;
+            objcExceptionProbe.Dispose();
         }
     }
 #endif
@@ -1029,17 +978,9 @@ static class FirebaseRuntimeDriftCases
         var payloads = Array.Empty<NSData>();
         var completionInvoked = false;
         NSError? completionError = null;
-        NSException? marshaledException = null;
-        MarshalObjectiveCExceptionMode? marshaledExceptionMode = null;
         var completionSource = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
 
-        void OnMarshalObjectiveCException(object? sender, MarshalObjectiveCExceptionEventArgs args)
-        {
-            marshaledException ??= args.Exception;
-            marshaledExceptionMode ??= args.ExceptionMode;
-        }
-
-        Runtime.MarshalObjectiveCException += OnMarshalObjectiveCException;
+        var objcExceptionProbe = ObjCExceptionProbe.Attach();
         try
         {
             try
@@ -1057,9 +998,9 @@ static class FirebaseRuntimeDriftCases
                     $"Selector '{selector}' should not throw with the corrected enum binding, but observed {ex.GetType().FullName}. " +
                     $"Managed policy argument type: {policy.GetType().FullName}. Policy value: {(int)policy}. " +
                     $"Payload array type: {payloads.GetType().FullName}. Payload count: {payloads.Length}. " +
-                    $"NSException.Name: {FormatDetail(marshaledException?.Name?.ToString())}. " +
-                    $"NSException.Reason: {FormatDetail(marshaledException?.Reason)}. " +
-                    $"Marshal mode: {FormatDetail(marshaledExceptionMode?.ToString())}.",
+                    $"NSException.Name: {objcExceptionProbe.Name}. " +
+                    $"NSException.Reason: {objcExceptionProbe.Reason}. " +
+                    $"Marshal mode: {objcExceptionProbe.Mode}.",
                     ex);
             }
 
@@ -1076,11 +1017,11 @@ static class FirebaseRuntimeDriftCases
                     $"Selector '{selector}' completed without throwing, but the completion callback was never marked as invoked.");
             }
 
-            if (marshaledException is not null)
+            if (objcExceptionProbe.HasException)
             {
                 throw new InvalidOperationException(
-                    $"Selector '{selector}' completed, but Runtime.MarshalObjectiveCException captured unexpected NSException.Name '{marshaledException.Name}'. " +
-                    $"Reason: {FormatDetail(marshaledException.Reason)}. Marshal mode: {FormatDetail(marshaledExceptionMode?.ToString())}.");
+                    $"Selector '{selector}' completed, but Runtime.MarshalObjectiveCException captured unexpected NSException.Name '{objcExceptionProbe.Name}'. " +
+                    $"Reason: {objcExceptionProbe.Reason}. Marshal mode: {objcExceptionProbe.Mode}.");
             }
 
             return
@@ -1091,7 +1032,7 @@ static class FirebaseRuntimeDriftCases
         }
         finally
         {
-            Runtime.MarshalObjectiveCException -= OnMarshalObjectiveCException;
+            objcExceptionProbe.Dispose();
         }
     }
 #endif
@@ -1109,16 +1050,8 @@ static class FirebaseRuntimeDriftCases
 
         var payload = new ExperimentPayload();
         var origin = "codex";
-        NSException? marshaledException = null;
-        MarshalObjectiveCExceptionMode? marshaledExceptionMode = null;
 
-        void OnMarshalObjectiveCException(object? sender, MarshalObjectiveCExceptionEventArgs args)
-        {
-            marshaledException ??= args.Exception;
-            marshaledExceptionMode ??= args.ExceptionMode;
-        }
-
-        Runtime.MarshalObjectiveCException += OnMarshalObjectiveCException;
+        var objcExceptionProbe = ObjCExceptionProbe.Attach();
         try
         {
             try
@@ -1131,17 +1064,17 @@ static class FirebaseRuntimeDriftCases
                     $"Selector '{selector}' should not throw after the binding fix, but observed {ex.GetType().FullName}. " +
                     $"Managed payload type: {payload.GetType().FullName}. " +
                     $"Origin argument type: {origin.GetType().FullName}. " +
-                    $"NSException.Name: {FormatDetail(marshaledException?.Name?.ToString())}. " +
-                    $"NSException.Reason: {FormatDetail(marshaledException?.Reason)}. " +
-                    $"Marshal mode: {FormatDetail(marshaledExceptionMode?.ToString())}.",
+                    $"NSException.Name: {objcExceptionProbe.Name}. " +
+                    $"NSException.Reason: {objcExceptionProbe.Reason}. " +
+                    $"Marshal mode: {objcExceptionProbe.Mode}.",
                     ex);
             }
 
-            if (marshaledException is not null)
+            if (objcExceptionProbe.HasException)
             {
                 throw new InvalidOperationException(
-                    $"Selector '{selector}' completed, but Runtime.MarshalObjectiveCException captured unexpected NSException.Name '{marshaledException.Name}'. " +
-                    $"Reason: {FormatDetail(marshaledException.Reason)}. Marshal mode: {FormatDetail(marshaledExceptionMode?.ToString())}.");
+                    $"Selector '{selector}' completed, but Runtime.MarshalObjectiveCException captured unexpected NSException.Name '{objcExceptionProbe.Name}'. " +
+                    $"Reason: {objcExceptionProbe.Reason}. Marshal mode: {objcExceptionProbe.Mode}.");
             }
 
             return Task.FromResult(
@@ -1151,7 +1084,7 @@ static class FirebaseRuntimeDriftCases
         }
         finally
         {
-            Runtime.MarshalObjectiveCException -= OnMarshalObjectiveCException;
+            objcExceptionProbe.Dispose();
         }
     }
 #endif
@@ -1188,16 +1121,8 @@ static class FirebaseRuntimeDriftCases
 
         var payloads = Array.Empty<ExperimentPayload>();
         var origin = "codex";
-        NSException? marshaledException = null;
-        MarshalObjectiveCExceptionMode? marshaledExceptionMode = null;
 
-        void OnMarshalObjectiveCException(object? sender, MarshalObjectiveCExceptionEventArgs args)
-        {
-            marshaledException ??= args.Exception;
-            marshaledExceptionMode ??= args.ExceptionMode;
-        }
-
-        Runtime.MarshalObjectiveCException += OnMarshalObjectiveCException;
+        var objcExceptionProbe = ObjCExceptionProbe.Attach();
         try
         {
             try
@@ -1210,17 +1135,17 @@ static class FirebaseRuntimeDriftCases
                     $"Selector '{selector}' should not throw after the binding fix, but observed {ex.GetType().FullName}. " +
                     $"Managed payload array type: {payloads.GetType().FullName}. Payload count: {payloads.Length}. " +
                     $"Origin argument type: {origin.GetType().FullName}. " +
-                    $"NSException.Name: {FormatDetail(marshaledException?.Name?.ToString())}. " +
-                    $"NSException.Reason: {FormatDetail(marshaledException?.Reason)}. " +
-                    $"Marshal mode: {FormatDetail(marshaledExceptionMode?.ToString())}.",
+                    $"NSException.Name: {objcExceptionProbe.Name}. " +
+                    $"NSException.Reason: {objcExceptionProbe.Reason}. " +
+                    $"Marshal mode: {objcExceptionProbe.Mode}.",
                     ex);
             }
 
-            if (marshaledException is not null)
+            if (objcExceptionProbe.HasException)
             {
                 throw new InvalidOperationException(
-                    $"Selector '{selector}' completed, but Runtime.MarshalObjectiveCException captured unexpected NSException.Name '{marshaledException.Name}'. " +
-                    $"Reason: {FormatDetail(marshaledException.Reason)}. Marshal mode: {FormatDetail(marshaledExceptionMode?.ToString())}.");
+                    $"Selector '{selector}' completed, but Runtime.MarshalObjectiveCException captured unexpected NSException.Name '{objcExceptionProbe.Name}'. " +
+                    $"Reason: {objcExceptionProbe.Reason}. Marshal mode: {objcExceptionProbe.Mode}.");
             }
 
             return Task.FromResult(
@@ -1231,7 +1156,7 @@ static class FirebaseRuntimeDriftCases
         }
         finally
         {
-            Runtime.MarshalObjectiveCException -= OnMarshalObjectiveCException;
+            objcExceptionProbe.Dispose();
         }
     }
 #endif
@@ -1250,17 +1175,9 @@ static class FirebaseRuntimeDriftCases
         var queryName = "codex-firestore-missing-query";
         var callbackInvoked = false;
         var returnedQueryWasNull = false;
-        NSException? marshaledException = null;
-        MarshalObjectiveCExceptionMode? marshaledExceptionMode = null;
         var completionSource = new TaskCompletionSource<Query?>(TaskCreationOptions.RunContinuationsAsynchronously);
 
-        void OnMarshalObjectiveCException(object? sender, MarshalObjectiveCExceptionEventArgs args)
-        {
-            marshaledException ??= args.Exception;
-            marshaledExceptionMode ??= args.ExceptionMode;
-        }
-
-        Runtime.MarshalObjectiveCException += OnMarshalObjectiveCException;
+        var objcExceptionProbe = ObjCExceptionProbe.Attach();
         try
         {
             try
@@ -1277,9 +1194,9 @@ static class FirebaseRuntimeDriftCases
                 throw new InvalidOperationException(
                     $"Selector '{selector}' should not throw after the binding fix, but observed {ex.GetType().FullName}. " +
                     $"Runtime argument type: {queryName.GetType().FullName}. " +
-                    $"NSException.Name: {FormatDetail(marshaledException?.Name?.ToString())}. " +
-                    $"NSException.Reason: {FormatDetail(marshaledException?.Reason)}. " +
-                    $"Marshal mode: {FormatDetail(marshaledExceptionMode?.ToString())}.",
+                    $"NSException.Name: {objcExceptionProbe.Name}. " +
+                    $"NSException.Reason: {objcExceptionProbe.Reason}. " +
+                    $"Marshal mode: {objcExceptionProbe.Mode}.",
                     ex);
             }
 
@@ -1297,11 +1214,11 @@ static class FirebaseRuntimeDriftCases
                     $"Selector '{selector}' completed without throwing, but the completion callback was never marked as invoked.");
             }
 
-            if (marshaledException is not null)
+            if (objcExceptionProbe.HasException)
             {
                 throw new InvalidOperationException(
-                    $"Selector '{selector}' completed, but Runtime.MarshalObjectiveCException captured unexpected NSException.Name '{marshaledException.Name}'. " +
-                    $"Reason: {FormatDetail(marshaledException.Reason)}. Marshal mode: {FormatDetail(marshaledExceptionMode?.ToString())}.");
+                    $"Selector '{selector}' completed, but Runtime.MarshalObjectiveCException captured unexpected NSException.Name '{objcExceptionProbe.Name}'. " +
+                    $"Reason: {objcExceptionProbe.Reason}. Marshal mode: {objcExceptionProbe.Mode}.");
             }
 
             return
@@ -1313,7 +1230,7 @@ static class FirebaseRuntimeDriftCases
         }
         finally
         {
-            Runtime.MarshalObjectiveCException -= OnMarshalObjectiveCException;
+            objcExceptionProbe.Dispose();
         }
     }
 #endif
@@ -1355,17 +1272,9 @@ static class FirebaseRuntimeDriftCases
         using var first = NSNumber.FromInt64(1);
         using var second = NSNumber.FromInt64(2);
         var values = new[] { first, second };
-        NSException? marshaledException = null;
-        MarshalObjectiveCExceptionMode? marshaledExceptionMode = null;
         var vectorArrayLength = 0;
 
-        void OnMarshalObjectiveCException(object? sender, MarshalObjectiveCExceptionEventArgs args)
-        {
-            marshaledException ??= args.Exception;
-            marshaledExceptionMode ??= args.ExceptionMode;
-        }
-
-        Runtime.MarshalObjectiveCException += OnMarshalObjectiveCException;
+        var objcExceptionProbe = ObjCExceptionProbe.Attach();
         try
         {
             try
@@ -1392,17 +1301,17 @@ static class FirebaseRuntimeDriftCases
                     $"Selector '{selector}' should not throw after the missing binding is added, but observed {ex.GetType().FullName}. " +
                     $"Managed vector argument type: {values.GetType().FullName}. " +
                     $"Vector value type: {typeof(VectorValue).FullName}. " +
-                    $"NSException.Name: {FormatDetail(marshaledException?.Name?.ToString())}. " +
-                    $"NSException.Reason: {FormatDetail(marshaledException?.Reason)}. " +
-                    $"Marshal mode: {FormatDetail(marshaledExceptionMode?.ToString())}.",
+                    $"NSException.Name: {objcExceptionProbe.Name}. " +
+                    $"NSException.Reason: {objcExceptionProbe.Reason}. " +
+                    $"Marshal mode: {objcExceptionProbe.Mode}.",
                     ex);
             }
 
-            if (marshaledException is not null)
+            if (objcExceptionProbe.HasException)
             {
                 throw new InvalidOperationException(
-                    $"Selector '{selector}' completed, but Runtime.MarshalObjectiveCException captured unexpected NSException.Name '{marshaledException.Name}'. " +
-                    $"Reason: {FormatDetail(marshaledException.Reason)}. Marshal mode: {FormatDetail(marshaledExceptionMode?.ToString())}.");
+                    $"Selector '{selector}' completed, but Runtime.MarshalObjectiveCException captured unexpected NSException.Name '{objcExceptionProbe.Name}'. " +
+                    $"Reason: {objcExceptionProbe.Reason}. Marshal mode: {objcExceptionProbe.Mode}.");
             }
 
             return Task.FromResult(
@@ -1412,7 +1321,7 @@ static class FirebaseRuntimeDriftCases
         }
         finally
         {
-            Runtime.MarshalObjectiveCException -= OnMarshalObjectiveCException;
+            objcExceptionProbe.Dispose();
         }
     }
 #endif
@@ -1533,16 +1442,7 @@ static class FirebaseRuntimeDriftCases
             throw new InvalidOperationException($"Native FIRQuery does not respond to expected selector '{queryWhereFieldPathNotInSelector}'.");
         }
 
-        NSException? marshaledException = null;
-        MarshalObjectiveCExceptionMode? marshaledExceptionMode = null;
-
-        void OnMarshalObjectiveCException(object? sender, MarshalObjectiveCExceptionEventArgs args)
-        {
-            marshaledException ??= args.Exception;
-            marshaledExceptionMode ??= args.ExceptionMode;
-        }
-
-        Runtime.MarshalObjectiveCException += OnMarshalObjectiveCException;
+        var objcExceptionProbe = ObjCExceptionProbe.Attach();
         try
         {
             Query stringNotEqualQuery;
@@ -1574,17 +1474,17 @@ static class FirebaseRuntimeDriftCases
                     $"Firestore query filter selectors should not throw after the missing bindings are added, but observed {ex.GetType().FullName}. " +
                     $"Selectors exercised: setData:completion:, '{queryWhereFilterSelector}', '{queryWhereFieldNotEqualSelector}', " +
                     $"'{queryWhereFieldPathNotEqualSelector}', '{queryWhereFieldNotInSelector}', '{queryWhereFieldPathNotInSelector}', '{filterWhereFieldNotInSelector}'. " +
-                    $"NSException.Name: {FormatDetail(marshaledException?.Name?.ToString())}. " +
-                    $"NSException.Reason: {FormatDetail(marshaledException?.Reason)}. " +
-                    $"Marshal mode: {FormatDetail(marshaledExceptionMode?.ToString())}.",
+                    $"NSException.Name: {objcExceptionProbe.Name}. " +
+                    $"NSException.Reason: {objcExceptionProbe.Reason}. " +
+                    $"Marshal mode: {objcExceptionProbe.Mode}.",
                     ex);
             }
 
-            if (marshaledException is not null)
+            if (objcExceptionProbe.HasException)
             {
                 throw new InvalidOperationException(
-                    $"Firestore query filter selectors completed, but Runtime.MarshalObjectiveCException captured unexpected NSException.Name '{marshaledException.Name}'. " +
-                    $"Reason: {FormatDetail(marshaledException.Reason)}. Marshal mode: {FormatDetail(marshaledExceptionMode?.ToString())}.");
+                    $"Firestore query filter selectors completed, but Runtime.MarshalObjectiveCException captured unexpected NSException.Name '{objcExceptionProbe.Name}'. " +
+                    $"Reason: {objcExceptionProbe.Reason}. Marshal mode: {objcExceptionProbe.Mode}.");
             }
 
             var stringNotEqualCount = await GetServerCountAsync(stringNotEqualQuery, "string notEqualTo query");
@@ -1607,7 +1507,7 @@ static class FirebaseRuntimeDriftCases
         }
         finally
         {
-            Runtime.MarshalObjectiveCException -= OnMarshalObjectiveCException;
+            objcExceptionProbe.Dispose();
         }
 
         async Task SetSeedDocumentAsync(string documentId, string group, string color, int score)
@@ -1707,11 +1607,11 @@ static class FirebaseRuntimeDriftCases
                 throw new InvalidOperationException($"Cloud Firestore {label} completed without either a snapshot or an NSError.");
             }
 
-            if (marshaledException is not null)
+            if (objcExceptionProbe.HasException)
             {
                 throw new InvalidOperationException(
-                    $"Cloud Firestore {label} completed, but Runtime.MarshalObjectiveCException captured unexpected NSException.Name '{marshaledException.Name}'. " +
-                    $"Reason: {FormatDetail(marshaledException.Reason)}. Marshal mode: {FormatDetail(marshaledExceptionMode?.ToString())}.");
+                    $"Cloud Firestore {label} completed, but Runtime.MarshalObjectiveCException captured unexpected NSException.Name '{objcExceptionProbe.Name}'. " +
+                    $"Reason: {objcExceptionProbe.Reason}. Marshal mode: {objcExceptionProbe.Mode}.");
             }
 
             return (int)completedSnapshot.Count;
@@ -1855,16 +1755,7 @@ static class FirebaseRuntimeDriftCases
                 $"Native FIRQuery does not respond to expected selector '{addSnapshotListenerWithOptionsSelector}'.");
         }
 
-        NSException? marshaledException = null;
-        MarshalObjectiveCExceptionMode? marshaledExceptionMode = null;
-
-        void OnMarshalObjectiveCException(object? sender, MarshalObjectiveCExceptionEventArgs args)
-        {
-            marshaledException ??= args.Exception;
-            marshaledExceptionMode ??= args.ExceptionMode;
-        }
-
-        Runtime.MarshalObjectiveCException += OnMarshalObjectiveCException;
+        var objcExceptionProbe = ObjCExceptionProbe.Attach();
         IListenerRegistration? documentRegistration = null;
         IListenerRegistration? queryRegistration = null;
         var documentCallbackSource = new TaskCompletionSource<(DocumentSnapshot? Snapshot, NSError? Error)>(TaskCreationOptions.RunContinuationsAsynchronously);
@@ -1921,9 +1812,9 @@ static class FirebaseRuntimeDriftCases
                 throw new InvalidOperationException(
                     $"Firestore snapshot listen option selectors should not throw after the missing bindings are added, but observed {ex.GetType().FullName}. " +
                     $"Selectors exercised: '{optionsWithIncludeMetadataChangesSelector}', '{optionsWithSourceSelector}', '{addSnapshotListenerWithOptionsSelector}'. " +
-                    $"NSException.Name: {FormatDetail(marshaledException?.Name?.ToString())}. " +
-                    $"NSException.Reason: {FormatDetail(marshaledException?.Reason)}. " +
-                    $"Marshal mode: {FormatDetail(marshaledExceptionMode?.ToString())}.",
+                    $"NSException.Name: {objcExceptionProbe.Name}. " +
+                    $"NSException.Reason: {objcExceptionProbe.Reason}. " +
+                    $"Marshal mode: {objcExceptionProbe.Mode}.",
                     ex);
             }
 
@@ -1943,11 +1834,11 @@ static class FirebaseRuntimeDriftCases
                 Task.WhenAll(documentCallbackSource.Task, queryCallbackSource.Task),
                 Task.Delay(TimeSpan.FromMilliseconds(500)));
 
-            if (marshaledException is not null)
+            if (objcExceptionProbe.HasException)
             {
                 throw new InvalidOperationException(
-                    $"Firestore snapshot listen option selectors completed, but Runtime.MarshalObjectiveCException captured unexpected NSException.Name '{marshaledException.Name}'. " +
-                    $"Reason: {FormatDetail(marshaledException.Reason)}. Marshal mode: {FormatDetail(marshaledExceptionMode?.ToString())}.");
+                    $"Firestore snapshot listen option selectors completed, but Runtime.MarshalObjectiveCException captured unexpected NSException.Name '{objcExceptionProbe.Name}'. " +
+                    $"Reason: {objcExceptionProbe.Reason}. Marshal mode: {objcExceptionProbe.Mode}.");
             }
 
             var documentCallbackDetail = documentCallbackSource.Task.IsCompletedSuccessfully
@@ -1973,7 +1864,7 @@ static class FirebaseRuntimeDriftCases
             finally
             {
                 queryRegistration?.Remove();
-                Runtime.MarshalObjectiveCException -= OnMarshalObjectiveCException;
+                objcExceptionProbe.Dispose();
             }
         }
 
@@ -2088,19 +1979,10 @@ static class FirebaseRuntimeDriftCases
         {
             throw new InvalidOperationException($"Native FIRQuery does not respond to expected selector '{aggregateSelector}'.");
         }
-
-        NSException? marshaledException = null;
-        MarshalObjectiveCExceptionMode? marshaledExceptionMode = null;
         var seedWriteCompletionSource = new TaskCompletionSource<NSError?>(TaskCreationOptions.RunContinuationsAsynchronously);
         var serverCountCompletionSource = new TaskCompletionSource<(AggregateQuerySnapshot? Snapshot, NSError? Error)>(TaskCreationOptions.RunContinuationsAsynchronously);
 
-        void OnMarshalObjectiveCException(object? sender, MarshalObjectiveCExceptionEventArgs args)
-        {
-            marshaledException ??= args.Exception;
-            marshaledExceptionMode ??= args.ExceptionMode;
-        }
-
-        Runtime.MarshalObjectiveCException += OnMarshalObjectiveCException;
+        var objcExceptionProbe = ObjCExceptionProbe.Attach();
         try
         {
             AggregateField countField;
@@ -2194,17 +2076,17 @@ static class FirebaseRuntimeDriftCases
                 throw new InvalidOperationException(
                     $"Firestore aggregate selectors should not throw after the missing bindings are added, but observed {ex.GetType().FullName}. " +
                     $"Selectors exercised: setData:completion:, '{queryCountSelector}', '{aggregateSelector}', '{aggregateQueryQuerySelector}', '{getAggregationSelector}', aggregateFieldForCount, aggregateFieldForSumOfField:, aggregateFieldForSumOfFieldPath:, aggregateFieldForAverageOfField:, aggregateFieldForAverageOfFieldPath:. " +
-                    $"NSException.Name: {FormatDetail(marshaledException?.Name?.ToString())}. " +
-                    $"NSException.Reason: {FormatDetail(marshaledException?.Reason)}. " +
-                    $"Marshal mode: {FormatDetail(marshaledExceptionMode?.ToString())}.",
+                    $"NSException.Name: {objcExceptionProbe.Name}. " +
+                    $"NSException.Reason: {objcExceptionProbe.Reason}. " +
+                    $"Marshal mode: {objcExceptionProbe.Mode}.",
                     ex);
             }
 
-            if (marshaledException is not null)
+            if (objcExceptionProbe.HasException)
             {
                 throw new InvalidOperationException(
-                    $"Firestore aggregate selectors completed, but Runtime.MarshalObjectiveCException captured unexpected NSException.Name '{marshaledException.Name}'. " +
-                    $"Reason: {FormatDetail(marshaledException.Reason)}. Marshal mode: {FormatDetail(marshaledExceptionMode?.ToString())}.");
+                    $"Firestore aggregate selectors completed, but Runtime.MarshalObjectiveCException captured unexpected NSException.Name '{objcExceptionProbe.Name}'. " +
+                    $"Reason: {objcExceptionProbe.Reason}. Marshal mode: {objcExceptionProbe.Mode}.");
             }
 
             if (countQuery is null)
@@ -2251,11 +2133,11 @@ static class FirebaseRuntimeDriftCases
                 throw new InvalidOperationException("Server count aggregation callback state did not match the completed task payload.");
             }
 
-            if (marshaledException is not null)
+            if (objcExceptionProbe.HasException)
             {
                 throw new InvalidOperationException(
-                    $"Firestore aggregate server query completed, but Runtime.MarshalObjectiveCException captured unexpected NSException.Name '{marshaledException.Name}'. " +
-                    $"Reason: {FormatDetail(marshaledException.Reason)}. Marshal mode: {FormatDetail(marshaledExceptionMode?.ToString())}.");
+                    $"Firestore aggregate server query completed, but Runtime.MarshalObjectiveCException captured unexpected NSException.Name '{objcExceptionProbe.Name}'. " +
+                    $"Reason: {objcExceptionProbe.Reason}. Marshal mode: {objcExceptionProbe.Mode}.");
             }
 
             var serverResultDetail = completedServerCountError is not null
@@ -2292,7 +2174,7 @@ static class FirebaseRuntimeDriftCases
         }
         finally
         {
-            Runtime.MarshalObjectiveCException -= OnMarshalObjectiveCException;
+            objcExceptionProbe.Dispose();
         }
     }
 
@@ -2335,16 +2217,8 @@ static class FirebaseRuntimeDriftCases
 
         var defaultApp = Firebase.Core.App.DefaultInstance
             ?? throw new InvalidOperationException("Firebase.Core.App.DefaultInstance returned null after App.Configure().");
-        NSException? marshaledException = null;
-        MarshalObjectiveCExceptionMode? marshaledExceptionMode = null;
 
-        void OnMarshalObjectiveCException(object? sender, MarshalObjectiveCExceptionEventArgs args)
-        {
-            marshaledException ??= args.Exception;
-            marshaledExceptionMode ??= args.ExceptionMode;
-        }
-
-        Runtime.MarshalObjectiveCException += OnMarshalObjectiveCException;
+        var objcExceptionProbe = ObjCExceptionProbe.Attach();
         try
         {
             Firestore? defaultNamedDatabase = null;
@@ -2360,9 +2234,9 @@ static class FirebaseRuntimeDriftCases
                     $"Firestore named-database selectors should not throw after the missing bindings are added, but observed {ex.GetType().FullName}. " +
                     $"Selectors exercised: '{firestoreForDatabaseSelector}', '{firestoreForAppDatabaseSelector}'. " +
                     $"Database id: {databaseId}. " +
-                    $"NSException.Name: {FormatDetail(marshaledException?.Name?.ToString())}. " +
-                    $"NSException.Reason: {FormatDetail(marshaledException?.Reason)}. " +
-                    $"Marshal mode: {FormatDetail(marshaledExceptionMode?.ToString())}.",
+                    $"NSException.Name: {objcExceptionProbe.Name}. " +
+                    $"NSException.Reason: {objcExceptionProbe.Reason}. " +
+                    $"Marshal mode: {objcExceptionProbe.Mode}.",
                     ex);
             }
 
@@ -2390,11 +2264,11 @@ static class FirebaseRuntimeDriftCases
                     $"Firestore instance from selector '{firestoreForAppDatabaseSelector}' could not create a collection reference.");
             }
 
-            if (marshaledException is not null)
+            if (objcExceptionProbe.HasException)
             {
                 throw new InvalidOperationException(
-                    $"Firestore named-database selectors completed, but Runtime.MarshalObjectiveCException captured unexpected NSException.Name '{marshaledException.Name}'. " +
-                    $"Reason: {FormatDetail(marshaledException.Reason)}. Marshal mode: {FormatDetail(marshaledExceptionMode?.ToString())}.");
+                    $"Firestore named-database selectors completed, but Runtime.MarshalObjectiveCException captured unexpected NSException.Name '{objcExceptionProbe.Name}'. " +
+                    $"Reason: {objcExceptionProbe.Reason}. Marshal mode: {objcExceptionProbe.Mode}.");
             }
 
             return Task.FromResult(
@@ -2406,7 +2280,7 @@ static class FirebaseRuntimeDriftCases
         }
         finally
         {
-            Runtime.MarshalObjectiveCException -= OnMarshalObjectiveCException;
+            objcExceptionProbe.Dispose();
         }
     }
 #endif
@@ -2622,16 +2496,7 @@ static class FirebaseRuntimeDriftCases
                 $"Native FIRFirestore does not respond to expected selector '{persistentCacheIndexManagerSelector}'.");
         }
 
-        NSException? marshaledException = null;
-        MarshalObjectiveCExceptionMode? marshaledExceptionMode = null;
-
-        void OnMarshalObjectiveCException(object? sender, MarshalObjectiveCExceptionEventArgs args)
-        {
-            marshaledException ??= args.Exception;
-            marshaledExceptionMode ??= args.ExceptionMode;
-        }
-
-        Runtime.MarshalObjectiveCException += OnMarshalObjectiveCException;
+        var objcExceptionProbe = ObjCExceptionProbe.Attach();
         try
         {
             string cacheSettingsRuntimeTypes;
@@ -2721,17 +2586,17 @@ static class FirebaseRuntimeDriftCases
                     $"Selectors exercised: '{cacheSettingsSelector}', '{setCacheSettingsSelector}', '{persistentCacheIndexManagerSelector}', " +
                     $"'{enableIndexAutoCreationSelector}', '{disableIndexAutoCreationSelector}', '{deleteAllIndexesSelector}', " +
                     $"initWithSizeBytes:, initWithGarbageCollectorSettings:. " +
-                    $"NSException.Name: {FormatDetail(marshaledException?.Name?.ToString())}. " +
-                    $"NSException.Reason: {FormatDetail(marshaledException?.Reason)}. " +
-                    $"Marshal mode: {FormatDetail(marshaledExceptionMode?.ToString())}.",
+                    $"NSException.Name: {objcExceptionProbe.Name}. " +
+                    $"NSException.Reason: {objcExceptionProbe.Reason}. " +
+                    $"Marshal mode: {objcExceptionProbe.Mode}.",
                     ex);
             }
 
-            if (marshaledException is not null)
+            if (objcExceptionProbe.HasException)
             {
                 throw new InvalidOperationException(
-                    $"Firestore cache settings selectors completed, but Runtime.MarshalObjectiveCException captured unexpected NSException.Name '{marshaledException.Name}'. " +
-                    $"Reason: {FormatDetail(marshaledException.Reason)}. Marshal mode: {FormatDetail(marshaledExceptionMode?.ToString())}.");
+                    $"Firestore cache settings selectors completed, but Runtime.MarshalObjectiveCException captured unexpected NSException.Name '{objcExceptionProbe.Name}'. " +
+                    $"Reason: {objcExceptionProbe.Reason}. Marshal mode: {objcExceptionProbe.Mode}.");
             }
 
             return Task.FromResult(
@@ -2743,29 +2608,7 @@ static class FirebaseRuntimeDriftCases
         }
         finally
         {
-            Runtime.MarshalObjectiveCException -= OnMarshalObjectiveCException;
-        }
-
-        static void RequireConstructor(Type type, Type[] parameterTypes, string selector)
-        {
-            var constructor = type.GetConstructor(parameterTypes);
-            if (constructor is null)
-            {
-                throw new InvalidOperationException(
-                    $"Expected managed constructor '{type.FullName}({string.Join(", ", parameterTypes.Select(parameterType => parameterType.FullName))})' " +
-                    $"was not found for selector '{selector}'.");
-            }
-        }
-
-        static void RequireVoidMethod(Type type, string methodName, string selector)
-        {
-            var method = type.GetMethod(methodName, BindingFlags.Instance | BindingFlags.Public, binder: null, Type.EmptyTypes, modifiers: null);
-            if (method?.ReturnType != typeof(void))
-            {
-                throw new InvalidOperationException(
-                    $"Expected managed API '{type.FullName}.{methodName}()' to return void for selector '{selector}', " +
-                    $"observed '{method?.ReturnType.FullName ?? "<missing>"}'.");
-            }
+            objcExceptionProbe.Dispose();
         }
 
         static string RequireCacheSettings(FirestoreSettings settings, string assignedRuntimeTypeName)
@@ -2821,16 +2664,7 @@ static class FirebaseRuntimeDriftCases
                 $"Native FIRFunctions does not respond to expected live selector '{liveSelector}'.");
         }
 
-        NSException? marshaledException = null;
-        MarshalObjectiveCExceptionMode? marshaledExceptionMode = null;
-
-        void OnMarshalObjectiveCException(object? sender, MarshalObjectiveCExceptionEventArgs args)
-        {
-            marshaledException ??= args.Exception;
-            marshaledExceptionMode ??= args.ExceptionMode;
-        }
-
-        Runtime.MarshalObjectiveCException += OnMarshalObjectiveCException;
+        var objcExceptionProbe = ObjCExceptionProbe.Attach();
         try
         {
             try
@@ -2842,17 +2676,17 @@ static class FirebaseRuntimeDriftCases
                 throw new InvalidOperationException(
                     $"Selector '{liveSelector}' should not throw after the binding fix, but observed {ex.GetType().FullName}. " +
                     $"Runtime host argument type: {typeof(string).FullName}. Runtime port argument type: {typeof(uint).FullName}. " +
-                    $"NSException.Name: {FormatDetail(marshaledException?.Name?.ToString())}. " +
-                    $"NSException.Reason: {FormatDetail(marshaledException?.Reason)}. " +
-                    $"Marshal mode: {FormatDetail(marshaledExceptionMode?.ToString())}.",
+                    $"NSException.Name: {objcExceptionProbe.Name}. " +
+                    $"NSException.Reason: {objcExceptionProbe.Reason}. " +
+                    $"Marshal mode: {objcExceptionProbe.Mode}.",
                     ex);
             }
 
-            if (marshaledException is not null)
+            if (objcExceptionProbe.HasException)
             {
                 throw new InvalidOperationException(
-                    $"Cloud Functions emulator API completed, but Runtime.MarshalObjectiveCException captured unexpected NSException.Name '{marshaledException.Name}'. " +
-                    $"Reason: {FormatDetail(marshaledException.Reason)}. Marshal mode: {FormatDetail(marshaledExceptionMode?.ToString())}.");
+                    $"Cloud Functions emulator API completed, but Runtime.MarshalObjectiveCException captured unexpected NSException.Name '{objcExceptionProbe.Name}'. " +
+                    $"Reason: {objcExceptionProbe.Reason}. Marshal mode: {objcExceptionProbe.Mode}.");
             }
 
             return Task.FromResult(
@@ -2862,7 +2696,7 @@ static class FirebaseRuntimeDriftCases
         }
         finally
         {
-            Runtime.MarshalObjectiveCException -= OnMarshalObjectiveCException;
+            objcExceptionProbe.Dispose();
         }
     }
 #endif
@@ -2885,16 +2719,7 @@ static class FirebaseRuntimeDriftCases
                 $"Expected managed API '{nameof(StackFrame.Create)}({typeof(nuint).FullName})' was not found.");
         }
 
-        var marshaledExceptionCaptured = false;
-        MarshalObjectiveCExceptionMode? marshaledExceptionMode = null;
-
-        void OnMarshalObjectiveCException(object? sender, MarshalObjectiveCExceptionEventArgs args)
-        {
-            marshaledExceptionCaptured = true;
-            marshaledExceptionMode ??= args.ExceptionMode;
-        }
-
-        Runtime.MarshalObjectiveCException += OnMarshalObjectiveCException;
+        var objcExceptionProbe = ObjCExceptionProbe.Attach();
         try
         {
             try
@@ -2912,14 +2737,14 @@ static class FirebaseRuntimeDriftCases
                     $"Selector '{liveSelector}' should not throw after the binding fix, but observed {ex.GetType().FullName}. " +
                     $"Stale selector was '{staleSelector}'. " +
                     $"Runtime address argument type: {typeof(nuint).FullName}. " +
-                    $"Marshal mode: {FormatDetail(marshaledExceptionMode?.ToString())}.");
+                    $"Marshal mode: {objcExceptionProbe.Mode}.");
             }
 
-            if (marshaledExceptionCaptured)
+            if (objcExceptionProbe.HasException)
             {
                 throw new InvalidOperationException(
                     $"Selector '{liveSelector}' completed, but Runtime.MarshalObjectiveCException captured an unexpected Objective-C exception. " +
-                    $"Marshal mode: {FormatDetail(marshaledExceptionMode?.ToString())}.");
+                    $"Marshal mode: {objcExceptionProbe.Mode}.");
             }
 
             return Task.FromResult(
@@ -2928,7 +2753,7 @@ static class FirebaseRuntimeDriftCases
         }
         finally
         {
-            Runtime.MarshalObjectiveCException -= OnMarshalObjectiveCException;
+            objcExceptionProbe.Dispose();
         }
     }
 #endif
@@ -2938,17 +2763,11 @@ static class FirebaseRuntimeDriftCases
     {
         const string selector = "recordError:userInfo:";
 
-        var signature = typeof(Crashlytics).GetMethod(
+        RequireVoidMethod(
+            typeof(Crashlytics),
             nameof(Crashlytics.RecordError),
-            BindingFlags.Instance | BindingFlags.Public,
-            binder: null,
-            types: new[] { typeof(NSError), typeof(NSDictionary<NSString, NSObject>) },
-            modifiers: null);
-        if (signature is null)
-        {
-            throw new InvalidOperationException(
-                $"Expected managed API '{nameof(Crashlytics.RecordError)}({typeof(NSError).FullName}, {typeof(NSDictionary<NSString, NSObject>).FullName})' was not found.");
-        }
+            new[] { typeof(NSError), typeof(NSDictionary<NSString, NSObject>) },
+            selector);
 
         var crashlytics = Crashlytics.SharedInstance;
         if (crashlytics is null)
@@ -2970,16 +2789,7 @@ static class FirebaseRuntimeDriftCases
             new[] { userInfoKey },
             1);
 
-        NSException? marshaledException = null;
-        MarshalObjectiveCExceptionMode? marshaledExceptionMode = null;
-
-        void OnMarshalObjectiveCException(object? sender, MarshalObjectiveCExceptionEventArgs args)
-        {
-            marshaledException ??= args.Exception;
-            marshaledExceptionMode ??= args.ExceptionMode;
-        }
-
-        Runtime.MarshalObjectiveCException += OnMarshalObjectiveCException;
+        var objcExceptionProbe = ObjCExceptionProbe.Attach();
         try
         {
             try
@@ -2991,17 +2801,17 @@ static class FirebaseRuntimeDriftCases
                 throw new InvalidOperationException(
                     $"Selector '{selector}' should not throw after the missing binding is added, but observed {ex.GetType().FullName}. " +
                     $"NSError domain: {error.Domain}. UserInfo type: {userInfo.GetType().FullName}. " +
-                    $"NSException.Name: {FormatDetail(marshaledException?.Name?.ToString())}. " +
-                    $"NSException.Reason: {FormatDetail(marshaledException?.Reason)}. " +
-                    $"Marshal mode: {FormatDetail(marshaledExceptionMode?.ToString())}.",
+                    $"NSException.Name: {objcExceptionProbe.Name}. " +
+                    $"NSException.Reason: {objcExceptionProbe.Reason}. " +
+                    $"Marshal mode: {objcExceptionProbe.Mode}.",
                     ex);
             }
 
-            if (marshaledException is not null)
+            if (objcExceptionProbe.HasException)
             {
                 throw new InvalidOperationException(
-                    $"Selector '{selector}' completed, but Runtime.MarshalObjectiveCException captured unexpected NSException.Name '{marshaledException.Name}'. " +
-                    $"Reason: {FormatDetail(marshaledException.Reason)}. Marshal mode: {FormatDetail(marshaledExceptionMode?.ToString())}.");
+                    $"Selector '{selector}' completed, but Runtime.MarshalObjectiveCException captured unexpected NSException.Name '{objcExceptionProbe.Name}'. " +
+                    $"Reason: {objcExceptionProbe.Reason}. Marshal mode: {objcExceptionProbe.Mode}.");
             }
 
             return Task.FromResult(
@@ -3010,18 +2820,8 @@ static class FirebaseRuntimeDriftCases
         }
         finally
         {
-            Runtime.MarshalObjectiveCException -= OnMarshalObjectiveCException;
+            objcExceptionProbe.Dispose();
         }
     }
 #endif
-
-    static string FormatNSError(Foundation.NSError error)
-    {
-        return $"{error.Domain} ({error.Code}): {error.LocalizedDescription}";
-    }
-
-    static string FormatDetail(string? value)
-    {
-        return string.IsNullOrWhiteSpace(value) ? "<empty>" : value;
-    }
 }
