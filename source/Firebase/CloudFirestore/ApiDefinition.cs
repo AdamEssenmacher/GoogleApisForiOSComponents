@@ -837,27 +837,43 @@ namespace Firebase.CloudFirestore
 
 		// @property(nonatomic, strong) id<FIRLocalCacheSettings, NSObject> _Nonnull cacheSettings;
 		[Export ("cacheSettings", ArgumentSemantic.Strong)]
-		NSObject CacheSettings { get; set; }
+		ILocalCacheSettings CacheSettings { get; set; }
+	}
+
+	interface ILocalCacheSettings { }
+
+	// @protocol FIRLocalCacheSettings
+	[Protocol (Name = "FIRLocalCacheSettings")]
+	interface LocalCacheSettings
+	{
 	}
 
 	// @interface FIRPersistentCacheSettings : NSObject <NSCopying, FIRLocalCacheSettings>
 	[BaseType (typeof (NSObject), Name = "FIRPersistentCacheSettings")]
-	interface PersistentCacheSettings : INSCopying
+	interface PersistentCacheSettings : INSCopying, LocalCacheSettings
 	{
 		// - (instancetype _Nonnull)initWithSizeBytes:(NSNumber * _Nonnull)size;
 		[Export ("initWithSizeBytes:")]
 		NativeHandle Constructor (NSNumber size);
 	}
 
+	interface IMemoryGarbageCollectorSettings { }
+
+	// @protocol FIRMemoryGarbageCollectorSettings
+	[Protocol (Name = "FIRMemoryGarbageCollectorSettings")]
+	interface MemoryGarbageCollectorSettings
+	{
+	}
+
 	// @interface FIRMemoryEagerGCSettings : NSObject <NSCopying, FIRMemoryGarbageCollectorSettings>
 	[BaseType (typeof (NSObject), Name = "FIRMemoryEagerGCSettings")]
-	interface MemoryEagerGCSettings : INSCopying
+	interface MemoryEagerGCSettings : INSCopying, MemoryGarbageCollectorSettings
 	{
 	}
 
 	// @interface FIRMemoryLRUGCSettings : NSObject <NSCopying, FIRMemoryGarbageCollectorSettings>
 	[BaseType (typeof (NSObject), Name = "FIRMemoryLRUGCSettings")]
-	interface MemoryLRUGCSettings : INSCopying
+	interface MemoryLRUGCSettings : INSCopying, MemoryGarbageCollectorSettings
 	{
 		// - (instancetype _Nonnull)initWithSizeBytes:(NSNumber * _Nonnull)size;
 		[Export ("initWithSizeBytes:")]
@@ -866,11 +882,11 @@ namespace Firebase.CloudFirestore
 
 	// @interface FIRMemoryCacheSettings : NSObject <NSCopying, FIRLocalCacheSettings>
 	[BaseType (typeof (NSObject), Name = "FIRMemoryCacheSettings")]
-	interface MemoryCacheSettings : INSCopying
+	interface MemoryCacheSettings : INSCopying, LocalCacheSettings
 	{
 		// - (instancetype _Nonnull)initWithGarbageCollectorSettings:(id<FIRMemoryGarbageCollectorSettings, NSObject> _Nonnull)settings;
 		[Export ("initWithGarbageCollectorSettings:")]
-		NativeHandle Constructor (NSObject settings);
+		NativeHandle Constructor (IMemoryGarbageCollectorSettings settings);
 	}
 
 	// @interface FIRTransactionOptions : NSObject <NSCopying>

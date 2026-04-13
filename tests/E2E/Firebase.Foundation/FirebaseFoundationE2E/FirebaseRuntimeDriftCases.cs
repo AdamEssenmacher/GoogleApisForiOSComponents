@@ -2454,11 +2454,11 @@ static partial class FirebaseRuntimeDriftCases
         var cacheSettingsProperty = typeof(FirestoreSettings).GetProperty(
             nameof(FirestoreSettings.CacheSettings),
             BindingFlags.Instance | BindingFlags.Public);
-        if (cacheSettingsProperty?.PropertyType != typeof(NSObject))
+        if (cacheSettingsProperty?.PropertyType != typeof(ILocalCacheSettings))
         {
             throw new InvalidOperationException(
                 $"Expected managed API '{typeof(FirestoreSettings).FullName}.{nameof(FirestoreSettings.CacheSettings)}' " +
-                $"to return '{typeof(NSObject).FullName}' for selector '{cacheSettingsSelector}', " +
+                $"to return '{typeof(ILocalCacheSettings).FullName}' for selector '{cacheSettingsSelector}', " +
                 $"observed '{cacheSettingsProperty?.PropertyType.FullName ?? "<missing>"}'.");
         }
 
@@ -2479,7 +2479,7 @@ static partial class FirebaseRuntimeDriftCases
         RequireConstructor(typeof(MemoryLRUGCSettings), Type.EmptyTypes, "init");
         RequireConstructor(typeof(MemoryLRUGCSettings), new[] { typeof(NSNumber) }, "initWithSizeBytes:");
         RequireConstructor(typeof(MemoryCacheSettings), Type.EmptyTypes, "init");
-        RequireConstructor(typeof(MemoryCacheSettings), new[] { typeof(NSObject) }, "initWithGarbageCollectorSettings:");
+        RequireConstructor(typeof(MemoryCacheSettings), new[] { typeof(IMemoryGarbageCollectorSettings) }, "initWithGarbageCollectorSettings:");
         RequireVoidMethod(typeof(PersistentCacheIndexManager), nameof(PersistentCacheIndexManager.EnableIndexAutoCreation), enableIndexAutoCreationSelector);
         RequireVoidMethod(typeof(PersistentCacheIndexManager), nameof(PersistentCacheIndexManager.DisableIndexAutoCreation), disableIndexAutoCreationSelector);
         RequireVoidMethod(typeof(PersistentCacheIndexManager), nameof(PersistentCacheIndexManager.DeleteAllIndexes), deleteAllIndexesSelector);
@@ -2616,7 +2616,13 @@ static partial class FirebaseRuntimeDriftCases
             var cacheSettings = settings.CacheSettings
                 ?? throw new InvalidOperationException($"FirestoreSettings.CacheSettings returned null after assigning {assignedRuntimeTypeName}.");
 
-            return cacheSettings.GetType().FullName ?? assignedRuntimeTypeName;
+            if (cacheSettings is not NSObject nativeCacheSettings)
+            {
+                throw new InvalidOperationException(
+                    $"FirestoreSettings.CacheSettings returned '{cacheSettings.GetType().FullName}', which does not expose an NSObject native handle.");
+            }
+
+            return nativeCacheSettings.GetType().FullName ?? assignedRuntimeTypeName;
         }
     }
 #endif
