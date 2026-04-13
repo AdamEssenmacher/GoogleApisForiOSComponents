@@ -65,6 +65,8 @@ public sealed class BindingSurfaceCoverageBuilderTests
                 [BaseType(typeof(NSObject), Name = "FIRAuth")]
                 public interface Auth
                 {
+                    [Field("FIRAuthErrorDomain", "__Internal")]
+                    NSString ErrorDomain { get; }
                 }
                 """);
             File.WriteAllText(
@@ -90,6 +92,9 @@ public sealed class BindingSurfaceCoverageBuilderTests
                 "Auth");
 
             var surfaces = document.Targets.Single().Surfaces;
+            var fieldConstant = Assert.Single(surfaces, static surface => surface.BindingValue == "FIRAuthErrorDomain");
+            Assert.True(fieldConstant.IsStatic);
+
             var helperDelegate = Assert.Single(surfaces, static surface => surface.Kind == "manual-delegate");
             Assert.Equal("Firebase.Auth.Auth+TokenFactory", helperDelegate.RuntimeTypeName);
             Assert.Equal(["int"], helperDelegate.ParameterTypes);

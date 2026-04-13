@@ -426,7 +426,9 @@ internal sealed class BindingSyntaxParser
             BindingAttribute: bindingAttribute,
             BindingValue: bindingValue,
             IsNotification: HasAttribute(propertyDeclaration.AttributeLists, "Notification"),
-            IsStatic: propertyDeclaration.Modifiers.Any(static token => token.IsKind(SyntaxKind.StaticKeyword)) || HasAttribute(propertyDeclaration.AttributeLists, "Static"),
+            IsStatic: propertyDeclaration.Modifiers.Any(static token => token.IsKind(SyntaxKind.StaticKeyword)) ||
+                      HasAttribute(propertyDeclaration.AttributeLists, "Static") ||
+                      string.Equals(bindingAttribute, "Field", StringComparison.Ordinal),
             ReturnType: NormalizeType(propertyDeclaration.Type),
             IsReturnNullAllowed: HasNullAllowed(propertyDeclaration.AttributeLists, "return") || HasNullAllowed(propertyDeclaration.AttributeLists, null),
             HasGetter: getter is not null,

@@ -442,7 +442,7 @@ public static partial class FirebaseBindingSurfaceCoverage
             return;
         }
 
-        var field = type.GetField(memberName, flags);
+        var field = FindField(type, surface, flags);
         if (field?.IsStatic == true)
         {
             _ = field.GetValue(null);
@@ -472,10 +472,26 @@ public static partial class FirebaseBindingSurfaceCoverage
             return false;
         }
 
-        return ReturnTypeMatches(property.PropertyType, surface) &&
+        return PropertyIsStatic(property) == surface.IsStatic &&
+               ReturnTypeMatches(property.PropertyType, surface) &&
                ParametersMatch(property.GetIndexParameters(), surface) &&
                (!surface.HasGetter || property.GetMethod is not null) &&
                (!surface.HasSetter || property.SetMethod is not null);
+    }
+
+    static bool PropertyIsStatic(PropertyInfo property) =>
+        property.GetMethod?.IsStatic ??
+        property.SetMethod?.IsStatic ??
+        false;
+
+    static FieldInfo? FindField(Type type, BindingSurfaceDescriptor surface, BindingFlags flags) =>
+        type.GetFields(flags).FirstOrDefault(field => FieldMatchesSurface(field, surface));
+
+    static bool FieldMatchesSurface(FieldInfo field, BindingSurfaceDescriptor surface)
+    {
+        return string.Equals(field.Name, surface.MemberName, StringComparison.Ordinal) &&
+               field.IsStatic == surface.IsStatic &&
+               ReturnTypeMatches(field.FieldType, surface);
     }
 
     static bool MethodMatchesSurface(MethodInfo method, BindingSurfaceDescriptor surface)
