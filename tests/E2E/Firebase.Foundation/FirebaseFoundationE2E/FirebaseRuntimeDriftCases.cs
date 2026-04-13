@@ -1,5 +1,11 @@
 using System.Reflection;
 
+#if ENABLE_RUNTIME_DRIFT_CASE_CORE_CONFIGURATION_LOGGERLEVEL
+using Firebase.Core;
+using Foundation;
+using ObjCRuntime;
+#endif
+
 #if ENABLE_RUNTIME_DRIFT_CASE_ANALYTICS_SESSIONIDWITHCOMPLETION
 using Firebase.Analytics;
 using Foundation;
@@ -25,8 +31,9 @@ using Foundation;
 using ObjCRuntime;
 #endif
 
-#if ENABLE_RUNTIME_DRIFT_CASE_DATABASE_SERVERVALUE_INCREMENT
+#if ENABLE_RUNTIME_DRIFT_CASE_DATABASE_SERVERVALUE_INCREMENT || ENABLE_RUNTIME_DRIFT_CASE_DATABASE_QUERY_GETDATA
 using Firebase.Database;
+using FirebaseCoreOptions = Firebase.Core.Options;
 using Foundation;
 using ObjCRuntime;
 #endif
@@ -91,14 +98,21 @@ using Foundation;
 using ObjCRuntime;
 #endif
 
+#if ENABLE_RUNTIME_DRIFT_CASE_CLOUDFIRESTORE_INDEX_CONFIGURATION
+using Firebase.CloudFirestore;
+using Foundation;
+using ObjCRuntime;
+#endif
+
 #if ENABLE_RUNTIME_DRIFT_CASE_CLOUDFUNCTIONS_USEFUNCTIONSEMULATORORIGIN
 using Firebase.CloudFunctions;
 using Foundation;
 using ObjCRuntime;
 #endif
 
-#if ENABLE_RUNTIME_DRIFT_CASE_CRASHLYTICS_STACKFRAMEWITHADDRESS
+#if ENABLE_RUNTIME_DRIFT_CASE_CRASHLYTICS_STACKFRAMEWITHADDRESS || ENABLE_RUNTIME_DRIFT_CASE_CRASHLYTICS_RECORD_ERROR_USER_INFO
 using Firebase.Crashlytics;
+using Foundation;
 using ObjCRuntime;
 #endif
 
@@ -149,6 +163,119 @@ static partial class FirebaseRuntimeDriftCases
             .FirstOrDefault(attribute => string.Equals(attribute.Key, key, StringComparison.Ordinal))
             ?.Value;
     }
+
+#if ENABLE_RUNTIME_DRIFT_CASE_CORE_CONFIGURATION_LOGGERLEVEL
+    static Task<string> VerifyCoreConfigurationLoggerLevelAsync()
+    {
+        const string loggerLevelSelector = "loggerLevel";
+        const string setLoggerLevelSelector = "setLoggerLevel:";
+        const LoggerLevel requestedLevel = LoggerLevel.Warning;
+
+        var loggerLevelProperty = typeof(Configuration).GetProperty(
+            nameof(Configuration.LoggerLevel),
+            BindingFlags.Instance | BindingFlags.Public);
+        if (loggerLevelProperty?.PropertyType != typeof(LoggerLevel))
+        {
+            throw new InvalidOperationException(
+                $"Expected managed API '{typeof(Configuration).FullName}.{nameof(Configuration.LoggerLevel)}' " +
+                $"to return '{typeof(LoggerLevel).FullName}' for selector '{loggerLevelSelector}', " +
+                $"observed '{loggerLevelProperty?.PropertyType.FullName ?? "<missing>"}'.");
+        }
+
+        var setter = typeof(Configuration).GetMethod(
+            nameof(Configuration.SetLoggerLevel),
+            BindingFlags.Instance | BindingFlags.Public,
+            binder: null,
+            types: new[] { typeof(LoggerLevel) },
+            modifiers: null);
+        if (setter?.ReturnType != typeof(void))
+        {
+            throw new InvalidOperationException(
+                $"Expected managed API '{typeof(Configuration).FullName}.{nameof(Configuration.SetLoggerLevel)}({typeof(LoggerLevel).FullName})' " +
+                $"to return void for selector '{setLoggerLevelSelector}', observed '{setter?.ReturnType.FullName ?? "<missing>"}'.");
+        }
+
+        var configuration = Configuration.SharedInstance;
+        if (configuration is null)
+        {
+            throw new InvalidOperationException("Firebase.Core.Configuration.SharedInstance returned null.");
+        }
+
+        if (!configuration.RespondsToSelector(new Selector(loggerLevelSelector)))
+        {
+            throw new InvalidOperationException($"Native FIRConfiguration does not respond to expected selector '{loggerLevelSelector}'.");
+        }
+
+        if (!configuration.RespondsToSelector(new Selector(setLoggerLevelSelector)))
+        {
+            throw new InvalidOperationException($"Native FIRConfiguration does not respond to expected selector '{setLoggerLevelSelector}'.");
+        }
+
+        NSException? marshaledException = null;
+        MarshalObjectiveCExceptionMode? marshaledExceptionMode = null;
+
+        void OnMarshalObjectiveCException(object? sender, MarshalObjectiveCExceptionEventArgs args)
+        {
+            marshaledException ??= args.Exception;
+            marshaledExceptionMode ??= args.ExceptionMode;
+        }
+
+        Runtime.MarshalObjectiveCException += OnMarshalObjectiveCException;
+        try
+        {
+            LoggerLevel originalLevel = default;
+            var originalLevelRead = false;
+            LoggerLevel observedLevel;
+
+            try
+            {
+                originalLevel = configuration.LoggerLevel;
+                originalLevelRead = true;
+                configuration.SetLoggerLevel(requestedLevel);
+                observedLevel = configuration.LoggerLevel;
+            }
+            catch (ObjCException ex)
+            {
+                throw new InvalidOperationException(
+                    $"Core configuration logger-level selectors should not throw after the missing getter binding is added, but observed {ex.GetType().FullName}. " +
+                    $"Selectors exercised: '{loggerLevelSelector}', '{setLoggerLevelSelector}'. " +
+                    $"NSException.Name: {FormatDetail(marshaledException?.Name?.ToString())}. " +
+                    $"NSException.Reason: {FormatDetail(marshaledException?.Reason)}. " +
+                    $"Marshal mode: {FormatDetail(marshaledExceptionMode?.ToString())}.",
+                    ex);
+            }
+            finally
+            {
+                if (originalLevelRead)
+                {
+                    configuration.SetLoggerLevel(originalLevel);
+                }
+            }
+
+            if (observedLevel != requestedLevel)
+            {
+                throw new InvalidOperationException(
+                    $"Selector '{loggerLevelSelector}' returned '{observedLevel}' after setting '{requestedLevel}'.");
+            }
+
+            if (marshaledException is not null)
+            {
+                throw new InvalidOperationException(
+                    $"Core configuration logger-level selectors completed, but Runtime.MarshalObjectiveCException captured unexpected NSException.Name '{marshaledException.Name}'. " +
+                    $"Reason: {FormatDetail(marshaledException.Reason)}. Marshal mode: {FormatDetail(marshaledExceptionMode?.ToString())}.");
+            }
+
+            return Task.FromResult(
+                $"Core configuration logger-level selectors crossed the native boundary. " +
+                $"Selectors exercised: '{loggerLevelSelector}', '{setLoggerLevelSelector}'. " +
+                $"Observed level after set: {observedLevel}.");
+        }
+        finally
+        {
+            Runtime.MarshalObjectiveCException -= OnMarshalObjectiveCException;
+        }
+    }
+#endif
 
 #if ENABLE_RUNTIME_DRIFT_CASE_ANALYTICS_SESSIONIDWITHCOMPLETION
     static async Task<string> VerifyAnalyticsSessionIdWithCompletionAsync()
@@ -674,6 +801,129 @@ static partial class FirebaseRuntimeDriftCases
         finally
         {
             objcExceptionProbe.Dispose();
+        }
+    }
+#endif
+
+#if ENABLE_RUNTIME_DRIFT_CASE_DATABASE_QUERY_GETDATA
+    static async Task<string> VerifyDatabaseQueryGetDataAsync()
+    {
+        const string selector = "getDataWithCompletionBlock:";
+
+        var signature = typeof(DatabaseQuery).GetMethod(
+            nameof(DatabaseQuery.GetData),
+            BindingFlags.Instance | BindingFlags.Public,
+            binder: null,
+            types: new[] { typeof(DataSnapshotCompletionHandler) },
+            modifiers: null);
+        if (signature?.ReturnType != typeof(void))
+        {
+            throw new InvalidOperationException(
+                $"Expected managed API '{typeof(DatabaseQuery).FullName}.{nameof(DatabaseQuery.GetData)}({typeof(DataSnapshotCompletionHandler).FullName})' " +
+                $"to return void for selector '{selector}', observed '{signature?.ReturnType.FullName ?? "<missing>"}'.");
+        }
+
+        var projectId = FirebaseCoreOptions.DefaultInstance?.ProjectId
+            ?? throw new InvalidOperationException("Firebase.Core.Options.ProjectId returned null before Database query validation.");
+        var database = Firebase.Database.Database.From($"https://{projectId}-default-rtdb.firebaseio.com");
+        var root = database.GetRootReference();
+        var query = root.GetQueryOrderedByKey();
+        if (query is null)
+        {
+            throw new InvalidOperationException("Firebase.Database.DatabaseReference.GetQueryOrderedByKey returned null.");
+        }
+
+        if (!query.RespondsToSelector(new Selector(selector)))
+        {
+            throw new InvalidOperationException($"Native FIRDatabaseQuery does not respond to expected selector '{selector}'.");
+        }
+
+        var completionSource = new TaskCompletionSource<(NSError? Error, DataSnapshot? Snapshot)>(TaskCreationOptions.RunContinuationsAsynchronously);
+        var completionInvoked = false;
+        NSError? callbackError = null;
+        DataSnapshot? callbackSnapshot = null;
+        NSException? marshaledException = null;
+        MarshalObjectiveCExceptionMode? marshaledExceptionMode = null;
+
+        void OnMarshalObjectiveCException(object? sender, MarshalObjectiveCExceptionEventArgs args)
+        {
+            marshaledException ??= args.Exception;
+            marshaledExceptionMode ??= args.ExceptionMode;
+        }
+
+        Runtime.MarshalObjectiveCException += OnMarshalObjectiveCException;
+        try
+        {
+            try
+            {
+                query.GetData((error, snapshot) =>
+                {
+                    completionInvoked = true;
+                    callbackError = error;
+                    callbackSnapshot = snapshot;
+                    completionSource.TrySetResult((error, snapshot));
+                });
+            }
+            catch (ObjCException ex)
+            {
+                throw new InvalidOperationException(
+                    $"Selector '{selector}' should not throw after the missing DatabaseQuery binding is added, but observed {ex.GetType().FullName}. " +
+                    $"Managed query runtime type: {query.GetType().FullName}. " +
+                    $"NSException.Name: {FormatDetail(marshaledException?.Name?.ToString())}. " +
+                    $"NSException.Reason: {FormatDetail(marshaledException?.Reason)}. " +
+                    $"Marshal mode: {FormatDetail(marshaledExceptionMode?.ToString())}.",
+                    ex);
+            }
+
+            if (marshaledException is not null)
+            {
+                throw new InvalidOperationException(
+                    $"Selector '{selector}' completed, but Runtime.MarshalObjectiveCException captured unexpected NSException.Name '{marshaledException.Name}'. " +
+                    $"Reason: {FormatDetail(marshaledException.Reason)}. Marshal mode: {FormatDetail(marshaledExceptionMode?.ToString())}.");
+            }
+
+            var completedTask = await Task.WhenAny(completionSource.Task, Task.Delay(AsyncTimeout));
+            if (completedTask != completionSource.Task)
+            {
+                throw new TimeoutException(
+                    $"Selector '{selector}' did not invoke its completion callback within {AsyncTimeout.TotalSeconds} seconds after crossing the native DatabaseQuery boundary.");
+            }
+
+            string callbackDetail;
+            var (completedError, completedSnapshot) = await completionSource.Task;
+            if (!completionInvoked)
+            {
+                throw new InvalidOperationException(
+                    $"Selector '{selector}' completed without throwing, but the completion callback was never marked as invoked.");
+            }
+
+            if (!ReferenceEquals(callbackError, completedError) || !ReferenceEquals(callbackSnapshot, completedSnapshot))
+            {
+                throw new InvalidOperationException("Database query getData callback state did not match the completed task payload.");
+            }
+
+            callbackDetail = completedError is not null
+                ? $"completion callback returned Firebase error {FormatNSError(completedError)}"
+                : completedSnapshot is not null
+                    ? $"completion callback returned snapshot type {completedSnapshot.GetType().FullName} with key '{FormatDetail(completedSnapshot.Key)}'"
+                    : "completion callback returned neither snapshot nor Firebase error";
+
+            if (marshaledException is not null)
+            {
+                throw new InvalidOperationException(
+                    $"Selector '{selector}' completed, but Runtime.MarshalObjectiveCException captured unexpected NSException.Name '{marshaledException.Name}'. " +
+                    $"Reason: {FormatDetail(marshaledException.Reason)}. Marshal mode: {FormatDetail(marshaledExceptionMode?.ToString())}.");
+            }
+
+            return
+                $"Selector '{selector}' crossed the native DatabaseQuery boundary. " +
+                $"Managed query runtime type: {query.GetType().FullName}. " +
+                $"Query reference URL: {query.Reference.Url}. " +
+                $"Callback detail: {callbackDetail}.";
+        }
+        finally
+        {
+            Runtime.MarshalObjectiveCException -= OnMarshalObjectiveCException;
         }
     }
 #endif
@@ -2035,6 +2285,162 @@ static partial class FirebaseRuntimeDriftCases
     }
 #endif
 
+#if ENABLE_RUNTIME_DRIFT_CASE_CLOUDFIRESTORE_INDEX_CONFIGURATION
+    static async Task<string> VerifyCloudFirestoreIndexConfigurationAsync()
+    {
+        const string jsonSelector = "setIndexConfigurationFromJSON:completion:";
+        const string streamSelector = "setIndexConfigurationFromStream:completion:";
+        const string indexConfigurationJson = """
+        {
+          "indexes": [],
+          "fieldOverrides": []
+        }
+        """;
+
+        var jsonSignature = typeof(Firestore).GetMethod(
+            nameof(Firestore.SetIndexConfiguration),
+            BindingFlags.Instance | BindingFlags.Public,
+            binder: null,
+            types: new[] { typeof(string), typeof(Action<NSError>) },
+            modifiers: null);
+        if (jsonSignature?.ReturnType != typeof(void))
+        {
+            throw new InvalidOperationException(
+                $"Expected managed API '{typeof(Firestore).FullName}.{nameof(Firestore.SetIndexConfiguration)}({typeof(string).FullName}, {typeof(Action<NSError>).FullName})' " +
+                $"to return void for selector '{jsonSelector}', observed '{jsonSignature?.ReturnType.FullName ?? "<missing>"}'.");
+        }
+
+        var streamSignature = typeof(Firestore).GetMethod(
+            nameof(Firestore.SetIndexConfiguration),
+            BindingFlags.Instance | BindingFlags.Public,
+            binder: null,
+            types: new[] { typeof(NSInputStream), typeof(Action<NSError>) },
+            modifiers: null);
+        if (streamSignature?.ReturnType != typeof(void))
+        {
+            throw new InvalidOperationException(
+                $"Expected managed API '{typeof(Firestore).FullName}.{nameof(Firestore.SetIndexConfiguration)}({typeof(NSInputStream).FullName}, {typeof(Action<NSError>).FullName})' " +
+                $"to return void for selector '{streamSelector}', observed '{streamSignature?.ReturnType.FullName ?? "<missing>"}'.");
+        }
+
+        var firestore = Firestore.SharedInstance;
+        if (firestore is null)
+        {
+            throw new InvalidOperationException("Firebase.CloudFirestore.Firestore.SharedInstance returned null after App.Configure().");
+        }
+
+        if (!firestore.RespondsToSelector(new Selector(jsonSelector)))
+        {
+            throw new InvalidOperationException($"Native FIRFirestore does not respond to expected selector '{jsonSelector}'.");
+        }
+
+        if (!firestore.RespondsToSelector(new Selector(streamSelector)))
+        {
+            throw new InvalidOperationException($"Native FIRFirestore does not respond to expected selector '{streamSelector}'.");
+        }
+
+        using var indexConfigurationData = NSData.FromString(indexConfigurationJson, NSStringEncoding.UTF8);
+        using var indexConfigurationStream = NSInputStream.FromData(indexConfigurationData);
+        if (indexConfigurationStream is null)
+        {
+            throw new InvalidOperationException("Foundation.NSInputStream.FromData returned null for the Firestore index configuration JSON.");
+        }
+
+        var jsonCompletionSource = new TaskCompletionSource<NSError?>(TaskCreationOptions.RunContinuationsAsynchronously);
+        var streamCompletionSource = new TaskCompletionSource<NSError?>(TaskCreationOptions.RunContinuationsAsynchronously);
+        var jsonCompletionInvoked = false;
+        var streamCompletionInvoked = false;
+        NSError? jsonCallbackError = null;
+        NSError? streamCallbackError = null;
+        NSException? marshaledException = null;
+        MarshalObjectiveCExceptionMode? marshaledExceptionMode = null;
+
+        void OnMarshalObjectiveCException(object? sender, MarshalObjectiveCExceptionEventArgs args)
+        {
+            marshaledException ??= args.Exception;
+            marshaledExceptionMode ??= args.ExceptionMode;
+        }
+
+        Runtime.MarshalObjectiveCException += OnMarshalObjectiveCException;
+        try
+        {
+            try
+            {
+                firestore.SetIndexConfiguration(indexConfigurationJson, error =>
+                {
+                    jsonCompletionInvoked = true;
+                    jsonCallbackError = error;
+                    jsonCompletionSource.TrySetResult(error);
+                });
+
+                firestore.SetIndexConfiguration(indexConfigurationStream, error =>
+                {
+                    streamCompletionInvoked = true;
+                    streamCallbackError = error;
+                    streamCompletionSource.TrySetResult(error);
+                });
+            }
+            catch (ObjCException ex)
+            {
+                throw new InvalidOperationException(
+                    $"Firestore index-configuration selectors should not throw after the missing bindings are added, but observed {ex.GetType().FullName}. " +
+                    $"Selectors exercised: '{jsonSelector}', '{streamSelector}'. " +
+                    $"NSException.Name: {FormatDetail(marshaledException?.Name?.ToString())}. " +
+                    $"NSException.Reason: {FormatDetail(marshaledException?.Reason)}. " +
+                    $"Marshal mode: {FormatDetail(marshaledExceptionMode?.ToString())}.",
+                    ex);
+            }
+
+            var completionsTask = Task.WhenAll(jsonCompletionSource.Task, streamCompletionSource.Task);
+            var completedTask = await Task.WhenAny(completionsTask, Task.Delay(AsyncTimeout));
+            if (completedTask != completionsTask)
+            {
+                throw new TimeoutException(
+                    $"Firestore index-configuration selectors did not both invoke their completion callbacks within {AsyncTimeout.TotalSeconds} seconds. " +
+                    $"JSON callback invoked: {jsonCompletionInvoked}. Stream callback invoked: {streamCompletionInvoked}.");
+            }
+
+            var completedErrors = await completionsTask;
+            var completedJsonError = completedErrors[0];
+            var completedStreamError = completedErrors[1];
+            if (!jsonCompletionInvoked || !streamCompletionInvoked)
+            {
+                throw new InvalidOperationException(
+                    $"Firestore index-configuration completion state did not match completed task state. " +
+                    $"JSON callback invoked: {jsonCompletionInvoked}. Stream callback invoked: {streamCompletionInvoked}.");
+            }
+
+            if (!ReferenceEquals(jsonCallbackError, completedJsonError) || !ReferenceEquals(streamCallbackError, completedStreamError))
+            {
+                throw new InvalidOperationException("Firestore index-configuration callback state did not match the completed task payload.");
+            }
+
+            if (marshaledException is not null)
+            {
+                throw new InvalidOperationException(
+                    $"Firestore index-configuration selectors completed, but Runtime.MarshalObjectiveCException captured unexpected NSException.Name '{marshaledException.Name}'. " +
+                    $"Reason: {FormatDetail(marshaledException.Reason)}. Marshal mode: {FormatDetail(marshaledExceptionMode?.ToString())}.");
+            }
+
+            var jsonResultDetail = completedJsonError is null
+                ? "JSON configuration completed without Firebase NSError"
+                : $"JSON configuration reached native completion with Firebase error {FormatNSError(completedJsonError)}";
+            var streamResultDetail = completedStreamError is null
+                ? "stream configuration completed without Firebase NSError"
+                : $"stream configuration reached native completion with Firebase error {FormatNSError(completedStreamError)}";
+
+            return
+                $"Firestore index-configuration APIs crossed the native selector boundary. " +
+                $"Selectors exercised: '{jsonSelector}', '{streamSelector}'. " +
+                $"{jsonResultDetail}; {streamResultDetail}.";
+        }
+        finally
+        {
+            Runtime.MarshalObjectiveCException -= OnMarshalObjectiveCException;
+        }
+    }
+#endif
+
 #if ENABLE_RUNTIME_DRIFT_CASE_CLOUDFIRESTORE_CACHE_SETTINGS
     static Task<string> VerifyCloudFirestoreCacheSettingsAsync()
     {
@@ -2352,4 +2758,70 @@ static partial class FirebaseRuntimeDriftCases
     }
 #endif
 
+#if ENABLE_RUNTIME_DRIFT_CASE_CRASHLYTICS_RECORD_ERROR_USER_INFO
+    static Task<string> VerifyCrashlyticsRecordErrorUserInfoAsync()
+    {
+        const string selector = "recordError:userInfo:";
+
+        RequireVoidMethod(
+            typeof(Crashlytics),
+            nameof(Crashlytics.RecordError),
+            new[] { typeof(NSError), typeof(NSDictionary<NSString, NSObject>) },
+            selector);
+
+        var crashlytics = Crashlytics.SharedInstance;
+        if (crashlytics is null)
+        {
+            throw new InvalidOperationException("Firebase.Crashlytics.Crashlytics.SharedInstance returned null after App.Configure().");
+        }
+
+        if (!crashlytics.RespondsToSelector(new Selector(selector)))
+        {
+            throw new InvalidOperationException($"Native FIRCrashlytics does not respond to expected selector '{selector}'.");
+        }
+
+        using var domain = new NSString("codex.crashlytics.e2e");
+        using var userInfoKey = new NSString("codex_context");
+        using var userInfoValue = new NSString("record-error-user-info");
+        using var error = new NSError(domain, -130, null);
+        using var userInfo = NSDictionary<NSString, NSObject>.FromObjectsAndKeys(
+            new NSObject[] { userInfoValue },
+            new[] { userInfoKey },
+            1);
+
+        var objcExceptionProbe = ObjCExceptionProbe.Attach();
+        try
+        {
+            try
+            {
+                crashlytics.RecordError(error, userInfo);
+            }
+            catch (ObjCException ex)
+            {
+                throw new InvalidOperationException(
+                    $"Selector '{selector}' should not throw after the missing binding is added, but observed {ex.GetType().FullName}. " +
+                    $"NSError domain: {error.Domain}. UserInfo type: {userInfo.GetType().FullName}. " +
+                    $"NSException.Name: {objcExceptionProbe.Name}. " +
+                    $"NSException.Reason: {objcExceptionProbe.Reason}. " +
+                    $"Marshal mode: {objcExceptionProbe.Mode}.",
+                    ex);
+            }
+
+            if (objcExceptionProbe.HasException)
+            {
+                throw new InvalidOperationException(
+                    $"Selector '{selector}' completed, but Runtime.MarshalObjectiveCException captured unexpected NSException.Name '{objcExceptionProbe.Name}'. " +
+                    $"Reason: {objcExceptionProbe.Reason}. Marshal mode: {objcExceptionProbe.Mode}.");
+            }
+
+            return Task.FromResult(
+                $"Selector '{selector}' crossed the native boundary without ObjC exception. " +
+                $"NSError domain: {error.Domain}. UserInfo count: {userInfo.Count}.");
+        }
+        finally
+        {
+            objcExceptionProbe.Dispose();
+        }
+    }
+#endif
 }

@@ -78,6 +78,10 @@ namespace Firebase.Core
 		// - (void)setLoggerLevel:(FIRLoggerLevel)loggerLevel;
 		[Export ("setLoggerLevel:")]
 		void SetLoggerLevel (LoggerLevel loggerLevel);
+
+		// - (FIRLoggerLevel)loggerLevel;
+		[Export ("loggerLevel")]
+		LoggerLevel LoggerLevel { get; }
 	}
 
 	// @interface FIROptions : NSObject <NSCopying>

@@ -103,7 +103,7 @@ namespace Firebase.AppCheck {
 	// @interface FIRAppCheckDebugProvider : NSObject <FIRAppCheckProvider>	
 	[DisableDefaultCtor]
 	[BaseType (typeof (NSObject), Name = "FIRAppCheckDebugProvider")]
-	interface AppCheckDebugProvider : IAppCheckProvider {
+	interface AppCheckDebugProvider : AppCheckProvider {
 		// -(instancetype _Nullable)initWithApp:(FIRApp * _Nonnull)app;
 		[return: NullAllowed]
 		[Export ("initWithApp:")]
@@ -117,9 +117,6 @@ namespace Firebase.AppCheck {
 		[Export ("currentDebugToken")]
 		string CurrentDebugToken { get; }
 
-		// -(void)getLimitedUseTokenWithCompletion:(void (^ _Nonnull)(FIRAppCheckToken * _Nullable, NSError * _Nullable))handler __attribute__((swift_name("getLimitedUseToken(completion:)")));
-		[Export ("getLimitedUseTokenWithCompletion:")]
-		void GetLimitedUseTokenWithCompletion (TokenCompletionHandler handler);
 	}
 
 	// @interface FIRAppCheckDebugProviderFactory : NSObject <FIRAppCheckProviderFactory>

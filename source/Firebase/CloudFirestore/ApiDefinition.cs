@@ -670,6 +670,16 @@ namespace Firebase.CloudFirestore
 		[Export ("persistentCacheIndexManager")]
 		PersistentCacheIndexManager PersistentCacheIndexManager { get; }
 
+		// - (void)setIndexConfigurationFromJSON:(NSString *)json completion:(nullable void (^)(NSError *_Nullable error))completion;
+		[Async]
+		[Export ("setIndexConfigurationFromJSON:completion:")]
+		void SetIndexConfiguration (string json, [NullAllowed] Action<NSError> completion);
+
+		// - (void)setIndexConfigurationFromStream:(NSInputStream *)stream completion:(nullable void (^)(NSError *_Nullable error))completion;
+		[Async]
+		[Export ("setIndexConfigurationFromStream:completion:")]
+		void SetIndexConfiguration (NSInputStream stream, [NullAllowed] Action<NSError> completion);
+
 		// -(FIRCollectionReference * _Nonnull)collectionWithPath:(NSString * _Nonnull)collectionPath;
 		[Export ("collectionWithPath:")]
 		CollectionReference GetCollection (string collectionPath);
@@ -686,6 +696,11 @@ namespace Firebase.CloudFirestore
 		[Internal]
 		[Export ("runTransactionWithBlock:completion:")]
 		void _RunTransaction (Func<Transaction, IntPtr, NSObject> updateHandler, TransactionCompletionHandler completion);
+
+		// -(void)runTransactionWithOptions:(FIRTransactionOptions * _Nullable)options block:(id  _Nullable (^ _Nonnull)(FIRTransaction * _Nonnull, NSError * _Nullable * _Nullable))updateBlock completion:(void (^ _Nonnull)(id _Nullable, NSError * _Nullable))completion;
+		[Internal]
+		[Export ("runTransactionWithOptions:block:completion:")]
+		void _RunTransaction ([NullAllowed] TransactionOptions options, Func<Transaction, IntPtr, NSObject> updateHandler, TransactionCompletionHandler completion);
 
 		// -(FIRWriteBatch * _Nonnull)batch;
 		[Export ("batch")]
@@ -856,6 +871,15 @@ namespace Firebase.CloudFirestore
 		// - (instancetype _Nonnull)initWithGarbageCollectorSettings:(id<FIRMemoryGarbageCollectorSettings, NSObject> _Nonnull)settings;
 		[Export ("initWithGarbageCollectorSettings:")]
 		NativeHandle Constructor (NSObject settings);
+	}
+
+	// @interface FIRTransactionOptions : NSObject <NSCopying>
+	[BaseType (typeof (NSObject), Name = "FIRTransactionOptions")]
+	interface TransactionOptions : INSCopying
+	{
+		// @property(nonatomic, assign) NSInteger maxAttempts;
+		[Export ("maxAttempts")]
+		nint MaxAttempts { get; set; }
 	}
 
 	// @interface FIRPersistentCacheIndexManager : NSObject

@@ -1,6 +1,12 @@
 {
   "cases": [
     {
+      "id": "core-configuration-loggerlevel",
+      "method": "VerifyCoreConfigurationLoggerLevelAsync",
+      "bindingPackage": "AdamE.Firebase.iOS.Core",
+      "packages": []
+    },
+    {
       "id": "analytics-sessionidwithcompletion",
       "method": "VerifyAnalyticsSessionIdWithCompletionAsync",
       "bindingPackage": "AdamE.Firebase.iOS.Analytics",
@@ -41,6 +47,17 @@
     {
       "id": "database-servervalue-increment",
       "method": "VerifyDatabaseServerValueIncrementAsync",
+      "bindingPackage": "AdamE.Firebase.iOS.Database",
+      "packages": [
+        {
+          "id": "AdamE.Firebase.iOS.Database",
+          "version": "12.6.0"
+        }
+      ]
+    },
+    {
+      "id": "database-query-getdata",
+      "method": "VerifyDatabaseQueryGetDataAsync",
       "bindingPackage": "AdamE.Firebase.iOS.Database",
       "packages": [
         {
@@ -160,6 +177,17 @@
       ]
     },
     {
+      "id": "cloudfirestore-index-configuration",
+      "method": "VerifyCloudFirestoreIndexConfigurationAsync",
+      "bindingPackage": "AdamE.Firebase.iOS.CloudFirestore",
+      "packages": [
+        {
+          "id": "AdamE.Firebase.iOS.CloudFirestore",
+          "version": "12.6.0"
+        }
+      ]
+    },
+    {
       "id": "cloudfunctions-usefunctionsemulatororigin",
       "method": "VerifyCloudFunctionsUseFunctionsEmulatorOriginAsync",
       "bindingPackage": "AdamE.Firebase.iOS.CloudFunctions",
@@ -173,6 +201,17 @@
     {
       "id": "crashlytics-stackframewithaddress",
       "method": "VerifyCrashlyticsStackFrameWithAddressAsync",
+      "bindingPackage": "AdamE.Firebase.iOS.Crashlytics",
+      "packages": [
+        {
+          "id": "AdamE.Firebase.iOS.Crashlytics",
+          "version": "12.6.0"
+        }
+      ]
+    },
+    {
+      "id": "crashlytics-record-error-user-info",
+      "method": "VerifyCrashlyticsRecordErrorUserInfoAsync",
       "bindingPackage": "AdamE.Firebase.iOS.Crashlytics",
       "packages": [
         {

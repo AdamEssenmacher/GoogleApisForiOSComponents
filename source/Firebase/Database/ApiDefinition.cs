@@ -112,6 +112,10 @@ namespace Firebase.Database
 		[Export ("observeEventType:andPreviousSiblingKeyWithBlock:withCancelBlock:")]
 		nuint ObserveEvent (DataEventType eventType, DatabaseQueryPreviousSiblingKeyUpdateHandler completionHandler, [NullAllowed] DatabaseQueryCancelHandler cancelHandler);
 
+		// - (void)getDataWithCompletionBlock:(void (^_Nonnull)(NSError *__nullable error, FIRDataSnapshot *__nullable snapshot))block;
+		[Export ("getDataWithCompletionBlock:")]
+		void GetData (DataSnapshotCompletionHandler completionHandler);
+
 		// -(void)observeSingleEventOfType:(FIRDataEventType)eventType withBlock:(void (^ _Nonnull)(FIRDataSnapshot * _Nonnull))block;
 		[Export ("observeSingleEventOfType:withBlock:")]
 		void ObserveSingleEvent (DataEventType eventType, DatabaseQueryUpdateHandler completionHandler);
