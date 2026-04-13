@@ -741,18 +741,16 @@ internal sealed class AuditRunner
         return (processResult, BuildProcessWarningFindings(processResult, target, "sharpie bind", "sharpie-warning"));
     }
 
-    private static bool TryResolveSharpieCompanionFrameworkPath(string frameworkPath, string stagedFrameworksDirectory, out string companionFrameworkPath)
+    internal static bool TryResolveSharpieCompanionFrameworkPath(string frameworkPath, string stagedFrameworksDirectory, out string companionFrameworkPath)
     {
         var frameworkName = Path.GetFileNameWithoutExtension(frameworkPath);
         var rootHeaderPath = Path.Combine(frameworkPath, "Headers", $"{frameworkName}.h");
         if (File.Exists(rootHeaderPath))
         {
-            var importMatch = Regex.Match(
-                File.ReadAllText(rootHeaderPath),
-                "#import\\s+<([^/]+)/[^>]+>",
-                RegexOptions.CultureInvariant);
-
-            if (importMatch.Success)
+            foreach (Match importMatch in Regex.Matches(
+                         File.ReadAllText(rootHeaderPath),
+                         "#import\\s+<([^/]+)/[^>]+>",
+                         RegexOptions.CultureInvariant))
             {
                 var companionModuleName = importMatch.Groups[1].Value;
                 if (!string.Equals(companionModuleName, frameworkName, StringComparison.Ordinal))
