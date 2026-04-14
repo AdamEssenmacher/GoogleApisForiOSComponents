@@ -215,10 +215,18 @@ public static partial class FirebaseBindingSurfaceCoverage
         else if (string.Equals(surface.BindingAttribute, "Field", StringComparison.Ordinal) ||
                  string.Equals(surface.BindingAttribute, "Notification", StringComparison.Ordinal))
         {
+            if (IsManualSurface(surface))
+            {
+                TouchManualSurface(type, surface);
+            }
+
             ProbeNativeSymbol(surface);
-            TouchStaticMemberIfAvailable(type, surface.MemberName);
+            if (!IsManualSurface(surface))
+            {
+                TouchStaticMemberIfAvailable(type, surface.MemberName);
+            }
         }
-        else if (surface.Kind.StartsWith("manual", StringComparison.Ordinal))
+        else if (IsManualSurface(surface))
         {
             TouchManualSurface(type, surface);
         }
@@ -609,6 +617,9 @@ public static partial class FirebaseBindingSurfaceCoverage
         !IsManualFieldSurface(surface) &&
         !string.Equals(surface.Kind, "manual-constructor", StringComparison.Ordinal) &&
         !IsDelegateSurface(surface);
+
+    static bool IsManualSurface(BindingSurfaceDescriptor surface) =>
+        surface.Kind.StartsWith("manual", StringComparison.Ordinal);
 
     static bool IsDelegateSurface(BindingSurfaceDescriptor surface) =>
         string.Equals(surface.Kind, "delegate", StringComparison.Ordinal) ||
