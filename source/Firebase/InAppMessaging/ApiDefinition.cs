@@ -12,6 +12,10 @@ namespace Firebase.InAppMessaging
 	[BaseType (typeof(NSObject), Name = "FIRInAppMessaging")]
 	interface InAppMessaging
 	{
+		// extern NSErrorDomain const FIRInAppMessagingErrorDomain NS_SWIFT_NAME(InAppMessagingErrorDomain);
+		[Field ("FIRInAppMessagingErrorDomain", "__Internal")]
+		NSString ErrorDomain { get; }
+
 		// +(FIRInAppMessaging * _Nonnull)inAppMessaging __attribute__((swift_name("inAppMessaging()")));
 		[Static]
 		[Export ("inAppMessaging")]
@@ -55,6 +59,10 @@ namespace Firebase.InAppMessaging
 		// @property (readonly, copy, nonatomic) UIColor * _Nonnull buttonBackgroundColor;
 		[Export ("buttonBackgroundColor", ArgumentSemantic.Copy)]
 		UIColor ButtonBackgroundColor { get; }
+
+		// -(instancetype _Nonnull)initWithButtonText:(NSString * _Nonnull)buttonText buttonTextColor:(UIColor * _Nonnull)textColor backgroundColor:(UIColor * _Nonnull)backgroundColor;
+		[Export ("initWithButtonText:buttonTextColor:backgroundColor:")]
+		NativeHandle Constructor (string buttonText, UIColor textColor, UIColor backgroundColor);
 	}
 
 	// @interface FIRInAppMessagingImageData : NSObject
@@ -135,6 +143,10 @@ namespace Firebase.InAppMessaging
 		[NullAllowed]
 		[Export ("appData")]
 		NSDictionary AppData { get; }
+
+		// -(instancetype _Nonnull)initWithMessageID:(NSString * _Nonnull)messageID campaignName:(NSString * _Nonnull)campaignName renderAsTestMessage:(BOOL)renderAsTestMessage messageType:(FIRInAppMessagingDisplayMessageType)messageType triggerType:(FIRInAppMessagingDisplayTriggerType)triggerType;
+		[Export ("initWithMessageID:campaignName:renderAsTestMessage:messageType:triggerType:")]
+		NativeHandle Constructor (string messageId, string campaignName, bool renderAsTestMessage, InAppMessagingDisplayMessageType messageType, InAppMessagingDisplayTriggerType triggerType);
 	}
 
 	// @interface FIRInAppMessagingCardDisplay : FIRInAppMessagingDisplayMessage
@@ -185,6 +197,10 @@ namespace Firebase.InAppMessaging
 		[NullAllowed]
 		[Export ("secondaryActionURL")]
 		NSUrl SecondaryActionUrl { get; }
+
+		// -(instancetype _Nonnull)initWithCampaignName:(NSString * _Nonnull)campaignName titleText:(NSString * _Nonnull)title bodyText:(NSString * _Nullable)bodyText textColor:(UIColor * _Nonnull)textColor portraitImageData:(FIRInAppMessagingImageData * _Nonnull)portraitImageData landscapeImageData:(FIRInAppMessagingImageData * _Nullable)landscapeImageData backgroundColor:(UIColor * _Nonnull)backgroundColor primaryActionButton:(FIRInAppMessagingActionButton * _Nonnull)primaryActionButton secondaryActionButton:(FIRInAppMessagingActionButton * _Nullable)secondaryActionButton primaryActionURL:(NSURL * _Nullable)primaryActionURL secondaryActionURL:(NSURL * _Nullable)secondaryActionURL appData:(NSDictionary * _Nullable)appData;
+		[Export ("initWithCampaignName:titleText:bodyText:textColor:portraitImageData:landscapeImageData:backgroundColor:primaryActionButton:secondaryActionButton:primaryActionURL:secondaryActionURL:appData:")]
+		NativeHandle Constructor (string campaignName, string title, [NullAllowed] string bodyText, UIColor textColor, InAppMessagingImageData portraitImageData, [NullAllowed] InAppMessagingImageData landscapeImageData, UIColor backgroundColor, InAppMessagingActionButton primaryActionButton, [NullAllowed] InAppMessagingActionButton secondaryActionButton, [NullAllowed] NSUrl primaryActionUrl, [NullAllowed] NSUrl secondaryActionUrl, [NullAllowed] NSDictionary appData);
 	}
 
 	// @interface FIRInAppMessagingModalDisplay : FIRInAppMessagingDisplayMessage
@@ -223,6 +239,10 @@ namespace Firebase.InAppMessaging
 		// @property(nonatomic, copy, nonnull, readonly) UIColor *textColor;
 		[Export ("textColor", ArgumentSemantic.Copy)]
 		UIColor TextColor { get; }
+
+		// -(instancetype _Nonnull)initWithCampaignName:(NSString * _Nonnull)campaignName titleText:(NSString * _Nonnull)title bodyText:(NSString * _Nullable)bodyText textColor:(UIColor * _Nonnull)textColor backgroundColor:(UIColor * _Nonnull)backgroundColor imageData:(FIRInAppMessagingImageData * _Nullable)imageData actionButton:(FIRInAppMessagingActionButton * _Nullable)actionButton actionURL:(NSURL * _Nullable)actionURL appData:(NSDictionary * _Nullable)appData;
+		[Export ("initWithCampaignName:titleText:bodyText:textColor:backgroundColor:imageData:actionButton:actionURL:appData:")]
+		NativeHandle Constructor (string campaignName, string title, [NullAllowed] string bodyText, UIColor textColor, UIColor backgroundColor, [NullAllowed] InAppMessagingImageData imageData, [NullAllowed] InAppMessagingActionButton actionButton, [NullAllowed] NSUrl actionUrl, [NullAllowed] NSDictionary appData);
 	}
 
 	// @interface FIRInAppMessagingBannerDisplay : FIRInAppMessagingDisplayMessage
@@ -256,6 +276,10 @@ namespace Firebase.InAppMessaging
 		[NullAllowed]
 		[Export ("actionURL")]
 		NSUrl ActionUrl { get; }
+
+		// -(instancetype _Nonnull)initWithCampaignName:(NSString * _Nonnull)campaignName titleText:(NSString * _Nonnull)title bodyText:(NSString * _Nullable)bodyText textColor:(UIColor * _Nonnull)textColor backgroundColor:(UIColor * _Nonnull)backgroundColor imageData:(FIRInAppMessagingImageData * _Nullable)imageData actionURL:(NSURL * _Nullable)actionURL appData:(NSDictionary * _Nullable)appData;
+		[Export ("initWithCampaignName:titleText:bodyText:textColor:backgroundColor:imageData:actionURL:appData:")]
+		NativeHandle Constructor (string campaignName, string title, [NullAllowed] string bodyText, UIColor textColor, UIColor backgroundColor, [NullAllowed] InAppMessagingImageData imageData, [NullAllowed] NSUrl actionUrl, [NullAllowed] NSDictionary appData);
 	}
 
 	// @interface FIRInAppMessagingImageOnlyDisplay : FIRInAppMessagingDisplayMessage
@@ -271,6 +295,10 @@ namespace Firebase.InAppMessaging
 		[NullAllowed]
 		[Export ("actionURL")]
 		NSUrl ActionUrl { get; }
+
+		// -(instancetype _Nonnull)initWithCampaignName:(NSString * _Nonnull)campaignName imageData:(FIRInAppMessagingImageData * _Nonnull)imageData actionURL:(NSURL * _Nullable)actionURL appData:(NSDictionary * _Nullable)appData;
+		[Export ("initWithCampaignName:imageData:actionURL:appData:")]
+		NativeHandle Constructor (string campaignName, InAppMessagingImageData imageData, [NullAllowed] NSUrl actionUrl, [NullAllowed] NSDictionary appData);
 	}
 
 	interface IInAppMessagingDisplayDelegate { }

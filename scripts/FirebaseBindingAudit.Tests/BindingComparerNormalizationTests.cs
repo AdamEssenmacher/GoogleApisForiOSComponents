@@ -86,6 +86,65 @@ public sealed class BindingComparerNormalizationTests
     }
 
     [Fact]
+    public void Compare_MatchesProtocolInterfaceTypeReferences()
+    {
+        var result = Compare(
+            """
+            [Protocol(Name = "FIRInAppMessagingDisplay")]
+            public interface InAppMessagingDisplay
+            {
+            }
+
+            [BaseType(typeof(NSObject), Name = "FIRInAppMessaging")]
+            public interface InAppMessaging
+            {
+                [Export("messageDisplayComponent")]
+                IInAppMessagingDisplay MessageDisplayComponent { get; set; }
+            }
+            """,
+            """
+            [Protocol]
+            public interface FIRInAppMessagingDisplay
+            {
+            }
+
+            [BaseType(typeof(NSObject))]
+            public interface FIRInAppMessaging
+            {
+                [Export("messageDisplayComponent")]
+                IFIRInAppMessagingDisplay MessageDisplayComponent { get; set; }
+            }
+            """);
+
+        AssertNoFailures(result);
+    }
+
+    [Fact]
+    public void Compare_TreatsProtocolNSObjectBaseAsGeneratorShape()
+    {
+        var result = Compare(
+            """
+            [Protocol(Name = "FIRInAppMessagingDisplay")]
+            public interface InAppMessagingDisplay
+            {
+                [Export("displayMessage:displayDelegate:")]
+                void DisplayMessage(NSObject message, NSObject displayDelegate);
+            }
+            """,
+            """
+            [Protocol]
+            [BaseType(typeof(NSObject))]
+            public interface FIRInAppMessagingDisplay
+            {
+                [Export("displayMessage:displayDelegate:")]
+                void DisplayMessage(NSObject message, NSObject displayDelegate);
+            }
+            """);
+
+        AssertNoFailures(result);
+    }
+
+    [Fact]
     public void Compare_MatchesEnumMemberWithContainingEnumPrefix()
     {
         var result = Compare(
@@ -99,6 +158,48 @@ public sealed class BindingComparerNormalizationTests
             public enum FIRAggregateSource
             {
                 FIRAggregateSourceServer
+            }
+            """);
+
+        AssertNoFailures(result);
+    }
+
+    [Fact]
+    public void Compare_MatchesEnumMemberWithOptionalTypePrefix()
+    {
+        var result = Compare(
+            """
+            public enum InAppMessagingDismissType
+            {
+                TypeUserSwipe,
+                Unspecified
+            }
+            """,
+            """
+            public enum FIRInAppMessagingDismissType
+            {
+                FIRInAppMessagingDismissTypeUserSwipe,
+                FIRInAppMessagingDismissUnspecified
+            }
+            """);
+
+        AssertNoFailures(result);
+    }
+
+    [Fact]
+    public void Compare_MatchesFiamPrefixedSwiftEnumName()
+    {
+        var result = Compare(
+            """
+            public enum InAppMessagingDisplayRenderErrorType
+            {
+                ImageDataInvalid
+            }
+            """,
+            """
+            public enum FIAMDisplayRenderErrorType
+            {
+                FIAMDisplayRenderErrorTypeImageDataInvalid
             }
             """);
 
@@ -220,6 +321,40 @@ public sealed class BindingComparerNormalizationTests
 
             [BaseType(typeof(NSObject))]
             public interface UIApplication
+            {
+            }
+            """);
+
+        AssertNoFailures(result);
+    }
+
+    [Fact]
+    public void Compare_IgnoresGeneratedEmptySupportTypePlaceholders()
+    {
+        var result = Compare(
+            """
+            namespace Firebase.InAppMessaging;
+
+            [BaseType(typeof(NSObject), Name = "FIRInAppMessaging")]
+            public interface InAppMessaging
+            {
+            }
+            """,
+            """
+            namespace FirebaseInAppMessaging;
+
+            [BaseType(typeof(NSObject))]
+            public interface FIRInAppMessaging
+            {
+            }
+
+            [BaseType(typeof(NSObject))]
+            public interface FIRApp
+            {
+            }
+
+            [BaseType(typeof(NSObject))]
+            public interface UIColor
             {
             }
             """);

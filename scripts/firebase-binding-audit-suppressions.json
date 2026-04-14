@@ -231,6 +231,28 @@
       "evidence": [
         "externals/FirebaseCrashlytics.xcframework/ios-arm64_x86_64-simulator/FirebaseCrashlytics.framework/Headers/FIRCrashlyticsReport.h#L71-L73"
       ]
+    },
+    {
+      "id": "inappmessaging-error-domain-generator-omits-constant",
+      "target": "InAppMessaging",
+      "category": "stale-baseline-binding",
+      "comparisonTypeKey": "FIRInAppMessaging",
+      "comparisonMemberKey": "field|FIRInAppMessagingErrorDomain",
+      "reason": "The Firebase 12.6 header declares FIRInAppMessagingErrorDomain, but swift-dotnet-bindings does not emit this FOUNDATION_EXTERN NSErrorDomain constant.",
+      "evidence": [
+        "externals/FirebaseInAppMessaging.xcframework/ios-arm64/FirebaseInAppMessaging.framework/Headers/FIRInAppMessagingErrors.h#L19-L20"
+      ]
+    },
+    {
+      "id": "inappmessaging-delegate-generator-weakdelegate-shape",
+      "target": "InAppMessaging",
+      "category": "signature-drift",
+      "comparisonTypeKey": "FIRInAppMessaging",
+      "comparisonMemberKey": "export|delegate",
+      "reason": "The Firebase 12.6 header declares id<FIRInAppMessagingDisplayDelegate> delegate; the baseline keeps the typed protocol delegate property while swift-dotnet-bindings emits an NSObject WeakDelegate shape for the same selector.",
+      "evidence": [
+        "externals/FirebaseInAppMessaging.xcframework/ios-arm64/FirebaseInAppMessaging.framework/Headers/FIRInAppMessaging.h#L89-L92"
+      ]
     }
   ]
 }

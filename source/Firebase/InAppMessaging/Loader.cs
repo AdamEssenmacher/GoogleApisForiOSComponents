@@ -15,9 +15,9 @@ namespace Firebase.InAppMessaging {
 
 namespace ApiDefinition
 {
-	partial class Messaging
+	partial class InAppMessaging
 	{
-		static Messaging ()
+		static InAppMessaging ()
 		{
 			Firebase.InAppMessaging.Loader.ForceLoad ();
 		}

@@ -82,6 +82,7 @@ public static partial class FirebaseBindingSurfaceCoverage
             "Analytics" => VerifyAnalyticsBindingSurfaceAsync(document),
             "AppCheck" => VerifyAppCheckBindingSurfaceAsync(document),
             "AppDistribution" => VerifyAppDistributionBindingSurfaceAsync(document),
+            "InAppMessaging" => VerifyInAppMessagingBindingSurfaceAsync(document),
             "Auth" => VerifyAuthBindingSurfaceAsync(document),
             "CloudFirestore" => VerifyCloudFirestoreBindingSurfaceAsync(document),
             "CloudFunctions" => VerifyCloudFunctionsBindingSurfaceAsync(document),
@@ -234,19 +235,46 @@ public static partial class FirebaseBindingSurfaceCoverage
 
     static Type ResolveManagedType(BindingSurfaceDescriptor surface)
     {
-        var type = ResolveManagedType(surface.RuntimeTypeName, surface.AssemblyName);
-        if (type is null && surface.RuntimeTypeName.StartsWith("Firebase.", StringComparison.Ordinal))
+        foreach (var runtimeTypeName in CreateRuntimeTypeNameCandidates(surface))
         {
-            var runtimeParts = surface.RuntimeTypeName.Split('.');
-            if (runtimeParts.Length > 2 && !runtimeParts[^1].StartsWith('I'))
+            var type = ResolveManagedType(runtimeTypeName, surface.AssemblyName);
+            if (type is not null)
             {
-                var interfaceName = string.Join('.', runtimeParts.Take(runtimeParts.Length - 1).Append($"I{runtimeParts[^1]}"));
-                type = ResolveManagedType(interfaceName, surface.AssemblyName);
+                return type;
             }
         }
 
-        return type ?? throw new TypeLoadException($"Managed type '{surface.RuntimeTypeName}' was not found in assembly '{surface.AssemblyName}'.");
+        throw new TypeLoadException($"Managed type '{surface.RuntimeTypeName}' was not found in assembly '{surface.AssemblyName}'.");
     }
+
+    static IEnumerable<string> CreateRuntimeTypeNameCandidates(BindingSurfaceDescriptor surface)
+    {
+        yield return surface.RuntimeTypeName;
+
+        if (!surface.RuntimeTypeName.StartsWith("Firebase.", StringComparison.Ordinal))
+        {
+            yield break;
+        }
+
+        var runtimeParts = surface.RuntimeTypeName.Split('.');
+        if (runtimeParts.Length <= 2 || IsInterfaceStyleName(runtimeParts[^1]))
+        {
+            yield break;
+        }
+
+        var runtimeNamespace = string.Join('.', runtimeParts.Take(runtimeParts.Length - 1));
+        yield return $"{runtimeNamespace}.I{runtimeParts[^1]}";
+
+        if (surface.IsProtocol)
+        {
+            yield return $"{runtimeNamespace}.{runtimeParts[^1]}Wrapper";
+        }
+    }
+
+    static bool IsInterfaceStyleName(string typeName) =>
+        typeName.Length > 1 &&
+        typeName[0] == 'I' &&
+        char.IsUpper(typeName[1]);
 
     static void ResolveManagedMember(Type type, BindingSurfaceDescriptor surface)
     {

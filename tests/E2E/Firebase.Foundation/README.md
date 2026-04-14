@@ -103,7 +103,7 @@ Pack the active Firebase set when running the aggregate lane:
 
 ```sh
 dotnet tool restore
-dotnet tool run dotnet-cake -- --target=nuget --names="Firebase.ABTesting,Firebase.Analytics,Firebase.AppCheck,Firebase.AppDistribution,Firebase.Auth,Firebase.CloudFirestore,Firebase.CloudFunctions,Firebase.CloudMessaging,Firebase.Core,Firebase.Crashlytics,Firebase.Database,Firebase.Installations,Firebase.PerformanceMonitoring,Firebase.RemoteConfig,Firebase.Storage"
+dotnet tool run dotnet-cake -- --target=nuget --names="Firebase.ABTesting,Firebase.Analytics,Firebase.AppCheck,Firebase.AppDistribution,Firebase.Auth,Firebase.CloudFirestore,Firebase.CloudFunctions,Firebase.CloudMessaging,Firebase.Core,Firebase.Crashlytics,Firebase.Database,Firebase.InAppMessaging,Firebase.Installations,Firebase.PerformanceMonitoring,Firebase.RemoteConfig,Firebase.Storage"
 ```
 
 Run a representative target or the full active set with:
