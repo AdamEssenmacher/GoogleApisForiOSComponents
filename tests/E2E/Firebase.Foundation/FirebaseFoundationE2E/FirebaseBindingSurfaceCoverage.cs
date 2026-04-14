@@ -753,9 +753,25 @@ public static partial class FirebaseBindingSurfaceCoverage
 
             AddTypeNameCandidate(candidates, type.Name);
             AddTypeNameCandidate(candidates, type.FullName);
+            AddTypeNameSuffixCandidates(candidates, type.FullName);
         }
 
         return candidates;
+    }
+
+    static void AddTypeNameSuffixCandidates(List<string> candidates, string? typeName)
+    {
+        var normalizedTypeName = NormalizeTypeName(typeName);
+        if (string.IsNullOrWhiteSpace(normalizedTypeName))
+        {
+            return;
+        }
+
+        var parts = normalizedTypeName.Split('.');
+        for (var index = 1; index < parts.Length - 1; index++)
+        {
+            AddTypeNameCandidate(candidates, string.Join('.', parts[index..]));
+        }
     }
 
     static IEnumerable<string> CreateGenericTypeNameCandidates(Type genericDefinition)

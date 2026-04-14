@@ -967,6 +967,11 @@ internal sealed class BindingSurfaceCoverageBuilder
         string? bindingAttribute,
         string? bindingValue)
     {
+        if (string.IsNullOrWhiteSpace(manualItem.ObjectiveCName))
+        {
+            return EmptySelectors;
+        }
+
         if (!string.Equals(bindingAttribute, "Export", StringComparison.Ordinal) ||
             string.IsNullOrWhiteSpace(bindingValue))
         {
