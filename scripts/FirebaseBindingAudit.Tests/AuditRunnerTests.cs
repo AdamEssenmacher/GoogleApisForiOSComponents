@@ -63,8 +63,60 @@ public sealed class AuditRunnerTests
     [Fact]
     public void ShouldStageSharpieFrameworkSlices_SkipsWhenSharpieIsDisabled()
     {
-        Assert.False(AuditRunner.ShouldStageSharpieFrameworkSlices(CreateAuditOptions(disableSharpie: true)));
-        Assert.True(AuditRunner.ShouldStageSharpieFrameworkSlices(CreateAuditOptions(disableSharpie: false)));
+        var selectedTargets = new[] { CreateTarget("Auth", "FirebaseAuth") };
+
+        Assert.False(AuditRunner.ShouldStageSharpieFrameworkSlices(
+            CreateAuditOptions(disableSharpie: true),
+            selectedTargets,
+            CreateSharpieConfiguration()));
+        Assert.True(AuditRunner.ShouldStageSharpieFrameworkSlices(
+            CreateAuditOptions(disableSharpie: false),
+            selectedTargets,
+            CreateSharpieConfiguration()));
+    }
+
+    [Fact]
+    public void ShouldStageSharpieFrameworkSlices_SkipsTargetsWithSharpieOff()
+    {
+        var selectedTargets = new[] { CreateTarget("Auth", "FirebaseAuth", sharpieMode: "off") };
+
+        var shouldStage = AuditRunner.ShouldStageSharpieFrameworkSlices(
+            CreateAuditOptions(disableSharpie: false),
+            selectedTargets,
+            CreateSharpieConfiguration());
+
+        Assert.False(shouldStage);
+    }
+
+    [Fact]
+    public void ShouldStageSharpieFrameworkSlices_IncludesAutoAndForceFallbackTargets()
+    {
+        var selectedTargets = new[]
+        {
+            CreateTarget("Auth", "FirebaseAuth", sharpieMode: "auto"),
+            CreateTarget("CloudFirestore", "FirebaseFirestore", sharpieMode: "forceFallback")
+        };
+
+        var stagedXcframeworks = AuditRunner.GetSharpieFrameworkSliceStageXcframeworks(
+            CreateAuditOptions(disableSharpie: false),
+            selectedTargets,
+            CreateSharpieConfiguration());
+
+        Assert.Equal(["FirebaseAuth", "FirebaseFirestore"], stagedXcframeworks);
+    }
+
+    [Fact]
+    public void GetSharpieFrameworkSliceStageXcframeworks_ExcludesUnselectedTargets()
+    {
+        var selectedTargets = new[] { CreateTarget("Auth", "FirebaseAuth") };
+
+        var stagedXcframeworks = AuditRunner.GetSharpieFrameworkSliceStageXcframeworks(
+            CreateAuditOptions(disableSharpie: false),
+            selectedTargets,
+            CreateSharpieConfiguration());
+
+        Assert.Equal(["FirebaseAuth"], stagedXcframeworks);
+        Assert.DoesNotContain("UnsupportedUnselectedFramework", stagedXcframeworks);
     }
 
     [Fact]
@@ -128,4 +180,18 @@ public sealed class AuditRunnerTests
             SharpieVersion: "26.3.0.11",
             DisableSharpie: disableSharpie,
             DisableSuppressions: false);
+
+    private static SharpieConfiguration CreateSharpieConfiguration() =>
+        new()
+        {
+            DefaultMode = "auto"
+        };
+
+    private static AuditTargetDefinition CreateTarget(string id, string xcframework, string? sharpieMode = null) =>
+        new()
+        {
+            Id = id,
+            Xcframework = xcframework,
+            SharpieMode = sharpieMode
+        };
 }

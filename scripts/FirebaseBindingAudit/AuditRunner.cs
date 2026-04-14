@@ -126,9 +126,10 @@ internal sealed class AuditRunner
             var stagedFrameworksDirectory = Path.Combine(tempRoot, "frameworks");
             StageXcframeworks(options.RepoRoot, stagedFrameworksDirectory);
             var sharpieFrameworkSearchDirectory = Path.Combine(tempRoot, "sharpie-frameworks");
-            if (ShouldStageSharpieFrameworkSlices(options))
+            var sharpieStageXcframeworks = GetSharpieFrameworkSliceStageXcframeworks(options, selectedTargets, configuration.Sharpie);
+            if (sharpieStageXcframeworks.Count > 0)
             {
-                StageSharpieFrameworkSlices(stagedFrameworksDirectory, sharpieFrameworkSearchDirectory);
+                StageSharpieFrameworkSlices(stagedFrameworksDirectory, sharpieFrameworkSearchDirectory, sharpieStageXcframeworks);
             }
 
             var sharedAliases = BuildSharedAliases(options.RepoRoot);
@@ -390,8 +391,29 @@ internal sealed class AuditRunner
                sharpieRun.Comparison is not null;
     }
 
-    internal static bool ShouldStageSharpieFrameworkSlices(AuditOptions options) =>
-        !options.DisableSharpie;
+    internal static bool ShouldStageSharpieFrameworkSlices(
+        AuditOptions options,
+        IReadOnlyList<AuditTargetDefinition> selectedTargets,
+        SharpieConfiguration sharpieConfiguration) =>
+        GetSharpieFrameworkSliceStageXcframeworks(options, selectedTargets, sharpieConfiguration).Count > 0;
+
+    internal static IReadOnlyList<string> GetSharpieFrameworkSliceStageXcframeworks(
+        AuditOptions options,
+        IReadOnlyList<AuditTargetDefinition> selectedTargets,
+        SharpieConfiguration sharpieConfiguration)
+    {
+        if (options.DisableSharpie)
+        {
+            return [];
+        }
+
+        return selectedTargets
+            .Where(target => !string.Equals(target.EffectiveSharpieMode(sharpieConfiguration), "off", StringComparison.OrdinalIgnoreCase))
+            .Select(static target => target.Xcframework)
+            .Where(static xcframework => !string.IsNullOrWhiteSpace(xcframework))
+            .Distinct(StringComparer.Ordinal)
+            .ToList();
+    }
 
     internal static string CreateTempRootPath() =>
         Path.Combine(Path.GetTempPath(), "firebase-binding-audit", $"{DateTime.UtcNow:yyyyMMddHHmmss}-{Guid.NewGuid():N}");
@@ -1186,12 +1208,30 @@ internal sealed class AuditRunner
         }
     }
 
-    private static void StageSharpieFrameworkSlices(string stagedFrameworksDirectory, string destinationDirectory)
+    private static void StageSharpieFrameworkSlices(
+        string stagedFrameworksDirectory,
+        string destinationDirectory,
+        IReadOnlyList<string> xcframeworkNames)
     {
         Directory.CreateDirectory(destinationDirectory);
-        foreach (var xcframeworkDirectory in Directory.EnumerateDirectories(stagedFrameworksDirectory, "*.xcframework", SearchOption.TopDirectoryOnly))
+        foreach (var xcframeworkName in xcframeworkNames)
         {
-            var frameworkPath = ResolveSharpieFrameworkPath(xcframeworkDirectory);
+            var xcframeworkDirectory = Path.Combine(stagedFrameworksDirectory, $"{xcframeworkName}.xcframework");
+            if (!Directory.Exists(xcframeworkDirectory))
+            {
+                continue;
+            }
+
+            string frameworkPath;
+            try
+            {
+                frameworkPath = ResolveSharpieFrameworkPath(xcframeworkDirectory);
+            }
+            catch (InvalidOperationException)
+            {
+                continue;
+            }
+
             var destinationPath = Path.Combine(destinationDirectory, Path.GetFileName(frameworkPath));
             TryCreateDirectorySymlink(destinationPath, frameworkPath);
         }

@@ -879,8 +879,19 @@ internal sealed class BindingSurfaceCoverageBuilder
         IsPublic(member) &&
         member.Ancestors().OfType<TypeDeclarationSyntax>().All(IsPublic);
 
-    private static bool IsPublic(MemberDeclarationSyntax member) =>
-        member.Modifiers.Any(static modifier => modifier.IsKind(Microsoft.CodeAnalysis.CSharp.SyntaxKind.PublicKeyword));
+    private static bool IsPublic(MemberDeclarationSyntax member)
+    {
+        if (member.Modifiers.Any(static modifier => modifier.IsKind(SyntaxKind.PublicKeyword)))
+        {
+            return true;
+        }
+
+        return member.Parent is InterfaceDeclarationSyntax &&
+               !member.Modifiers.Any(static modifier =>
+                   modifier.IsKind(SyntaxKind.PrivateKeyword) ||
+                   modifier.IsKind(SyntaxKind.ProtectedKeyword) ||
+                   modifier.IsKind(SyntaxKind.InternalKeyword));
+    }
 
     private static bool HasGetter(AccessorListSyntax? accessorList) =>
         accessorList is null ||

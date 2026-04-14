@@ -465,6 +465,72 @@ public sealed class BindingSurfaceCoverageBuilderTests
     }
 
     [Fact]
+    public void Build_IncludesImplicitlyPublicInterfaceHelperMembers()
+    {
+        var repoRoot = Path.Combine(Path.GetTempPath(), $"firebase-binding-surface-builder-{Guid.NewGuid():N}");
+
+        try
+        {
+            var sourceDirectory = Path.Combine(repoRoot, "source", "Firebase", "Auth");
+            Directory.CreateDirectory(sourceDirectory);
+            File.WriteAllText(
+                Path.Combine(sourceDirectory, "ApiDefinition.cs"),
+                """
+                namespace Firebase.Auth;
+                """);
+            File.WriteAllText(
+                Path.Combine(sourceDirectory, "Extension.cs"),
+                """
+                namespace Firebase.Auth;
+
+                public interface IAuthTokenSource
+                {
+                    string Token { get; }
+
+                    string this[int index] { get; }
+
+                    bool TryGetToken(out NSError error);
+
+                    private string HiddenToken() => "";
+                }
+                """);
+
+            var document = new BindingSurfaceCoverageBuilder(CreateConfiguration(["Extension.cs"])).Build(
+                repoRoot,
+                CreateManifest("Extension.cs"),
+                "Auth");
+
+            var surfaces = document.Targets.Single().Surfaces;
+            var helperType = Assert.Single(surfaces, static surface => surface.Kind == "manual-type");
+            Assert.Equal("Firebase.Auth.IAuthTokenSource", helperType.RuntimeTypeName);
+            Assert.Equal("interface", helperType.ContainerKind);
+
+            var helperProperty = Assert.Single(surfaces, static surface => surface.Kind == "manual-property");
+            Assert.Equal("Token", helperProperty.MemberName);
+            Assert.Equal("string", helperProperty.ReturnType);
+
+            var helperMethod = Assert.Single(surfaces, static surface => surface.Kind == "manual-method");
+            Assert.Equal("TryGetToken", helperMethod.MemberName);
+            Assert.Equal(["out NSError"], helperMethod.ParameterTypes);
+            Assert.Equal("bool", helperMethod.ReturnType);
+
+            var helperIndexer = Assert.Single(surfaces, static surface => surface.Kind == "manual-indexer");
+            Assert.Equal("Item", helperIndexer.MemberName);
+            Assert.Equal(["int"], helperIndexer.ParameterTypes);
+            Assert.Equal("string", helperIndexer.ReturnType);
+
+            Assert.DoesNotContain(surfaces, static surface => surface.MemberName == "HiddenToken");
+        }
+        finally
+        {
+            if (Directory.Exists(repoRoot))
+            {
+                Directory.Delete(repoRoot, recursive: true);
+            }
+        }
+    }
+
+    [Fact]
     public void Build_RecordsPublicHelperDelegatesConstructorsAndIndexers()
     {
         var repoRoot = Path.Combine(Path.GetTempPath(), $"firebase-binding-surface-builder-{Guid.NewGuid():N}");
