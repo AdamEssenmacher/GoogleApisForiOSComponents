@@ -424,6 +424,47 @@ public sealed class BindingSurfaceCoverageBuilderTests
     }
 
     [Fact]
+    public void Build_PreservesApiDefinitionManualTypeShape()
+    {
+        var repoRoot = Path.Combine(Path.GetTempPath(), $"firebase-binding-surface-builder-{Guid.NewGuid():N}");
+
+        try
+        {
+            var sourceDirectory = Path.Combine(repoRoot, "source", "Firebase", "Auth");
+            Directory.CreateDirectory(sourceDirectory);
+            File.WriteAllText(
+                Path.Combine(sourceDirectory, "ApiDefinition.cs"),
+                """
+                namespace Firebase.Auth;
+
+                public interface AuthMarker
+                {
+                }
+                """);
+
+            var document = new BindingSurfaceCoverageBuilder(CreateConfiguration()).Build(
+                repoRoot,
+                CreateManifest(),
+                "Auth");
+
+            var surface = Assert.Single(
+                document.Targets.Single().Surfaces,
+                static surface => surface.Kind == "manual-type");
+
+            Assert.Equal("Firebase.Auth.AuthMarker", surface.RuntimeTypeName);
+            Assert.Equal("interface", surface.ContainerKind);
+            Assert.False(surface.IsStatic);
+        }
+        finally
+        {
+            if (Directory.Exists(repoRoot))
+            {
+                Directory.Delete(repoRoot, recursive: true);
+            }
+        }
+    }
+
+    [Fact]
     public void Build_RecordsPublicHelperDelegatesConstructorsAndIndexers()
     {
         var repoRoot = Path.Combine(Path.GetTempPath(), $"firebase-binding-surface-builder-{Guid.NewGuid():N}");

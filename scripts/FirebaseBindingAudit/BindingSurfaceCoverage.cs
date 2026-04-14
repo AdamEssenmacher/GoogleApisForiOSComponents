@@ -518,7 +518,7 @@ internal sealed class BindingSurfaceCoverageBuilder
                 RuntimeTypeName: manualItem.TypeName,
                 AssemblyName: ResolveAssemblyName(ExtractNamespace(manualItem.TypeName)),
                 ObjectiveCName: manualItem.ObjectiveCName,
-                ContainerKind: "manual",
+                ContainerKind: manualItem.ContainerKind ?? "manual",
                 IsProtocol: false,
                 IsStatic: manualItem.IsStatic,
                 MemberName: manualItem.MemberName,
