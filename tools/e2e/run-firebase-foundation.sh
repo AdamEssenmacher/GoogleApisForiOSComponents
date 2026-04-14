@@ -3,7 +3,7 @@ set -euo pipefail
 
 usage() {
   cat <<'EOF'
-Usage: tools/e2e/run-firebase-foundation.sh [--package-dir output] [--configuration Release] [--enable-nullability-validation] [--runtime-drift-case <id>]
+Usage: tools/e2e/run-firebase-foundation.sh [--package-dir output] [--configuration Release] [--enable-nullability-validation] [--runtime-drift-case <id>] [--binding-surface-target <target|all>]
 EOF
 }
 
@@ -14,6 +14,7 @@ bundle_id="com.googleapisforioscomponents.tests.firebase.e2e"
 configuration="Release"
 enable_nullability_validation="false"
 runtime_drift_case=""
+binding_surface_target=""
 package_dir="$repo_root/output"
 artifacts_dir="$repo_root/tests/E2E/Firebase.Foundation/artifacts"
 log_file="$artifacts_dir/firebase-foundation-sim.log"
@@ -26,6 +27,10 @@ runtime_drift_props="$artifacts_dir/runtime-drift-case.generated.props"
 runtime_drift_info="$artifacts_dir/runtime-drift-case.info"
 runtime_drift_method=""
 runtime_drift_binding_package=""
+binding_surface_manifest="$repo_root/tests/E2E/Firebase.Foundation/binding-surface-coverage.json"
+binding_surface_document="$artifacts_dir/binding-surface-coverage.generated.json"
+binding_surface_props="$artifacts_dir/binding-surface-coverage.generated.props"
+binding_surface_info="$artifacts_dir/binding-surface-coverage.info"
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -43,6 +48,10 @@ while [[ $# -gt 0 ]]; do
       ;;
     --runtime-drift-case)
       runtime_drift_case="$2"
+      shift 2
+      ;;
+    --binding-surface-target)
+      binding_surface_target="$2"
       shift 2
       ;;
     --help|-h)
@@ -67,8 +76,12 @@ mkdir -p "$artifacts_dir"
 rm -rf "$packages_cache_dir"
 mkdir -p "$packages_cache_dir"
 
-if [[ "$enable_nullability_validation" == "true" && -n "$runtime_drift_case" ]]; then
-  echo "--enable-nullability-validation and --runtime-drift-case cannot be used together." >&2
+selected_modes=0
+[[ "$enable_nullability_validation" == "true" ]] && selected_modes=$((selected_modes + 1))
+[[ -n "$runtime_drift_case" ]] && selected_modes=$((selected_modes + 1))
+[[ -n "$binding_surface_target" ]] && selected_modes=$((selected_modes + 1))
+if (( selected_modes > 1 )); then
+  echo "--enable-nullability-validation, --runtime-drift-case, and --binding-surface-target are mutually exclusive." >&2
   exit 1
 fi
 
@@ -166,6 +179,53 @@ PY
   restore_args+=("--force-evaluate")
 
   echo "Runtime drift case: $runtime_drift_case ($runtime_drift_binding_package)"
+fi
+
+if [[ -n "$binding_surface_target" ]]; then
+  if [[ ! -f "$binding_surface_manifest" ]]; then
+    echo "Missing binding surface coverage manifest: $binding_surface_manifest" >&2
+    exit 1
+  fi
+
+  echo "Generating binding surface coverage inventory for target: $binding_surface_target"
+  dotnet run --project "$repo_root/scripts/FirebaseBindingAudit/FirebaseBindingAudit.csproj" -- \
+    --generate-binding-surface-coverage \
+    --repo-root "$repo_root" \
+    --coverage-manifest "$binding_surface_manifest" \
+    --coverage-output "$binding_surface_document" \
+    --coverage-props-output "$binding_surface_props" \
+    --binding-surface-target "$binding_surface_target" \
+    > "$binding_surface_info"
+
+  python3 - "$binding_surface_document" >> "$binding_surface_info" <<'PY'
+import json
+import pathlib
+import sys
+
+document = json.loads(pathlib.Path(sys.argv[1]).read_text())
+seen = set()
+for target in document.get("targets", []):
+    for package in target.get("requiredPackages", []):
+        package_id = package.get("id")
+        if package_id and package_id not in seen:
+            seen.add(package_id)
+            print(package_id)
+PY
+
+  binding_surface_details=("${(@f)$(<"$binding_surface_info")}")
+  for detail in "${binding_surface_details[@]}"; do
+    if [[ "$detail" == AdamE.* ]]; then
+      required_packages+=("$detail")
+    fi
+  done
+
+  msbuild_args+=(
+    "-p:BindingSurfaceCoverageTarget=$binding_surface_target"
+    "-p:BindingSurfaceCoveragePropsPath=$binding_surface_props"
+  )
+  restore_args+=("--force-evaluate")
+
+  echo "Binding surface coverage target: $binding_surface_target"
 fi
 
 for package_name in "${required_packages[@]}"; do

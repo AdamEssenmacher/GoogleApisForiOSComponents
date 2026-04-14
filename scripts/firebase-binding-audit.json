@@ -1,0 +1,220 @@
+{
+  "manualAttributes": [
+    "Wrap",
+    "Advice",
+    "Async",
+    "Internal"
+  ],
+  "bindingAttributes": [
+    "Export",
+    "Field",
+    "Notification"
+  ],
+  "sharpie": {
+    "expectedVersion": "26.3.0.11",
+    "defaultMode": "auto"
+  },
+  "targets": [
+    {
+      "id": "ABTesting",
+      "packageId": "Firebase.ABTesting",
+      "xcframework": "FirebaseABTesting",
+      "baselineDirectory": "source/Firebase/ABTesting",
+      "baselineFiles": [
+        "ApiDefinition.cs",
+        "Enums.cs"
+      ],
+      "helperFiles": [],
+      "sharpieMode": "auto"
+    },
+    {
+      "id": "Analytics",
+      "packageId": "Firebase.Analytics",
+      "xcframework": "FirebaseAnalytics",
+      "baselineDirectory": "source/Firebase/Analytics",
+      "baselineFiles": [
+        "ApiDefinition.cs",
+        "Enums.cs"
+      ],
+      "helperFiles": [
+        "Extension.cs"
+      ],
+      "sharpieMode": "auto"
+    },
+    {
+      "id": "AppCheck",
+      "packageId": "Firebase.AppCheck",
+      "xcframework": "FirebaseAppCheck",
+      "baselineDirectory": "source/Firebase/AppCheck",
+      "baselineFiles": [
+        "ApiDefinition.cs",
+        "Enums.cs"
+      ],
+      "helperFiles": [],
+      "sharpieMode": "auto"
+    },
+    {
+      "id": "AppDistribution",
+      "packageId": "Firebase.AppDistribution",
+      "xcframework": "FirebaseAppDistribution",
+      "baselineDirectory": "source/Firebase/AppDistribution",
+      "baselineFiles": [
+        "ApiDefinition.cs",
+        "Enums.cs"
+      ],
+      "helperFiles": [],
+      "sharpieMode": "auto"
+    },
+    {
+      "id": "Auth",
+      "packageId": "Firebase.Auth",
+      "xcframework": "FirebaseAuth",
+      "baselineDirectory": "source/Firebase/Auth",
+      "baselineFiles": [
+        "ApiDefinition.cs",
+        "Enums.cs"
+      ],
+      "helperFiles": [
+        "Extension.cs"
+      ],
+      "sharpieMode": "auto"
+    },
+    {
+      "id": "CloudFirestore",
+      "packageId": "Firebase.CloudFirestore",
+      "xcframework": "FirebaseFirestore",
+      "baselineDirectory": "source/Firebase/CloudFirestore",
+      "baselineFiles": [
+        "ApiDefinition.cs",
+        "Enums.cs"
+      ],
+      "helperFiles": [
+        "Extensions.cs"
+      ],
+      "sharpieMode": "forceFallback",
+      "useSharpieComparisonFallback": true
+    },
+    {
+      "id": "CloudFunctions",
+      "packageId": "Firebase.CloudFunctions",
+      "xcframework": "FirebaseFunctions",
+      "baselineDirectory": "source/Firebase/CloudFunctions",
+      "baselineFiles": [
+        "ApiDefinition.cs",
+        "Enums.cs"
+      ],
+      "helperFiles": [
+        "Extension.cs"
+      ],
+      "sharpieMode": "auto"
+    },
+    {
+      "id": "CloudMessaging",
+      "packageId": "Firebase.CloudMessaging",
+      "xcframework": "FirebaseMessaging",
+      "baselineDirectory": "source/Firebase/CloudMessaging",
+      "baselineFiles": [
+        "ApiDefinition.cs",
+        "Enums.cs"
+      ],
+      "helperFiles": [],
+      "sharpieMode": "auto"
+    },
+    {
+      "id": "Core",
+      "packageId": "Firebase.Core",
+      "xcframework": "FirebaseCore",
+      "baselineDirectory": "source/Firebase/Core",
+      "baselineFiles": [
+        "ApiDefinition.cs",
+        "Enums.cs"
+      ],
+      "helperFiles": [
+        "Extension.cs"
+      ],
+      "sharpieMode": "auto"
+    },
+    {
+      "id": "Crashlytics",
+      "packageId": "Firebase.Crashlytics",
+      "xcframework": "FirebaseCrashlytics",
+      "baselineDirectory": "source/Firebase/Crashlytics",
+      "baselineFiles": [
+        "ApiDefinition.cs",
+        "Enums.cs"
+      ],
+      "helperFiles": [
+        "Extensions.cs"
+      ],
+      "sharpieMode": "auto"
+    },
+    {
+      "id": "Database",
+      "packageId": "Firebase.Database",
+      "xcframework": "FirebaseDatabase",
+      "baselineDirectory": "source/Firebase/Database",
+      "baselineFiles": [
+        "ApiDefinition.cs",
+        "Enums.cs"
+      ],
+      "helperFiles": [
+        "Extension.cs"
+      ],
+      "sharpieMode": "auto"
+    },
+    {
+      "id": "Installations",
+      "packageId": "Firebase.Installations",
+      "xcframework": "FirebaseInstallations",
+      "baselineDirectory": "source/Firebase/Installations",
+      "baselineFiles": [
+        "ApiDefinition.cs",
+        "Enums.cs"
+      ],
+      "helperFiles": [],
+      "sharpieMode": "auto"
+    },
+    {
+      "id": "PerformanceMonitoring",
+      "packageId": "Firebase.PerformanceMonitoring",
+      "xcframework": "FirebasePerformance",
+      "baselineDirectory": "source/Firebase/PerformanceMonitoring",
+      "baselineFiles": [
+        "ApiDefinition.cs",
+        "Enums.cs"
+      ],
+      "helperFiles": [
+        "Extensions.cs"
+      ],
+      "sharpieMode": "auto"
+    },
+    {
+      "id": "RemoteConfig",
+      "packageId": "Firebase.RemoteConfig",
+      "xcframework": "FirebaseRemoteConfig",
+      "baselineDirectory": "source/Firebase/RemoteConfig",
+      "baselineFiles": [
+        "ApiDefinition.cs",
+        "Enums.cs"
+      ],
+      "helperFiles": [
+        "Extension.cs"
+      ],
+      "sharpieMode": "auto"
+    },
+    {
+      "id": "Storage",
+      "packageId": "Firebase.Storage",
+      "xcframework": "FirebaseStorage",
+      "baselineDirectory": "source/Firebase/Storage",
+      "baselineFiles": [
+        "ApiDefinition.cs",
+        "Enums.cs"
+      ],
+      "helperFiles": [
+        "Extension.cs"
+      ],
+      "sharpieMode": "auto"
+    }
+  ]
+}
