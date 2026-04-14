@@ -42,6 +42,21 @@
       "requiredExtraPackages": []
     },
     {
+      "id": "InAppMessaging",
+      "packageId": "AdamE.Firebase.iOS.InAppMessaging",
+      "coverageCaseMethod": "VerifyInAppMessagingBindingSurfaceAsync",
+      "sourceFiles": [
+        "source/Firebase/InAppMessaging/ApiDefinition.cs",
+        "source/Firebase/InAppMessaging/Enums.cs"
+      ],
+      "requiredExtraPackages": [
+        {
+          "id": "AdamE.Firebase.iOS.ABTesting",
+          "version": "12.6.0"
+        }
+      ]
+    },
+    {
       "id": "Auth",
       "packageId": "AdamE.Firebase.iOS.Auth",
       "coverageCaseMethod": "VerifyAuthBindingSurfaceAsync",

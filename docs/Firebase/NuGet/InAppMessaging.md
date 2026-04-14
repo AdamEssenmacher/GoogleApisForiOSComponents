@@ -1,6 +1,6 @@
 # AdamE.Firebase.iOS.InAppMessaging
 
-.NET bindings for Firebase In-App Messaging on Apple platforms, for use from .NET iOS and Mac Catalyst apps.
+.NET bindings for Firebase In-App Messaging on iOS, for use from .NET iOS apps.
 
 ## What this package provides
 
@@ -36,18 +36,16 @@ These bindings primarily:
 
 ## Supported target frameworks
 
-This package is intended for Apple platform TFMs such as:
+This package is intended for iOS TFMs such as:
 
 - `net9.0-ios`
 - `net10.0-ios`
-- `net9.0-maccatalyst`
-- `net10.0-maccatalyst`
 
-When multi-targeting, condition the package reference so it only restores for Apple targets.
+When multi-targeting, condition the package reference so it only restores for iOS targets.
 
 ```xml
-<ItemGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios' Or $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">
-  <PackageReference Include="AdamE.Firebase.iOS.InAppMessaging" Version="8.10.0.3" />
+<ItemGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">
+  <PackageReference Include="AdamE.Firebase.iOS.InAppMessaging" Version="12.6.0" />
 </ItemGroup>
 ```
 
@@ -79,7 +77,7 @@ inAppMessaging.TriggerEvent("purchase_complete");
 - `AdamE.Firebase.iOS.ABTesting` - package metadata references Firebase A/B Testing for campaign experiment handling.
 - `AdamE.Firebase.iOS.Analytics` - commonly used with In-App Messaging campaign triggers and measurement.
 
-This package currently uses the `8.10` package line in this repository. Verify compatibility carefully before combining it with Firebase packages from a different MAJOR.MINOR package line.
+This package is part of the Firebase `12.6.0` package line in this repository. Firebase's aggregate `Firebase/InAppMessaging` `12.6.0` CocoaPods subspec resolves the native `FirebaseInAppMessaging` `12.6.0-beta` pod. The native SDK is iOS-only in this package; Mac Catalyst is intentionally not targeted because the Firebase 12.6 public headers mark In-App Messaging unavailable on Mac Catalyst.
 
 ## Firebase app configuration
 

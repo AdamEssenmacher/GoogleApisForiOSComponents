@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net9.0-ios</TargetFramework>
+    <TargetFrameworks>net9.0-ios;net10.0-ios</TargetFrameworks>
     <Nullable>enable</Nullable>
     <ImplicitUsings>true</ImplicitUsings>
     <IsBindingProject>true</IsBindingProject>
@@ -8,10 +8,11 @@
     <SupportedOSPlatformVersion>15.0</SupportedOSPlatformVersion>
     <RootNamespace>Firebase.InAppMessaging</RootNamespace>
     <AssemblyName>Firebase.InAppMessaging</AssemblyName>
-    <AssemblyVersion>1.0.0.0</AssemblyVersion>
-    <FileVersion>8.10.0.3</FileVersion>
+    <AssemblyVersion>12.6.0</AssemblyVersion>
+    <FileVersion>12.6.0</FileVersion>
     <IPhoneResourcePrefix>Resources</IPhoneResourcePrefix>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <CompressBindingResourcePackage>true</CompressBindingResourcePackage>
   </PropertyGroup>
   <PropertyGroup>
     <PackageId>AdamE.Firebase.iOS.InAppMessaging</PackageId>
@@ -26,7 +27,7 @@
     <PackageLicenseFile>License.md</PackageLicenseFile>
     <PackageReadmeFile>NUGET_README.md</PackageReadmeFile>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-    <PackageVersion>8.10.0.3</PackageVersion>
+    <PackageVersion>12.6.0</PackageVersion>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="..\..\AssemblyInfo.cs" />
@@ -45,7 +46,8 @@
       <Kind>Framework</Kind>
       <SmartLink>True</SmartLink>
       <ForceLoad>True</ForceLoad>
-      <Frameworks>CoreTelephony QuartzCore SystemConfiguration</Frameworks>
+      <Frameworks>CoreTelephony QuartzCore SystemConfiguration UIKit</Frameworks>
+      <LinkerFlags>-ObjC</LinkerFlags>
     </NativeReference>
   </ItemGroup>
   <ItemGroup>
@@ -53,9 +55,6 @@
   </ItemGroup>
   <ItemGroup>
     <ObjcBindingApiDefinition Include="ApiDefinition.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="Xamarin.Build.Download" Version="0.11.4" PrivateAssets="None" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Core\Core.csproj" PrivateAssets="None" />

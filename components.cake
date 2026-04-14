@@ -8,7 +8,7 @@ Artifact FIREBASE_CLOUD_MESSAGING_ARTIFACT         = new Artifact ("Firebase.Clo
 Artifact FIREBASE_CORE_ARTIFACT                    = new Artifact ("Firebase.Core",                   "12.6.0",  "15.0", ComponentGroup.Firebase, csprojName: "Core");
 Artifact FIREBASE_CRASHLYTICS_ARTIFACT             = new Artifact ("Firebase.Crashlytics",            "12.6.0",  "15.0", ComponentGroup.Firebase, csprojName: "Crashlytics");
 Artifact FIREBASE_DATABASE_ARTIFACT                = new Artifact ("Firebase.Database",               "12.6.0",  "15.0", ComponentGroup.Firebase, csprojName: "Database");
-//Artifact FIREBASE_IN_APP_MESSAGING_ARTIFACT      = new Artifact ("Firebase.InAppMessaging",         "8.10.0.3", "15.0", ComponentGroup.Firebase, csprojName: "InAppMessaging");
+Artifact FIREBASE_IN_APP_MESSAGING_ARTIFACT        = new Artifact ("Firebase.InAppMessaging",         "12.6.0",  "15.0", ComponentGroup.Firebase, csprojName: "InAppMessaging");
 Artifact FIREBASE_INSTALLATIONS_ARTIFACT           = new Artifact ("Firebase.Installations",          "12.6.0",  "15.0", ComponentGroup.Firebase, csprojName: "Installations");
 Artifact FIREBASE_PERFORMANCE_MONITORING_ARTIFACT  = new Artifact ("Firebase.PerformanceMonitoring",  "12.6.0",  "15.0", ComponentGroup.Firebase, csprojName: "PerformanceMonitoring");
 Artifact FIREBASE_REMOTE_CONFIG_ARTIFACT           = new Artifact ("Firebase.RemoteConfig",           "12.6.0",  "15.0", ComponentGroup.Firebase, csprojName: "RemoteConfig");
@@ -59,7 +59,7 @@ var ARTIFACTS = new Dictionary<string, Artifact> {
 	{ "Firebase.Core",                   FIREBASE_CORE_ARTIFACT },
 	{ "Firebase.Crashlytics",            FIREBASE_CRASHLYTICS_ARTIFACT },
 	{ "Firebase.Database",               FIREBASE_DATABASE_ARTIFACT },
-	//{ "Firebase.InAppMessaging",         FIREBASE_IN_APP_MESSAGING_ARTIFACT },
+	{ "Firebase.InAppMessaging",         FIREBASE_IN_APP_MESSAGING_ARTIFACT },
 	{ "Firebase.Installations",          FIREBASE_INSTALLATIONS_ARTIFACT },
 	{ "Firebase.PerformanceMonitoring",  FIREBASE_PERFORMANCE_MONITORING_ARTIFACT },
 	{ "Firebase.RemoteConfig",           FIREBASE_REMOTE_CONFIG_ARTIFACT },
@@ -109,7 +109,7 @@ void SetArtifactsDependencies ()
 	FIREBASE_CORE_ARTIFACT.Dependencies                    = new [] { GOOGLE_GOOGLE_DATA_TRANSPORT_ARTIFACT, GOOGLE_GOOGLE_UTILITIES_ARTIFACT, GOOGLE_NANOPB_ARTIFACT, GOOGLE_PROMISES_OBJC_ARTIFACT};
 	FIREBASE_CRASHLYTICS_ARTIFACT.Dependencies             = new [] { FIREBASE_CORE_ARTIFACT, FIREBASE_INSTALLATIONS_ARTIFACT };
 	FIREBASE_DATABASE_ARTIFACT.Dependencies                = new [] { FIREBASE_CORE_ARTIFACT, /* Needed for sample FIREBASE_AUTH_ARTIFACT */ };
-	//FIREBASE_IN_APP_MESSAGING_ARTIFACT.Dependencies        = new [] { FIREBASE_CORE_ARTIFACT, FIREBASE_INSTALLATIONS_ARTIFACT, FIREBASE_AB_TESTING_ARTIFACT };
+	FIREBASE_IN_APP_MESSAGING_ARTIFACT.Dependencies        = new [] { FIREBASE_CORE_ARTIFACT, FIREBASE_INSTALLATIONS_ARTIFACT, FIREBASE_AB_TESTING_ARTIFACT };
 	FIREBASE_INSTALLATIONS_ARTIFACT.Dependencies           = new [] { FIREBASE_CORE_ARTIFACT };
 	FIREBASE_PERFORMANCE_MONITORING_ARTIFACT.Dependencies  = new [] { FIREBASE_CORE_ARTIFACT, FIREBASE_INSTALLATIONS_ARTIFACT, FIREBASE_AB_TESTING_ARTIFACT, FIREBASE_REMOTE_CONFIG_ARTIFACT };
 	FIREBASE_REMOTE_CONFIG_ARTIFACT.Dependencies           = new [] { FIREBASE_CORE_ARTIFACT, FIREBASE_INSTALLATIONS_ARTIFACT, FIREBASE_AB_TESTING_ARTIFACT };
@@ -192,9 +192,9 @@ void SetArtifactsPodSpecs ()
 	FIREBASE_DATABASE_ARTIFACT.PodSpecs = new [] {
 		PodSpec.Create ("FirebaseDatabase", "12.6.0", frameworkSource: FrameworkSource.Pods)		
 	};
-	//FIREBASE_IN_APP_MESSAGING_ARTIFACT.PodSpecs = new [] {
-	//	PodSpec.Create ("Firebase", "8.10.0", frameworkSource: FrameworkSource.Pods, frameworkName: "FirebaseInAppMessaging", targetName: "FirebaseInAppMessaging", subSpecs: new [] { "InAppMessaging" })
-	//};
+	FIREBASE_IN_APP_MESSAGING_ARTIFACT.PodSpecs = new [] {
+		PodSpec.Create ("Firebase", "12.6.0", frameworkSource: FrameworkSource.Pods, frameworkName: "FirebaseInAppMessaging", targetName: "FirebaseInAppMessaging", subSpecs: new [] { "InAppMessaging" })
+	};
 	FIREBASE_INSTALLATIONS_ARTIFACT.PodSpecs = new [] {
 		PodSpec.Create ("FirebaseInstallations", "12.6.0", frameworkSource: FrameworkSource.Pods),
 		PodSpec.Create ("FirebaseSessions",      "12.6.0", frameworkSource: FrameworkSource.Pods)
@@ -404,7 +404,7 @@ void SetArtifactsExtraPodfileLines ()
 	inAppMessagingLines.AddRange (dynamicFrameworkLines);
 	inAppMessagingLines.AddRange (inAppMessagingWorkaround);
 
-	//FIREBASE_IN_APP_MESSAGING_ARTIFACT.ExtraPodfileLines = inAppMessagingLines.ToArray ();
+	FIREBASE_IN_APP_MESSAGING_ARTIFACT.ExtraPodfileLines = inAppMessagingLines.ToArray ();
 }
 
 void SetArtifactsSamples ()

@@ -66,6 +66,18 @@
       "sharpieMode": "auto"
     },
     {
+      "id": "InAppMessaging",
+      "packageId": "Firebase.InAppMessaging",
+      "xcframework": "FirebaseInAppMessaging",
+      "baselineDirectory": "source/Firebase/InAppMessaging",
+      "baselineFiles": [
+        "ApiDefinition.cs",
+        "Enums.cs"
+      ],
+      "helperFiles": [],
+      "sharpieMode": "auto"
+    },
+    {
       "id": "Auth",
       "packageId": "Firebase.Auth",
       "xcframework": "FirebaseAuth",

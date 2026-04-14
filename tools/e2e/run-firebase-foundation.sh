@@ -224,6 +224,7 @@ PY
     "-p:BindingSurfaceCoveragePropsPath=$binding_surface_props"
   )
   restore_args+=("--force-evaluate")
+  restore_args+=("-p:TargetFramework=net9.0-ios")
 
   echo "Binding surface coverage target: $binding_surface_target"
 fi

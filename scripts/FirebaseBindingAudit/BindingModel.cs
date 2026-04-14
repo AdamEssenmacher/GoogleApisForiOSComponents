@@ -633,6 +633,15 @@ internal sealed class BindingSyntaxParser
             AddExpandedAliases(aliases, boundType.Name, boundType.ComparisonKey);
             AddExpandedAliases(aliases, boundType.ObjectiveCName, boundType.ComparisonKey);
             AddExpandedAliases(aliases, CreateNamespacePrefixedAlias(boundType.Namespace, boundType.Name), boundType.ComparisonKey);
+            if (boundType.IsProtocol)
+            {
+                AddExpandedAliases(aliases, $"I{boundType.Name}", boundType.ComparisonKey);
+                AddExpandedAliases(aliases, $"I{boundType.ObjectiveCName}", boundType.ComparisonKey);
+                AddExpandedAliases(
+                    aliases,
+                    string.IsNullOrWhiteSpace(boundType.Namespace) ? null : $"{boundType.Namespace}.I{boundType.Name}",
+                    boundType.ComparisonKey);
+            }
         }
 
         foreach (var delegateSurface in delegates)
@@ -711,6 +720,11 @@ internal sealed class BindingSyntaxParser
             AddSimpleAliasVariant(variants, withoutInterfaceObjectiveCPrefix);
         }
 
+        if (TryExpandFirebaseInAppMessagingPrefix(simpleName, out var inAppMessagingName))
+        {
+            AddSimpleAliasVariant(variants, inAppMessagingName);
+        }
+
         return variants;
     }
 
@@ -748,6 +762,20 @@ internal sealed class BindingSyntaxParser
                 result = alias[prefix.Length..];
                 return true;
             }
+        }
+
+        result = string.Empty;
+        return false;
+    }
+
+    private static bool TryExpandFirebaseInAppMessagingPrefix(string alias, out string result)
+    {
+        if (alias.Length > 4 &&
+            alias.StartsWith("FIAM", StringComparison.Ordinal) &&
+            char.IsUpper(alias[4]))
+        {
+            result = $"InAppMessaging{alias[4..]}";
+            return true;
         }
 
         result = string.Empty;
@@ -1196,6 +1224,7 @@ internal sealed class SymbolAliasLookup
     {
         return (alias.Length > 3 && alias.StartsWith("FIR", StringComparison.Ordinal) && char.IsUpper(alias[3])) ||
                (alias.Length > 3 && alias.StartsWith("ABT", StringComparison.Ordinal) && char.IsUpper(alias[3])) ||
+               (alias.Length > 4 && alias.StartsWith("FIAM", StringComparison.Ordinal) && char.IsUpper(alias[4])) ||
                (alias.Length > 4 && alias.StartsWith("IFIR", StringComparison.Ordinal) && char.IsUpper(alias[4])) ||
                (alias.Length > 4 && alias.StartsWith("IABT", StringComparison.Ordinal) && char.IsUpper(alias[4]));
     }
@@ -1231,6 +1260,11 @@ internal sealed class SymbolAliasLookup
         {
             AddLookupKeyVariants(lookupKeys, withoutInterfaceObjectiveCPrefix);
             AddLookupKeyVariants(lookupKeys, withoutInterfaceObjectiveCPrefix[1..]);
+        }
+
+        if (TryExpandFirebaseInAppMessagingPrefix(alias, out var inAppMessagingAlias))
+        {
+            AddLookupKeyVariants(lookupKeys, inAppMessagingAlias);
         }
     }
 
@@ -1272,12 +1306,28 @@ internal sealed class SymbolAliasLookup
         result = string.Empty;
         return false;
     }
+
+    private static bool TryExpandFirebaseInAppMessagingPrefix(string alias, out string result)
+    {
+        if (alias.Length > 4 &&
+            alias.StartsWith("FIAM", StringComparison.Ordinal) &&
+            char.IsUpper(alias[4]))
+        {
+            result = $"InAppMessaging{alias[4..]}";
+            return true;
+        }
+
+        result = string.Empty;
+        return false;
+    }
 }
 
 internal sealed class BindingComparer
 {
     private static readonly HashSet<string> ExternalPlaceholderTypeKeys = new(StringComparer.Ordinal)
     {
+        "FIRApp",
+        "UIColor",
         "UIApplication"
     };
 
@@ -1419,8 +1469,10 @@ internal sealed class BindingComparer
         SymbolAliasLookup aliases,
         List<AuditFinding> failures)
     {
+        var baselineBaseType = NormalizeTypeReference(baseline.BaseType, aliases);
+        var generatedBaseType = NormalizeTypeReference(generated.BaseType, aliases);
         if (!string.Equals(baseline.ContainerKind, generated.ContainerKind, StringComparison.Ordinal) ||
-            !string.Equals(NormalizeTypeReference(baseline.BaseType, aliases), NormalizeTypeReference(generated.BaseType, aliases), StringComparison.Ordinal) ||
+            !HaveEquivalentProtocolBaseTypes(baseline.IsProtocol, generated.IsProtocol, baselineBaseType, generatedBaseType) ||
             baseline.IsProtocol != generated.IsProtocol ||
             baseline.IsStatic != generated.IsStatic)
         {
@@ -1435,6 +1487,26 @@ internal sealed class BindingComparer
                 GeneratedFile: generated.SourceFile,
                 ComparisonTypeKey: baseline.ComparisonKey));
         }
+    }
+
+    private static bool HaveEquivalentProtocolBaseTypes(
+        bool baselineIsProtocol,
+        bool generatedIsProtocol,
+        string baselineBaseType,
+        string generatedBaseType)
+    {
+        if (string.Equals(baselineBaseType, generatedBaseType, StringComparison.Ordinal))
+        {
+            return true;
+        }
+
+        if (!baselineIsProtocol || !generatedIsProtocol)
+        {
+            return false;
+        }
+
+        return (string.IsNullOrEmpty(baselineBaseType) && string.Equals(generatedBaseType, "nsobject", StringComparison.Ordinal)) ||
+               (string.Equals(baselineBaseType, "nsobject", StringComparison.Ordinal) && string.IsNullOrEmpty(generatedBaseType));
     }
 
     private static void CompareMembers(
@@ -2009,18 +2081,21 @@ internal sealed class BindingComparer
 
     private static string NormalizeEnumMemberKey(string memberKey, EnumSurface enumSurface, SymbolAliasLookup aliases)
     {
+        var enumNameVariants = GetEnumNameVariants(enumSurface, aliases)
+            .SelectMany(ExpandEnumTypeNameVariants)
+            .Distinct(StringComparer.Ordinal);
         var normalizedMember = SymbolAliasLookup.NormalizeLookupKey(StripObjectiveCPrefix(memberKey));
-        foreach (var enumName in GetEnumNameVariants(enumSurface, aliases).OrderByDescending(static name => name.Length))
+        foreach (var enumName in enumNameVariants.OrderByDescending(static name => name.Length))
         {
             var normalizedEnumName = SymbolAliasLookup.NormalizeLookupKey(StripObjectiveCPrefix(enumName));
             if (normalizedMember.Length > normalizedEnumName.Length &&
                 normalizedMember.StartsWith(normalizedEnumName, StringComparison.Ordinal))
             {
-                return normalizedMember[normalizedEnumName.Length..];
+                return NormalizeEnumMemberRemainder(normalizedMember[normalizedEnumName.Length..], enumSurface, aliases);
             }
         }
 
-        return normalizedMember;
+        return NormalizeEnumMemberRemainder(normalizedMember, enumSurface, aliases);
     }
 
     private static IEnumerable<string> GetEnumNameVariants(EnumSurface enumSurface, SymbolAliasLookup aliases)
@@ -2034,6 +2109,35 @@ internal sealed class BindingComparer
             yield return equivalentKey;
             yield return equivalentKey.Split('.').Last();
         }
+    }
+
+    private static IEnumerable<string> ExpandEnumTypeNameVariants(string enumName)
+    {
+        yield return enumName;
+        if (enumName.Length > "Type".Length &&
+            enumName.EndsWith("Type", StringComparison.Ordinal))
+        {
+            yield return enumName[..^"Type".Length];
+        }
+    }
+
+    private static string NormalizeEnumMemberRemainder(string memberRemainder, EnumSurface enumSurface, SymbolAliasLookup aliases)
+    {
+        if (!EnumNameHasTypeSuffix(enumSurface, aliases))
+        {
+            return memberRemainder;
+        }
+
+        return memberRemainder.Length > "type".Length &&
+               memberRemainder.StartsWith("type", StringComparison.Ordinal)
+            ? memberRemainder["type".Length..]
+            : memberRemainder;
+    }
+
+    private static bool EnumNameHasTypeSuffix(EnumSurface enumSurface, SymbolAliasLookup aliases)
+    {
+        return GetEnumNameVariants(enumSurface, aliases)
+            .Any(static name => name.EndsWith("Type", StringComparison.Ordinal));
     }
 
     private static string StripObjectiveCPrefix(string symbol)
