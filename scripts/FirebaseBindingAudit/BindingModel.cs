@@ -327,9 +327,8 @@ internal sealed class BindingSyntaxParser
             {
                 Kind = ToManualMemberKind(member.Kind),
                 ContainerKind = isStatic ? "static class" : containerKind,
-                ObjectiveCName = string.Equals(member.BindingAttribute, "Export", StringComparison.Ordinal) ? typeMatchKey : null,
                 HasGetter = member.HasGetter,
-                HasSetter = member.HasSetter
+                HasSetter = false
             });
         }
     }

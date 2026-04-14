@@ -465,6 +465,53 @@ public sealed class BindingSurfaceCoverageBuilderTests
     }
 
     [Fact]
+    public void Build_DoesNotTreatApiDefinitionHelperExportsAsNativeClasses()
+    {
+        var repoRoot = Path.Combine(Path.GetTempPath(), $"firebase-binding-surface-builder-{Guid.NewGuid():N}");
+
+        try
+        {
+            var sourceDirectory = Path.Combine(repoRoot, "source", "Firebase", "Auth");
+            Directory.CreateDirectory(sourceDirectory);
+            File.WriteAllText(
+                Path.Combine(sourceDirectory, "ApiDefinition.cs"),
+                """
+                namespace Firebase.Auth;
+
+                public interface InstallationIdChangedEventArgs
+                {
+                    [Export("kFIRInstallationIDDidChangeNotificationAppNameKey")]
+                    string AppName { get; set; }
+                }
+                """);
+
+            var document = new BindingSurfaceCoverageBuilder(CreateConfiguration()).Build(
+                repoRoot,
+                CreateManifest(),
+                "Auth");
+
+            var surface = Assert.Single(
+                document.Targets.Single().Surfaces,
+                static surface => surface.MemberName == "AppName");
+
+            Assert.Equal("manual-property", surface.Kind);
+            Assert.Null(surface.ObjectiveCName);
+            Assert.Empty(surface.NativeSelectors);
+            Assert.Equal("Export", surface.BindingAttribute);
+            Assert.Equal("kFIRInstallationIDDidChangeNotificationAppNameKey", surface.BindingValue);
+            Assert.True(surface.HasGetter);
+            Assert.False(surface.HasSetter);
+        }
+        finally
+        {
+            if (Directory.Exists(repoRoot))
+            {
+                Directory.Delete(repoRoot, recursive: true);
+            }
+        }
+    }
+
+    [Fact]
     public void Build_IncludesImplicitlyPublicInterfaceHelperMembers()
     {
         var repoRoot = Path.Combine(Path.GetTempPath(), $"firebase-binding-surface-builder-{Guid.NewGuid():N}");
