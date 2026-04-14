@@ -100,6 +100,7 @@ public sealed class BindingSurfaceCoverageValidatorTests
             ParameterCount: 0,
             ParameterTypes: [],
             ReturnType: null,
+            UnderlyingType: null,
             NativeSelectors: [],
             SourceFile: "source/Firebase/Core/ApiDefinition.cs",
             Signature: "interface App");

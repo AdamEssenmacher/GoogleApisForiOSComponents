@@ -87,6 +87,8 @@ internal sealed record ManualSurfaceItem(
 {
     public string? ObjectiveCName { get; init; }
     public string Kind { get; init; } = "manual";
+    public string? ContainerKind { get; init; }
+    public string? UnderlyingType { get; init; }
     public bool HasGetter { get; init; }
     public bool HasSetter { get; init; }
     public IReadOnlyList<string> ManualAttributes { get; init; } = [];
@@ -253,13 +255,13 @@ internal sealed class BindingSyntaxParser
 
         if (isHelperFile)
         {
-            AddManualTypeItems(typeName, objectiveCName, containerKind, currentNamespace, filePath, bindingMembers.Values, manualItems);
+            AddManualTypeItems(typeName, objectiveCName, containerKind, isStatic, currentNamespace, filePath, bindingMembers.Values, manualItems);
             return;
         }
 
         if (baseTypeName is null && !isProtocol)
         {
-            AddManualTypeItems(typeName, objectiveCName, containerKind, currentNamespace, filePath, bindingMembers.Values, manualItems);
+            AddManualTypeItems(typeName, objectiveCName, containerKind, isStatic, currentNamespace, filePath, bindingMembers.Values, manualItems);
             return;
         }
 
@@ -281,6 +283,7 @@ internal sealed class BindingSyntaxParser
         string typeName,
         string typeMatchKey,
         string containerKind,
+        bool isStatic,
         string currentNamespace,
         string filePath,
         IEnumerable<BindingMemberSurface> bindingMembers,
@@ -296,13 +299,14 @@ internal sealed class BindingSyntaxParser
                 MatchTypeKey: typeMatchKey,
                 MatchMemberKey: null,
                 MemberName: null,
-                IsStatic: false,
+                IsStatic: isStatic,
                 ParameterTypes: [],
                 ReturnType: null,
                 Signature: $"{containerKind} {typeName}",
                 SourceFile: filePath)
             {
-                Kind = "manual-type"
+                Kind = "manual-type",
+                ContainerKind = isStatic ? "static class" : containerKind
             });
             return;
         }
@@ -322,6 +326,7 @@ internal sealed class BindingSyntaxParser
                 SourceFile: member.SourceFile)
             {
                 Kind = ToManualMemberKind(member.Kind),
+                ContainerKind = isStatic ? "static class" : containerKind,
                 ObjectiveCName = string.Equals(member.BindingAttribute, "Export", StringComparison.Ordinal) ? typeMatchKey : null,
                 HasGetter = member.HasGetter,
                 HasSetter = member.HasSetter
@@ -498,7 +503,8 @@ internal sealed class BindingSyntaxParser
                 Signature: BuildDelegateSignature(delegateDeclaration),
                 SourceFile: filePath)
             {
-                Kind = "manual-delegate"
+                Kind = "manual-delegate",
+                ContainerKind = "delegate"
             });
             return;
         }
@@ -538,7 +544,9 @@ internal sealed class BindingSyntaxParser
                 Signature: $"enum {enumDeclaration.Identifier.Text}",
                 SourceFile: filePath)
             {
-                Kind = "manual-type"
+                Kind = "manual-type",
+                ContainerKind = "enum",
+                UnderlyingType = enumDeclaration.BaseList?.Types.FirstOrDefault()?.Type.WithoutTrivia().ToString()
             });
             return;
         }

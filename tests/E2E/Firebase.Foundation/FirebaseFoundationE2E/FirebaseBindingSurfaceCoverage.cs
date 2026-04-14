@@ -242,6 +242,8 @@ public static partial class FirebaseBindingSurfaceCoverage
 
     static void ResolveManagedMember(Type type, BindingSurfaceDescriptor surface)
     {
+        VerifyManagedTypeShape(type, surface);
+
         if (IsDelegateSurface(surface))
         {
             VerifyDelegateSurface(type, surface);
@@ -281,6 +283,84 @@ public static partial class FirebaseBindingSurfaceCoverage
             throw new MissingMethodException(type.FullName, ".ctor");
         }
     }
+
+    static void VerifyManagedTypeShape(Type type, BindingSurfaceDescriptor surface)
+    {
+        if (string.Equals(surface.Kind, "enum", StringComparison.Ordinal) ||
+            string.Equals(surface.Kind, "enum-member", StringComparison.Ordinal) ||
+            string.Equals(surface.ContainerKind, "enum", StringComparison.Ordinal))
+        {
+            VerifyEnumSurface(type, surface);
+            return;
+        }
+
+        if (IsDelegateSurface(surface))
+        {
+            if (!typeof(Delegate).IsAssignableFrom(type))
+            {
+                throw new TypeLoadException($"Managed type '{type.FullName}' is not a delegate.");
+            }
+
+            return;
+        }
+
+        // Binding-definition interfaces and protocols can generate managed classes; only
+        // helper/manual type shapes are expected to map 1:1 to reflection Type shape here.
+        if (!string.Equals(surface.Kind, "manual-type", StringComparison.Ordinal))
+        {
+            return;
+        }
+
+        VerifyManualTypeShape(type, surface);
+    }
+
+    static void VerifyEnumSurface(Type type, BindingSurfaceDescriptor surface)
+    {
+        if (!type.IsEnum)
+        {
+            throw new TypeLoadException($"Managed enum '{surface.RuntimeTypeName}' resolved to non-enum type '{type.FullName}'.");
+        }
+
+        if (!string.IsNullOrWhiteSpace(surface.UnderlyingType) &&
+            !TypeMatches(Enum.GetUnderlyingType(type), surface.UnderlyingType))
+        {
+            throw new TypeLoadException(
+                $"Managed enum '{type.FullName}' has underlying type '{Enum.GetUnderlyingType(type).FullName}', expected '{surface.UnderlyingType}'.");
+        }
+    }
+
+    static void VerifyManualTypeShape(Type type, BindingSurfaceDescriptor surface)
+    {
+        switch (surface.ContainerKind)
+        {
+            case "static class":
+                if (!IsStaticClass(type))
+                {
+                    throw new TypeLoadException($"Managed helper type '{type.FullName}' is not a static class.");
+                }
+                break;
+            case "class":
+                if (!type.IsClass || IsStaticClass(type))
+                {
+                    throw new TypeLoadException($"Managed helper type '{type.FullName}' is not an instance class.");
+                }
+                break;
+            case "struct":
+                if (!type.IsValueType || type.IsEnum)
+                {
+                    throw new TypeLoadException($"Managed helper type '{type.FullName}' is not a struct.");
+                }
+                break;
+            case "interface":
+                if (!type.IsInterface)
+                {
+                    throw new TypeLoadException($"Managed helper type '{type.FullName}' is not an interface.");
+                }
+                break;
+        }
+    }
+
+    static bool IsStaticClass(Type type) => type.IsAbstract && type.IsSealed;
 
     static Type? ResolveManagedType(string runtimeTypeName, string assemblyName)
     {
@@ -868,6 +948,7 @@ public static partial class FirebaseBindingSurfaceCoverage
         public int ParameterCount { get; set; }
         public List<string> ParameterTypes { get; set; } = [];
         public string? ReturnType { get; set; }
+        public string? UnderlyingType { get; set; }
         public List<BindingSurfaceNativeSelector> NativeSelectors { get; set; } = [];
         public string SourceFile { get; set; } = string.Empty;
         public string Signature { get; set; } = string.Empty;

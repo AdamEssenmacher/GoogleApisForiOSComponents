@@ -334,6 +334,96 @@ public sealed class BindingSurfaceCoverageBuilderTests
     }
 
     [Fact]
+    public void Build_RecordsEnumUnderlyingType()
+    {
+        var repoRoot = Path.Combine(Path.GetTempPath(), $"firebase-binding-surface-builder-{Guid.NewGuid():N}");
+
+        try
+        {
+            var sourceDirectory = Path.Combine(repoRoot, "source", "Firebase", "Auth");
+            Directory.CreateDirectory(sourceDirectory);
+            File.WriteAllText(
+                Path.Combine(sourceDirectory, "ApiDefinition.cs"),
+                """
+                namespace Firebase.Auth;
+
+                [Native]
+                public enum AuthErrorCode : long
+                {
+                    Unknown = 0
+                }
+                """);
+
+            var document = new BindingSurfaceCoverageBuilder(CreateConfiguration()).Build(
+                repoRoot,
+                CreateManifest(),
+                "Auth");
+
+            var surface = Assert.Single(
+                document.Targets.Single().Surfaces,
+                static surface => surface.Kind == "enum");
+
+            Assert.Equal("Firebase.Auth.AuthErrorCode", surface.RuntimeTypeName);
+            Assert.Equal("long", surface.UnderlyingType);
+            Assert.Equal("enum", surface.ContainerKind);
+        }
+        finally
+        {
+            if (Directory.Exists(repoRoot))
+            {
+                Directory.Delete(repoRoot, recursive: true);
+            }
+        }
+    }
+
+    [Fact]
+    public void Build_PreservesPublicHelperTypeShape()
+    {
+        var repoRoot = Path.Combine(Path.GetTempPath(), $"firebase-binding-surface-builder-{Guid.NewGuid():N}");
+
+        try
+        {
+            var sourceDirectory = Path.Combine(repoRoot, "source", "Firebase", "Auth");
+            Directory.CreateDirectory(sourceDirectory);
+            File.WriteAllText(
+                Path.Combine(sourceDirectory, "ApiDefinition.cs"),
+                """
+                namespace Firebase.Auth;
+                """);
+            File.WriteAllText(
+                Path.Combine(sourceDirectory, "Extension.cs"),
+                """
+                namespace Firebase.Auth;
+
+                public static class AuthHelpers
+                {
+                    public static string Normalize(string value) => value;
+                }
+                """);
+
+            var document = new BindingSurfaceCoverageBuilder(CreateConfiguration(["Extension.cs"])).Build(
+                repoRoot,
+                CreateManifest("Extension.cs"),
+                "Auth");
+
+            var surface = Assert.Single(
+                document.Targets.Single().Surfaces,
+                static surface => surface.Kind == "manual-type");
+
+            Assert.Equal("Firebase.Auth.AuthHelpers", surface.RuntimeTypeName);
+            Assert.Equal("static class", surface.ContainerKind);
+            Assert.True(surface.IsStatic);
+        }
+        finally
+        {
+            if (Directory.Exists(repoRoot))
+            {
+                Directory.Delete(repoRoot, recursive: true);
+            }
+        }
+    }
+
+    [Fact]
     public void Build_RecordsPublicHelperDelegatesConstructorsAndIndexers()
     {
         var repoRoot = Path.Combine(Path.GetTempPath(), $"firebase-binding-surface-builder-{Guid.NewGuid():N}");
@@ -386,8 +476,13 @@ public sealed class BindingSurfaceCoverageBuilderTests
             var fieldConstant = Assert.Single(surfaces, static surface => surface.BindingValue == "FIRAuthErrorDomain");
             Assert.True(fieldConstant.IsStatic);
 
+            var helperType = Assert.Single(surfaces, static surface => surface.Kind == "manual-type");
+            Assert.Equal("class", helperType.ContainerKind);
+            Assert.False(helperType.IsStatic);
+
             var helperDelegate = Assert.Single(surfaces, static surface => surface.Kind == "manual-delegate");
             Assert.Equal("Firebase.Auth.Auth+TokenFactory", helperDelegate.RuntimeTypeName);
+            Assert.Equal("delegate", helperDelegate.ContainerKind);
             Assert.Equal(["int", "ref NSError"], helperDelegate.ParameterTypes);
             Assert.Equal("string", helperDelegate.ReturnType);
 
