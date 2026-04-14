@@ -23,11 +23,11 @@ namespace Firebase.PerformanceMonitoring
 
 		// @property (assign, nonatomic) long requestPayloadSize;
 		[Export ("requestPayloadSize")]
-		nint RequestPayloadSize { get; set; }
+		long RequestPayloadSize { get; set; }
 
 		// @property (assign, nonatomic) long responsePayloadSize;
 		[Export ("responsePayloadSize")]
-		nint ResponsePayloadSize { get; set; }
+		long ResponsePayloadSize { get; set; }
 
 		// @property (copy, nonatomic) NSString * _Nullable responseContentType;
 		[NullAllowed, Export ("responseContentType")]
