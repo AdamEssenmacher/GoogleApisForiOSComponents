@@ -95,7 +95,7 @@ tools/e2e/run-firebase-foundation.sh --package-dir output --configuration Debug 
 
 ## Binding surface coverage mode
 
-The opt-in binding surface coverage lane accounts for the 14 active Firebase `12.6.0` bindings tracked by the audit config. It generates a source-derived coverage inventory from [`binding-surface-coverage.json`](./binding-surface-coverage.json), restores the selected target package set from the local feed, and runs `ConfigureApp` plus the generated surface coverage case.
+The opt-in binding surface coverage lane accounts for the active Firebase `12.6.0` bindings tracked by the audit config. It generates a source-derived coverage inventory from [`binding-surface-coverage.json`](./binding-surface-coverage.json), restores the selected target package set from the local feed, and runs `ConfigureApp` plus the generated surface coverage case.
 
 This lane treats native Firebase/backend errors as acceptable when the binding surface is present and loadable. It fails binding-layer problems such as missing managed types, missing Objective-C classes/protocols/selectors, missing native symbols, `TypeLoadException`, `DllNotFoundException`, `EntryPointNotFoundException`, and `ObjCRuntime.ObjCException`.
 
@@ -103,7 +103,7 @@ Pack the active Firebase set when running the aggregate lane:
 
 ```sh
 dotnet tool restore
-dotnet tool run dotnet-cake -- --target=nuget --names="Firebase.ABTesting,Firebase.Analytics,Firebase.AppCheck,Firebase.Auth,Firebase.CloudFirestore,Firebase.CloudFunctions,Firebase.CloudMessaging,Firebase.Core,Firebase.Crashlytics,Firebase.Database,Firebase.Installations,Firebase.PerformanceMonitoring,Firebase.RemoteConfig,Firebase.Storage"
+dotnet tool run dotnet-cake -- --target=nuget --names="Firebase.ABTesting,Firebase.Analytics,Firebase.AppCheck,Firebase.AppDistribution,Firebase.Auth,Firebase.CloudFirestore,Firebase.CloudFunctions,Firebase.CloudMessaging,Firebase.Core,Firebase.Crashlytics,Firebase.Database,Firebase.Installations,Firebase.PerformanceMonitoring,Firebase.RemoteConfig,Firebase.Storage"
 ```
 
 Run a representative target or the full active set with:
