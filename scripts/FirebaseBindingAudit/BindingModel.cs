@@ -79,8 +79,20 @@ internal sealed record ManualSurfaceItem(
     string MatchTypeKey,
     string? MatchMemberKey,
     string? MemberName,
+    bool IsStatic,
+    IReadOnlyList<string> ParameterTypes,
+    string? ReturnType,
     string Signature,
-    string SourceFile);
+    string SourceFile)
+{
+    public string? ObjectiveCName { get; init; }
+    public string Kind { get; init; } = "manual";
+    public string? ContainerKind { get; init; }
+    public string? UnderlyingType { get; init; }
+    public bool HasGetter { get; init; }
+    public bool HasSetter { get; init; }
+    public IReadOnlyList<string> ManualAttributes { get; init; } = [];
+}
 
 internal sealed class BindingSyntaxParser
 {
@@ -243,13 +255,13 @@ internal sealed class BindingSyntaxParser
 
         if (isHelperFile)
         {
-            AddManualTypeItems(typeName, objectiveCName, containerKind, currentNamespace, filePath, bindingMembers.Values, manualItems);
+            AddManualTypeItems(typeName, objectiveCName, containerKind, isStatic, currentNamespace, filePath, bindingMembers.Values, manualItems);
             return;
         }
 
         if (baseTypeName is null && !isProtocol)
         {
-            AddManualTypeItems(typeName, objectiveCName, containerKind, currentNamespace, filePath, bindingMembers.Values, manualItems);
+            AddManualTypeItems(typeName, objectiveCName, containerKind, isStatic, currentNamespace, filePath, bindingMembers.Values, manualItems);
             return;
         }
 
@@ -271,6 +283,7 @@ internal sealed class BindingSyntaxParser
         string typeName,
         string typeMatchKey,
         string containerKind,
+        bool isStatic,
         string currentNamespace,
         string filePath,
         IEnumerable<BindingMemberSurface> bindingMembers,
@@ -286,8 +299,15 @@ internal sealed class BindingSyntaxParser
                 MatchTypeKey: typeMatchKey,
                 MatchMemberKey: null,
                 MemberName: null,
+                IsStatic: isStatic,
+                ParameterTypes: [],
+                ReturnType: null,
                 Signature: $"{containerKind} {typeName}",
-                SourceFile: filePath));
+                SourceFile: filePath)
+            {
+                Kind = "manual-type",
+                ContainerKind = isStatic ? "static class" : containerKind
+            });
             return;
         }
 
@@ -299,10 +319,29 @@ internal sealed class BindingSyntaxParser
                 MatchTypeKey: typeMatchKey,
                 MatchMemberKey: member.Key,
                 MemberName: member.Name,
+                IsStatic: member.IsStatic,
+                ParameterTypes: member.Parameters.Select(static parameter => parameter.Type).ToList(),
+                ReturnType: member.ReturnType,
                 Signature: member.Signature,
-                SourceFile: member.SourceFile));
+                SourceFile: member.SourceFile)
+            {
+                Kind = ToManualMemberKind(member.Kind),
+                ContainerKind = isStatic ? "static class" : containerKind,
+                ObjectiveCName = string.Equals(member.BindingAttribute, "Export", StringComparison.Ordinal) ? typeMatchKey : null,
+                HasGetter = member.HasGetter,
+                HasSetter = member.HasSetter
+            });
         }
     }
+
+    private static string ToManualMemberKind(string memberKind) =>
+        memberKind switch
+        {
+            "constructor" => "manual-constructor",
+            "property" => "manual-property",
+            "method" => "manual-method",
+            _ => "manual"
+        };
 
     private void ParseMethod(
         MethodDeclarationSyntax methodDeclaration,
@@ -316,7 +355,8 @@ internal sealed class BindingSyntaxParser
     {
         var bindingAttribute = GetPrimaryBindingAttribute(methodDeclaration.AttributeLists);
         var bindingValue = bindingAttribute is null ? null : GetBindingValue(methodDeclaration.AttributeLists, bindingAttribute);
-        var isManual = isHelperFile || HasAnyAttribute(methodDeclaration.AttributeLists, manualAttributes);
+        var manualAttributeNames = GetMatchingManualAttributes(methodDeclaration.AttributeLists);
+        var isManual = isHelperFile || manualAttributeNames.Count > 0;
         var signature = BuildMethodSignature(methodDeclaration);
 
         if (isManual)
@@ -327,8 +367,17 @@ internal sealed class BindingSyntaxParser
                 MatchTypeKey: containingTypeMatchKey,
                 MatchMemberKey: bindingAttribute is null ? null : CreateMemberKey(bindingAttribute, bindingValue, methodDeclaration.Identifier.Text, methodDeclaration.ParameterList.Parameters.Count),
                 MemberName: methodDeclaration.Identifier.Text,
+                IsStatic: methodDeclaration.Modifiers.Any(static token => token.IsKind(SyntaxKind.StaticKeyword)) ||
+                          HasAttribute(methodDeclaration.AttributeLists, "Static"),
+                ParameterTypes: methodDeclaration.ParameterList.Parameters.Select(NormalizeParameterType).ToList(),
+                ReturnType: NormalizeType(methodDeclaration.ReturnType),
                 Signature: signature,
-                SourceFile: filePath));
+                SourceFile: filePath)
+            {
+                ObjectiveCName = string.Equals(bindingAttribute, "Export", StringComparison.Ordinal) ? containingTypeMatchKey : null,
+                Kind = methodDeclaration.Identifier.Text == "Constructor" ? "manual-constructor" : "manual-method",
+                ManualAttributes = manualAttributeNames
+            });
             return;
         }
 
@@ -373,7 +422,8 @@ internal sealed class BindingSyntaxParser
     {
         var bindingAttribute = GetPrimaryBindingAttribute(propertyDeclaration.AttributeLists);
         var bindingValue = bindingAttribute is null ? null : GetBindingValue(propertyDeclaration.AttributeLists, bindingAttribute);
-        var isManual = isHelperFile || HasAnyAttribute(propertyDeclaration.AttributeLists, manualAttributes);
+        var manualAttributeNames = GetMatchingManualAttributes(propertyDeclaration.AttributeLists);
+        var isManual = isHelperFile || manualAttributeNames.Count > 0;
         var signature = BuildPropertySignature(propertyDeclaration);
 
         if (isManual)
@@ -384,8 +434,20 @@ internal sealed class BindingSyntaxParser
                 MatchTypeKey: containingTypeMatchKey,
                 MatchMemberKey: bindingAttribute is null ? null : CreateMemberKey(bindingAttribute, bindingValue, propertyDeclaration.Identifier.Text, 0),
                 MemberName: propertyDeclaration.Identifier.Text,
+                IsStatic: propertyDeclaration.Modifiers.Any(static token => token.IsKind(SyntaxKind.StaticKeyword)) ||
+                          HasAttribute(propertyDeclaration.AttributeLists, "Static") ||
+                          string.Equals(bindingAttribute, "Field", StringComparison.Ordinal),
+                ParameterTypes: [],
+                ReturnType: NormalizeType(propertyDeclaration.Type),
                 Signature: signature,
-                SourceFile: filePath));
+                SourceFile: filePath)
+            {
+                ObjectiveCName = string.Equals(bindingAttribute, "Export", StringComparison.Ordinal) ? containingTypeMatchKey : null,
+                Kind = "manual-property",
+                HasGetter = propertyDeclaration.AccessorList?.Accessors.Any(static accessor => accessor.IsKind(SyntaxKind.GetAccessorDeclaration)) == true,
+                HasSetter = propertyDeclaration.AccessorList?.Accessors.Any(static accessor => accessor.IsKind(SyntaxKind.SetAccessorDeclaration)) == true,
+                ManualAttributes = manualAttributeNames
+            });
             return;
         }
 
@@ -405,7 +467,9 @@ internal sealed class BindingSyntaxParser
             BindingAttribute: bindingAttribute,
             BindingValue: bindingValue,
             IsNotification: HasAttribute(propertyDeclaration.AttributeLists, "Notification"),
-            IsStatic: propertyDeclaration.Modifiers.Any(static token => token.IsKind(SyntaxKind.StaticKeyword)) || HasAttribute(propertyDeclaration.AttributeLists, "Static"),
+            IsStatic: propertyDeclaration.Modifiers.Any(static token => token.IsKind(SyntaxKind.StaticKeyword)) ||
+                      HasAttribute(propertyDeclaration.AttributeLists, "Static") ||
+                      string.Equals(bindingAttribute, "Field", StringComparison.Ordinal),
             ReturnType: NormalizeType(propertyDeclaration.Type),
             IsReturnNullAllowed: HasNullAllowed(propertyDeclaration.AttributeLists, "return") || HasNullAllowed(propertyDeclaration.AttributeLists, null),
             HasGetter: getter is not null,
@@ -433,8 +497,15 @@ internal sealed class BindingSyntaxParser
                 MatchTypeKey: delegateDeclaration.Identifier.Text,
                 MatchMemberKey: null,
                 MemberName: null,
+                IsStatic: false,
+                ParameterTypes: delegateDeclaration.ParameterList.Parameters.Select(NormalizeParameterType).ToList(),
+                ReturnType: NormalizeType(delegateDeclaration.ReturnType),
                 Signature: BuildDelegateSignature(delegateDeclaration),
-                SourceFile: filePath));
+                SourceFile: filePath)
+            {
+                Kind = "manual-delegate",
+                ContainerKind = "delegate"
+            });
             return;
         }
 
@@ -467,8 +538,16 @@ internal sealed class BindingSyntaxParser
                 MatchTypeKey: enumDeclaration.Identifier.Text,
                 MatchMemberKey: null,
                 MemberName: null,
+                IsStatic: false,
+                ParameterTypes: [],
+                ReturnType: null,
                 Signature: $"enum {enumDeclaration.Identifier.Text}",
-                SourceFile: filePath));
+                SourceFile: filePath)
+            {
+                Kind = "manual-type",
+                ContainerKind = "enum",
+                UnderlyingType = enumDeclaration.BaseList?.Types.FirstOrDefault()?.Type.WithoutTrivia().ToString()
+            });
             return;
         }
 
@@ -536,7 +615,7 @@ internal sealed class BindingSyntaxParser
     private static BindingParameterSurface CreateParameter(ParameterSyntax parameter)
     {
         return new BindingParameterSurface(
-            Type: NormalizeType(parameter.Type),
+            Type: NormalizeParameterType(parameter),
             IsNullAllowed: HasNullAllowed(parameter.AttributeLists, null));
     }
 
@@ -716,7 +795,7 @@ internal sealed class BindingSyntaxParser
         var builder = new StringBuilder();
         builder.Append(methodDeclaration.Identifier.Text);
         builder.Append('(');
-        builder.Append(string.Join(", ", methodDeclaration.ParameterList.Parameters.Select(static parameter => NormalizeType(parameter.Type))));
+        builder.Append(string.Join(", ", methodDeclaration.ParameterList.Parameters.Select(NormalizeParameterType)));
         builder.Append(')');
         builder.Append(" -> ");
         builder.Append(NormalizeType(methodDeclaration.ReturnType));
@@ -749,7 +828,7 @@ internal sealed class BindingSyntaxParser
         var builder = new StringBuilder();
         builder.Append(delegateDeclaration.Identifier.Text);
         builder.Append('(');
-        builder.Append(string.Join(", ", delegateDeclaration.ParameterList.Parameters.Select(static parameter => NormalizeType(parameter.Type))));
+        builder.Append(string.Join(", ", delegateDeclaration.ParameterList.Parameters.Select(NormalizeParameterType)));
         builder.Append(')');
         builder.Append(" -> ");
         builder.Append(NormalizeType(delegateDeclaration.ReturnType));
@@ -759,6 +838,16 @@ internal sealed class BindingSyntaxParser
     private static string NormalizeType(TypeSyntax? typeSyntax)
     {
         return typeSyntax?.WithoutTrivia().ToString().Replace("global::", string.Empty, StringComparison.Ordinal) ?? "void";
+    }
+
+    private static string NormalizeParameterType(ParameterSyntax parameter)
+    {
+        var parameterType = NormalizeType(parameter.Type);
+        var modifier = parameter.Modifiers.FirstOrDefault(static modifier =>
+            modifier.IsKind(SyntaxKind.RefKeyword) ||
+            modifier.IsKind(SyntaxKind.OutKeyword) ||
+            modifier.IsKind(SyntaxKind.InKeyword));
+        return modifier.RawKind == 0 ? parameterType : $"{modifier.Text} {parameterType}";
     }
 
     private static string QualifyType(string currentNamespace, string typeName)
@@ -771,20 +860,22 @@ internal sealed class BindingSyntaxParser
         return string.IsNullOrWhiteSpace(currentNamespace) ? childNamespace : $"{currentNamespace}.{childNamespace}";
     }
 
-    private bool HasAnyAttribute(SyntaxList<AttributeListSyntax> attributeLists, HashSet<string> attributeNames)
+    private IReadOnlyList<string> GetMatchingManualAttributes(SyntaxList<AttributeListSyntax> attributeLists)
     {
+        var matchingAttributes = new List<string>();
         foreach (var attributeList in attributeLists)
         {
             foreach (var attribute in attributeList.Attributes)
             {
-                if (attributeNames.Contains(NormalizeAttributeName(attribute.Name)))
+                var attributeName = NormalizeAttributeName(attribute.Name);
+                if (manualAttributes.Contains(attributeName))
                 {
-                    return true;
+                    matchingAttributes.Add(attributeName);
                 }
             }
         }
 
-        return false;
+        return matchingAttributes;
     }
 
     private static bool HasAttribute(SyntaxList<AttributeListSyntax> attributeLists, string attributeName)
@@ -1967,7 +2058,17 @@ internal sealed class BindingComparer
             return string.Empty;
         }
 
-        var compact = typeName.Replace("global::", string.Empty, StringComparison.Ordinal)
+        var cleaned = typeName.Replace("global::", string.Empty, StringComparison.Ordinal).Trim();
+        foreach (var modifier in new[] { "ref", "out", "in" })
+        {
+            var prefix = $"{modifier} ";
+            if (cleaned.StartsWith(prefix, StringComparison.Ordinal))
+            {
+                return $"{modifier} {NormalizeTypeReference(cleaned[prefix.Length..], aliases)}";
+            }
+        }
+
+        var compact = cleaned
             .Replace(" ", string.Empty, StringComparison.Ordinal);
 
         if (compact.EndsWith("[]", StringComparison.Ordinal))

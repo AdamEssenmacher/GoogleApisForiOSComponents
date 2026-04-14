@@ -18,9 +18,12 @@
     <RuntimeDriftCase></RuntimeDriftCase>
     <RuntimeDriftCaseMethod></RuntimeDriftCaseMethod>
     <RuntimeDriftCasePropsPath></RuntimeDriftCasePropsPath>
+    <BindingSurfaceCoverageTarget></BindingSurfaceCoverageTarget>
+    <BindingSurfaceCoveragePropsPath></BindingSurfaceCoveragePropsPath>
   </PropertyGroup>
 
   <Import Project="$(RuntimeDriftCasePropsPath)" Condition="'$(RuntimeDriftCasePropsPath)' != '' and Exists('$(RuntimeDriftCasePropsPath)')" />
+  <Import Project="$(BindingSurfaceCoveragePropsPath)" Condition="'$(BindingSurfaceCoveragePropsPath)' != '' and Exists('$(BindingSurfaceCoveragePropsPath)')" />
 
   <PropertyGroup Condition="'$(EnableNullabilityValidation)' == 'true'">
     <DefineConstants>$(DefineConstants);ENABLE_NULLABILITY_VALIDATION</DefineConstants>
@@ -42,6 +45,10 @@
     <MtouchLink>None</MtouchLink>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(BindingSurfaceCoverageTarget)' != ''">
+    <MtouchLink>None</MtouchLink>
+  </PropertyGroup>
+
   <ItemGroup>
     <None Remove="GoogleService-Info.plist" Condition="Exists('GoogleService-Info.plist')" />
     <BundleResource Include="GoogleService-Info.plist" Condition="Exists('GoogleService-Info.plist')" />
@@ -55,6 +62,13 @@
     <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute" Condition="'$(RuntimeDriftCaseMethod)' != ''">
       <_Parameter1>RuntimeDriftCaseMethod</_Parameter1>
       <_Parameter2>$(RuntimeDriftCaseMethod)</_Parameter2>
+    </AssemblyAttribute>
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(BindingSurfaceCoverageTarget)' != ''">
+    <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+      <_Parameter1>BindingSurfaceCoverageTarget</_Parameter1>
+      <_Parameter2>$(BindingSurfaceCoverageTarget)</_Parameter2>
     </AssemblyAttribute>
   </ItemGroup>
 
