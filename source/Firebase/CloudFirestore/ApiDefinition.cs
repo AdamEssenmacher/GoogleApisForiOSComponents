@@ -712,7 +712,7 @@ namespace Firebase.CloudFirestore
 
 		// - (void) useEmulatorWithHost:(NSString*) host port:(NSInteger) port;		
 		[Export ("useEmulatorWithHost:port:")]
-		void UseEmulatorWithHost (string host, uint port);
+		void UseEmulatorWithHost (string host, nint port);
 
 		// -(void)enableNetworkWithCompletion:(void (^ _Nullable)(NSError * _Nullable))completion;
 		[Async]
