@@ -28,6 +28,9 @@ namespace Firebase.Storage
 		NonMatchingChecksum = -13031,
 		DownloadSizeExceeded = -13032,
 		Cancelled = -13040,
-		InvalidArgument = -13050
+		InvalidArgument = -13050,
+		BucketMismatch = -13051,
+		InternalError = -13052,
+		PathError = -13053
 	}
 }
