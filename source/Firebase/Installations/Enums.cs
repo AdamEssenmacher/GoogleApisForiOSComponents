@@ -4,7 +4,7 @@ using ObjCRuntime;
 namespace Firebase.Installations
 {
 	[Native]
-	public enum InstallationsErrorCode : ulong
+	public enum InstallationsErrorCode : long
 	{
 		Unknown = 0,
 		Keychain = 1,
