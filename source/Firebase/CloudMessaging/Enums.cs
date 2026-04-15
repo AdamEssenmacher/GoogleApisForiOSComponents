@@ -4,7 +4,7 @@ using ObjCRuntime;
 namespace Firebase.CloudMessaging
 {
 	[Native]
-	public enum ErrorCode : ulong
+	public enum ErrorCode : long
 	{
 		Unknown = 0,
 		Authentication = 1,
