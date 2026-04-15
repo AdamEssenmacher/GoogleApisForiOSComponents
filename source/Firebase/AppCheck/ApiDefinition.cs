@@ -80,7 +80,7 @@ namespace Firebase.AppCheck {
 		[Abstract]
 		[Export ("createProviderWithApp:")]
 		[return: NullAllowed]
-		NSObject CreateProviderWithApp (App app);
+		IAppCheckProvider CreateProviderWithApp (App app);
 	}
 
 	// @interface FIRAppCheckToken : NSObject	
