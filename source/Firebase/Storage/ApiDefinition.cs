@@ -49,6 +49,10 @@ namespace Firebase.Storage
 		[Export ("maxOperationRetryTime")]
 		double MaxOperationRetryTime { get; set; }
 
+		// @property int64_t uploadChunkSizeBytes;
+		[Export ("uploadChunkSizeBytes")]
+		long UploadChunkSizeBytes { get; set; }
+
 		// @property (nonatomic, strong) dispatch_queue_t _Nonnull callbackQueue;
 		[Export ("callbackQueue", ArgumentSemantic.Strong)]
 		DispatchQueue CallbackQueue { get; set; }
@@ -67,7 +71,7 @@ namespace Firebase.Storage
 
 		// - (void) useEmulatorWithHost:(NSString*) host port:(NSInteger) port;
 		[Export ("useEmulatorWithHost:port:")]
-		void UseEmulatorWithHost (string host, uint port);
+		void UseEmulatorWithHost (string host, nint port);
 	}
 
 	// @interface FIRStorageDownloadTask : FIRStorageObservableTask <FIRStorageTaskManagement>
