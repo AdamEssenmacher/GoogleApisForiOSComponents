@@ -221,6 +221,7 @@ internal sealed class AuditRunner
 
         try
         {
+            PrepareStagedXcframeworkForTarget(target, stagedFrameworkPath);
             var projectFile = CreateSwiftBindingProject(projectDirectory, projectName, stagedFrameworkPath, options.GeneratorVersion);
             var buildResult = await BuildTargetProjectAsync(projectFile, projectDirectory, dotnetEnvironment, cancellationToken);
             WriteLogs(logsDirectory, $"{target.Id}-build", buildResult);
@@ -1206,6 +1207,96 @@ internal sealed class AuditRunner
             var destinationPath = Path.Combine(destinationDirectory, Path.GetFileName(xcframeworkDirectory));
             TryCreateDirectorySymlink(destinationPath, xcframeworkDirectory);
         }
+    }
+
+    internal static void PrepareStagedXcframeworkForTarget(AuditTargetDefinition target, string stagedXcframeworkPath)
+    {
+        if (target.ObjcUmbrellaHeaderImports.Length == 0)
+        {
+            return;
+        }
+
+        MaterializeStagedDirectory(stagedXcframeworkPath);
+        AddObjcUmbrellaHeaderImports(stagedXcframeworkPath, target.ObjcUmbrellaHeaderImports);
+    }
+
+    private static void MaterializeStagedDirectory(string stagedDirectoryPath)
+    {
+        var directoryInfo = new DirectoryInfo(stagedDirectoryPath);
+        if (!directoryInfo.Exists || (directoryInfo.Attributes & FileAttributes.ReparsePoint) == 0)
+        {
+            return;
+        }
+
+        var linkTarget = directoryInfo.LinkTarget;
+        if (string.IsNullOrWhiteSpace(linkTarget))
+        {
+            throw new InvalidOperationException($"Unable to resolve symlink target for '{stagedDirectoryPath}'.");
+        }
+
+        var sourcePath = Path.IsPathRooted(linkTarget)
+            ? linkTarget
+            : Path.GetFullPath(Path.Combine(directoryInfo.Parent?.FullName ?? Directory.GetCurrentDirectory(), linkTarget));
+        if (!Directory.Exists(sourcePath))
+        {
+            throw new InvalidOperationException($"Symlink target '{sourcePath}' does not exist for '{stagedDirectoryPath}'.");
+        }
+
+        Directory.Delete(stagedDirectoryPath);
+        CopyDirectory(sourcePath, stagedDirectoryPath);
+    }
+
+    private static void AddObjcUmbrellaHeaderImports(string xcframeworkPath, IReadOnlyList<string> imports)
+    {
+        var importLines = imports
+            .Select(NormalizeObjcImportLine)
+            .Distinct(StringComparer.Ordinal)
+            .ToList();
+        if (importLines.Count == 0)
+        {
+            return;
+        }
+
+        foreach (var umbrellaHeaderPath in Directory.EnumerateFiles(xcframeworkPath, "*-umbrella.h", SearchOption.AllDirectories))
+        {
+            var content = File.ReadAllText(umbrellaHeaderPath);
+            var additions = importLines
+                .Where(importLine => !content.Contains(importLine, StringComparison.Ordinal))
+                .ToList();
+            if (additions.Count == 0)
+            {
+                continue;
+            }
+
+            var builder = new StringBuilder(content);
+            if (builder.Length > 0 && builder[^1] != '\n')
+            {
+                builder.AppendLine();
+            }
+
+            foreach (var addition in additions)
+            {
+                builder.AppendLine(addition);
+            }
+
+            File.WriteAllText(umbrellaHeaderPath, builder.ToString());
+        }
+    }
+
+    private static string NormalizeObjcImportLine(string import)
+    {
+        var trimmedImport = import.Trim();
+        if (trimmedImport.StartsWith("#import ", StringComparison.Ordinal))
+        {
+            return trimmedImport;
+        }
+
+        if (trimmedImport.StartsWith("<", StringComparison.Ordinal) || trimmedImport.StartsWith("\"", StringComparison.Ordinal))
+        {
+            return $"#import {trimmedImport}";
+        }
+
+        return $"#import <{trimmedImport}>";
     }
 
     private static void StageSharpieFrameworkSlices(
