@@ -169,6 +169,45 @@ public sealed class AuditRunnerTests
         }
     }
 
+    [Fact]
+    public void PrepareStagedXcframeworkForTarget_MaterializesSymlinkBeforeAddingUmbrellaImports()
+    {
+        var tempRoot = Path.Combine(Path.GetTempPath(), $"firebase-binding-audit-umbrella-{Guid.NewGuid():N}");
+
+        try
+        {
+            var sourceXcframeworkPath = Path.Combine(tempRoot, "externals", "FirebaseFunctions.xcframework");
+            var sourceHeaderPath = Path.Combine(sourceXcframeworkPath, "ios-arm64", "FirebaseFunctions.framework", "Headers", "FirebaseFunctions-umbrella.h");
+            Directory.CreateDirectory(Path.GetDirectoryName(sourceHeaderPath)!);
+            File.WriteAllText(sourceHeaderPath, "FOUNDATION_EXPORT double FirebaseFunctionsVersionNumber;\n");
+
+            var stagedXcframeworkPath = Path.Combine(tempRoot, "frameworks", "FirebaseFunctions.xcframework");
+            Directory.CreateDirectory(Path.GetDirectoryName(stagedXcframeworkPath)!);
+            Directory.CreateSymbolicLink(stagedXcframeworkPath, sourceXcframeworkPath);
+
+            AuditRunner.PrepareStagedXcframeworkForTarget(
+                new AuditTargetDefinition
+                {
+                    Id = "CloudFunctions",
+                    Xcframework = "FirebaseFunctions",
+                    ObjcUmbrellaHeaderImports = ["FirebaseFunctions/FirebaseFunctions-Swift.h"]
+                },
+                stagedXcframeworkPath);
+
+            var stagedHeaderPath = Path.Combine(stagedXcframeworkPath, "ios-arm64", "FirebaseFunctions.framework", "Headers", "FirebaseFunctions-umbrella.h");
+            Assert.Contains("#import <FirebaseFunctions/FirebaseFunctions-Swift.h>", File.ReadAllText(stagedHeaderPath));
+            Assert.DoesNotContain("#import <FirebaseFunctions/FirebaseFunctions-Swift.h>", File.ReadAllText(sourceHeaderPath));
+            Assert.False((new DirectoryInfo(stagedXcframeworkPath).Attributes & FileAttributes.ReparsePoint) != 0);
+        }
+        finally
+        {
+            if (Directory.Exists(tempRoot))
+            {
+                Directory.Delete(tempRoot, recursive: true);
+            }
+        }
+    }
+
     private static AuditOptions CreateAuditOptions(bool disableSharpie) =>
         new(
             RepoRoot: string.Empty,

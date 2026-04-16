@@ -118,6 +118,9 @@
       "helperFiles": [
         "Extension.cs"
       ],
+      "objcUmbrellaHeaderImports": [
+        "FirebaseFunctions/FirebaseFunctions-Swift.h"
+      ],
       "sharpieMode": "auto"
     },
     {
