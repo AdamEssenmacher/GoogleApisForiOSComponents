@@ -236,15 +236,25 @@ namespace Firebase.Auth
 		[Export ("shareAuthStateAcrossDevices")]
 		bool ShareAuthStateAcrossDevices { get; set; }
 
+		// @property (nonatomic, copy) NSString * _Nullable tenantID;
+		[NullAllowed]
+		[Export ("tenantID")]
+		string TenantId { get; set; }
+
+		// @property (nonatomic, copy) NSString * _Nullable customAuthDomain;
+		[NullAllowed]
+		[Export ("customAuthDomain")]
+		string CustomAuthDomain { get; set; }
+
 		// @property (nonatomic, readonly, copy) NSData * _Nullable APNSToken;
 		[NullAllowed]
 		[Export ("APNSToken", ArgumentSemantic.Copy)]
 		NSData ApnsToken { get; }
 
-		// -(void)updateCurrentUser:(FIRUser * _Nonnull)user completion:(FIRUserUpdateCallback _Nullable)completion;
+		// -(void)updateCurrentUser:(FIRUser * _Nullable)user completion:(FIRUserUpdateCallback _Nullable)completion;
 		[Async]
 		[Export ("updateCurrentUser:completion:")]
-		void UpdateCurrentUser (User user, [NullAllowed] UserUpdateHandler completion);
+		void UpdateCurrentUser ([NullAllowed] User user, [NullAllowed] UserUpdateHandler completion);
 
 		// -(void)fetchSignInMethodsForEmail:(NSString * _Nonnull)email completion:(FIRSignInMethodQueryCallback _Nullable)completion;
 		[Async]
@@ -311,10 +321,10 @@ namespace Firebase.Auth
 		[Export ("sendPasswordResetWithEmail:completion:")]
 		void SendPasswordReset (string email, [NullAllowed] SendPasswordResetHandler completion);
 
-		// - (void)sendPasswordResetWithEmail:(NSString *)email actionCodeSettings:(FIRActionCodeSettings*) actionCodeSettings completion:(nullable FIRSendPasswordResetCallback) completion;
+		// - (void)sendPasswordResetWithEmail:(NSString *)email actionCodeSettings:(FIRActionCodeSettings* _Nullable) actionCodeSettings completion:(nullable FIRSendPasswordResetCallback) completion;
 		[Async]
 		[Export ("sendPasswordResetWithEmail:actionCodeSettings:completion:")]
-		void SendPasswordReset (string email, ActionCodeSettings actionCodeSettings, [NullAllowed] SendPasswordResetHandler completion);
+		void SendPasswordReset (string email, [NullAllowed] ActionCodeSettings actionCodeSettings, [NullAllowed] SendPasswordResetHandler completion);
 
 		// -(void)sendSignInLinkToEmail:(NSString * _Nonnull)email actionCodeSettings:(FIRActionCodeSettings * _Nonnull)actionCodeSettings completion:(FIRSendSignInLinkToEmailCallback _Nullable)completion;
 		[Async]
@@ -328,6 +338,11 @@ namespace Firebase.Auth
 		// -(BOOL)isSignInWithEmailLink:(NSString * _Nonnull)link;
 		[Export ("isSignInWithEmailLink:")]
 		bool IsSignIn (string link);
+
+		// -(void)initializeRecaptchaConfigWithCompletion:(void (^ _Nullable)(NSError * _Nullable))completion;
+		[Async]
+		[Export ("initializeRecaptchaConfigWithCompletion:")]
+		void InitializeRecaptchaConfig ([NullAllowed] AuthVoidErrorHandler completion);
 
 		// -(FIRAuthStateDidChangeListenerHandle _Nonnull)addAuthStateDidChangeListener:(FIRAuthStateDidChangeListenerBlock _Nonnull)listener;
 		[Export ("addAuthStateDidChangeListener:")]
@@ -352,6 +367,11 @@ namespace Firebase.Auth
 		// - (void)useEmulatorWithHost:(NSString *)host port:(NSInteger)port;
 		[Export ("useEmulatorWithHost:port:")]
 		void UseEmulatorWithHost (string host, nint port);
+
+		// -(void)revokeTokenWithAuthorizationCode:(NSString * _Nonnull)authorizationCode completion:(void (^ _Nullable)(NSError * _Nullable))completion;
+		[Async]
+		[Export ("revokeTokenWithAuthorizationCode:completion:")]
+		void RevokeToken (string authorizationCode, [NullAllowed] AuthVoidErrorHandler completion);
 
 		// - (BOOL)canHandleURL:(nonnull NSURL *)URL;
 		[Export ("canHandleURL:")]
