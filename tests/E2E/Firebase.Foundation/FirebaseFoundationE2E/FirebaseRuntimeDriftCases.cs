@@ -2675,13 +2675,13 @@ static partial class FirebaseRuntimeDriftCases
         {
             try
             {
-                functions.UseEmulatorOriginWithHost("127.0.0.1", 5002);
+                functions.UseEmulatorWithHost("127.0.0.1", (nint)5002);
             }
             catch (ObjCException ex)
             {
                 throw new InvalidOperationException(
                     $"Selector '{liveSelector}' should not throw after the binding fix, but observed {ex.GetType().FullName}. " +
-                    $"Runtime host argument type: {typeof(string).FullName}. Runtime port argument type: {typeof(uint).FullName}. " +
+                    $"Runtime host argument type: {typeof(string).FullName}. Runtime port argument type: {typeof(nint).FullName}. " +
                     $"NSException.Name: {objcExceptionProbe.Name}. " +
                     $"NSException.Reason: {objcExceptionProbe.Reason}. " +
                     $"Marshal mode: {objcExceptionProbe.Mode}.",
@@ -2698,7 +2698,7 @@ static partial class FirebaseRuntimeDriftCases
             return Task.FromResult(
                 $"Removed stale managed selector '{staleSelector}' and property 'EmulatorOrigin'. " +
                 $"Live selector '{liveSelector}' completed without ObjC exception after the binding fix. " +
-                $"Runtime host argument type: {typeof(string).FullName}. Runtime port argument type: {typeof(uint).FullName}.");
+                $"Runtime host argument type: {typeof(string).FullName}. Runtime port argument type: {typeof(nint).FullName}.");
         }
         finally
         {
