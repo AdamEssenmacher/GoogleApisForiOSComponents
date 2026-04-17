@@ -19,14 +19,20 @@ namespace Firebase.Storage
 	{
 		public StorageTask GetTask ()
 		{
+			if (_Task == IntPtr.Zero)
+				throw new InvalidOperationException ("Firebase Storage task snapshot does not contain a task.");
+
 			var task = Runtime.GetNSObject<StorageTask> (_Task);
-			return task;
+			return task ?? throw new InvalidOperationException ("Unable to resolve Firebase Storage task.");
 		}
 
 		public T GetTask<T> () where T : StorageTask
 		{
+			if (_Task == IntPtr.Zero)
+				throw new InvalidOperationException ("Firebase Storage task snapshot does not contain a task.");
+
 			var task = Runtime.GetNSObject<T> (_Task);
-			return task;
+			return task ?? throw new InvalidOperationException ($"Unable to resolve Firebase Storage task as {typeof (T).FullName}.");
 		}
 	}
 }
