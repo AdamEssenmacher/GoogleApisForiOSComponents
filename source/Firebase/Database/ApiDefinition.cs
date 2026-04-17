@@ -85,7 +85,7 @@ namespace Firebase.Database
 
 		// - (void) useEmulatorWithHost:(NSString*) host port:(NSInteger) port;		
 		[Export ("useEmulatorWithHost:port:")]
-		void UseEmulatorWithHost (string host, uint port);
+		void UseEmulatorWithHost (string host, nint port);
 	}
 
 	delegate void DatabaseQueryUpdateHandler (DataSnapshot snapshot);
