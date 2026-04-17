@@ -25,6 +25,367 @@
       ]
     },
     {
+      "id": "cloudmessaging-messageinfo-status-managed-enum-name",
+      "target": "CloudMessaging",
+      "category": "signature-drift",
+      "typeName": "Firebase.CloudMessaging.MessageInfo",
+      "memberName": "Status",
+      "selector": "status",
+      "comparisonTypeKey": "FIRMessagingMessageInfo",
+      "comparisonMemberKey": "export|status",
+      "reason": "The Firebase 12.6 header declares status as FIRMessagingMessageStatus. The baseline keeps the existing public MessageStatus enum name with the same NSInteger-backed native values.",
+      "evidence": [
+        "externals/FirebaseMessaging.xcframework/ios-arm64/FirebaseMessaging.framework/Headers/FIRMessaging.h#L105-L111",
+        "externals/FirebaseMessaging.xcframework/ios-arm64/FirebaseMessaging.framework/Headers/FIRMessaging.h#L129-L135"
+      ]
+    },
+    {
+      "id": "cloudmessaging-delegate-typed-protocol-shape",
+      "target": "CloudMessaging",
+      "category": "signature-drift",
+      "typeName": "Firebase.CloudMessaging.Messaging",
+      "memberName": "Delegate",
+      "selector": "delegate",
+      "comparisonTypeKey": "FIRMessaging",
+      "comparisonMemberKey": "export|delegate",
+      "reason": "The Firebase 12.6 header declares a nullable weak id<FIRMessagingDelegate> delegate. The baseline keeps the typed protocol delegate property while swift-dotnet-bindings emits the same selector as an NSObject WeakDelegate shape.",
+      "evidence": [
+        "externals/FirebaseMessaging.xcframework/ios-arm64/FirebaseMessaging.framework/Headers/FIRMessaging.h#L144-L158",
+        "externals/FirebaseMessaging.xcframework/ios-arm64/FirebaseMessaging.framework/Headers/FIRMessaging.h#L174-L177"
+      ]
+    },
+    {
+      "id": "cloudmessaging-set-apns-token-managed-enum-name",
+      "target": "CloudMessaging",
+      "category": "signature-drift",
+      "typeName": "Firebase.CloudMessaging.Messaging",
+      "memberName": "SetApnsToken",
+      "selector": "setAPNSToken:type:",
+      "comparisonTypeKey": "FIRMessaging",
+      "comparisonMemberKey": "export|setAPNSToken:type:",
+      "reason": "The Firebase 12.6 header declares setAPNSToken:type: with FIRMessagingAPNSTokenType. The baseline keeps the existing public ApnsTokenType enum name with the same NSInteger-backed native values.",
+      "evidence": [
+        "externals/FirebaseMessaging.xcframework/ios-arm64/FirebaseMessaging.framework/Headers/FIRMessaging.h#L120-L127",
+        "externals/FirebaseMessaging.xcframework/ios-arm64/FirebaseMessaging.framework/Headers/FIRMessaging.h#L208-L219"
+      ]
+    },
+    {
+      "id": "cloudmessaging-fcm-token-fetch-delegate-name-shape",
+      "target": "CloudMessaging",
+      "category": "signature-drift",
+      "typeName": "Firebase.CloudMessaging.MessagingFcmTokenFetchCompletionHandler",
+      "comparisonTypeKey": "MessagingFcmTokenFetchCompletionHandler",
+      "reason": "The Firebase 12.6 header declares FIRMessagingFCMTokenFetchCompletion with the same nullable NSString/NSError callback shape. The baseline keeps the existing managed delegate name while swift-dotnet-bindings preserves the native FIR-prefixed typedef name.",
+      "evidence": [
+        "externals/FirebaseMessaging.xcframework/ios-arm64/FirebaseMessaging.framework/Headers/FIRMessaging.h#L32-L34",
+        "externals/FirebaseMessaging.xcframework/ios-arm64/FirebaseMessaging.framework/Headers/FIRMessaging.h#L267-L268",
+        "externals/FirebaseMessaging.xcframework/ios-arm64/FirebaseMessaging.framework/Headers/FIRMessaging.h#L300-L303"
+      ]
+    },
+    {
+      "id": "cloudmessaging-delete-fcm-token-delegate-name-shape",
+      "target": "CloudMessaging",
+      "category": "signature-drift",
+      "typeName": "Firebase.CloudMessaging.MessagingDeleteFcmTokenCompletionHandler",
+      "comparisonTypeKey": "MessagingDeleteFcmTokenCompletionHandler",
+      "reason": "The Firebase 12.6 header declares FIRMessagingDeleteFCMTokenCompletion with the same nullable NSError callback shape. The baseline keeps the existing managed delegate name while swift-dotnet-bindings preserves the native FIR-prefixed typedef name.",
+      "evidence": [
+        "externals/FirebaseMessaging.xcframework/ios-arm64/FirebaseMessaging.framework/Headers/FIRMessaging.h#L46-L47",
+        "externals/FirebaseMessaging.xcframework/ios-arm64/FirebaseMessaging.framework/Headers/FIRMessaging.h#L279",
+        "externals/FirebaseMessaging.xcframework/ios-arm64/FirebaseMessaging.framework/Headers/FIRMessaging.h#L313-L315"
+      ]
+    },
+    {
+      "id": "cloudmessaging-topic-operation-delegate-name-shape",
+      "target": "CloudMessaging",
+      "category": "signature-drift",
+      "typeName": "Firebase.CloudMessaging.MessagingTopicOperationCompletionHandler",
+      "comparisonTypeKey": "MessagingTopicOperationCompletionHandler",
+      "reason": "The Firebase 12.6 header declares FIRMessagingTopicOperationCompletion with the same nullable NSError callback shape. The baseline keeps the existing managed delegate name while swift-dotnet-bindings preserves the native FIR-prefixed typedef name.",
+      "evidence": [
+        "externals/FirebaseMessaging.xcframework/ios-arm64/FirebaseMessaging.framework/Headers/FIRMessaging.h#L57-L58",
+        "externals/FirebaseMessaging.xcframework/ios-arm64/FirebaseMessaging.framework/Headers/FIRMessaging.h#L339-L362"
+      ]
+    },
+    {
+      "id": "cloudmessaging-errorcode-managed-enum-name",
+      "target": "CloudMessaging",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.CloudMessaging.ErrorCode",
+      "comparisonTypeKey": "ErrorCode",
+      "reason": "The Firebase 12.6 header declares FIRMessagingError as an NS_ERROR_ENUM. The baseline keeps the existing public ErrorCode enum name with the same NSInteger-backed native values.",
+      "evidence": [
+        "externals/FirebaseMessaging.xcframework/ios-arm64/FirebaseMessaging.framework/Headers/FIRMessaging.h#L74-L103"
+      ]
+    },
+    {
+      "id": "cloudmessaging-message-status-managed-enum-name",
+      "target": "CloudMessaging",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.CloudMessaging.MessageStatus",
+      "comparisonTypeKey": "MessageStatus",
+      "reason": "The Firebase 12.6 header declares FIRMessagingMessageStatus. The baseline keeps the existing public MessageStatus enum name with the same NSInteger-backed native values.",
+      "evidence": [
+        "externals/FirebaseMessaging.xcframework/ios-arm64/FirebaseMessaging.framework/Headers/FIRMessaging.h#L105-L111"
+      ]
+    },
+    {
+      "id": "cloudmessaging-apns-token-type-managed-enum-name",
+      "target": "CloudMessaging",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.CloudMessaging.ApnsTokenType",
+      "comparisonTypeKey": "ApnsTokenType",
+      "reason": "The Firebase 12.6 header declares FIRMessagingAPNSTokenType. The baseline keeps the existing public ApnsTokenType enum name with the same NSInteger-backed native values.",
+      "evidence": [
+        "externals/FirebaseMessaging.xcframework/ios-arm64/FirebaseMessaging.framework/Headers/FIRMessaging.h#L120-L127"
+      ]
+    },
+    {
+      "id": "cloudmessaging-firmessagingerror-native-enum-name",
+      "target": "CloudMessaging",
+      "category": "missing-baseline-binding",
+      "comparisonTypeKey": "FIRMessagingError",
+      "reason": "The Firebase 12.6 header declares FIRMessagingError as the native enum name, while the baseline intentionally exposes the existing public ErrorCode enum with equivalent values and NSInteger backing.",
+      "evidence": [
+        "externals/FirebaseMessaging.xcframework/ios-arm64/FirebaseMessaging.framework/Headers/FIRMessaging.h#L74-L103"
+      ]
+    },
+    {
+      "id": "cloudmessaging-firmessagingmessagestatus-native-enum-name",
+      "target": "CloudMessaging",
+      "category": "missing-baseline-binding",
+      "comparisonTypeKey": "FIRMessagingMessageStatus",
+      "reason": "The Firebase 12.6 header declares FIRMessagingMessageStatus as the native enum name, while the baseline intentionally exposes the existing public MessageStatus enum with equivalent values and NSInteger backing.",
+      "evidence": [
+        "externals/FirebaseMessaging.xcframework/ios-arm64/FirebaseMessaging.framework/Headers/FIRMessaging.h#L105-L111"
+      ]
+    },
+    {
+      "id": "cloudmessaging-firmessagingapnstokentype-native-enum-name",
+      "target": "CloudMessaging",
+      "category": "missing-baseline-binding",
+      "comparisonTypeKey": "FIRMessagingAPNSTokenType",
+      "reason": "The Firebase 12.6 header declares FIRMessagingAPNSTokenType as the native enum name, while the baseline intentionally exposes the existing public ApnsTokenType enum with equivalent values and NSInteger backing.",
+      "evidence": [
+        "externals/FirebaseMessaging.xcframework/ios-arm64/FirebaseMessaging.framework/Headers/FIRMessaging.h#L120-L127"
+      ]
+    },
+    {
+      "id": "database-query-observeevent-update-handler-nuint-handle-shape",
+      "target": "Database",
+      "category": "signature-drift",
+      "typeName": "Firebase.Database.DatabaseQuery",
+      "memberName": "ObserveEvent",
+      "selector": "observeEventType:withBlock:",
+      "comparisonTypeKey": "FIRDatabaseQuery",
+      "comparisonMemberKey": "export|observeEventType:withBlock:",
+      "reason": "The Firebase 12.6 header returns FIRDatabaseHandle, typedef'd to NSUInteger, and takes a FIRDataSnapshot block. The baseline keeps the existing nuint handle and named delegate while swift-dotnet-bindings emits ulong and Action<>.",
+      "evidence": [
+        "externals/FirebaseDatabase.xcframework/ios-arm64/FirebaseDatabase.framework/Headers/FIRDatabaseQuery.h#L28",
+        "externals/FirebaseDatabase.xcframework/ios-arm64/FirebaseDatabase.framework/Headers/FIRDatabaseQuery.h#L57-L59"
+      ]
+    },
+    {
+      "id": "database-query-observeevent-prevkey-handler-nuint-handle-shape",
+      "target": "Database",
+      "category": "signature-drift",
+      "typeName": "Firebase.Database.DatabaseQuery",
+      "memberName": "ObserveEvent",
+      "selector": "observeEventType:andPreviousSiblingKeyWithBlock:",
+      "comparisonTypeKey": "FIRDatabaseQuery",
+      "comparisonMemberKey": "export|observeEventType:andPreviousSiblingKeyWithBlock:",
+      "reason": "The Firebase 12.6 header returns FIRDatabaseHandle, typedef'd to NSUInteger, and takes a FIRDataSnapshot/NSString block. The baseline keeps the existing nuint handle and named delegate while swift-dotnet-bindings emits ulong and Action<>.",
+      "evidence": [
+        "externals/FirebaseDatabase.xcframework/ios-arm64/FirebaseDatabase.framework/Headers/FIRDatabaseQuery.h#L28",
+        "externals/FirebaseDatabase.xcframework/ios-arm64/FirebaseDatabase.framework/Headers/FIRDatabaseQuery.h#L77-L80"
+      ]
+    },
+    {
+      "id": "database-query-observeevent-update-cancel-handler-nuint-handle-shape",
+      "target": "Database",
+      "category": "signature-drift",
+      "typeName": "Firebase.Database.DatabaseQuery",
+      "memberName": "ObserveEvent",
+      "selector": "observeEventType:withBlock:withCancelBlock:",
+      "comparisonTypeKey": "FIRDatabaseQuery",
+      "comparisonMemberKey": "export|observeEventType:withBlock:withCancelBlock:",
+      "reason": "The Firebase 12.6 header returns FIRDatabaseHandle, typedef'd to NSUInteger, and takes FIRDataSnapshot/NSError blocks. The baseline keeps the existing nuint handle and named delegates while swift-dotnet-bindings emits ulong and Action<>.",
+      "evidence": [
+        "externals/FirebaseDatabase.xcframework/ios-arm64/FirebaseDatabase.framework/Headers/FIRDatabaseQuery.h#L28",
+        "externals/FirebaseDatabase.xcframework/ios-arm64/FirebaseDatabase.framework/Headers/FIRDatabaseQuery.h#L101-L104"
+      ]
+    },
+    {
+      "id": "database-query-observeevent-prevkey-cancel-handler-nuint-handle-shape",
+      "target": "Database",
+      "category": "signature-drift",
+      "typeName": "Firebase.Database.DatabaseQuery",
+      "memberName": "ObserveEvent",
+      "selector": "observeEventType:andPreviousSiblingKeyWithBlock:withCancelBlock:",
+      "comparisonTypeKey": "FIRDatabaseQuery",
+      "comparisonMemberKey": "export|observeEventType:andPreviousSiblingKeyWithBlock:withCancelBlock:",
+      "reason": "The Firebase 12.6 header returns FIRDatabaseHandle, typedef'd to NSUInteger, and takes FIRDataSnapshot/NSString/NSError blocks. The baseline keeps the existing nuint handle and named delegates while swift-dotnet-bindings emits ulong and Action<>.",
+      "evidence": [
+        "externals/FirebaseDatabase.xcframework/ios-arm64/FirebaseDatabase.framework/Headers/FIRDatabaseQuery.h#L28",
+        "externals/FirebaseDatabase.xcframework/ios-arm64/FirebaseDatabase.framework/Headers/FIRDatabaseQuery.h#L127-L132"
+      ]
+    },
+    {
+      "id": "database-query-removeobserver-nuint-handle-shape",
+      "target": "Database",
+      "category": "signature-drift",
+      "typeName": "Firebase.Database.DatabaseQuery",
+      "memberName": "RemoveObserver",
+      "selector": "removeObserverWithHandle:",
+      "comparisonTypeKey": "FIRDatabaseQuery",
+      "comparisonMemberKey": "export|removeObserverWithHandle:",
+      "reason": "The Firebase 12.6 header takes FIRDatabaseHandle, typedef'd to NSUInteger. The baseline nuint parameter matches the header while swift-dotnet-bindings emits ulong.",
+      "evidence": [
+        "externals/FirebaseDatabase.xcframework/ios-arm64/FirebaseDatabase.framework/Headers/FIRDatabaseQuery.h#L28",
+        "externals/FirebaseDatabase.xcframework/ios-arm64/FirebaseDatabase.framework/Headers/FIRDatabaseQuery.h#L223"
+      ]
+    },
+    {
+      "id": "database-reference-observeevent-update-handler-nuint-handle-shape",
+      "target": "Database",
+      "category": "signature-drift",
+      "typeName": "Firebase.Database.DatabaseReference",
+      "memberName": "ObserveEvent",
+      "selector": "observeEventType:withBlock:",
+      "comparisonTypeKey": "FIRDatabaseReference",
+      "comparisonMemberKey": "export|observeEventType:withBlock:",
+      "reason": "The Firebase 12.6 header returns FIRDatabaseHandle, typedef'd to NSUInteger, and takes a FIRDataSnapshot block. The baseline keeps the existing nuint handle and named delegate while swift-dotnet-bindings emits ulong and Action<>.",
+      "evidence": [
+        "externals/FirebaseDatabase.xcframework/ios-arm64/FirebaseDatabase.framework/Headers/FIRDatabaseQuery.h#L28",
+        "externals/FirebaseDatabase.xcframework/ios-arm64/FirebaseDatabase.framework/Headers/FIRDatabaseReference.h#L226-L228"
+      ]
+    },
+    {
+      "id": "database-reference-observeevent-prevkey-handler-nuint-handle-shape",
+      "target": "Database",
+      "category": "signature-drift",
+      "typeName": "Firebase.Database.DatabaseReference",
+      "memberName": "ObserveEvent",
+      "selector": "observeEventType:andPreviousSiblingKeyWithBlock:",
+      "comparisonTypeKey": "FIRDatabaseReference",
+      "comparisonMemberKey": "export|observeEventType:andPreviousSiblingKeyWithBlock:",
+      "reason": "The Firebase 12.6 header returns FIRDatabaseHandle, typedef'd to NSUInteger, and takes a FIRDataSnapshot/NSString block. The baseline keeps the existing nuint handle and named delegate while swift-dotnet-bindings emits ulong and Action<>.",
+      "evidence": [
+        "externals/FirebaseDatabase.xcframework/ios-arm64/FirebaseDatabase.framework/Headers/FIRDatabaseQuery.h#L28",
+        "externals/FirebaseDatabase.xcframework/ios-arm64/FirebaseDatabase.framework/Headers/FIRDatabaseReference.h#L246-L249"
+      ]
+    },
+    {
+      "id": "database-reference-observeevent-update-cancel-handler-nuint-handle-shape",
+      "target": "Database",
+      "category": "signature-drift",
+      "typeName": "Firebase.Database.DatabaseReference",
+      "memberName": "ObserveEvent",
+      "selector": "observeEventType:withBlock:withCancelBlock:",
+      "comparisonTypeKey": "FIRDatabaseReference",
+      "comparisonMemberKey": "export|observeEventType:withBlock:withCancelBlock:",
+      "reason": "The Firebase 12.6 header returns FIRDatabaseHandle, typedef'd to NSUInteger, and takes FIRDataSnapshot/NSError blocks. The baseline keeps the existing nuint handle and named delegates while swift-dotnet-bindings emits ulong and Action<>.",
+      "evidence": [
+        "externals/FirebaseDatabase.xcframework/ios-arm64/FirebaseDatabase.framework/Headers/FIRDatabaseQuery.h#L28",
+        "externals/FirebaseDatabase.xcframework/ios-arm64/FirebaseDatabase.framework/Headers/FIRDatabaseReference.h#L270-L273"
+      ]
+    },
+    {
+      "id": "database-reference-observeevent-prevkey-cancel-handler-nuint-handle-shape",
+      "target": "Database",
+      "category": "signature-drift",
+      "typeName": "Firebase.Database.DatabaseReference",
+      "memberName": "ObserveEvent",
+      "selector": "observeEventType:andPreviousSiblingKeyWithBlock:withCancelBlock:",
+      "comparisonTypeKey": "FIRDatabaseReference",
+      "comparisonMemberKey": "export|observeEventType:andPreviousSiblingKeyWithBlock:withCancelBlock:",
+      "reason": "The Firebase 12.6 header returns FIRDatabaseHandle, typedef'd to NSUInteger, and takes FIRDataSnapshot/NSString/NSError blocks. The baseline keeps the existing nuint handle and named delegates while swift-dotnet-bindings emits ulong and Action<>.",
+      "evidence": [
+        "externals/FirebaseDatabase.xcframework/ios-arm64/FirebaseDatabase.framework/Headers/FIRDatabaseQuery.h#L28",
+        "externals/FirebaseDatabase.xcframework/ios-arm64/FirebaseDatabase.framework/Headers/FIRDatabaseReference.h#L296-L301"
+      ]
+    },
+    {
+      "id": "database-reference-removeobserver-nuint-handle-shape",
+      "target": "Database",
+      "category": "signature-drift",
+      "typeName": "Firebase.Database.DatabaseReference",
+      "memberName": "RemoveObserver",
+      "selector": "removeObserverWithHandle:",
+      "comparisonTypeKey": "FIRDatabaseReference",
+      "comparisonMemberKey": "export|removeObserverWithHandle:",
+      "reason": "The Firebase 12.6 header takes FIRDatabaseHandle, typedef'd to NSUInteger. The baseline nuint parameter matches the header while swift-dotnet-bindings emits ulong.",
+      "evidence": [
+        "externals/FirebaseDatabase.xcframework/ios-arm64/FirebaseDatabase.framework/Headers/FIRDatabaseQuery.h#L28",
+        "externals/FirebaseDatabase.xcframework/ios-arm64/FirebaseDatabase.framework/Headers/FIRDatabaseReference.h#L390"
+      ]
+    },
+    {
+      "id": "database-reference-runtransaction-handler-delegate-shape",
+      "target": "Database",
+      "category": "signature-drift",
+      "typeName": "Firebase.Database.DatabaseReference",
+      "memberName": "RunTransaction",
+      "selector": "runTransactionBlock:",
+      "comparisonTypeKey": "FIRDatabaseReference",
+      "comparisonMemberKey": "export|runTransactionBlock:",
+      "reason": "The Firebase 12.6 header declares a block from FIRMutableData to FIRTransactionResult. The baseline keeps the existing named delegate while swift-dotnet-bindings emits the equivalent Func<> shape.",
+      "evidence": [
+        "externals/FirebaseDatabase.xcframework/ios-arm64/FirebaseDatabase.framework/Headers/FIRDatabaseReference.h#L787-L788"
+      ]
+    },
+    {
+      "id": "database-reference-runtransaction-completion-delegate-shape",
+      "target": "Database",
+      "category": "signature-drift",
+      "typeName": "Firebase.Database.DatabaseReference",
+      "memberName": "RunTransaction",
+      "selector": "runTransactionBlock:andCompletionBlock:",
+      "comparisonTypeKey": "FIRDatabaseReference",
+      "comparisonMemberKey": "export|runTransactionBlock:andCompletionBlock:",
+      "reason": "The Firebase 12.6 header declares transaction and completion blocks with FIRMutableData, FIRTransactionResult, NSError, BOOL, and FIRDataSnapshot. The baseline keeps existing named delegates while swift-dotnet-bindings emits equivalent Func<>/Action<> shapes.",
+      "evidence": [
+        "externals/FirebaseDatabase.xcframework/ios-arm64/FirebaseDatabase.framework/Headers/FIRDatabaseReference.h#L811-L815"
+      ]
+    },
+    {
+      "id": "database-reference-runtransaction-completion-local-events-delegate-shape",
+      "target": "Database",
+      "category": "signature-drift",
+      "typeName": "Firebase.Database.DatabaseReference",
+      "memberName": "RunTransaction",
+      "selector": "runTransactionBlock:andCompletionBlock:withLocalEvents:",
+      "comparisonTypeKey": "FIRDatabaseReference",
+      "comparisonMemberKey": "export|runTransactionBlock:andCompletionBlock:withLocalEvents:",
+      "reason": "The Firebase 12.6 header declares transaction and nullable completion blocks plus BOOL localEvents. The baseline keeps existing named delegates while swift-dotnet-bindings emits equivalent Func<>/Action<> shapes.",
+      "evidence": [
+        "externals/FirebaseDatabase.xcframework/ios-arm64/FirebaseDatabase.framework/Headers/FIRDatabaseReference.h#L845-L851"
+      ]
+    },
+    {
+      "id": "database-reference-transaction-handler-delegate-shape",
+      "target": "Database",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Database.DatabaseReferenceTransactionHandler",
+      "comparisonTypeKey": "DatabaseReferenceTransactionHandler",
+      "reason": "The delegate backs runTransactionBlock: and matches the Firebase 12.6 FIRMutableData-to-FIRTransactionResult block shape. swift-dotnet-bindings emits the equivalent Func<> callback instead of the existing public delegate name.",
+      "evidence": [
+        "externals/FirebaseDatabase.xcframework/ios-arm64/FirebaseDatabase.framework/Headers/FIRDatabaseReference.h#L787-L788"
+      ]
+    },
+    {
+      "id": "database-reference-transaction-completion-handler-delegate-shape",
+      "target": "Database",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Database.DatabaseReferenceTransactionCompletionHandler",
+      "comparisonTypeKey": "DatabaseReferenceTransactionCompletionHandler",
+      "reason": "The delegate backs runTransactionBlock completion overloads and matches the Firebase 12.6 NSError/BOOL/FIRDataSnapshot block shape. swift-dotnet-bindings emits the equivalent Action<> callback instead of the existing public delegate name.",
+      "evidence": [
+        "externals/FirebaseDatabase.xcframework/ios-arm64/FirebaseDatabase.framework/Headers/FIRDatabaseReference.h#L813-L815",
+        "externals/FirebaseDatabase.xcframework/ios-arm64/FirebaseDatabase.framework/Headers/FIRDatabaseReference.h#L847-L850"
+      ]
+    },
+    {
       "id": "core-options-apikey-nullability-false-positive",
       "target": "Core",
       "category": "attribute-drift",
@@ -34,6 +395,286 @@
       "reason": "The Firebase header declares APIKey nullable, but generator output currently emits it as non-null.",
       "evidence": [
         "externals/FirebaseCore.xcframework/ios-arm64/FirebaseCore.framework/Headers/FIROptions.h#L38"
+      ]
+    },
+    {
+      "id": "core-timestamp-compare-generator-omits-method",
+      "target": "Core",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Core.Timestamp",
+      "memberName": "Compare",
+      "selector": "compare:",
+      "comparisonTypeKey": "FIRTimestamp",
+      "comparisonMemberKey": "export|compare:",
+      "reason": "The Firebase 12.6 header declares -[FIRTimestamp compare:], but swift-dotnet-bindings does not emit this NSComparisonResult-returning method.",
+      "evidence": [
+        "externals/FirebaseCore.xcframework/ios-arm64/FirebaseCore.framework/Headers/FIRTimestamp.h#L73"
+      ]
+    },
+    {
+      "id": "crashlytics-hasunsentreportshandler-async-delegate-surface",
+      "target": "Crashlytics",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Crashlytics.HasUnsentReportsHandler",
+      "comparisonTypeKey": "HasUnsentReportsHandler",
+      "reason": "The delegate backs the Async-bound checkForUnsentReportsWithCompletion: API; the Firebase 12.6 header still declares the void (^)(BOOL) completion callback while the audit treats the Async method as manual surface.",
+      "evidence": [
+        "externals/FirebaseCrashlytics.xcframework/ios-arm64/FirebaseCrashlytics.framework/Headers/FIRCrashlytics.h#L197"
+      ]
+    },
+    {
+      "id": "analytics-consenttype-managed-typed-string-enum",
+      "target": "Analytics",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Analytics.ConsentType",
+      "comparisonTypeKey": "ConsentType",
+      "reason": "The Firebase 12.6 header declares FIRConsentType as an NS_TYPED_ENUM NSString constant family; the baseline keeps the managed enum wrapper used by Analytics.SetConsent while swift-dotnet-bindings does not emit that convenience shape.",
+      "evidence": [
+        "externals/FirebaseAnalytics.xcframework/ios-arm64/FirebaseAnalytics.framework/Headers/FIRAnalytics+Consent.h#L10-L22"
+      ]
+    },
+    {
+      "id": "analytics-consentstatus-managed-typed-string-enum",
+      "target": "Analytics",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Analytics.ConsentStatus",
+      "comparisonTypeKey": "ConsentStatus",
+      "reason": "The Firebase 12.6 header declares FIRConsentStatus as an NS_TYPED_ENUM NSString constant family; the baseline keeps the managed enum wrapper used by Analytics.SetConsent while swift-dotnet-bindings does not emit that convenience shape.",
+      "evidence": [
+        "externals/FirebaseAnalytics.xcframework/ios-arm64/FirebaseAnalytics.framework/Headers/FIRAnalytics+Consent.h#L26-L34"
+      ]
+    },
+    {
+      "id": "abtesting-overflow-policy-unrecognizedvalue-private-enum-member",
+      "target": "ABTesting",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.ABTesting.ExperimentPayloadExperimentOverflowPolicy",
+      "memberName": "UnrecognizedValue",
+      "comparisonTypeKey": "ExperimentPayloadExperimentOverflowPolicy",
+      "comparisonMemberKey": "UnrecognizedValue",
+      "reason": "The Firebase 12.6 public header forward-declares ABTExperimentPayloadExperimentOverflowPolicy for FIRExperimentController, while the pod private ABTExperimentPayload header defines the enum values used by the managed API.",
+      "evidence": [
+        "externals/FirebaseABTesting.xcframework/ios-arm64/FirebaseABTesting.framework/Headers/FIRExperimentController.h#L20-L28",
+        "externals/build/Firebase.ABTesting/Pods/FirebaseABTesting/FirebaseABTesting/Sources/Private/ABTExperimentPayload.h#L21-L25"
+      ]
+    },
+    {
+      "id": "abtesting-overflow-policy-unspecified-private-enum-member",
+      "target": "ABTesting",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.ABTesting.ExperimentPayloadExperimentOverflowPolicy",
+      "memberName": "Unspecified",
+      "comparisonTypeKey": "ExperimentPayloadExperimentOverflowPolicy",
+      "comparisonMemberKey": "Unspecified",
+      "reason": "The Firebase 12.6 public header forward-declares ABTExperimentPayloadExperimentOverflowPolicy for FIRExperimentController, while the pod private ABTExperimentPayload header defines the enum values used by the managed API.",
+      "evidence": [
+        "externals/FirebaseABTesting.xcframework/ios-arm64/FirebaseABTesting.framework/Headers/FIRExperimentController.h#L20-L28",
+        "externals/build/Firebase.ABTesting/Pods/FirebaseABTesting/FirebaseABTesting/Sources/Private/ABTExperimentPayload.h#L21-L25"
+      ]
+    },
+    {
+      "id": "abtesting-overflow-policy-discardoldest-private-enum-member",
+      "target": "ABTesting",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.ABTesting.ExperimentPayloadExperimentOverflowPolicy",
+      "memberName": "DiscardOldest",
+      "comparisonTypeKey": "ExperimentPayloadExperimentOverflowPolicy",
+      "comparisonMemberKey": "DiscardOldest",
+      "reason": "The Firebase 12.6 public header forward-declares ABTExperimentPayloadExperimentOverflowPolicy for FIRExperimentController, while the pod private ABTExperimentPayload header defines the enum values used by the managed API.",
+      "evidence": [
+        "externals/FirebaseABTesting.xcframework/ios-arm64/FirebaseABTesting.framework/Headers/FIRExperimentController.h#L20-L28",
+        "externals/build/Firebase.ABTesting/Pods/FirebaseABTesting/FirebaseABTesting/Sources/Private/ABTExperimentPayload.h#L21-L25"
+      ]
+    },
+    {
+      "id": "abtesting-overflow-policy-ignorenewest-private-enum-member",
+      "target": "ABTesting",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.ABTesting.ExperimentPayloadExperimentOverflowPolicy",
+      "memberName": "IgnoreNewest",
+      "comparisonTypeKey": "ExperimentPayloadExperimentOverflowPolicy",
+      "comparisonMemberKey": "IgnoreNewest",
+      "reason": "The Firebase 12.6 public header forward-declares ABTExperimentPayloadExperimentOverflowPolicy for FIRExperimentController, while the pod private ABTExperimentPayload header defines the enum values used by the managed API.",
+      "evidence": [
+        "externals/FirebaseABTesting.xcframework/ios-arm64/FirebaseABTesting.framework/Headers/FIRExperimentController.h#L20-L28",
+        "externals/build/Firebase.ABTesting/Pods/FirebaseABTesting/FirebaseABTesting/Sources/Private/ABTExperimentPayload.h#L21-L25"
+      ]
+    },
+    {
+      "id": "installations-id-change-notification-constants-generator-class-shape",
+      "target": "Installations",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Installations.Installations",
+      "memberName": "InstallationIdDidChangeNotification",
+      "selector": "FIRInstallationIDDidChangeNotification",
+      "comparisonTypeKey": "FIRInstallations",
+      "comparisonMemberKey": "field|FIRInstallationIDDidChangeNotification",
+      "reason": "The Firebase 12.6 header declares FIRInstallationIDDidChangeNotification, but swift-dotnet-bindings emits it on a generated constants class while the baseline keeps the existing Installations notification surface.",
+      "evidence": [
+        "externals/FirebaseInstallations.xcframework/ios-arm64/FirebaseInstallations.framework/Headers/FIRInstallations.h#L24-L31"
+      ]
+    },
+    {
+      "id": "installations-id-change-notification-app-name-key-generator-class-shape",
+      "target": "Installations",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Installations.Installations",
+      "memberName": "InstallationIdDidChangeNotificationAppNameKey",
+      "selector": "kFIRInstallationIDDidChangeNotificationAppNameKey",
+      "comparisonTypeKey": "FIRInstallations",
+      "comparisonMemberKey": "field|kFIRInstallationIDDidChangeNotificationAppNameKey",
+      "reason": "The Firebase 12.6 header declares kFIRInstallationIDDidChangeNotificationAppNameKey, but swift-dotnet-bindings emits it on a generated constants class while the baseline keeps the existing Installations notification surface.",
+      "evidence": [
+        "externals/FirebaseInstallations.xcframework/ios-arm64/FirebaseInstallations.framework/Headers/FIRInstallations.h#L24-L31"
+      ]
+    },
+    {
+      "id": "installations-id-handler-name-generator-shape",
+      "target": "Installations",
+      "category": "signature-drift",
+      "typeName": "Firebase.Installations.InstallationsIdHandler",
+      "comparisonTypeKey": "InstallationsIdHandler",
+      "reason": "The Firebase 12.6 header declares FIRInstallationsIDHandler with the same NSString/NSError callback shape; the baseline keeps the existing public delegate name while swift-dotnet-bindings preserves the native FIR-prefixed delegate name.",
+      "evidence": [
+        "externals/FirebaseInstallations.xcframework/ios-arm64/FirebaseInstallations.framework/Headers/FIRInstallations.h#L34-L41"
+      ]
+    },
+    {
+      "id": "installations-token-handler-inline-action-generator-shape",
+      "target": "Installations",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Installations.InstallationsTokenHandler",
+      "comparisonTypeKey": "InstallationsTokenHandler",
+      "reason": "The Firebase 12.6 header declares FIRInstallationsTokenHandler and uses equivalent inline completion block shapes; the baseline keeps the existing public delegate for compatibility while swift-dotnet-bindings emits Action<> callbacks for the methods.",
+      "evidence": [
+        "externals/FirebaseInstallations.xcframework/ios-arm64/FirebaseInstallations.framework/Headers/FIRInstallations.h#L43-L51",
+        "externals/FirebaseInstallations.xcframework/ios-arm64/FirebaseInstallations.framework/Headers/FIRInstallations.h#L89-L113"
+      ]
+    },
+    {
+      "id": "appcheck-token-did-change-notification-constants-generator-class-shape",
+      "target": "AppCheck",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.AppCheck.AppCheck",
+      "memberName": "TokenDidChangeNotification",
+      "selector": "FIRAppCheckAppCheckTokenDidChangeNotification",
+      "comparisonTypeKey": "FIRAppCheck",
+      "comparisonMemberKey": "field|FIRAppCheckAppCheckTokenDidChangeNotification",
+      "reason": "The Firebase 12.6 header declares FIRAppCheckAppCheckTokenDidChangeNotification, but swift-dotnet-bindings emits constants on a generated constants class while the baseline keeps the existing AppCheck notification surface.",
+      "evidence": [
+        "externals/FirebaseAppCheck.xcframework/ios-arm64/FirebaseAppCheck.framework/Headers/FIRAppCheck.h#L25-L35"
+      ]
+    },
+    {
+      "id": "appcheck-token-notification-key-constants-generator-class-shape",
+      "target": "AppCheck",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.AppCheck.AppCheck",
+      "memberName": "TokenNotificationKey",
+      "selector": "kFIRAppCheckTokenNotificationKey",
+      "comparisonTypeKey": "FIRAppCheck",
+      "comparisonMemberKey": "field|kFIRAppCheckTokenNotificationKey",
+      "reason": "The Firebase 12.6 header declares kFIRAppCheckTokenNotificationKey, but swift-dotnet-bindings emits constants on a generated constants class while the baseline keeps the existing AppCheck notification surface.",
+      "evidence": [
+        "externals/FirebaseAppCheck.xcframework/ios-arm64/FirebaseAppCheck.framework/Headers/FIRAppCheck.h#L25-L35"
+      ]
+    },
+    {
+      "id": "appcheck-app-name-notification-key-constants-generator-class-shape",
+      "target": "AppCheck",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.AppCheck.AppCheck",
+      "memberName": "AppNameNotificationKey",
+      "selector": "kFIRAppCheckAppNameNotificationKey",
+      "comparisonTypeKey": "FIRAppCheck",
+      "comparisonMemberKey": "field|kFIRAppCheckAppNameNotificationKey",
+      "reason": "The Firebase 12.6 header declares kFIRAppCheckAppNameNotificationKey, but swift-dotnet-bindings emits constants on a generated constants class while the baseline keeps the existing AppCheck notification surface.",
+      "evidence": [
+        "externals/FirebaseAppCheck.xcframework/ios-arm64/FirebaseAppCheck.framework/Headers/FIRAppCheck.h#L25-L35"
+      ]
+    },
+    {
+      "id": "appcheck-debugprovider-constructor-nullability-generator-false-positive",
+      "target": "AppCheck",
+      "category": "attribute-drift",
+      "typeName": "Firebase.AppCheck.AppCheckDebugProvider",
+      "memberName": "Constructor",
+      "selector": "initWithApp:",
+      "comparisonTypeKey": "FIRAppCheckDebugProvider",
+      "comparisonMemberKey": "export|initWithApp:",
+      "reason": "The Firebase 12.6 header declares -[FIRAppCheckDebugProvider initWithApp:] as nullable instancetype, but generator output currently emits it as non-null.",
+      "evidence": [
+        "externals/FirebaseAppCheck.xcframework/ios-arm64/FirebaseAppCheck.framework/Headers/FIRAppCheckDebugProvider.h#L66-L68"
+      ]
+    },
+    {
+      "id": "appcheck-devicecheckprovider-constructor-nullability-generator-false-positive",
+      "target": "AppCheck",
+      "category": "attribute-drift",
+      "typeName": "Firebase.AppCheck.DeviceCheckProvider",
+      "memberName": "Constructor",
+      "selector": "initWithApp:",
+      "comparisonTypeKey": "FIRDeviceCheckProvider",
+      "comparisonMemberKey": "export|initWithApp:",
+      "reason": "The Firebase 12.6 header declares -[FIRDeviceCheckProvider initWithApp:] as nullable instancetype, but generator output currently emits it as non-null.",
+      "evidence": [
+        "externals/FirebaseAppCheck.xcframework/ios-arm64/FirebaseAppCheck.framework/Headers/FIRDeviceCheckProvider.h#L36-L42"
+      ]
+    },
+    {
+      "id": "appcheck-appattestprovider-constructor-nullability-generator-false-positive",
+      "target": "AppCheck",
+      "category": "attribute-drift",
+      "typeName": "Firebase.AppCheck.AppAttestProvider",
+      "memberName": "Constructor",
+      "selector": "initWithApp:",
+      "comparisonTypeKey": "FIRAppAttestProvider",
+      "comparisonMemberKey": "export|initWithApp:",
+      "reason": "The Firebase 12.6 header declares -[FIRAppAttestProvider initWithApp:] as nullable instancetype, but generator output currently emits it as non-null.",
+      "evidence": [
+        "externals/FirebaseAppCheck.xcframework/ios-arm64/FirebaseAppCheck.framework/Headers/FIRAppAttestProvider.h#L35-L41"
+      ]
+    },
+    {
+      "id": "appdistribution-error-domain-generator-omits-constant",
+      "target": "AppDistribution",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.AppDistribution.AppDistribution",
+      "memberName": "ErrorDomain",
+      "selector": "FIRAppDistributionErrorDomain",
+      "comparisonTypeKey": "FIRAppDistribution",
+      "comparisonMemberKey": "field|FIRAppDistributionErrorDomain",
+      "reason": "The Firebase 12.6 header declares FIRAppDistributionErrorDomain, but swift-dotnet-bindings does not emit this FOUNDATION_EXPORT NSString constant.",
+      "evidence": [
+        "externals/FirebaseAppDistribution.xcframework/ios-arm64/FirebaseAppDistribution.framework/Headers/FIRAppDistribution.h#L76-L80"
+      ]
+    },
+    {
+      "id": "appdistribution-error-details-key-generator-omits-constant",
+      "target": "AppDistribution",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.AppDistribution.AppDistribution",
+      "memberName": "ErrorDetailsKey",
+      "selector": "FIRAppDistributionErrorDetailsKey",
+      "comparisonTypeKey": "FIRAppDistribution",
+      "comparisonMemberKey": "field|FIRAppDistributionErrorDetailsKey",
+      "reason": "The Firebase 12.6 header declares FIRAppDistributionErrorDetailsKey, but swift-dotnet-bindings does not emit this FOUNDATION_EXPORT NSString constant.",
+      "evidence": [
+        "externals/FirebaseAppDistribution.xcframework/ios-arm64/FirebaseAppDistribution.framework/Headers/FIRAppDistribution.h#L82-L84"
+      ]
+    },
+    {
+      "id": "performancemonitoring-httpmetric-constructor-nullability-false-positive",
+      "target": "PerformanceMonitoring",
+      "category": "attribute-drift",
+      "typeName": "Firebase.PerformanceMonitoring.HttpMetric",
+      "memberName": "Constructor",
+      "selector": "initWithURL:HTTPMethod:",
+      "comparisonTypeKey": "FIRHTTPMetric",
+      "comparisonMemberKey": "export|initWithURL:HTTPMethod:",
+      "reason": "The Firebase 12.6 header declares initWithURL:HTTPMethod: as nullable instancetype, but generator output currently emits it as non-null.",
+      "evidence": [
+        "externals/FirebasePerformance.xcframework/ios-arm64/FirebasePerformance.framework/Headers/FIRHTTPMetric.h#L56-L57"
       ]
     },
     {
@@ -49,59 +690,769 @@
       ]
     },
     {
-      "id": "cloudfunctions-functions-swift-header-generator-empty",
-      "target": "CloudFunctions",
-      "category": "stale-baseline-binding",
-      "typeName": "Firebase.CloudFunctions.CloudFunctions",
-      "comparisonTypeKey": "FIRFunctions",
-      "reason": "The CloudFunctions audit generator produced zero comparable types for this Swift-generated framework, but the FirebaseFunctions Swift header still declares FIRFunctions.",
+      "id": "remoteconfig-stringvalue-managed-string-shape",
+      "target": "RemoteConfig",
+      "category": "signature-drift",
+      "typeName": "Firebase.RemoteConfig.RemoteConfigValue",
+      "memberName": "NSStringValue",
+      "selector": "stringValue",
+      "comparisonTypeKey": "FIRRemoteConfigValue",
+      "comparisonMemberKey": "export|stringValue",
+      "reason": "The Firebase 12.6 header declares stringValue as nonnull NSString. The baseline keeps the raw NSStringValue binding plus the existing managed StringValue extension while swift-dotnet-bindings flattens the selector directly to string StringValue.",
       "evidence": [
-        "externals/FirebaseFunctions.xcframework/ios-arm64_x86_64-simulator/FirebaseFunctions.framework/Headers/FirebaseFunctions-Swift.h#L321"
+        "externals/FirebaseRemoteConfig.xcframework/ios-arm64/FirebaseRemoteConfig.framework/Headers/FIRRemoteConfig.h#L155",
+        "source/Firebase/RemoteConfig/Extension.cs#L6"
       ]
     },
     {
-      "id": "cloudfunctions-httpscallable-swift-header-generator-empty",
-      "target": "CloudFunctions",
+      "id": "remoteconfig-google-mobile-platform-namespace-generator-omits-constant",
+      "target": "RemoteConfig",
       "category": "stale-baseline-binding",
-      "typeName": "Firebase.CloudFunctions.HttpsCallable",
-      "comparisonTypeKey": "FIRHTTPSCallable",
-      "reason": "The CloudFunctions audit generator produced zero comparable types for this Swift-generated framework, but the FirebaseFunctions Swift header still declares FIRHTTPSCallable.",
+      "typeName": "Firebase.RemoteConfig.RemoteConfig",
+      "memberName": "GoogleMobilePlatformNamespace",
+      "selector": "FIRNamespaceGoogleMobilePlatform",
+      "comparisonTypeKey": "FIRRemoteConfig",
+      "comparisonMemberKey": "field|FIRNamespaceGoogleMobilePlatform",
+      "reason": "The Firebase 12.6 header declares FIRNamespaceGoogleMobilePlatform, but swift-dotnet-bindings does not emit this NS_SWIFT_NAME global NSString constant on the comparable RemoteConfig surface.",
       "evidence": [
-        "externals/FirebaseFunctions.xcframework/ios-arm64_x86_64-simulator/FirebaseFunctions.framework/Headers/FirebaseFunctions-Swift.h#L466"
+        "externals/FirebaseRemoteConfig.xcframework/ios-arm64/FirebaseRemoteConfig.framework/Headers/FIRRemoteConfig.h#L24-L25"
       ]
     },
     {
-      "id": "cloudfunctions-httpscallableresult-swift-header-generator-empty",
-      "target": "CloudFunctions",
+      "id": "remoteconfig-throttled-end-time-key-generator-omits-constant",
+      "target": "RemoteConfig",
       "category": "stale-baseline-binding",
-      "typeName": "Firebase.CloudFunctions.HttpsCallableResult",
-      "comparisonTypeKey": "FIRHTTPSCallableResult",
-      "reason": "The CloudFunctions audit generator produced zero comparable types for this Swift-generated framework, but the FirebaseFunctions Swift header still declares FIRHTTPSCallableResult.",
+      "typeName": "Firebase.RemoteConfig.RemoteConfig",
+      "memberName": "ThrottledEndTimeInSecondsKey",
+      "selector": "FIRRemoteConfigThrottledEndTimeInSecondsKey",
+      "comparisonTypeKey": "FIRRemoteConfig",
+      "comparisonMemberKey": "field|FIRRemoteConfigThrottledEndTimeInSecondsKey",
+      "reason": "The Firebase 12.6 header declares FIRRemoteConfigThrottledEndTimeInSecondsKey, but swift-dotnet-bindings does not emit this NS_SWIFT_NAME global NSString constant on the comparable RemoteConfig surface.",
       "evidence": [
-        "externals/FirebaseFunctions.xcframework/ios-arm64_x86_64-simulator/FirebaseFunctions.framework/Headers/FirebaseFunctions-Swift.h#L532"
+        "externals/FirebaseRemoteConfig.xcframework/ios-arm64/FirebaseRemoteConfig.framework/Headers/FIRRemoteConfig.h#L30-L31"
       ]
     },
     {
-      "id": "cloudfunctions-httpscallableresulthandler-swift-header-generator-empty",
+      "id": "remoteconfig-error-domain-generator-omits-constant",
+      "target": "RemoteConfig",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.RemoteConfig.RemoteConfig",
+      "memberName": "ErrorDomain",
+      "selector": "FIRRemoteConfigErrorDomain",
+      "comparisonTypeKey": "FIRRemoteConfig",
+      "comparisonMemberKey": "field|FIRRemoteConfigErrorDomain",
+      "reason": "The Firebase 12.6 header declares FIRRemoteConfigErrorDomain, but swift-dotnet-bindings does not emit this NS_SWIFT_NAME global NSString constant on the comparable RemoteConfig surface.",
+      "evidence": [
+        "externals/FirebaseRemoteConfig.xcframework/ios-arm64/FirebaseRemoteConfig.framework/Headers/FIRRemoteConfig.h#L75"
+      ]
+    },
+    {
+      "id": "remoteconfig-update-error-domain-generator-omits-constant",
+      "target": "RemoteConfig",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.RemoteConfig.RemoteConfig",
+      "memberName": "UpdateErrorDomain",
+      "selector": "FIRRemoteConfigUpdateErrorDomain",
+      "comparisonTypeKey": "FIRRemoteConfig",
+      "comparisonMemberKey": "field|FIRRemoteConfigUpdateErrorDomain",
+      "reason": "The Firebase 12.6 header declares FIRRemoteConfigUpdateErrorDomain, but swift-dotnet-bindings does not emit this NS_SWIFT_NAME global NSString constant on the comparable RemoteConfig surface.",
+      "evidence": [
+        "externals/FirebaseRemoteConfig.xcframework/ios-arm64/FirebaseRemoteConfig.framework/Headers/FIRRemoteConfig.h#L87"
+      ]
+    },
+    {
+      "id": "remoteconfig-custom-signals-error-domain-generator-omits-constant",
+      "target": "RemoteConfig",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.RemoteConfig.RemoteConfig",
+      "memberName": "CustomSignalsErrorDomain",
+      "selector": "FIRRemoteConfigCustomSignalsErrorDomain",
+      "comparisonTypeKey": "FIRRemoteConfig",
+      "comparisonMemberKey": "field|FIRRemoteConfigCustomSignalsErrorDomain",
+      "reason": "The Firebase 12.6 header declares FIRRemoteConfigCustomSignalsErrorDomain, but swift-dotnet-bindings does not emit this NS_SWIFT_NAME global NSString constant on the comparable RemoteConfig surface.",
+      "evidence": [
+        "externals/FirebaseRemoteConfig.xcframework/ios-arm64/FirebaseRemoteConfig.framework/Headers/FIRRemoteConfig.h#L101"
+      ]
+    },
+    {
+      "id": "remoteconfig-keyed-subscript-managed-string-shape",
+      "target": "RemoteConfig",
+      "category": "signature-drift",
+      "typeName": "Firebase.RemoteConfig.RemoteConfig",
+      "memberName": "GetObjectForKeyedSubscript",
+      "selector": "objectForKeyedSubscript:",
+      "comparisonTypeKey": "FIRRemoteConfig",
+      "comparisonMemberKey": "export|objectForKeyedSubscript:",
+      "reason": "The Firebase 12.6 header declares objectForKeyedSubscript: with nonnull NSString and FIRRemoteConfigValue. The baseline keeps the existing raw NSString method shape while swift-dotnet-bindings smooths the parameter to string and changes the managed method name.",
+      "evidence": [
+        "externals/FirebaseRemoteConfig.xcframework/ios-arm64/FirebaseRemoteConfig.framework/Headers/FIRRemoteConfig.h#L367"
+      ]
+    },
+    {
+      "id": "remoteconfig-fetch-completion-delegate-name-shape",
+      "target": "RemoteConfig",
+      "category": "signature-drift",
+      "typeName": "Firebase.RemoteConfig.RemoteConfigFetchCompletionHandler",
+      "comparisonTypeKey": "RemoteConfigFetchCompletionHandler",
+      "reason": "The Firebase 12.6 header declares FIRRemoteConfigFetchCompletion with the same status/error callback shape used by the baseline; the audit difference is the existing managed delegate name versus the native FIR-prefixed typedef name.",
+      "evidence": [
+        "externals/FirebaseRemoteConfig.xcframework/ios-arm64/FirebaseRemoteConfig.framework/Headers/FIRRemoteConfig.h#L126-L128",
+        "externals/FirebaseRemoteConfig.xcframework/ios-arm64/FirebaseRemoteConfig.framework/Headers/FIRRemoteConfig.h#L259-L274"
+      ]
+    },
+    {
+      "id": "remoteconfig-initialization-completion-delegate-name-shape",
+      "target": "RemoteConfig",
+      "category": "signature-drift",
+      "typeName": "Firebase.RemoteConfig.RemoteConfigInitializationCompletionHandler",
+      "comparisonTypeKey": "RemoteConfigInitializationCompletionHandler",
+      "reason": "The Firebase 12.6 header declares FIRRemoteConfigInitializationCompletion with the same NSError callback shape used by the baseline; the audit difference is the existing managed delegate name versus the native FIR-prefixed typedef name.",
+      "evidence": [
+        "externals/FirebaseRemoteConfig.xcframework/ios-arm64/FirebaseRemoteConfig.framework/Headers/FIRRemoteConfig.h#L138-L139",
+        "externals/FirebaseRemoteConfig.xcframework/ios-arm64/FirebaseRemoteConfig.framework/Headers/FIRRemoteConfig.h#L237-L243"
+      ]
+    },
+    {
+      "id": "remoteconfig-fetch-and-activate-completion-delegate-name-shape",
+      "target": "RemoteConfig",
+      "category": "signature-drift",
+      "typeName": "Firebase.RemoteConfig.RemoteConfigFetchAndActivateCompletionHandler",
+      "comparisonTypeKey": "RemoteConfigFetchAndActivateCompletionHandler",
+      "reason": "The Firebase 12.6 header declares FIRRemoteConfigFetchAndActivateCompletion with the same status/error callback shape used by the baseline; the audit difference is the existing managed delegate name versus the native FIR-prefixed typedef name.",
+      "evidence": [
+        "externals/FirebaseRemoteConfig.xcframework/ios-arm64/FirebaseRemoteConfig.framework/Headers/FIRRemoteConfig.h#L145-L147",
+        "externals/FirebaseRemoteConfig.xcframework/ios-arm64/FirebaseRemoteConfig.framework/Headers/FIRRemoteConfig.h#L325-L341"
+      ]
+    },
+    {
+      "id": "remoteconfig-activate-completion-method-block-shape",
+      "target": "RemoteConfig",
+      "category": "signature-drift",
+      "typeName": "Firebase.RemoteConfig.RemoteConfigActivateCompletionHandler",
+      "comparisonTypeKey": "RemoteConfigActivateCompletionHandler",
+      "reason": "The Firebase 12.6 header has a separate FIRRemoteConfigActivateCompletion typedef with only NSError, but activateWithCompletion: itself declares an inline block with BOOL changed and NSError. The baseline delegate matches the callable method block.",
+      "evidence": [
+        "externals/FirebaseRemoteConfig.xcframework/ios-arm64/FirebaseRemoteConfig.framework/Headers/FIRRemoteConfig.h#L132-L133",
+        "externals/FirebaseRemoteConfig.xcframework/ios-arm64/FirebaseRemoteConfig.framework/Headers/FIRRemoteConfig.h#L350-L357"
+      ]
+    },
+    {
+      "id": "cloudfunctions-httpscallableresulthandler-block-shape",
       "target": "CloudFunctions",
       "category": "stale-baseline-binding",
       "typeName": "Firebase.CloudFunctions.HttpsCallableResultHandler",
       "comparisonTypeKey": "HttpsCallableResultHandler",
-      "reason": "The CloudFunctions audit generator produced zero comparable types for this Swift-generated framework, but the FirebaseFunctions Swift header still declares completion blocks using FIRHTTPSCallableResult and NSError.",
+      "reason": "The Firebase 12.6 header declares inline completion blocks using FIRHTTPSCallableResult and NSError. The baseline keeps the existing managed delegate name while swift-dotnet-bindings emits equivalent Action<> callback shapes.",
       "evidence": [
         "externals/FirebaseFunctions.xcframework/ios-arm64_x86_64-simulator/FirebaseFunctions.framework/Headers/FirebaseFunctions-Swift.h#L499",
         "externals/FirebaseFunctions.xcframework/ios-arm64_x86_64-simulator/FirebaseFunctions.framework/Headers/FirebaseFunctions-Swift.h#L511"
       ]
     },
     {
-      "id": "cloudfunctions-errorcode-swift-header-generator-empty",
+      "id": "cloudfunctions-errorcode-managed-name",
       "target": "CloudFunctions",
       "category": "stale-baseline-binding",
       "typeName": "Firebase.CloudFunctions.CloudFunctionsErrorCode",
       "comparisonTypeKey": "CloudFunctionsErrorCode",
-      "reason": "The CloudFunctions audit generator produced zero comparable types for this Swift-generated framework, but the FirebaseFunctions Swift header still declares FIRFunctionsErrorCode.",
+      "reason": "The Firebase 12.6 header declares FIRFunctionsErrorCode with values 0 through 16. The baseline keeps the existing managed CloudFunctionsErrorCode name with matching values.",
       "evidence": [
-        "externals/FirebaseFunctions.xcframework/ios-arm64_x86_64-simulator/FirebaseFunctions.framework/Headers/FirebaseFunctions-Swift.h#L417"
+        "externals/FirebaseFunctions.xcframework/ios-arm64_x86_64-simulator/FirebaseFunctions.framework/Headers/FirebaseFunctions-Swift.h#L417-L461"
+      ]
+    },
+    {
+      "id": "cloudfunctions-fir-errorcode-managed-name",
+      "target": "CloudFunctions",
+      "category": "missing-baseline-binding",
+      "typeName": "FirebaseFunctions.FIRFunctionsErrorCode",
+      "comparisonTypeKey": "FIRFunctionsErrorCode",
+      "reason": "The Firebase 12.6 header declares FIRFunctionsErrorCode with values 0 through 16. The baseline keeps the existing managed CloudFunctionsErrorCode name with matching values.",
+      "evidence": [
+        "externals/FirebaseFunctions.xcframework/ios-arm64_x86_64-simulator/FirebaseFunctions.framework/Headers/FirebaseFunctions-Swift.h#L417-L461"
+      ]
+    },
+    {
+      "id": "cloudfunctions-functions-new-unavailable",
+      "target": "CloudFunctions",
+      "category": "missing-baseline-binding",
+      "typeName": "FirebaseFunctions.FIRFunctions",
+      "memberName": "New",
+      "selector": "new",
+      "comparisonTypeKey": "FIRFunctions",
+      "comparisonMemberKey": "export|new",
+      "reason": "The Firebase 12.6 header marks +new unavailable. The baseline correctly hides default construction while swift-dotnet-bindings emits the inherited NSObject new selector.",
+      "evidence": [
+        "externals/FirebaseFunctions.xcframework/ios-arm64_x86_64-simulator/FirebaseFunctions.framework/Headers/FirebaseFunctions-Swift.h#L410-L411"
+      ]
+    },
+    {
+      "id": "cloudfunctions-httpscallable-new-unavailable",
+      "target": "CloudFunctions",
+      "category": "missing-baseline-binding",
+      "typeName": "FirebaseFunctions.FIRHTTPSCallable",
+      "memberName": "New",
+      "selector": "new",
+      "comparisonTypeKey": "FIRHTTPSCallable",
+      "comparisonMemberKey": "export|new",
+      "reason": "The Firebase 12.6 header marks +new unavailable. The baseline correctly hides default construction while swift-dotnet-bindings emits the inherited NSObject new selector.",
+      "evidence": [
+        "externals/FirebaseFunctions.xcframework/ios-arm64_x86_64-simulator/FirebaseFunctions.framework/Headers/FirebaseFunctions-Swift.h#L512-L513"
+      ]
+    },
+    {
+      "id": "cloudfunctions-httpscallableoptions-new-unavailable",
+      "target": "CloudFunctions",
+      "category": "missing-baseline-binding",
+      "typeName": "FirebaseFunctions.FIRHTTPSCallableOptions",
+      "memberName": "New",
+      "selector": "new",
+      "comparisonTypeKey": "FIRHTTPSCallableOptions",
+      "comparisonMemberKey": "export|new",
+      "reason": "The Firebase 12.6 header marks +new unavailable. The baseline correctly hides default construction while swift-dotnet-bindings emits the inherited NSObject new selector.",
+      "evidence": [
+        "externals/FirebaseFunctions.xcframework/ios-arm64_x86_64-simulator/FirebaseFunctions.framework/Headers/FirebaseFunctions-Swift.h#L526-L527"
+      ]
+    },
+    {
+      "id": "cloudfunctions-httpscallableresult-new-unavailable",
+      "target": "CloudFunctions",
+      "category": "missing-baseline-binding",
+      "typeName": "FirebaseFunctions.FIRHTTPSCallableResult",
+      "memberName": "New",
+      "selector": "new",
+      "comparisonTypeKey": "FIRHTTPSCallableResult",
+      "comparisonMemberKey": "export|new",
+      "reason": "The Firebase 12.6 header marks +new unavailable. The baseline correctly hides default construction while swift-dotnet-bindings emits the inherited NSObject new selector.",
+      "evidence": [
+        "externals/FirebaseFunctions.xcframework/ios-arm64_x86_64-simulator/FirebaseFunctions.framework/Headers/FirebaseFunctions-Swift.h#L538-L539"
+      ]
+    },
+    {
+      "id": "storage-storage-swift-surface-generator-omits-type",
+      "target": "Storage",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Storage.Storage",
+      "comparisonTypeKey": "FIRStorage",
+      "reason": "The FirebaseStorage Swift header declares FIRStorage, but swift-dotnet-bindings did not emit the comparable Storage type in the fresh audit output.",
+      "evidence": [
+        "externals/FirebaseStorage.xcframework/ios-arm64_x86_64-simulator/FirebaseStorage.framework/Headers/FirebaseStorage-Swift.h#L320-L321"
+      ]
+    },
+    {
+      "id": "storage-listresult-swift-surface-generator-omits-type",
+      "target": "Storage",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Storage.StorageListResult",
+      "comparisonTypeKey": "FIRStorageListResult",
+      "reason": "The FirebaseStorage Swift header declares FIRStorageListResult, but swift-dotnet-bindings did not emit the comparable StorageListResult type in the fresh audit output.",
+      "evidence": [
+        "externals/FirebaseStorage.xcframework/ios-arm64_x86_64-simulator/FirebaseStorage.framework/Headers/FirebaseStorage-Swift.h#L520-L528"
+      ]
+    },
+    {
+      "id": "storage-metadata-bucket-swift-surface-generator-omits-member",
+      "target": "Storage",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Storage.StorageMetadata",
+      "memberName": "Bucket",
+      "selector": "bucket",
+      "comparisonTypeKey": "FIRStorageMetadata",
+      "comparisonMemberKey": "export|bucket",
+      "reason": "The FirebaseStorage Swift header declares FIRStorageMetadata.bucket, but swift-dotnet-bindings did not emit this comparable member in the fresh audit output.",
+      "evidence": [
+        "externals/FirebaseStorage.xcframework/ios-arm64_x86_64-simulator/FirebaseStorage.framework/Headers/FirebaseStorage-Swift.h#L542-L543"
+      ]
+    },
+    {
+      "id": "storage-metadata-cachecontrol-swift-surface-generator-omits-member",
+      "target": "Storage",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Storage.StorageMetadata",
+      "memberName": "CacheControl",
+      "selector": "cacheControl",
+      "comparisonTypeKey": "FIRStorageMetadata",
+      "comparisonMemberKey": "export|cacheControl",
+      "reason": "The FirebaseStorage Swift header declares FIRStorageMetadata.cacheControl, but swift-dotnet-bindings did not emit this comparable member in the fresh audit output.",
+      "evidence": [
+        "externals/FirebaseStorage.xcframework/ios-arm64_x86_64-simulator/FirebaseStorage.framework/Headers/FirebaseStorage-Swift.h#L544-L545"
+      ]
+    },
+    {
+      "id": "storage-metadata-contentdisposition-swift-surface-generator-omits-member",
+      "target": "Storage",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Storage.StorageMetadata",
+      "memberName": "ContentDisposition",
+      "selector": "contentDisposition",
+      "comparisonTypeKey": "FIRStorageMetadata",
+      "comparisonMemberKey": "export|contentDisposition",
+      "reason": "The FirebaseStorage Swift header declares FIRStorageMetadata.contentDisposition, but swift-dotnet-bindings did not emit this comparable member in the fresh audit output.",
+      "evidence": [
+        "externals/FirebaseStorage.xcframework/ios-arm64_x86_64-simulator/FirebaseStorage.framework/Headers/FirebaseStorage-Swift.h#L546-L547"
+      ]
+    },
+    {
+      "id": "storage-metadata-contentencoding-swift-surface-generator-omits-member",
+      "target": "Storage",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Storage.StorageMetadata",
+      "memberName": "ContentEncoding",
+      "selector": "contentEncoding",
+      "comparisonTypeKey": "FIRStorageMetadata",
+      "comparisonMemberKey": "export|contentEncoding",
+      "reason": "The FirebaseStorage Swift header declares FIRStorageMetadata.contentEncoding, but swift-dotnet-bindings did not emit this comparable member in the fresh audit output.",
+      "evidence": [
+        "externals/FirebaseStorage.xcframework/ios-arm64_x86_64-simulator/FirebaseStorage.framework/Headers/FirebaseStorage-Swift.h#L548-L549"
+      ]
+    },
+    {
+      "id": "storage-metadata-contentlanguage-swift-surface-generator-omits-member",
+      "target": "Storage",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Storage.StorageMetadata",
+      "memberName": "ContentLanguage",
+      "selector": "contentLanguage",
+      "comparisonTypeKey": "FIRStorageMetadata",
+      "comparisonMemberKey": "export|contentLanguage",
+      "reason": "The FirebaseStorage Swift header declares FIRStorageMetadata.contentLanguage, but swift-dotnet-bindings did not emit this comparable member in the fresh audit output.",
+      "evidence": [
+        "externals/FirebaseStorage.xcframework/ios-arm64_x86_64-simulator/FirebaseStorage.framework/Headers/FirebaseStorage-Swift.h#L550-L551"
+      ]
+    },
+    {
+      "id": "storage-metadata-contenttype-swift-surface-generator-omits-member",
+      "target": "Storage",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Storage.StorageMetadata",
+      "memberName": "ContentType",
+      "selector": "contentType",
+      "comparisonTypeKey": "FIRStorageMetadata",
+      "comparisonMemberKey": "export|contentType",
+      "reason": "The FirebaseStorage Swift header declares FIRStorageMetadata.contentType, but swift-dotnet-bindings did not emit this comparable member in the fresh audit output.",
+      "evidence": [
+        "externals/FirebaseStorage.xcframework/ios-arm64_x86_64-simulator/FirebaseStorage.framework/Headers/FirebaseStorage-Swift.h#L552-L553"
+      ]
+    },
+    {
+      "id": "storage-metadata-md5hash-swift-surface-generator-omits-member",
+      "target": "Storage",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Storage.StorageMetadata",
+      "memberName": "Md5Hash",
+      "selector": "md5Hash",
+      "comparisonTypeKey": "FIRStorageMetadata",
+      "comparisonMemberKey": "export|md5Hash",
+      "reason": "The FirebaseStorage Swift header declares FIRStorageMetadata.md5Hash, but swift-dotnet-bindings did not emit this comparable member in the fresh audit output.",
+      "evidence": [
+        "externals/FirebaseStorage.xcframework/ios-arm64_x86_64-simulator/FirebaseStorage.framework/Headers/FirebaseStorage-Swift.h#L554-L555"
+      ]
+    },
+    {
+      "id": "storage-metadata-generation-swift-surface-generator-omits-member",
+      "target": "Storage",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Storage.StorageMetadata",
+      "memberName": "Generation",
+      "selector": "generation",
+      "comparisonTypeKey": "FIRStorageMetadata",
+      "comparisonMemberKey": "export|generation",
+      "reason": "The FirebaseStorage Swift header declares FIRStorageMetadata.generation, but swift-dotnet-bindings did not emit this comparable member in the fresh audit output.",
+      "evidence": [
+        "externals/FirebaseStorage.xcframework/ios-arm64_x86_64-simulator/FirebaseStorage.framework/Headers/FirebaseStorage-Swift.h#L556-L557"
+      ]
+    },
+    {
+      "id": "storage-metadata-custommetadata-swift-surface-generator-omits-member",
+      "target": "Storage",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Storage.StorageMetadata",
+      "memberName": "CustomMetadata",
+      "selector": "customMetadata",
+      "comparisonTypeKey": "FIRStorageMetadata",
+      "comparisonMemberKey": "export|customMetadata",
+      "reason": "The FirebaseStorage Swift header declares FIRStorageMetadata.customMetadata, but swift-dotnet-bindings did not emit this comparable member in the fresh audit output.",
+      "evidence": [
+        "externals/FirebaseStorage.xcframework/ios-arm64_x86_64-simulator/FirebaseStorage.framework/Headers/FirebaseStorage-Swift.h#L558-L559"
+      ]
+    },
+    {
+      "id": "storage-metadata-metageneration-swift-surface-generator-omits-member",
+      "target": "Storage",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Storage.StorageMetadata",
+      "memberName": "Metageneration",
+      "selector": "metageneration",
+      "comparisonTypeKey": "FIRStorageMetadata",
+      "comparisonMemberKey": "export|metageneration",
+      "reason": "The FirebaseStorage Swift header declares FIRStorageMetadata.metageneration, but swift-dotnet-bindings did not emit this comparable member in the fresh audit output.",
+      "evidence": [
+        "externals/FirebaseStorage.xcframework/ios-arm64_x86_64-simulator/FirebaseStorage.framework/Headers/FirebaseStorage-Swift.h#L560-L563"
+      ]
+    },
+    {
+      "id": "storage-metadata-name-swift-surface-generator-omits-member",
+      "target": "Storage",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Storage.StorageMetadata",
+      "memberName": "Name",
+      "selector": "name",
+      "comparisonTypeKey": "FIRStorageMetadata",
+      "comparisonMemberKey": "export|name",
+      "reason": "The FirebaseStorage Swift header declares FIRStorageMetadata.name, but swift-dotnet-bindings did not emit this comparable member in the fresh audit output.",
+      "evidence": [
+        "externals/FirebaseStorage.xcframework/ios-arm64_x86_64-simulator/FirebaseStorage.framework/Headers/FirebaseStorage-Swift.h#L564-L565"
+      ]
+    },
+    {
+      "id": "storage-metadata-path-swift-surface-generator-omits-member",
+      "target": "Storage",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Storage.StorageMetadata",
+      "memberName": "Path",
+      "selector": "path",
+      "comparisonTypeKey": "FIRStorageMetadata",
+      "comparisonMemberKey": "export|path",
+      "reason": "The FirebaseStorage Swift header declares FIRStorageMetadata.path, but swift-dotnet-bindings did not emit this comparable member in the fresh audit output.",
+      "evidence": [
+        "externals/FirebaseStorage.xcframework/ios-arm64_x86_64-simulator/FirebaseStorage.framework/Headers/FirebaseStorage-Swift.h#L566-L567"
+      ]
+    },
+    {
+      "id": "storage-metadata-size-swift-surface-generator-omits-member",
+      "target": "Storage",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Storage.StorageMetadata",
+      "memberName": "Size",
+      "selector": "size",
+      "comparisonTypeKey": "FIRStorageMetadata",
+      "comparisonMemberKey": "export|size",
+      "reason": "The FirebaseStorage Swift header declares FIRStorageMetadata.size, but swift-dotnet-bindings did not emit this comparable member in the fresh audit output.",
+      "evidence": [
+        "externals/FirebaseStorage.xcframework/ios-arm64_x86_64-simulator/FirebaseStorage.framework/Headers/FirebaseStorage-Swift.h#L568-L569"
+      ]
+    },
+    {
+      "id": "storage-metadata-timecreated-swift-surface-generator-omits-member",
+      "target": "Storage",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Storage.StorageMetadata",
+      "memberName": "TimeCreated",
+      "selector": "timeCreated",
+      "comparisonTypeKey": "FIRStorageMetadata",
+      "comparisonMemberKey": "export|timeCreated",
+      "reason": "The FirebaseStorage Swift header declares FIRStorageMetadata.timeCreated, but swift-dotnet-bindings did not emit this comparable member in the fresh audit output.",
+      "evidence": [
+        "externals/FirebaseStorage.xcframework/ios-arm64_x86_64-simulator/FirebaseStorage.framework/Headers/FirebaseStorage-Swift.h#L570-L571"
+      ]
+    },
+    {
+      "id": "storage-metadata-updated-swift-surface-generator-omits-member",
+      "target": "Storage",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Storage.StorageMetadata",
+      "memberName": "Updated",
+      "selector": "updated",
+      "comparisonTypeKey": "FIRStorageMetadata",
+      "comparisonMemberKey": "export|updated",
+      "reason": "The FirebaseStorage Swift header declares FIRStorageMetadata.updated, but swift-dotnet-bindings did not emit this comparable member in the fresh audit output.",
+      "evidence": [
+        "externals/FirebaseStorage.xcframework/ios-arm64_x86_64-simulator/FirebaseStorage.framework/Headers/FirebaseStorage-Swift.h#L572-L573"
+      ]
+    },
+    {
+      "id": "storage-metadata-constructor-swift-surface-generator-omits-member",
+      "target": "Storage",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Storage.StorageMetadata",
+      "memberName": "Constructor",
+      "selector": "initWithDictionary:",
+      "comparisonTypeKey": "FIRStorageMetadata",
+      "comparisonMemberKey": "export|initWithDictionary:",
+      "reason": "The FirebaseStorage Swift header declares FIRStorageMetadata.initWithDictionary:, but swift-dotnet-bindings did not emit this comparable member in the fresh audit output.",
+      "evidence": [
+        "externals/FirebaseStorage.xcframework/ios-arm64_x86_64-simulator/FirebaseStorage.framework/Headers/FirebaseStorage-Swift.h#L584-L586"
+      ]
+    },
+    {
+      "id": "storage-metadata-dictionaryrepresentation-swift-surface-generator-omits-member",
+      "target": "Storage",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Storage.StorageMetadata",
+      "memberName": "DictionaryRepresentation",
+      "selector": "dictionaryRepresentation",
+      "comparisonTypeKey": "FIRStorageMetadata",
+      "comparisonMemberKey": "export|dictionaryRepresentation",
+      "reason": "The FirebaseStorage Swift header declares FIRStorageMetadata.dictionaryRepresentation, but swift-dotnet-bindings did not emit this comparable member in the fresh audit output.",
+      "evidence": [
+        "externals/FirebaseStorage.xcframework/ios-arm64_x86_64-simulator/FirebaseStorage.framework/Headers/FirebaseStorage-Swift.h#L574-L576"
+      ]
+    },
+    {
+      "id": "storage-metadata-isfile-swift-surface-generator-omits-member",
+      "target": "Storage",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Storage.StorageMetadata",
+      "memberName": "IsFile",
+      "selector": "isFile",
+      "comparisonTypeKey": "FIRStorageMetadata",
+      "comparisonMemberKey": "export|isFile",
+      "reason": "The FirebaseStorage Swift header declares FIRStorageMetadata.isFile, but swift-dotnet-bindings did not emit this comparable member in the fresh audit output.",
+      "evidence": [
+        "externals/FirebaseStorage.xcframework/ios-arm64_x86_64-simulator/FirebaseStorage.framework/Headers/FirebaseStorage-Swift.h#L577-L578"
+      ]
+    },
+    {
+      "id": "storage-metadata-isfolder-swift-surface-generator-omits-member",
+      "target": "Storage",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Storage.StorageMetadata",
+      "memberName": "IsFolder",
+      "selector": "isFolder",
+      "comparisonTypeKey": "FIRStorageMetadata",
+      "comparisonMemberKey": "export|isFolder",
+      "reason": "The FirebaseStorage Swift header declares FIRStorageMetadata.isFolder, but swift-dotnet-bindings did not emit this comparable member in the fresh audit output.",
+      "evidence": [
+        "externals/FirebaseStorage.xcframework/ios-arm64_x86_64-simulator/FirebaseStorage.framework/Headers/FirebaseStorage-Swift.h#L579-L580"
+      ]
+    },
+    {
+      "id": "storage-observabletask-swift-surface-generator-omits-type",
+      "target": "Storage",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Storage.StorageObservableTask",
+      "comparisonTypeKey": "FIRStorageObservableTask",
+      "reason": "The FirebaseStorage Swift header declares FIRStorageObservableTask, but swift-dotnet-bindings did not emit the comparable StorageObservableTask type in the fresh audit output.",
+      "evidence": [
+        "externals/FirebaseStorage.xcframework/ios-arm64_x86_64-simulator/FirebaseStorage.framework/Headers/FirebaseStorage-Swift.h#L453-L454"
+      ]
+    },
+    {
+      "id": "storage-reference-swift-surface-generator-omits-type",
+      "target": "Storage",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Storage.StorageReference",
+      "comparisonTypeKey": "FIRStorageReference",
+      "reason": "The FirebaseStorage Swift header declares FIRStorageReference, but swift-dotnet-bindings did not emit the comparable StorageReference type in the fresh audit output.",
+      "evidence": [
+        "externals/FirebaseStorage.xcframework/ios-arm64_x86_64-simulator/FirebaseStorage.framework/Headers/FirebaseStorage-Swift.h#L599-L600"
+      ]
+    },
+    {
+      "id": "storage-task-swift-surface-generator-omits-type",
+      "target": "Storage",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Storage.StorageTask",
+      "comparisonTypeKey": "FIRStorageTask",
+      "reason": "The FirebaseStorage Swift header declares FIRStorageTask, but swift-dotnet-bindings did not emit the comparable StorageTask type in the fresh audit output.",
+      "evidence": [
+        "externals/FirebaseStorage.xcframework/ios-arm64_x86_64-simulator/FirebaseStorage.framework/Headers/FirebaseStorage-Swift.h#L440-L443"
+      ]
+    },
+    {
+      "id": "storage-taskmanagement-swift-surface-generator-omits-protocol",
+      "target": "Storage",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Storage.StorageTaskManagement",
+      "comparisonTypeKey": "FIRStorageTaskManagement",
+      "reason": "The FirebaseStorage Swift header declares the FIRStorageTaskManagement protocol, but swift-dotnet-bindings did not emit the comparable StorageTaskManagement protocol in the fresh audit output.",
+      "evidence": [
+        "externals/FirebaseStorage.xcframework/ios-arm64_x86_64-simulator/FirebaseStorage.framework/Headers/FirebaseStorage-Swift.h#L420-L430"
+      ]
+    },
+    {
+      "id": "storage-tasksnapshot-metadata-swift-surface-generator-omits-member",
+      "target": "Storage",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Storage.StorageTaskSnapshot",
+      "memberName": "Metadata",
+      "selector": "metadata",
+      "comparisonTypeKey": "FIRStorageTaskSnapshot",
+      "comparisonMemberKey": "export|metadata",
+      "reason": "The FirebaseStorage Swift header declares FIRStorageTaskSnapshot.metadata, but swift-dotnet-bindings did not emit this comparable member in the fresh audit output.",
+      "evidence": [
+        "externals/FirebaseStorage.xcframework/ios-arm64_x86_64-simulator/FirebaseStorage.framework/Headers/FirebaseStorage-Swift.h#L829-L830"
+      ]
+    },
+    {
+      "id": "storage-tasksnapshot-reference-swift-surface-generator-omits-member",
+      "target": "Storage",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Storage.StorageTaskSnapshot",
+      "memberName": "Reference",
+      "selector": "reference",
+      "comparisonTypeKey": "FIRStorageTaskSnapshot",
+      "comparisonMemberKey": "export|reference",
+      "reason": "The FirebaseStorage Swift header declares FIRStorageTaskSnapshot.reference, but swift-dotnet-bindings did not emit this comparable member in the fresh audit output.",
+      "evidence": [
+        "externals/FirebaseStorage.xcframework/ios-arm64_x86_64-simulator/FirebaseStorage.framework/Headers/FirebaseStorage-Swift.h#L831-L832"
+      ]
+    },
+    {
+      "id": "storage-tasksnapshot-progress-swift-surface-generator-omits-member",
+      "target": "Storage",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Storage.StorageTaskSnapshot",
+      "memberName": "Progress",
+      "selector": "progress",
+      "comparisonTypeKey": "FIRStorageTaskSnapshot",
+      "comparisonMemberKey": "export|progress",
+      "reason": "The FirebaseStorage Swift header declares FIRStorageTaskSnapshot.progress, but swift-dotnet-bindings did not emit this comparable member in the fresh audit output.",
+      "evidence": [
+        "externals/FirebaseStorage.xcframework/ios-arm64_x86_64-simulator/FirebaseStorage.framework/Headers/FirebaseStorage-Swift.h#L833-L834"
+      ]
+    },
+    {
+      "id": "storage-tasksnapshot-error-swift-surface-generator-omits-member",
+      "target": "Storage",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Storage.StorageTaskSnapshot",
+      "memberName": "Error",
+      "selector": "error",
+      "comparisonTypeKey": "FIRStorageTaskSnapshot",
+      "comparisonMemberKey": "export|error",
+      "reason": "The FirebaseStorage Swift header declares FIRStorageTaskSnapshot.error, but swift-dotnet-bindings did not emit this comparable member in the fresh audit output.",
+      "evidence": [
+        "externals/FirebaseStorage.xcframework/ios-arm64_x86_64-simulator/FirebaseStorage.framework/Headers/FirebaseStorage-Swift.h#L835-L836"
+      ]
+    },
+    {
+      "id": "storage-tasksnapshot-status-swift-surface-generator-omits-member",
+      "target": "Storage",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Storage.StorageTaskSnapshot",
+      "memberName": "Status",
+      "selector": "status",
+      "comparisonTypeKey": "FIRStorageTaskSnapshot",
+      "comparisonMemberKey": "export|status",
+      "reason": "The FirebaseStorage Swift header declares FIRStorageTaskSnapshot.status, but swift-dotnet-bindings did not emit this comparable member in the fresh audit output.",
+      "evidence": [
+        "externals/FirebaseStorage.xcframework/ios-arm64_x86_64-simulator/FirebaseStorage.framework/Headers/FirebaseStorage-Swift.h#L837-L838"
+      ]
+    },
+    {
+      "id": "storage-observabletask-event-observer-delegate-name-shape",
+      "target": "Storage",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Storage.StorageObservableTaskEventObserverHandler",
+      "comparisonTypeKey": "StorageObservableTaskEventObserverHandler",
+      "reason": "The FirebaseStorage Swift header declares observeStatus:handler: with a FIRStorageTaskSnapshot block. The baseline keeps the existing public StorageObservableTaskEventObserverHandler delegate with the same callback shape.",
+      "evidence": [
+        "externals/FirebaseStorage.xcframework/ios-arm64_x86_64-simulator/FirebaseStorage.framework/Headers/FirebaseStorage-Swift.h#L455-L464"
+      ]
+    },
+    {
+      "id": "storage-get-put-update-completion-delegate-name-shape",
+      "target": "Storage",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Storage.StorageGetPutUpdateCompletionHandler",
+      "comparisonTypeKey": "StorageGetPutUpdateCompletionHandler",
+      "reason": "The FirebaseStorage Swift header declares metadata completion blocks with nullable FIRStorageMetadata/NSError parameters. The baseline keeps the existing public StorageGetPutUpdateCompletionHandler delegate with the same callback shape.",
+      "evidence": [
+        "externals/FirebaseStorage.xcframework/ios-arm64_x86_64-simulator/FirebaseStorage.framework/Headers/FirebaseStorage-Swift.h#L681",
+        "externals/FirebaseStorage.xcframework/ios-arm64_x86_64-simulator/FirebaseStorage.framework/Headers/FirebaseStorage-Swift.h#L711",
+        "externals/FirebaseStorage.xcframework/ios-arm64_x86_64-simulator/FirebaseStorage.framework/Headers/FirebaseStorage-Swift.h#L797",
+        "externals/FirebaseStorage.xcframework/ios-arm64_x86_64-simulator/FirebaseStorage.framework/Headers/FirebaseStorage-Swift.h#L804"
+      ]
+    },
+    {
+      "id": "storage-get-data-completion-delegate-name-shape",
+      "target": "Storage",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Storage.StorageGetDataCompletionHandler",
+      "comparisonTypeKey": "StorageGetDataCompletionHandler",
+      "reason": "The FirebaseStorage headers declare the data download callback as an NSData/NSError block. The baseline keeps the existing public StorageGetDataCompletionHandler delegate with the same callback shape.",
+      "evidence": [
+        "externals/FirebaseStorage.xcframework/ios-arm64_x86_64-simulator/FirebaseStorage.framework/Headers/FIRStorageTypedefs.h#L36",
+        "externals/FirebaseStorage.xcframework/ios-arm64_x86_64-simulator/FirebaseStorage.framework/Headers/FirebaseStorage-Swift.h#L726"
+      ]
+    },
+    {
+      "id": "storage-download-url-completion-delegate-name-shape",
+      "target": "Storage",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Storage.StorageDownloadUrlCompletionHandler",
+      "comparisonTypeKey": "StorageDownloadUrlCompletionHandler",
+      "reason": "The FirebaseStorage headers declare the download URL callback as an NSURL/NSError block. The baseline keeps the existing public StorageDownloadUrlCompletionHandler delegate with the same callback shape.",
+      "evidence": [
+        "externals/FirebaseStorage.xcframework/ios-arm64_x86_64-simulator/FirebaseStorage.framework/Headers/FIRStorageTypedefs.h#L70",
+        "externals/FirebaseStorage.xcframework/ios-arm64_x86_64-simulator/FirebaseStorage.framework/Headers/FirebaseStorage-Swift.h#L733"
+      ]
+    },
+    {
+      "id": "storage-write-to-file-completion-delegate-name-shape",
+      "target": "Storage",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Storage.StorageWriteToFileCompletionHandler",
+      "comparisonTypeKey": "StorageWriteToFileCompletionHandler",
+      "reason": "The FirebaseStorage Swift header declares writeToFile:completion: as an NSURL/NSError block. The baseline keeps the existing public StorageWriteToFileCompletionHandler delegate with the same callback shape.",
+      "evidence": [
+        "externals/FirebaseStorage.xcframework/ios-arm64_x86_64-simulator/FirebaseStorage.framework/Headers/FirebaseStorage-Swift.h#L754"
+      ]
+    },
+    {
+      "id": "storage-delete-completion-delegate-name-shape",
+      "target": "Storage",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Storage.StorageDeleteCompletionHandler",
+      "comparisonTypeKey": "StorageDeleteCompletionHandler",
+      "reason": "The FirebaseStorage headers declare the delete callback as an NSError block. The baseline keeps the existing public StorageDeleteCompletionHandler delegate with the same callback shape.",
+      "evidence": [
+        "externals/FirebaseStorage.xcframework/ios-arm64_x86_64-simulator/FirebaseStorage.framework/Headers/FIRStorageTypedefs.h#L43",
+        "externals/FirebaseStorage.xcframework/ios-arm64_x86_64-simulator/FirebaseStorage.framework/Headers/FirebaseStorage-Swift.h#L808"
+      ]
+    },
+    {
+      "id": "storage-firstoragevoiddataerror-native-delegate-name-shape",
+      "target": "Storage",
+      "category": "missing-baseline-binding",
+      "typeName": "FirebaseStorage.FIRStorageVoidDataError",
+      "comparisonTypeKey": "FIRStorageVoidDataError",
+      "reason": "The native FIRStorageVoidDataError typedef has the same nullable NSData/NSError callback shape as the existing public StorageGetDataCompletionHandler delegate.",
+      "evidence": [
+        "externals/FirebaseStorage.xcframework/ios-arm64_x86_64-simulator/FirebaseStorage.framework/Headers/FIRStorageTypedefs.h#L36"
+      ]
+    },
+    {
+      "id": "storage-firstoragevoiderror-native-delegate-name-shape",
+      "target": "Storage",
+      "category": "missing-baseline-binding",
+      "typeName": "FirebaseStorage.FIRStorageVoidError",
+      "comparisonTypeKey": "FIRStorageVoidError",
+      "reason": "The native FIRStorageVoidError typedef has the same nullable NSError callback shape as the existing public StorageDeleteCompletionHandler delegate.",
+      "evidence": [
+        "externals/FirebaseStorage.xcframework/ios-arm64_x86_64-simulator/FirebaseStorage.framework/Headers/FIRStorageTypedefs.h#L43"
+      ]
+    },
+    {
+      "id": "storage-firstoragevoidurlerror-native-delegate-name-shape",
+      "target": "Storage",
+      "category": "missing-baseline-binding",
+      "typeName": "FirebaseStorage.FIRStorageVoidURLError",
+      "comparisonTypeKey": "FIRStorageVoidURLError",
+      "reason": "The native FIRStorageVoidURLError typedef has the same nullable NSURL/NSError callback shape as the existing public StorageDownloadUrlCompletionHandler and StorageWriteToFileCompletionHandler delegates.",
+      "evidence": [
+        "externals/FirebaseStorage.xcframework/ios-arm64_x86_64-simulator/FirebaseStorage.framework/Headers/FIRStorageTypedefs.h#L70"
+      ]
+    },
+    {
+      "id": "storage-taskstatus-swift-surface-generator-omits-enum",
+      "target": "Storage",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Storage.StorageTaskStatus",
+      "comparisonTypeKey": "StorageTaskStatus",
+      "reason": "The FirebaseStorage Swift header declares StorageTaskStatus as an NSInteger-backed enum. The baseline keeps the existing public StorageTaskStatus enum with equivalent values.",
+      "evidence": [
+        "externals/FirebaseStorage.xcframework/ios-arm64_x86_64-simulator/FirebaseStorage.framework/Headers/FirebaseStorage-Swift.h#L844-L850"
+      ]
+    },
+    {
+      "id": "storage-errorcode-swift-surface-generator-omits-enum",
+      "target": "Storage",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Storage.StorageErrorCode",
+      "comparisonTypeKey": "StorageErrorCode",
+      "reason": "The FirebaseStorage Swift header declares StorageErrorCode as an NSInteger-backed enum. The baseline keeps the existing public StorageErrorCode enum with equivalent values.",
+      "evidence": [
+        "externals/FirebaseStorage.xcframework/ios-arm64_x86_64-simulator/FirebaseStorage.framework/Headers/FirebaseStorage-Swift.h#L500-L515"
       ]
     },
     {
@@ -252,6 +1603,1770 @@
       "reason": "The Firebase 12.6 header declares id<FIRInAppMessagingDisplayDelegate> delegate; the baseline keeps the typed protocol delegate property while swift-dotnet-bindings emits an NSObject WeakDelegate shape for the same selector.",
       "evidence": [
         "externals/FirebaseInAppMessaging.xcframework/ios-arm64/FirebaseInAppMessaging.framework/Headers/FIRInAppMessaging.h#L89-L92"
+      ]
+    },
+    {
+      "id": "cloudfirestore-collectionreference-sharpie-wrapper-omission",
+      "target": "CloudFirestore",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.CloudFirestore.CollectionReference",
+      "comparisonTypeKey": "FIRCollectionReference",
+      "reason": "Sharpie currently fails to build the FirebaseFirestore wrapper module during this audit pass, so fresh output omits this baseline binding. The declaration is present in the observable FirebaseFirestoreInternal header imported by the public FirebaseFirestore framework.",
+      "evidence": [
+        "externals/FirebaseFirestoreInternal.xcframework/ios-arm64/FirebaseFirestoreInternal.framework/Headers/FIRCollectionReference.h#L31"
+      ]
+    },
+    {
+      "id": "cloudfirestore-documentchange-sharpie-wrapper-omission",
+      "target": "CloudFirestore",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.CloudFirestore.DocumentChange",
+      "comparisonTypeKey": "FIRDocumentChange",
+      "reason": "Sharpie currently fails to build the FirebaseFirestore wrapper module during this audit pass, so fresh output omits this baseline binding. The declaration is present in the observable FirebaseFirestoreInternal header imported by the public FirebaseFirestore framework.",
+      "evidence": [
+        "externals/FirebaseFirestoreInternal.xcframework/ios-arm64/FirebaseFirestoreInternal.framework/Headers/FIRDocumentChange.h#L48"
+      ]
+    },
+    {
+      "id": "cloudfirestore-documentreference-sharpie-wrapper-omission",
+      "target": "CloudFirestore",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.CloudFirestore.DocumentReference",
+      "comparisonTypeKey": "FIRDocumentReference",
+      "reason": "Sharpie currently fails to build the FirebaseFirestore wrapper module during this audit pass, so fresh output omits this baseline binding. The declaration is present in the observable FirebaseFirestoreInternal header imported by the public FirebaseFirestore framework.",
+      "evidence": [
+        "externals/FirebaseFirestoreInternal.xcframework/ios-arm64/FirebaseFirestoreInternal.framework/Headers/FIRDocumentReference.h#L44"
+      ]
+    },
+    {
+      "id": "cloudfirestore-documentsnapshot-sharpie-wrapper-omission",
+      "target": "CloudFirestore",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.CloudFirestore.DocumentSnapshot",
+      "comparisonTypeKey": "FIRDocumentSnapshot",
+      "reason": "Sharpie currently fails to build the FirebaseFirestore wrapper module during this audit pass, so fresh output omits this baseline binding. The declaration is present in the observable FirebaseFirestoreInternal header imported by the public FirebaseFirestore framework.",
+      "evidence": [
+        "externals/FirebaseFirestoreInternal.xcframework/ios-arm64/FirebaseFirestoreInternal.framework/Headers/FIRDocumentSnapshot.h#L60"
+      ]
+    },
+    {
+      "id": "cloudfirestore-querydocumentsnapshot-sharpie-wrapper-omission",
+      "target": "CloudFirestore",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.CloudFirestore.QueryDocumentSnapshot",
+      "comparisonTypeKey": "FIRQueryDocumentSnapshot",
+      "reason": "Sharpie currently fails to build the FirebaseFirestore wrapper module during this audit pass, so fresh output omits this baseline binding. The declaration is present in the observable FirebaseFirestoreInternal header imported by the public FirebaseFirestore framework.",
+      "evidence": [
+        "externals/FirebaseFirestoreInternal.xcframework/ios-arm64/FirebaseFirestoreInternal.framework/Headers/FIRDocumentSnapshot.h#L153"
+      ]
+    },
+    {
+      "id": "cloudfirestore-fieldpath-sharpie-wrapper-omission",
+      "target": "CloudFirestore",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.CloudFirestore.FieldPath",
+      "comparisonTypeKey": "FIRFieldPath",
+      "reason": "Sharpie currently fails to build the FirebaseFirestore wrapper module during this audit pass, so fresh output omits this baseline binding. The declaration is present in the observable FirebaseFirestoreInternal header imported by the public FirebaseFirestore framework.",
+      "evidence": [
+        "externals/FirebaseFirestoreInternal.xcframework/ios-arm64/FirebaseFirestoreInternal.framework/Headers/FIRFieldPath.h#L28"
+      ]
+    },
+    {
+      "id": "cloudfirestore-fieldvalue-sharpie-wrapper-omission",
+      "target": "CloudFirestore",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.CloudFirestore.FieldValue",
+      "comparisonTypeKey": "FIRFieldValue",
+      "reason": "Sharpie currently fails to build the FirebaseFirestore wrapper module during this audit pass, so fresh output omits this baseline binding. The declaration is present in the observable FirebaseFirestoreInternal header imported by the public FirebaseFirestore framework.",
+      "evidence": [
+        "externals/FirebaseFirestoreInternal.xcframework/ios-arm64/FirebaseFirestoreInternal.framework/Headers/FIRFieldValue.h#L27"
+      ]
+    },
+    {
+      "id": "cloudfirestore-vectorvalue-sharpie-wrapper-omission",
+      "target": "CloudFirestore",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.CloudFirestore.VectorValue",
+      "comparisonTypeKey": "FIRVectorValue",
+      "reason": "Sharpie currently fails to build the FirebaseFirestore wrapper module during this audit pass, so fresh output omits this baseline binding. The declaration is present in the observable FirebaseFirestoreInternal header imported by the public FirebaseFirestore framework.",
+      "evidence": [
+        "externals/FirebaseFirestoreInternal.xcframework/ios-arm64/FirebaseFirestoreInternal.framework/Headers/FIRVectorValue.h#L26"
+      ]
+    },
+    {
+      "id": "cloudfirestore-aggregatefield-sharpie-wrapper-omission",
+      "target": "CloudFirestore",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.CloudFirestore.AggregateField",
+      "comparisonTypeKey": "FIRAggregateField",
+      "reason": "Sharpie currently fails to build the FirebaseFirestore wrapper module during this audit pass, so fresh output omits this baseline binding. The declaration is present in the observable FirebaseFirestoreInternal header imported by the public FirebaseFirestore framework.",
+      "evidence": [
+        "externals/FirebaseFirestoreInternal.xcframework/ios-arm64/FirebaseFirestoreInternal.framework/Headers/FIRAggregateField.h#L28"
+      ]
+    },
+    {
+      "id": "cloudfirestore-aggregatequery-sharpie-wrapper-omission",
+      "target": "CloudFirestore",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.CloudFirestore.AggregateQuery",
+      "comparisonTypeKey": "FIRAggregateQuery",
+      "reason": "Sharpie currently fails to build the FirebaseFirestore wrapper module during this audit pass, so fresh output omits this baseline binding. The declaration is present in the observable FirebaseFirestoreInternal header imported by the public FirebaseFirestore framework.",
+      "evidence": [
+        "externals/FirebaseFirestoreInternal.xcframework/ios-arm64/FirebaseFirestoreInternal.framework/Headers/FIRAggregateQuery.h#L31"
+      ]
+    },
+    {
+      "id": "cloudfirestore-aggregatequerysnapshot-sharpie-wrapper-omission",
+      "target": "CloudFirestore",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.CloudFirestore.AggregateQuerySnapshot",
+      "comparisonTypeKey": "FIRAggregateQuerySnapshot",
+      "reason": "Sharpie currently fails to build the FirebaseFirestore wrapper module during this audit pass, so fresh output omits this baseline binding. The declaration is present in the observable FirebaseFirestoreInternal header imported by the public FirebaseFirestore framework.",
+      "evidence": [
+        "externals/FirebaseFirestoreInternal.xcframework/ios-arm64/FirebaseFirestoreInternal.framework/Headers/FIRAggregateQuerySnapshot.h#L29"
+      ]
+    },
+    {
+      "id": "cloudfirestore-filter-sharpie-wrapper-omission",
+      "target": "CloudFirestore",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.CloudFirestore.Filter",
+      "comparisonTypeKey": "FIRFilter",
+      "reason": "Sharpie currently fails to build the FirebaseFirestore wrapper module during this audit pass, so fresh output omits this baseline binding. The declaration is present in the observable FirebaseFirestoreInternal header imported by the public FirebaseFirestore framework.",
+      "evidence": [
+        "externals/FirebaseFirestoreInternal.xcframework/ios-arm64/FirebaseFirestoreInternal.framework/Headers/FIRFilter.h#L29"
+      ]
+    },
+    {
+      "id": "cloudfirestore-firestore-sharpie-wrapper-omission",
+      "target": "CloudFirestore",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.CloudFirestore.Firestore",
+      "comparisonTypeKey": "FIRFirestore",
+      "reason": "Sharpie currently fails to build the FirebaseFirestore wrapper module during this audit pass, so fresh output omits this baseline binding. The declaration is present in the observable FirebaseFirestoreInternal header imported by the public FirebaseFirestore framework.",
+      "evidence": [
+        "externals/FirebaseFirestoreInternal.xcframework/ios-arm64/FirebaseFirestoreInternal.framework/Headers/FIRFirestore.h#L40"
+      ]
+    },
+    {
+      "id": "cloudfirestore-loadbundletaskprogress-sharpie-wrapper-omission",
+      "target": "CloudFirestore",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.CloudFirestore.LoadBundleTaskProgress",
+      "comparisonTypeKey": "FIRLoadBundleTaskProgress",
+      "reason": "Sharpie currently fails to build the FirebaseFirestore wrapper module during this audit pass, so fresh output omits this baseline binding. The declaration is present in the observable FirebaseFirestoreInternal header imported by the public FirebaseFirestore framework.",
+      "evidence": [
+        "externals/FirebaseFirestoreInternal.xcframework/ios-arm64/FirebaseFirestoreInternal.framework/Headers/FIRLoadBundleTask.h#L40"
+      ]
+    },
+    {
+      "id": "cloudfirestore-loadbundletask-sharpie-wrapper-omission",
+      "target": "CloudFirestore",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.CloudFirestore.LoadBundleTask",
+      "comparisonTypeKey": "FIRLoadBundleTask",
+      "reason": "Sharpie currently fails to build the FirebaseFirestore wrapper module during this audit pass, so fresh output omits this baseline binding. The declaration is present in the observable FirebaseFirestoreInternal header imported by the public FirebaseFirestore framework.",
+      "evidence": [
+        "externals/FirebaseFirestoreInternal.xcframework/ios-arm64/FirebaseFirestoreInternal.framework/Headers/FIRLoadBundleTask.h#L67"
+      ]
+    },
+    {
+      "id": "cloudfirestore-firestoresettings-sharpie-wrapper-omission",
+      "target": "CloudFirestore",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.CloudFirestore.FirestoreSettings",
+      "comparisonTypeKey": "FIRFirestoreSettings",
+      "reason": "Sharpie currently fails to build the FirebaseFirestore wrapper module during this audit pass, so fresh output omits this baseline binding. The declaration is present in the observable FirebaseFirestoreInternal header imported by the public FirebaseFirestore framework.",
+      "evidence": [
+        "externals/FirebaseFirestoreInternal.xcframework/ios-arm64/FirebaseFirestoreInternal.framework/Headers/FIRFirestoreSettings.h#L29"
+      ]
+    },
+    {
+      "id": "cloudfirestore-localcachesettings-sharpie-wrapper-omission",
+      "target": "CloudFirestore",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.CloudFirestore.LocalCacheSettings",
+      "comparisonTypeKey": "FIRLocalCacheSettings",
+      "reason": "Sharpie currently fails to build the FirebaseFirestore wrapper module during this audit pass, so fresh output omits this baseline binding. The declaration is present in the observable FirebaseFirestoreInternal header imported by the public FirebaseFirestore framework.",
+      "evidence": [
+        "externals/FirebaseFirestoreInternal.xcframework/ios-arm64/FirebaseFirestoreInternal.framework/Headers/FIRLocalCacheSettings.h#L28"
+      ]
+    },
+    {
+      "id": "cloudfirestore-persistentcachesettings-sharpie-wrapper-omission",
+      "target": "CloudFirestore",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.CloudFirestore.PersistentCacheSettings",
+      "comparisonTypeKey": "FIRPersistentCacheSettings",
+      "reason": "Sharpie currently fails to build the FirebaseFirestore wrapper module during this audit pass, so fresh output omits this baseline binding. The declaration is present in the observable FirebaseFirestoreInternal header imported by the public FirebaseFirestore framework.",
+      "evidence": [
+        "externals/FirebaseFirestoreInternal.xcframework/ios-arm64/FirebaseFirestoreInternal.framework/Headers/FIRLocalCacheSettings.h#L42"
+      ]
+    },
+    {
+      "id": "cloudfirestore-memorygarbagecollectorsettings-sharpie-wrapper-omission",
+      "target": "CloudFirestore",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.CloudFirestore.MemoryGarbageCollectorSettings",
+      "comparisonTypeKey": "FIRMemoryGarbageCollectorSettings",
+      "reason": "Sharpie currently fails to build the FirebaseFirestore wrapper module during this audit pass, so fresh output omits this baseline binding. The declaration is present in the observable FirebaseFirestoreInternal header imported by the public FirebaseFirestore framework.",
+      "evidence": [
+        "externals/FirebaseFirestoreInternal.xcframework/ios-arm64/FirebaseFirestoreInternal.framework/Headers/FIRLocalCacheSettings.h#L67"
+      ]
+    },
+    {
+      "id": "cloudfirestore-memoryeagergcsettings-sharpie-wrapper-omission",
+      "target": "CloudFirestore",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.CloudFirestore.MemoryEagerGCSettings",
+      "comparisonTypeKey": "FIRMemoryEagerGCSettings",
+      "reason": "Sharpie currently fails to build the FirebaseFirestore wrapper module during this audit pass, so fresh output omits this baseline binding. The declaration is present in the observable FirebaseFirestoreInternal header imported by the public FirebaseFirestore framework.",
+      "evidence": [
+        "externals/FirebaseFirestoreInternal.xcframework/ios-arm64/FirebaseFirestoreInternal.framework/Headers/FIRLocalCacheSettings.h#L81"
+      ]
+    },
+    {
+      "id": "cloudfirestore-memorylrugcsettings-sharpie-wrapper-omission",
+      "target": "CloudFirestore",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.CloudFirestore.MemoryLRUGCSettings",
+      "comparisonTypeKey": "FIRMemoryLRUGCSettings",
+      "reason": "Sharpie currently fails to build the FirebaseFirestore wrapper module during this audit pass, so fresh output omits this baseline binding. The declaration is present in the observable FirebaseFirestoreInternal header imported by the public FirebaseFirestore framework.",
+      "evidence": [
+        "externals/FirebaseFirestoreInternal.xcframework/ios-arm64/FirebaseFirestoreInternal.framework/Headers/FIRLocalCacheSettings.h#L101"
+      ]
+    },
+    {
+      "id": "cloudfirestore-memorycachesettings-sharpie-wrapper-omission",
+      "target": "CloudFirestore",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.CloudFirestore.MemoryCacheSettings",
+      "comparisonTypeKey": "FIRMemoryCacheSettings",
+      "reason": "Sharpie currently fails to build the FirebaseFirestore wrapper module during this audit pass, so fresh output omits this baseline binding. The declaration is present in the observable FirebaseFirestoreInternal header imported by the public FirebaseFirestore framework.",
+      "evidence": [
+        "externals/FirebaseFirestoreInternal.xcframework/ios-arm64/FirebaseFirestoreInternal.framework/Headers/FIRLocalCacheSettings.h#L126"
+      ]
+    },
+    {
+      "id": "cloudfirestore-transactionoptions-sharpie-wrapper-omission",
+      "target": "CloudFirestore",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.CloudFirestore.TransactionOptions",
+      "comparisonTypeKey": "FIRTransactionOptions",
+      "reason": "Sharpie currently fails to build the FirebaseFirestore wrapper module during this audit pass, so fresh output omits this baseline binding. The declaration is present in the observable FirebaseFirestoreInternal header imported by the public FirebaseFirestore framework.",
+      "evidence": [
+        "externals/FirebaseFirestoreInternal.xcframework/ios-arm64/FirebaseFirestoreInternal.framework/Headers/FIRTransactionOptions.h#L25"
+      ]
+    },
+    {
+      "id": "cloudfirestore-persistentcacheindexmanager-sharpie-wrapper-omission",
+      "target": "CloudFirestore",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.CloudFirestore.PersistentCacheIndexManager",
+      "comparisonTypeKey": "FIRPersistentCacheIndexManager",
+      "reason": "Sharpie currently fails to build the FirebaseFirestore wrapper module during this audit pass, so fresh output omits this baseline binding. The declaration is present in the observable FirebaseFirestoreInternal header imported by the public FirebaseFirestore framework.",
+      "evidence": [
+        "externals/FirebaseFirestoreInternal.xcframework/ios-arm64/FirebaseFirestoreInternal.framework/Headers/FIRPersistentCacheIndexManager.h#L26"
+      ]
+    },
+    {
+      "id": "cloudfirestore-geopoint-sharpie-wrapper-omission",
+      "target": "CloudFirestore",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.CloudFirestore.GeoPoint",
+      "comparisonTypeKey": "FIRGeoPoint",
+      "reason": "Sharpie currently fails to build the FirebaseFirestore wrapper module during this audit pass, so fresh output omits this baseline binding. The declaration is present in the observable FirebaseFirestoreInternal header imported by the public FirebaseFirestore framework.",
+      "evidence": [
+        "externals/FirebaseFirestoreInternal.xcframework/ios-arm64/FirebaseFirestoreInternal.framework/Headers/FIRGeoPoint.h#L30"
+      ]
+    },
+    {
+      "id": "cloudfirestore-listenerregistration-sharpie-wrapper-omission",
+      "target": "CloudFirestore",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.CloudFirestore.ListenerRegistration",
+      "comparisonTypeKey": "FIRListenerRegistration",
+      "reason": "Sharpie currently fails to build the FirebaseFirestore wrapper module during this audit pass, so fresh output omits this baseline binding. The declaration is present in the observable FirebaseFirestoreInternal header imported by the public FirebaseFirestore framework.",
+      "evidence": [
+        "externals/FirebaseFirestoreInternal.xcframework/ios-arm64/FirebaseFirestoreInternal.framework/Headers/FIRListenerRegistration.h#L23"
+      ]
+    },
+    {
+      "id": "cloudfirestore-snapshotlistenoptions-sharpie-wrapper-omission",
+      "target": "CloudFirestore",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.CloudFirestore.SnapshotListenOptions",
+      "comparisonTypeKey": "FIRSnapshotListenOptions",
+      "reason": "Sharpie currently fails to build the FirebaseFirestore wrapper module during this audit pass, so fresh output omits this baseline binding. The declaration is present in the observable FirebaseFirestoreInternal header imported by the public FirebaseFirestore framework.",
+      "evidence": [
+        "externals/FirebaseFirestoreInternal.xcframework/ios-arm64/FirebaseFirestoreInternal.framework/Headers/FIRSnapshotListenOptions.h#L49"
+      ]
+    },
+    {
+      "id": "cloudfirestore-query-sharpie-wrapper-omission",
+      "target": "CloudFirestore",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.CloudFirestore.Query",
+      "comparisonTypeKey": "FIRQuery",
+      "reason": "Sharpie currently fails to build the FirebaseFirestore wrapper module during this audit pass, so fresh output omits this baseline binding. The declaration is present in the observable FirebaseFirestoreInternal header imported by the public FirebaseFirestore framework.",
+      "evidence": [
+        "externals/FirebaseFirestoreInternal.xcframework/ios-arm64/FirebaseFirestoreInternal.framework/Headers/FIRQuery.h#L46"
+      ]
+    },
+    {
+      "id": "cloudfirestore-querysnapshot-sharpie-wrapper-omission",
+      "target": "CloudFirestore",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.CloudFirestore.QuerySnapshot",
+      "comparisonTypeKey": "FIRQuerySnapshot",
+      "reason": "Sharpie currently fails to build the FirebaseFirestore wrapper module during this audit pass, so fresh output omits this baseline binding. The declaration is present in the observable FirebaseFirestoreInternal header imported by the public FirebaseFirestore framework.",
+      "evidence": [
+        "externals/FirebaseFirestoreInternal.xcframework/ios-arm64/FirebaseFirestoreInternal.framework/Headers/FIRQuerySnapshot.h#L33"
+      ]
+    },
+    {
+      "id": "cloudfirestore-snapshotmetadata-sharpie-wrapper-omission",
+      "target": "CloudFirestore",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.CloudFirestore.SnapshotMetadata",
+      "comparisonTypeKey": "FIRSnapshotMetadata",
+      "reason": "Sharpie currently fails to build the FirebaseFirestore wrapper module during this audit pass, so fresh output omits this baseline binding. The declaration is present in the observable FirebaseFirestoreInternal header imported by the public FirebaseFirestore framework.",
+      "evidence": [
+        "externals/FirebaseFirestoreInternal.xcframework/ios-arm64/FirebaseFirestoreInternal.framework/Headers/FIRSnapshotMetadata.h#L24"
+      ]
+    },
+    {
+      "id": "cloudfirestore-transaction-sharpie-wrapper-omission",
+      "target": "CloudFirestore",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.CloudFirestore.Transaction",
+      "comparisonTypeKey": "FIRTransaction",
+      "reason": "Sharpie currently fails to build the FirebaseFirestore wrapper module during this audit pass, so fresh output omits this baseline binding. The declaration is present in the observable FirebaseFirestoreInternal header imported by the public FirebaseFirestore framework.",
+      "evidence": [
+        "externals/FirebaseFirestoreInternal.xcframework/ios-arm64/FirebaseFirestoreInternal.framework/Headers/FIRTransaction.h#L30"
+      ]
+    },
+    {
+      "id": "cloudfirestore-writebatch-sharpie-wrapper-omission",
+      "target": "CloudFirestore",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.CloudFirestore.WriteBatch",
+      "comparisonTypeKey": "FIRWriteBatch",
+      "reason": "Sharpie currently fails to build the FirebaseFirestore wrapper module during this audit pass, so fresh output omits this baseline binding. The declaration is present in the observable FirebaseFirestoreInternal header imported by the public FirebaseFirestore framework.",
+      "evidence": [
+        "externals/FirebaseFirestoreInternal.xcframework/ios-arm64/FirebaseFirestoreInternal.framework/Headers/FIRWriteBatch.h#L34"
+      ]
+    },
+    {
+      "id": "cloudfirestore-adddocumentcompletionhandler-sharpie-wrapper-omission",
+      "target": "CloudFirestore",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.CloudFirestore.AddDocumentCompletionHandler",
+      "comparisonTypeKey": "AddDocumentCompletionHandler",
+      "reason": "Sharpie currently fails to build the FirebaseFirestore wrapper module during this audit pass, so fresh output omits this baseline delegate. The inline completion block is present in the observable FirebaseFirestoreInternal header imported by the public FirebaseFirestore framework.",
+      "evidence": [
+        "externals/FirebaseFirestoreInternal.xcframework/ios-arm64/FirebaseFirestoreInternal.framework/Headers/FIRCollectionReference.h#L93-L96"
+      ]
+    },
+    {
+      "id": "cloudfirestore-documentsnapshothandler-sharpie-wrapper-omission",
+      "target": "CloudFirestore",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.CloudFirestore.DocumentSnapshotHandler",
+      "comparisonTypeKey": "DocumentSnapshotHandler",
+      "reason": "Sharpie currently fails to build the FirebaseFirestore wrapper module during this audit pass, so fresh output omits this baseline delegate. The matching document snapshot block shape is present in the observable FirebaseFirestoreInternal header imported by the public FirebaseFirestore framework.",
+      "evidence": [
+        "externals/FirebaseFirestoreInternal.xcframework/ios-arm64/FirebaseFirestoreInternal.framework/Headers/FIRDocumentReference.h#L32-L34"
+      ]
+    },
+    {
+      "id": "cloudfirestore-documentactioncompletionhandler-sharpie-wrapper-omission",
+      "target": "CloudFirestore",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.CloudFirestore.DocumentActionCompletionHandler",
+      "comparisonTypeKey": "DocumentActionCompletionHandler",
+      "reason": "Sharpie currently fails to build the FirebaseFirestore wrapper module during this audit pass, so fresh output omits this baseline delegate. The inline NSError completion block shape is present in the observable FirebaseFirestoreInternal header imported by the public FirebaseFirestore framework.",
+      "evidence": [
+        "externals/FirebaseFirestoreInternal.xcframework/ios-arm64/FirebaseFirestoreInternal.framework/Headers/FIRDocumentReference.h#L131"
+      ]
+    },
+    {
+      "id": "cloudfirestore-aggregatequerysnapshothandler-sharpie-wrapper-omission",
+      "target": "CloudFirestore",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.CloudFirestore.AggregateQuerySnapshotHandler",
+      "comparisonTypeKey": "AggregateQuerySnapshotHandler",
+      "reason": "Sharpie currently fails to build the FirebaseFirestore wrapper module during this audit pass, so fresh output omits this baseline delegate. The matching aggregate query snapshot completion block is present in the observable FirebaseFirestoreInternal header imported by the public FirebaseFirestore framework.",
+      "evidence": [
+        "externals/FirebaseFirestoreInternal.xcframework/ios-arm64/FirebaseFirestoreInternal.framework/Headers/FIRAggregateQuery.h#L47-L49"
+      ]
+    },
+    {
+      "id": "cloudfirestore-transactioncompletionhandler-sharpie-wrapper-omission",
+      "target": "CloudFirestore",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.CloudFirestore.TransactionCompletionHandler",
+      "comparisonTypeKey": "TransactionCompletionHandler",
+      "reason": "Sharpie currently fails to build the FirebaseFirestore wrapper module during this audit pass, so fresh output omits this baseline delegate. The matching transaction completion block is present in the observable FirebaseFirestoreInternal header imported by the public FirebaseFirestore framework.",
+      "evidence": [
+        "externals/FirebaseFirestoreInternal.xcframework/ios-arm64/FirebaseFirestoreInternal.framework/Headers/FIRFirestore.h#L239-L240"
+      ]
+    },
+    {
+      "id": "cloudfirestore-loadbundlecompletionhandler-sharpie-wrapper-omission",
+      "target": "CloudFirestore",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.CloudFirestore.LoadBundleCompletionHandler",
+      "comparisonTypeKey": "LoadBundleCompletionHandler",
+      "reason": "Sharpie currently fails to build the FirebaseFirestore wrapper module during this audit pass, so fresh output omits this baseline delegate. The matching load bundle completion block is present in the observable FirebaseFirestoreInternal header imported by the public FirebaseFirestore framework.",
+      "evidence": [
+        "externals/FirebaseFirestoreInternal.xcframework/ios-arm64/FirebaseFirestoreInternal.framework/Headers/FIRFirestore.h#L419-L422"
+      ]
+    },
+    {
+      "id": "cloudfirestore-querysnapshothandler-sharpie-wrapper-omission",
+      "target": "CloudFirestore",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.CloudFirestore.QuerySnapshotHandler",
+      "comparisonTypeKey": "QuerySnapshotHandler",
+      "reason": "Sharpie currently fails to build the FirebaseFirestore wrapper module during this audit pass, so fresh output omits this baseline delegate. The matching query snapshot block shape is present in the observable FirebaseFirestoreInternal header imported by the public FirebaseFirestore framework.",
+      "evidence": [
+        "externals/FirebaseFirestoreInternal.xcframework/ios-arm64/FirebaseFirestoreInternal.framework/Headers/FIRQuery.h#L36-L38"
+      ]
+    },
+    {
+      "id": "cloudfirestore-commitcompletionhandler-sharpie-wrapper-omission",
+      "target": "CloudFirestore",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.CloudFirestore.CommitCompletionHandler",
+      "comparisonTypeKey": "CommitCompletionHandler",
+      "reason": "Sharpie currently fails to build the FirebaseFirestore wrapper module during this audit pass, so fresh output omits this baseline delegate. The inline commit completion block is present in the observable FirebaseFirestoreInternal header imported by the public FirebaseFirestore framework.",
+      "evidence": [
+        "externals/FirebaseFirestoreInternal.xcframework/ios-arm64/FirebaseFirestoreInternal.framework/Headers/FIRWriteBatch.h#L134"
+      ]
+    },
+    {
+      "id": "cloudfirestore-documentchangetype-sharpie-wrapper-omission",
+      "target": "CloudFirestore",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.CloudFirestore.DocumentChangeType",
+      "comparisonTypeKey": "DocumentChangeType",
+      "reason": "Sharpie currently fails to build the FirebaseFirestore wrapper module during this audit pass, so fresh output omits this baseline enum. The NSInteger-backed native enum is present in the observable FirebaseFirestoreInternal header imported by the public FirebaseFirestore framework.",
+      "evidence": [
+        "externals/FirebaseFirestoreInternal.xcframework/ios-arm64/FirebaseFirestoreInternal.framework/Headers/FIRDocumentChange.h#L25-L39"
+      ]
+    },
+    {
+      "id": "cloudfirestore-servertimestampbehavior-sharpie-wrapper-omission",
+      "target": "CloudFirestore",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.CloudFirestore.ServerTimestampBehavior",
+      "comparisonTypeKey": "ServerTimestampBehavior",
+      "reason": "Sharpie currently fails to build the FirebaseFirestore wrapper module during this audit pass, so fresh output omits this baseline enum. The NSInteger-backed native enum is present in the observable FirebaseFirestoreInternal header imported by the public FirebaseFirestore framework.",
+      "evidence": [
+        "externals/FirebaseFirestoreInternal.xcframework/ios-arm64/FirebaseFirestoreInternal.framework/Headers/FIRDocumentSnapshot.h#L28-L47"
+      ]
+    },
+    {
+      "id": "cloudfirestore-firestoreerrorcode-sharpie-wrapper-omission",
+      "target": "CloudFirestore",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.CloudFirestore.FirestoreErrorCode",
+      "comparisonTypeKey": "FirestoreErrorCode",
+      "reason": "Sharpie currently fails to build the FirebaseFirestore wrapper module during this audit pass, so fresh output omits this baseline enum. The NSError-backed native enum is present in the observable FirebaseFirestoreInternal header imported by the public FirebaseFirestore framework.",
+      "evidence": [
+        "externals/FirebaseFirestoreInternal.xcframework/ios-arm64/FirebaseFirestoreInternal.framework/Headers/FIRFirestoreErrors.h#L25-L101"
+      ]
+    },
+    {
+      "id": "cloudfirestore-firestoresource-sharpie-wrapper-omission",
+      "target": "CloudFirestore",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.CloudFirestore.FirestoreSource",
+      "comparisonTypeKey": "FirestoreSource",
+      "reason": "Sharpie currently fails to build the FirebaseFirestore wrapper module during this audit pass, so fresh output omits this baseline enum. The NSUInteger-backed native enum is present in the observable FirebaseFirestoreInternal header imported by the public FirebaseFirestore framework.",
+      "evidence": [
+        "externals/FirebaseFirestoreInternal.xcframework/ios-arm64/FirebaseFirestoreInternal.framework/Headers/FIRFirestoreSource.h#L26-L52"
+      ]
+    },
+    {
+      "id": "cloudfirestore-aggregatesource-sharpie-wrapper-omission",
+      "target": "CloudFirestore",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.CloudFirestore.AggregateSource",
+      "comparisonTypeKey": "AggregateSource",
+      "reason": "Sharpie currently fails to build the FirebaseFirestore wrapper module during this audit pass, so fresh output omits this baseline enum. The NSUInteger-backed native enum is present in the observable FirebaseFirestoreInternal header imported by the public FirebaseFirestore framework.",
+      "evidence": [
+        "externals/FirebaseFirestoreInternal.xcframework/ios-arm64/FirebaseFirestoreInternal.framework/Headers/FIRAggregateSource.h#L26-L39"
+      ]
+    },
+    {
+      "id": "cloudfirestore-listensource-sharpie-wrapper-omission",
+      "target": "CloudFirestore",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.CloudFirestore.ListenSource",
+      "comparisonTypeKey": "ListenSource",
+      "reason": "Sharpie currently fails to build the FirebaseFirestore wrapper module during this audit pass, so fresh output omits this baseline enum. The NSUInteger-backed native enum is present in the observable FirebaseFirestoreInternal header imported by the public FirebaseFirestore framework.",
+      "evidence": [
+        "externals/FirebaseFirestoreInternal.xcframework/ios-arm64/FirebaseFirestoreInternal.framework/Headers/FIRSnapshotListenOptions.h#L24-L39"
+      ]
+    },
+    {
+      "id": "cloudfirestore-loadbundletaskstate-sharpie-wrapper-omission",
+      "target": "CloudFirestore",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.CloudFirestore.LoadBundleTaskState",
+      "comparisonTypeKey": "LoadBundleTaskState",
+      "reason": "Sharpie currently fails to build the FirebaseFirestore wrapper module during this audit pass, so fresh output omits this baseline enum. The NSInteger-backed native enum is present in the observable FirebaseFirestoreInternal header imported by the public FirebaseFirestore framework.",
+      "evidence": [
+        "externals/FirebaseFirestoreInternal.xcframework/ios-arm64/FirebaseFirestoreInternal.framework/Headers/FIRLoadBundleTask.h#L27-L33"
+      ]
+    },
+    {
+      "id": "auth-type-action-code-settings-member-url-generator-omission",
+      "target": "Auth",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Auth.ActionCodeSettings",
+      "memberName": "Url",
+      "selector": "URL",
+      "comparisonTypeKey": "FIRActionCodeSettings",
+      "comparisonMemberKey": "export|URL",
+      "reason": "The Firebase 12.6 Auth headers expose this symbol, but swift-dotnet-bindings currently emits a sparse FirebaseAuth surface for this target. The baseline binding is intentionally retained after header review.",
+      "evidence": [
+        "externals/FirebaseAuth.xcframework/ios-arm64/FirebaseAuth.framework/Headers/FirebaseAuth-Swift.h#L347-L382"
+      ]
+    },
+    {
+      "id": "auth-type-action-code-settings-member-handle-code-in-app-generator-omission",
+      "target": "Auth",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Auth.ActionCodeSettings",
+      "memberName": "HandleCodeInApp",
+      "selector": "handleCodeInApp",
+      "comparisonTypeKey": "FIRActionCodeSettings",
+      "comparisonMemberKey": "export|handleCodeInApp",
+      "reason": "The Firebase 12.6 Auth headers expose this symbol, but swift-dotnet-bindings currently emits a sparse FirebaseAuth surface for this target. The baseline binding is intentionally retained after header review.",
+      "evidence": [
+        "externals/FirebaseAuth.xcframework/ios-arm64/FirebaseAuth.framework/Headers/FirebaseAuth-Swift.h#L347-L382"
+      ]
+    },
+    {
+      "id": "auth-type-action-code-settings-member-ios-bundle-id-generator-omission",
+      "target": "Auth",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Auth.ActionCodeSettings",
+      "memberName": "IOSBundleId",
+      "selector": "iOSBundleID",
+      "comparisonTypeKey": "FIRActionCodeSettings",
+      "comparisonMemberKey": "export|iOSBundleID",
+      "reason": "The Firebase 12.6 Auth headers expose this symbol, but swift-dotnet-bindings currently emits a sparse FirebaseAuth surface for this target. The baseline binding is intentionally retained after header review.",
+      "evidence": [
+        "externals/FirebaseAuth.xcframework/ios-arm64/FirebaseAuth.framework/Headers/FirebaseAuth-Swift.h#L347-L382"
+      ]
+    },
+    {
+      "id": "auth-type-action-code-settings-member-android-package-name-generator-omission",
+      "target": "Auth",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Auth.ActionCodeSettings",
+      "memberName": "AndroidPackageName",
+      "selector": "androidPackageName",
+      "comparisonTypeKey": "FIRActionCodeSettings",
+      "comparisonMemberKey": "export|androidPackageName",
+      "reason": "The Firebase 12.6 Auth headers expose this symbol, but swift-dotnet-bindings currently emits a sparse FirebaseAuth surface for this target. The baseline binding is intentionally retained after header review.",
+      "evidence": [
+        "externals/FirebaseAuth.xcframework/ios-arm64/FirebaseAuth.framework/Headers/FirebaseAuth-Swift.h#L347-L382"
+      ]
+    },
+    {
+      "id": "auth-type-action-code-settings-member-android-minimum-version-generator-omission",
+      "target": "Auth",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Auth.ActionCodeSettings",
+      "memberName": "AndroidMinimumVersion",
+      "selector": "androidMinimumVersion",
+      "comparisonTypeKey": "FIRActionCodeSettings",
+      "comparisonMemberKey": "export|androidMinimumVersion",
+      "reason": "The Firebase 12.6 Auth headers expose this symbol, but swift-dotnet-bindings currently emits a sparse FirebaseAuth surface for this target. The baseline binding is intentionally retained after header review.",
+      "evidence": [
+        "externals/FirebaseAuth.xcframework/ios-arm64/FirebaseAuth.framework/Headers/FirebaseAuth-Swift.h#L347-L382"
+      ]
+    },
+    {
+      "id": "auth-type-action-code-settings-member-android-install-if-not-available-generator-omission",
+      "target": "Auth",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Auth.ActionCodeSettings",
+      "memberName": "AndroidInstallIfNotAvailable",
+      "selector": "androidInstallIfNotAvailable",
+      "comparisonTypeKey": "FIRActionCodeSettings",
+      "comparisonMemberKey": "export|androidInstallIfNotAvailable",
+      "reason": "The Firebase 12.6 Auth headers expose this symbol, but swift-dotnet-bindings currently emits a sparse FirebaseAuth surface for this target. The baseline binding is intentionally retained after header review.",
+      "evidence": [
+        "externals/FirebaseAuth.xcframework/ios-arm64/FirebaseAuth.framework/Headers/FirebaseAuth-Swift.h#L347-L382"
+      ]
+    },
+    {
+      "id": "auth-type-action-code-settings-member-set-android-package-name-generator-omission",
+      "target": "Auth",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Auth.ActionCodeSettings",
+      "memberName": "SetAndroidPackageName",
+      "selector": "setAndroidPackageName:installIfNotAvailable:minimumVersion:",
+      "comparisonTypeKey": "FIRActionCodeSettings",
+      "comparisonMemberKey": "export|setAndroidPackageName:installIfNotAvailable:minimumVersion:",
+      "reason": "The Firebase 12.6 Auth headers expose this symbol, but swift-dotnet-bindings currently emits a sparse FirebaseAuth surface for this target. The baseline binding is intentionally retained after header review.",
+      "evidence": [
+        "externals/FirebaseAuth.xcframework/ios-arm64/FirebaseAuth.framework/Headers/FirebaseAuth-Swift.h#L347-L382"
+      ]
+    },
+    {
+      "id": "auth-type-additional-user-info-generator-omission",
+      "target": "Auth",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Auth.AdditionalUserInfo",
+      "comparisonTypeKey": "FIRAdditionalUserInfo",
+      "reason": "The Firebase 12.6 Auth headers expose this symbol, but swift-dotnet-bindings currently emits a sparse FirebaseAuth surface for this target. The baseline binding is intentionally retained after header review.",
+      "evidence": [
+        "externals/FirebaseAuth.xcframework/ios-arm64/FirebaseAuth.framework/Headers/FirebaseAuth-Swift.h#L410-L429"
+      ]
+    },
+    {
+      "id": "auth-type-action-code-info-generator-omission",
+      "target": "Auth",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Auth.ActionCodeInfo",
+      "comparisonTypeKey": "FIRActionCodeInfo",
+      "reason": "The Firebase 12.6 Auth headers expose this symbol, but swift-dotnet-bindings currently emits a sparse FirebaseAuth surface for this target. The baseline binding is intentionally retained after header review.",
+      "evidence": [
+        "externals/FirebaseAuth.xcframework/ios-arm64/FirebaseAuth.framework/Headers/FirebaseAuth-Swift.h#L314-L323"
+      ]
+    },
+    {
+      "id": "auth-type-action-code-url-generator-omission",
+      "target": "Auth",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Auth.ActionCodeUrl",
+      "comparisonTypeKey": "FIRActionCodeURL",
+      "reason": "The Firebase 12.6 Auth headers expose this symbol, but swift-dotnet-bindings currently emits a sparse FirebaseAuth surface for this target. The baseline binding is intentionally retained after header review.",
+      "evidence": [
+        "externals/FirebaseAuth.xcframework/ios-arm64/FirebaseAuth.framework/Headers/FirebaseAuth-Swift.h#L384-L405"
+      ]
+    },
+    {
+      "id": "auth-type-auth-member-error-domain-generator-omission",
+      "target": "Auth",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Auth.Auth",
+      "memberName": "ErrorDomain",
+      "selector": "FIRAuthErrorDomain",
+      "comparisonTypeKey": "FIRAuth",
+      "comparisonMemberKey": "field|FIRAuthErrorDomain",
+      "reason": "The Firebase 12.6 Auth headers expose this symbol, but swift-dotnet-bindings currently emits a sparse FirebaseAuth surface for this target. The baseline binding is intentionally retained after header review.",
+      "evidence": [
+        "externals/FirebaseAuth.xcframework/ios-arm64/FirebaseAuth.framework/Headers/FIRAuthErrors.h#L24-L57"
+      ]
+    },
+    {
+      "id": "auth-type-auth-member-error-user-info-name-key-generator-omission",
+      "target": "Auth",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Auth.Auth",
+      "memberName": "ErrorUserInfoNameKey",
+      "selector": "FIRAuthErrorUserInfoNameKey",
+      "comparisonTypeKey": "FIRAuth",
+      "comparisonMemberKey": "field|FIRAuthErrorUserInfoNameKey",
+      "reason": "The Firebase 12.6 Auth headers expose this symbol, but swift-dotnet-bindings currently emits a sparse FirebaseAuth surface for this target. The baseline binding is intentionally retained after header review.",
+      "evidence": [
+        "externals/FirebaseAuth.xcframework/ios-arm64/FirebaseAuth.framework/Headers/FIRAuthErrors.h#L24-L57"
+      ]
+    },
+    {
+      "id": "auth-type-auth-member-error-user-info-email-key-generator-omission",
+      "target": "Auth",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Auth.Auth",
+      "memberName": "ErrorUserInfoEmailKey",
+      "selector": "FIRAuthErrorUserInfoEmailKey",
+      "comparisonTypeKey": "FIRAuth",
+      "comparisonMemberKey": "field|FIRAuthErrorUserInfoEmailKey",
+      "reason": "The Firebase 12.6 Auth headers expose this symbol, but swift-dotnet-bindings currently emits a sparse FirebaseAuth surface for this target. The baseline binding is intentionally retained after header review.",
+      "evidence": [
+        "externals/FirebaseAuth.xcframework/ios-arm64/FirebaseAuth.framework/Headers/FIRAuthErrors.h#L24-L57"
+      ]
+    },
+    {
+      "id": "auth-type-auth-member-error-user-info-updated-credential-key-generator-omission",
+      "target": "Auth",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Auth.Auth",
+      "memberName": "ErrorUserInfoUpdatedCredentialKey",
+      "selector": "FIRAuthErrorUserInfoUpdatedCredentialKey",
+      "comparisonTypeKey": "FIRAuth",
+      "comparisonMemberKey": "field|FIRAuthErrorUserInfoUpdatedCredentialKey",
+      "reason": "The Firebase 12.6 Auth headers expose this symbol, but swift-dotnet-bindings currently emits a sparse FirebaseAuth surface for this target. The baseline binding is intentionally retained after header review.",
+      "evidence": [
+        "externals/FirebaseAuth.xcframework/ios-arm64/FirebaseAuth.framework/Headers/FIRAuthErrors.h#L24-L57"
+      ]
+    },
+    {
+      "id": "auth-type-auth-member-error-user-info-multi-factor-resolver-key-generator-omission",
+      "target": "Auth",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Auth.Auth",
+      "memberName": "ErrorUserInfoMultiFactorResolverKey",
+      "selector": "FIRAuthErrorUserInfoMultiFactorResolverKey",
+      "comparisonTypeKey": "FIRAuth",
+      "comparisonMemberKey": "field|FIRAuthErrorUserInfoMultiFactorResolverKey",
+      "reason": "The Firebase 12.6 Auth headers expose this symbol, but swift-dotnet-bindings currently emits a sparse FirebaseAuth surface for this target. The baseline binding is intentionally retained after header review.",
+      "evidence": [
+        "externals/FirebaseAuth.xcframework/ios-arm64/FirebaseAuth.framework/Headers/FIRAuthErrors.h#L24-L57"
+      ]
+    },
+    {
+      "id": "auth-type-auth-member-state-did-change-notification-generator-omission",
+      "target": "Auth",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Auth.Auth",
+      "memberName": "StateDidChangeNotification",
+      "selector": "FIRAuthStateDidChangeNotification",
+      "comparisonTypeKey": "FIRAuth",
+      "comparisonMemberKey": "field|FIRAuthStateDidChangeNotification",
+      "reason": "The Firebase 12.6 Auth headers expose this symbol, but swift-dotnet-bindings currently emits a sparse FirebaseAuth surface for this target. The baseline binding is intentionally retained after header review.",
+      "evidence": [
+        "externals/FirebaseAuth.xcframework/ios-arm64/FirebaseAuth.framework/Headers/FIRAuth.h#L32-L166"
+      ]
+    },
+    {
+      "id": "auth-type-auth-member-default-instance-generator-omission",
+      "target": "Auth",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Auth.Auth",
+      "memberName": "DefaultInstance",
+      "selector": "auth",
+      "comparisonTypeKey": "FIRAuth",
+      "comparisonMemberKey": "export|auth",
+      "reason": "The Firebase 12.6 Auth headers expose this symbol, but swift-dotnet-bindings currently emits a sparse FirebaseAuth surface for this target. The baseline binding is intentionally retained after header review.",
+      "evidence": [
+        "externals/FirebaseAuth.xcframework/ios-arm64/FirebaseAuth.framework/Headers/FirebaseAuth-Swift.h#L449-L1019"
+      ]
+    },
+    {
+      "id": "auth-type-auth-member-from-generator-omission",
+      "target": "Auth",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Auth.Auth",
+      "memberName": "From",
+      "selector": "authWithApp:",
+      "comparisonTypeKey": "FIRAuth",
+      "comparisonMemberKey": "export|authWithApp:",
+      "reason": "The Firebase 12.6 Auth headers expose this symbol, but swift-dotnet-bindings currently emits a sparse FirebaseAuth surface for this target. The baseline binding is intentionally retained after header review.",
+      "evidence": [
+        "externals/FirebaseAuth.xcframework/ios-arm64/FirebaseAuth.framework/Headers/FirebaseAuth-Swift.h#L449-L1019"
+      ]
+    },
+    {
+      "id": "auth-type-auth-member-app-generator-omission",
+      "target": "Auth",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Auth.Auth",
+      "memberName": "App",
+      "selector": "app",
+      "comparisonTypeKey": "FIRAuth",
+      "comparisonMemberKey": "export|app",
+      "reason": "The Firebase 12.6 Auth headers expose this symbol, but swift-dotnet-bindings currently emits a sparse FirebaseAuth surface for this target. The baseline binding is intentionally retained after header review.",
+      "evidence": [
+        "externals/FirebaseAuth.xcframework/ios-arm64/FirebaseAuth.framework/Headers/FirebaseAuth-Swift.h#L449-L1019"
+      ]
+    },
+    {
+      "id": "auth-type-auth-member-current-user-generator-omission",
+      "target": "Auth",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Auth.Auth",
+      "memberName": "CurrentUser",
+      "selector": "currentUser",
+      "comparisonTypeKey": "FIRAuth",
+      "comparisonMemberKey": "export|currentUser",
+      "reason": "The Firebase 12.6 Auth headers expose this symbol, but swift-dotnet-bindings currently emits a sparse FirebaseAuth surface for this target. The baseline binding is intentionally retained after header review.",
+      "evidence": [
+        "externals/FirebaseAuth.xcframework/ios-arm64/FirebaseAuth.framework/Headers/FirebaseAuth-Swift.h#L449-L1019"
+      ]
+    },
+    {
+      "id": "auth-type-auth-member-language-code-generator-omission",
+      "target": "Auth",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Auth.Auth",
+      "memberName": "LanguageCode",
+      "selector": "languageCode",
+      "comparisonTypeKey": "FIRAuth",
+      "comparisonMemberKey": "export|languageCode",
+      "reason": "The Firebase 12.6 Auth headers expose this symbol, but swift-dotnet-bindings currently emits a sparse FirebaseAuth surface for this target. The baseline binding is intentionally retained after header review.",
+      "evidence": [
+        "externals/FirebaseAuth.xcframework/ios-arm64/FirebaseAuth.framework/Headers/FirebaseAuth-Swift.h#L449-L1019"
+      ]
+    },
+    {
+      "id": "auth-type-auth-member-settings-generator-omission",
+      "target": "Auth",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Auth.Auth",
+      "memberName": "Settings",
+      "selector": "settings",
+      "comparisonTypeKey": "FIRAuth",
+      "comparisonMemberKey": "export|settings",
+      "reason": "The Firebase 12.6 Auth headers expose this symbol, but swift-dotnet-bindings currently emits a sparse FirebaseAuth surface for this target. The baseline binding is intentionally retained after header review.",
+      "evidence": [
+        "externals/FirebaseAuth.xcframework/ios-arm64/FirebaseAuth.framework/Headers/FirebaseAuth-Swift.h#L449-L1019"
+      ]
+    },
+    {
+      "id": "auth-type-auth-member-user-access-group-generator-omission",
+      "target": "Auth",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Auth.Auth",
+      "memberName": "UserAccessGroup",
+      "selector": "userAccessGroup",
+      "comparisonTypeKey": "FIRAuth",
+      "comparisonMemberKey": "export|userAccessGroup",
+      "reason": "The Firebase 12.6 Auth headers expose this symbol, but swift-dotnet-bindings currently emits a sparse FirebaseAuth surface for this target. The baseline binding is intentionally retained after header review.",
+      "evidence": [
+        "externals/FirebaseAuth.xcframework/ios-arm64/FirebaseAuth.framework/Headers/FirebaseAuth-Swift.h#L449-L1019"
+      ]
+    },
+    {
+      "id": "auth-type-auth-member-share-auth-state-across-devices-generator-omission",
+      "target": "Auth",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Auth.Auth",
+      "memberName": "ShareAuthStateAcrossDevices",
+      "selector": "shareAuthStateAcrossDevices",
+      "comparisonTypeKey": "FIRAuth",
+      "comparisonMemberKey": "export|shareAuthStateAcrossDevices",
+      "reason": "The Firebase 12.6 Auth headers expose this symbol, but swift-dotnet-bindings currently emits a sparse FirebaseAuth surface for this target. The baseline binding is intentionally retained after header review.",
+      "evidence": [
+        "externals/FirebaseAuth.xcframework/ios-arm64/FirebaseAuth.framework/Headers/FirebaseAuth-Swift.h#L449-L1019"
+      ]
+    },
+    {
+      "id": "auth-type-auth-member-tenant-id-generator-omission",
+      "target": "Auth",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Auth.Auth",
+      "memberName": "TenantId",
+      "selector": "tenantID",
+      "comparisonTypeKey": "FIRAuth",
+      "comparisonMemberKey": "export|tenantID",
+      "reason": "The Firebase 12.6 Auth headers expose this symbol, but swift-dotnet-bindings currently emits a sparse FirebaseAuth surface for this target. The baseline binding is intentionally retained after header review.",
+      "evidence": [
+        "externals/FirebaseAuth.xcframework/ios-arm64/FirebaseAuth.framework/Headers/FirebaseAuth-Swift.h#L449-L1019"
+      ]
+    },
+    {
+      "id": "auth-type-auth-member-custom-auth-domain-generator-omission",
+      "target": "Auth",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Auth.Auth",
+      "memberName": "CustomAuthDomain",
+      "selector": "customAuthDomain",
+      "comparisonTypeKey": "FIRAuth",
+      "comparisonMemberKey": "export|customAuthDomain",
+      "reason": "The Firebase 12.6 Auth headers expose this symbol, but swift-dotnet-bindings currently emits a sparse FirebaseAuth surface for this target. The baseline binding is intentionally retained after header review.",
+      "evidence": [
+        "externals/FirebaseAuth.xcframework/ios-arm64/FirebaseAuth.framework/Headers/FirebaseAuth-Swift.h#L449-L1019"
+      ]
+    },
+    {
+      "id": "auth-type-auth-member-apns-token-generator-omission",
+      "target": "Auth",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Auth.Auth",
+      "memberName": "ApnsToken",
+      "selector": "APNSToken",
+      "comparisonTypeKey": "FIRAuth",
+      "comparisonMemberKey": "export|APNSToken",
+      "reason": "The Firebase 12.6 Auth headers expose this symbol, but swift-dotnet-bindings currently emits a sparse FirebaseAuth surface for this target. The baseline binding is intentionally retained after header review.",
+      "evidence": [
+        "externals/FirebaseAuth.xcframework/ios-arm64/FirebaseAuth.framework/Headers/FirebaseAuth-Swift.h#L449-L1019"
+      ]
+    },
+    {
+      "id": "auth-type-auth-member-sign-out-generator-omission",
+      "target": "Auth",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Auth.Auth",
+      "memberName": "SignOut",
+      "selector": "signOut:",
+      "comparisonTypeKey": "FIRAuth",
+      "comparisonMemberKey": "export|signOut:",
+      "reason": "The Firebase 12.6 Auth headers expose this symbol, but swift-dotnet-bindings currently emits a sparse FirebaseAuth surface for this target. The baseline binding is intentionally retained after header review.",
+      "evidence": [
+        "externals/FirebaseAuth.xcframework/ios-arm64/FirebaseAuth.framework/Headers/FirebaseAuth-Swift.h#L449-L1019"
+      ]
+    },
+    {
+      "id": "auth-type-auth-member-is-sign-in-generator-omission",
+      "target": "Auth",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Auth.Auth",
+      "memberName": "IsSignIn",
+      "selector": "isSignInWithEmailLink:",
+      "comparisonTypeKey": "FIRAuth",
+      "comparisonMemberKey": "export|isSignInWithEmailLink:",
+      "reason": "The Firebase 12.6 Auth headers expose this symbol, but swift-dotnet-bindings currently emits a sparse FirebaseAuth surface for this target. The baseline binding is intentionally retained after header review.",
+      "evidence": [
+        "externals/FirebaseAuth.xcframework/ios-arm64/FirebaseAuth.framework/Headers/FirebaseAuth-Swift.h#L449-L1019"
+      ]
+    },
+    {
+      "id": "auth-type-auth-member-add-auth-state-did-change-listener-generator-omission",
+      "target": "Auth",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Auth.Auth",
+      "memberName": "AddAuthStateDidChangeListener",
+      "selector": "addAuthStateDidChangeListener:",
+      "comparisonTypeKey": "FIRAuth",
+      "comparisonMemberKey": "export|addAuthStateDidChangeListener:",
+      "reason": "The Firebase 12.6 Auth headers expose this symbol, but swift-dotnet-bindings currently emits a sparse FirebaseAuth surface for this target. The baseline binding is intentionally retained after header review.",
+      "evidence": [
+        "externals/FirebaseAuth.xcframework/ios-arm64/FirebaseAuth.framework/Headers/FirebaseAuth-Swift.h#L449-L1019"
+      ]
+    },
+    {
+      "id": "auth-type-auth-member-remove-auth-state-did-change-listener-generator-omission",
+      "target": "Auth",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Auth.Auth",
+      "memberName": "RemoveAuthStateDidChangeListener",
+      "selector": "removeAuthStateDidChangeListener:",
+      "comparisonTypeKey": "FIRAuth",
+      "comparisonMemberKey": "export|removeAuthStateDidChangeListener:",
+      "reason": "The Firebase 12.6 Auth headers expose this symbol, but swift-dotnet-bindings currently emits a sparse FirebaseAuth surface for this target. The baseline binding is intentionally retained after header review.",
+      "evidence": [
+        "externals/FirebaseAuth.xcframework/ios-arm64/FirebaseAuth.framework/Headers/FirebaseAuth-Swift.h#L449-L1019"
+      ]
+    },
+    {
+      "id": "auth-type-auth-member-add-id-token-did-change-listener-generator-omission",
+      "target": "Auth",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Auth.Auth",
+      "memberName": "AddIdTokenDidChangeListener",
+      "selector": "addIDTokenDidChangeListener:",
+      "comparisonTypeKey": "FIRAuth",
+      "comparisonMemberKey": "export|addIDTokenDidChangeListener:",
+      "reason": "The Firebase 12.6 Auth headers expose this symbol, but swift-dotnet-bindings currently emits a sparse FirebaseAuth surface for this target. The baseline binding is intentionally retained after header review.",
+      "evidence": [
+        "externals/FirebaseAuth.xcframework/ios-arm64/FirebaseAuth.framework/Headers/FirebaseAuth-Swift.h#L449-L1019"
+      ]
+    },
+    {
+      "id": "auth-type-auth-member-remove-id-token-did-change-listener-generator-omission",
+      "target": "Auth",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Auth.Auth",
+      "memberName": "RemoveIdTokenDidChangeListener",
+      "selector": "removeIDTokenDidChangeListener:",
+      "comparisonTypeKey": "FIRAuth",
+      "comparisonMemberKey": "export|removeIDTokenDidChangeListener:",
+      "reason": "The Firebase 12.6 Auth headers expose this symbol, but swift-dotnet-bindings currently emits a sparse FirebaseAuth surface for this target. The baseline binding is intentionally retained after header review.",
+      "evidence": [
+        "externals/FirebaseAuth.xcframework/ios-arm64/FirebaseAuth.framework/Headers/FirebaseAuth-Swift.h#L449-L1019"
+      ]
+    },
+    {
+      "id": "auth-type-auth-member-use-app-language-generator-omission",
+      "target": "Auth",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Auth.Auth",
+      "memberName": "UseAppLanguage",
+      "selector": "useAppLanguage",
+      "comparisonTypeKey": "FIRAuth",
+      "comparisonMemberKey": "export|useAppLanguage",
+      "reason": "The Firebase 12.6 Auth headers expose this symbol, but swift-dotnet-bindings currently emits a sparse FirebaseAuth surface for this target. The baseline binding is intentionally retained after header review.",
+      "evidence": [
+        "externals/FirebaseAuth.xcframework/ios-arm64/FirebaseAuth.framework/Headers/FirebaseAuth-Swift.h#L449-L1019"
+      ]
+    },
+    {
+      "id": "auth-type-auth-member-use-emulator-with-host-generator-omission",
+      "target": "Auth",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Auth.Auth",
+      "memberName": "UseEmulatorWithHost",
+      "selector": "useEmulatorWithHost:port:",
+      "comparisonTypeKey": "FIRAuth",
+      "comparisonMemberKey": "export|useEmulatorWithHost:port:",
+      "reason": "The Firebase 12.6 Auth headers expose this symbol, but swift-dotnet-bindings currently emits a sparse FirebaseAuth surface for this target. The baseline binding is intentionally retained after header review.",
+      "evidence": [
+        "externals/FirebaseAuth.xcframework/ios-arm64/FirebaseAuth.framework/Headers/FirebaseAuth-Swift.h#L449-L1019"
+      ]
+    },
+    {
+      "id": "auth-type-auth-member-can-handle-url-generator-omission",
+      "target": "Auth",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Auth.Auth",
+      "memberName": "CanHandleUrl",
+      "selector": "canHandleURL:",
+      "comparisonTypeKey": "FIRAuth",
+      "comparisonMemberKey": "export|canHandleURL:",
+      "reason": "The Firebase 12.6 Auth headers expose this symbol, but swift-dotnet-bindings currently emits a sparse FirebaseAuth surface for this target. The baseline binding is intentionally retained after header review.",
+      "evidence": [
+        "externals/FirebaseAuth.xcframework/ios-arm64/FirebaseAuth.framework/Headers/FirebaseAuth-Swift.h#L449-L1019"
+      ]
+    },
+    {
+      "id": "auth-type-auth-member-set-apns-token-generator-omission",
+      "target": "Auth",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Auth.Auth",
+      "memberName": "SetApnsToken",
+      "selector": "setAPNSToken:type:",
+      "comparisonTypeKey": "FIRAuth",
+      "comparisonMemberKey": "export|setAPNSToken:type:",
+      "reason": "The Firebase 12.6 Auth headers expose this symbol, but swift-dotnet-bindings currently emits a sparse FirebaseAuth surface for this target. The baseline binding is intentionally retained after header review.",
+      "evidence": [
+        "externals/FirebaseAuth.xcframework/ios-arm64/FirebaseAuth.framework/Headers/FirebaseAuth-Swift.h#L449-L1019"
+      ]
+    },
+    {
+      "id": "auth-type-auth-member-can-handle-notification-generator-omission",
+      "target": "Auth",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Auth.Auth",
+      "memberName": "CanHandleNotification",
+      "selector": "canHandleNotification:",
+      "comparisonTypeKey": "FIRAuth",
+      "comparisonMemberKey": "export|canHandleNotification:",
+      "reason": "The Firebase 12.6 Auth headers expose this symbol, but swift-dotnet-bindings currently emits a sparse FirebaseAuth surface for this target. The baseline binding is intentionally retained after header review.",
+      "evidence": [
+        "externals/FirebaseAuth.xcframework/ios-arm64/FirebaseAuth.framework/Headers/FirebaseAuth-Swift.h#L449-L1019"
+      ]
+    },
+    {
+      "id": "auth-type-auth-member-use-user-access-group-generator-omission",
+      "target": "Auth",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Auth.Auth",
+      "memberName": "UseUserAccessGroup",
+      "selector": "useUserAccessGroup:error:",
+      "comparisonTypeKey": "FIRAuth",
+      "comparisonMemberKey": "export|useUserAccessGroup:error:",
+      "reason": "The Firebase 12.6 Auth headers expose this symbol, but swift-dotnet-bindings currently emits a sparse FirebaseAuth surface for this target. The baseline binding is intentionally retained after header review.",
+      "evidence": [
+        "externals/FirebaseAuth.xcframework/ios-arm64/FirebaseAuth.framework/Headers/FirebaseAuth-Swift.h#L449-L1019"
+      ]
+    },
+    {
+      "id": "auth-type-auth-member-get-stored-user-generator-omission",
+      "target": "Auth",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Auth.Auth",
+      "memberName": "GetStoredUser",
+      "selector": "getStoredUserForAccessGroup:error:",
+      "comparisonTypeKey": "FIRAuth",
+      "comparisonMemberKey": "export|getStoredUserForAccessGroup:error:",
+      "reason": "The Firebase 12.6 Auth headers expose this symbol, but swift-dotnet-bindings currently emits a sparse FirebaseAuth surface for this target. The baseline binding is intentionally retained after header review.",
+      "evidence": [
+        "externals/FirebaseAuth.xcframework/ios-arm64/FirebaseAuth.framework/Headers/FirebaseAuth-Swift.h#L449-L1019"
+      ]
+    },
+    {
+      "id": "auth-type-auth-credential-member-provider-generator-omission",
+      "target": "Auth",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Auth.AuthCredential",
+      "memberName": "Provider",
+      "selector": "provider",
+      "comparisonTypeKey": "FIRAuthCredential",
+      "comparisonMemberKey": "export|provider",
+      "reason": "The Firebase 12.6 Auth headers expose this symbol, but swift-dotnet-bindings currently emits a sparse FirebaseAuth surface for this target. The baseline binding is intentionally retained after header review.",
+      "evidence": [
+        "externals/FirebaseAuth.xcframework/ios-arm64/FirebaseAuth.framework/Headers/FirebaseAuth-Swift.h#L310-L2425"
+      ]
+    },
+    {
+      "id": "auth-type-auth-data-result-member-user-generator-omission",
+      "target": "Auth",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Auth.AuthDataResult",
+      "memberName": "User",
+      "selector": "user",
+      "comparisonTypeKey": "FIRAuthDataResult",
+      "comparisonMemberKey": "export|user",
+      "reason": "The Firebase 12.6 Auth headers expose this symbol, but swift-dotnet-bindings currently emits a sparse FirebaseAuth surface for this target. The baseline binding is intentionally retained after header review.",
+      "evidence": [
+        "externals/FirebaseAuth.xcframework/ios-arm64/FirebaseAuth.framework/Headers/FirebaseAuth-Swift.h#L310-L2425"
+      ]
+    },
+    {
+      "id": "auth-type-auth-data-result-member-additional-user-info-generator-omission",
+      "target": "Auth",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Auth.AuthDataResult",
+      "memberName": "AdditionalUserInfo",
+      "selector": "additionalUserInfo",
+      "comparisonTypeKey": "FIRAuthDataResult",
+      "comparisonMemberKey": "export|additionalUserInfo",
+      "reason": "The Firebase 12.6 Auth headers expose this symbol, but swift-dotnet-bindings currently emits a sparse FirebaseAuth surface for this target. The baseline binding is intentionally retained after header review.",
+      "evidence": [
+        "externals/FirebaseAuth.xcframework/ios-arm64/FirebaseAuth.framework/Headers/FirebaseAuth-Swift.h#L310-L2425"
+      ]
+    },
+    {
+      "id": "auth-type-auth-data-result-member-credential-generator-omission",
+      "target": "Auth",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Auth.AuthDataResult",
+      "memberName": "Credential",
+      "selector": "credential",
+      "comparisonTypeKey": "FIRAuthDataResult",
+      "comparisonMemberKey": "export|credential",
+      "reason": "The Firebase 12.6 Auth headers expose this symbol, but swift-dotnet-bindings currently emits a sparse FirebaseAuth surface for this target. The baseline binding is intentionally retained after header review.",
+      "evidence": [
+        "externals/FirebaseAuth.xcframework/ios-arm64/FirebaseAuth.framework/Headers/FirebaseAuth-Swift.h#L310-L2425"
+      ]
+    },
+    {
+      "id": "auth-type-auth-settings-member-app-verification-disabled-for-testing-generator-omission",
+      "target": "Auth",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Auth.AuthSettings",
+      "memberName": "AppVerificationDisabledForTesting",
+      "selector": "appVerificationDisabledForTesting",
+      "comparisonTypeKey": "FIRAuthSettings",
+      "comparisonMemberKey": "export|appVerificationDisabledForTesting",
+      "reason": "The Firebase 12.6 Auth headers expose this symbol, but swift-dotnet-bindings currently emits a sparse FirebaseAuth surface for this target. The baseline binding is intentionally retained after header review.",
+      "evidence": [
+        "externals/FirebaseAuth.xcframework/ios-arm64/FirebaseAuth.framework/Headers/FirebaseAuth-Swift.h#L310-L2425"
+      ]
+    },
+    {
+      "id": "auth-type-auth-token-result-generator-omission",
+      "target": "Auth",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Auth.AuthTokenResult",
+      "comparisonTypeKey": "FIRAuthTokenResult",
+      "reason": "The Firebase 12.6 Auth headers expose this symbol, but swift-dotnet-bindings currently emits a sparse FirebaseAuth surface for this target. The baseline binding is intentionally retained after header review.",
+      "evidence": [
+        "externals/FirebaseAuth.xcframework/ios-arm64/FirebaseAuth.framework/Headers/FirebaseAuth-Swift.h#L310-L2425"
+      ]
+    },
+    {
+      "id": "auth-type-auth-ui-delegate-generator-omission",
+      "target": "Auth",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Auth.AuthUIDelegate",
+      "comparisonTypeKey": "FIRAuthUIDelegate",
+      "reason": "The Firebase 12.6 Auth headers expose this symbol, but swift-dotnet-bindings currently emits a sparse FirebaseAuth surface for this target. The baseline binding is intentionally retained after header review.",
+      "evidence": [
+        "externals/FirebaseAuth.xcframework/ios-arm64/FirebaseAuth.framework/Headers/FirebaseAuth-Swift.h#L310-L2425"
+      ]
+    },
+    {
+      "id": "auth-type-email-auth-provider-generator-omission",
+      "target": "Auth",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Auth.EmailAuthProvider",
+      "comparisonTypeKey": "FIREmailAuthProvider",
+      "reason": "The Firebase 12.6 Auth headers expose this symbol, but swift-dotnet-bindings currently emits a sparse FirebaseAuth surface for this target. The baseline binding is intentionally retained after header review.",
+      "evidence": [
+        "externals/FirebaseAuth.xcframework/ios-arm64/FirebaseAuth.framework/Headers/FirebaseAuth-Swift.h#L310-L2425"
+      ]
+    },
+    {
+      "id": "auth-type-facebook-auth-provider-generator-omission",
+      "target": "Auth",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Auth.FacebookAuthProvider",
+      "comparisonTypeKey": "FIRFacebookAuthProvider",
+      "reason": "The Firebase 12.6 Auth headers expose this symbol, but swift-dotnet-bindings currently emits a sparse FirebaseAuth surface for this target. The baseline binding is intentionally retained after header review.",
+      "evidence": [
+        "externals/FirebaseAuth.xcframework/ios-arm64/FirebaseAuth.framework/Headers/FirebaseAuth-Swift.h#L310-L2425"
+      ]
+    },
+    {
+      "id": "auth-type-federated-auth-provider-generator-omission",
+      "target": "Auth",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Auth.FederatedAuthProvider",
+      "comparisonTypeKey": "FIRFederatedAuthProvider",
+      "reason": "The Firebase 12.6 Auth headers expose this symbol, but swift-dotnet-bindings currently emits a sparse FirebaseAuth surface for this target. The baseline binding is intentionally retained after header review.",
+      "evidence": [
+        "externals/FirebaseAuth.xcframework/ios-arm64/FirebaseAuth.framework/Headers/FirebaseAuth-Swift.h#L310-L2425"
+      ]
+    },
+    {
+      "id": "auth-type-game-center-auth-provider-generator-omission",
+      "target": "Auth",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Auth.GameCenterAuthProvider",
+      "comparisonTypeKey": "FIRGameCenterAuthProvider",
+      "reason": "The Firebase 12.6 Auth headers expose this symbol, but swift-dotnet-bindings currently emits a sparse FirebaseAuth surface for this target. The baseline binding is intentionally retained after header review.",
+      "evidence": [
+        "externals/FirebaseAuth.xcframework/ios-arm64/FirebaseAuth.framework/Headers/FirebaseAuth-Swift.h#L310-L2425"
+      ]
+    },
+    {
+      "id": "auth-type-git-hub-auth-provider-generator-omission",
+      "target": "Auth",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Auth.GitHubAuthProvider",
+      "comparisonTypeKey": "FIRGitHubAuthProvider",
+      "reason": "The Firebase 12.6 Auth headers expose this symbol, but swift-dotnet-bindings currently emits a sparse FirebaseAuth surface for this target. The baseline binding is intentionally retained after header review.",
+      "evidence": [
+        "externals/FirebaseAuth.xcframework/ios-arm64/FirebaseAuth.framework/Headers/FirebaseAuth-Swift.h#L310-L2425"
+      ]
+    },
+    {
+      "id": "auth-type-google-auth-provider-generator-omission",
+      "target": "Auth",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Auth.GoogleAuthProvider",
+      "comparisonTypeKey": "FIRGoogleAuthProvider",
+      "reason": "The Firebase 12.6 Auth headers expose this symbol, but swift-dotnet-bindings currently emits a sparse FirebaseAuth surface for this target. The baseline binding is intentionally retained after header review.",
+      "evidence": [
+        "externals/FirebaseAuth.xcframework/ios-arm64/FirebaseAuth.framework/Headers/FirebaseAuth-Swift.h#L310-L2425"
+      ]
+    },
+    {
+      "id": "auth-type-multi-factor-generator-omission",
+      "target": "Auth",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Auth.MultiFactor",
+      "comparisonTypeKey": "FIRMultiFactor",
+      "reason": "The Firebase 12.6 Auth headers expose this symbol, but swift-dotnet-bindings currently emits a sparse FirebaseAuth surface for this target. The baseline binding is intentionally retained after header review.",
+      "evidence": [
+        "externals/FirebaseAuth.xcframework/ios-arm64/FirebaseAuth.framework/Headers/FirebaseAuth-Swift.h#L310-L2425"
+      ]
+    },
+    {
+      "id": "auth-type-multi-factor-assertion-generator-omission",
+      "target": "Auth",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Auth.MultiFactorAssertion",
+      "comparisonTypeKey": "FIRMultiFactorAssertion",
+      "reason": "The Firebase 12.6 Auth headers expose this symbol, but swift-dotnet-bindings currently emits a sparse FirebaseAuth surface for this target. The baseline binding is intentionally retained after header review.",
+      "evidence": [
+        "externals/FirebaseAuth.xcframework/ios-arm64/FirebaseAuth.framework/Headers/FirebaseAuth-Swift.h#L310-L2425"
+      ]
+    },
+    {
+      "id": "auth-type-multi-factor-info-generator-omission",
+      "target": "Auth",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Auth.MultiFactorInfo",
+      "comparisonTypeKey": "FIRMultiFactorInfo",
+      "reason": "The Firebase 12.6 Auth headers expose this symbol, but swift-dotnet-bindings currently emits a sparse FirebaseAuth surface for this target. The baseline binding is intentionally retained after header review.",
+      "evidence": [
+        "externals/FirebaseAuth.xcframework/ios-arm64/FirebaseAuth.framework/Headers/FirebaseAuth-Swift.h#L310-L2425"
+      ]
+    },
+    {
+      "id": "auth-type-multi-factor-resolver-generator-omission",
+      "target": "Auth",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Auth.MultiFactorResolver",
+      "comparisonTypeKey": "FIRMultiFactorResolver",
+      "reason": "The Firebase 12.6 Auth headers expose this symbol, but swift-dotnet-bindings currently emits a sparse FirebaseAuth surface for this target. The baseline binding is intentionally retained after header review.",
+      "evidence": [
+        "externals/FirebaseAuth.xcframework/ios-arm64/FirebaseAuth.framework/Headers/FirebaseAuth-Swift.h#L310-L2425"
+      ]
+    },
+    {
+      "id": "auth-type-o-auth-credential-generator-omission",
+      "target": "Auth",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Auth.OAuthCredential",
+      "comparisonTypeKey": "FIROAuthCredential",
+      "reason": "The Firebase 12.6 Auth headers expose this symbol, but swift-dotnet-bindings currently emits a sparse FirebaseAuth surface for this target. The baseline binding is intentionally retained after header review.",
+      "evidence": [
+        "externals/FirebaseAuth.xcframework/ios-arm64/FirebaseAuth.framework/Headers/FirebaseAuth-Swift.h#L310-L2425"
+      ]
+    },
+    {
+      "id": "auth-type-o-auth-provider-generator-omission",
+      "target": "Auth",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Auth.OAuthProvider",
+      "comparisonTypeKey": "FIROAuthProvider",
+      "reason": "The Firebase 12.6 Auth headers expose this symbol, but swift-dotnet-bindings currently emits a sparse FirebaseAuth surface for this target. The baseline binding is intentionally retained after header review.",
+      "evidence": [
+        "externals/FirebaseAuth.xcframework/ios-arm64/FirebaseAuth.framework/Headers/FirebaseAuth-Swift.h#L310-L2425"
+      ]
+    },
+    {
+      "id": "auth-type-phone-auth-credential-generator-omission",
+      "target": "Auth",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Auth.PhoneAuthCredential",
+      "comparisonTypeKey": "FIRPhoneAuthCredential",
+      "reason": "The Firebase 12.6 Auth headers expose this symbol, but swift-dotnet-bindings currently emits a sparse FirebaseAuth surface for this target. The baseline binding is intentionally retained after header review.",
+      "evidence": [
+        "externals/FirebaseAuth.xcframework/ios-arm64/FirebaseAuth.framework/Headers/FirebaseAuth-Swift.h#L310-L2425"
+      ]
+    },
+    {
+      "id": "auth-type-phone-auth-provider-generator-omission",
+      "target": "Auth",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Auth.PhoneAuthProvider",
+      "comparisonTypeKey": "FIRPhoneAuthProvider",
+      "reason": "The Firebase 12.6 Auth headers expose this symbol, but swift-dotnet-bindings currently emits a sparse FirebaseAuth surface for this target. The baseline binding is intentionally retained after header review.",
+      "evidence": [
+        "externals/FirebaseAuth.xcframework/ios-arm64/FirebaseAuth.framework/Headers/FirebaseAuth-Swift.h#L310-L2425"
+      ]
+    },
+    {
+      "id": "auth-type-phone-multi-factor-assertion-generator-omission",
+      "target": "Auth",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Auth.PhoneMultiFactorAssertion",
+      "comparisonTypeKey": "FIRPhoneMultiFactorAssertion",
+      "reason": "The Firebase 12.6 Auth headers expose this symbol, but swift-dotnet-bindings currently emits a sparse FirebaseAuth surface for this target. The baseline binding is intentionally retained after header review.",
+      "evidence": [
+        "externals/FirebaseAuth.xcframework/ios-arm64/FirebaseAuth.framework/Headers/FirebaseAuth-Swift.h#L310-L2425"
+      ]
+    },
+    {
+      "id": "auth-type-phone-multi-factor-generator-generator-omission",
+      "target": "Auth",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Auth.PhoneMultiFactorGenerator",
+      "comparisonTypeKey": "FIRPhoneMultiFactorGenerator",
+      "reason": "The Firebase 12.6 Auth headers expose this symbol, but swift-dotnet-bindings currently emits a sparse FirebaseAuth surface for this target. The baseline binding is intentionally retained after header review.",
+      "evidence": [
+        "externals/FirebaseAuth.xcframework/ios-arm64/FirebaseAuth.framework/Headers/FirebaseAuth-Swift.h#L310-L2425"
+      ]
+    },
+    {
+      "id": "auth-type-phone-multi-factor-info-generator-omission",
+      "target": "Auth",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Auth.PhoneMultiFactorInfo",
+      "comparisonTypeKey": "FIRPhoneMultiFactorInfo",
+      "reason": "The Firebase 12.6 Auth headers expose this symbol, but swift-dotnet-bindings currently emits a sparse FirebaseAuth surface for this target. The baseline binding is intentionally retained after header review.",
+      "evidence": [
+        "externals/FirebaseAuth.xcframework/ios-arm64/FirebaseAuth.framework/Headers/FirebaseAuth-Swift.h#L310-L2425"
+      ]
+    },
+    {
+      "id": "auth-type-twitter-auth-provider-generator-omission",
+      "target": "Auth",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Auth.TwitterAuthProvider",
+      "comparisonTypeKey": "FIRTwitterAuthProvider",
+      "reason": "The Firebase 12.6 Auth headers expose this symbol, but swift-dotnet-bindings currently emits a sparse FirebaseAuth surface for this target. The baseline binding is intentionally retained after header review.",
+      "evidence": [
+        "externals/FirebaseAuth.xcframework/ios-arm64/FirebaseAuth.framework/Headers/FirebaseAuth-Swift.h#L310-L2425"
+      ]
+    },
+    {
+      "id": "auth-type-user-member-is-anonymous-generator-omission",
+      "target": "Auth",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Auth.User",
+      "memberName": "IsAnonymous",
+      "selector": "anonymous",
+      "comparisonTypeKey": "FIRUser",
+      "comparisonMemberKey": "export|anonymous",
+      "reason": "The Firebase 12.6 Auth headers expose this symbol, but swift-dotnet-bindings currently emits a sparse FirebaseAuth surface for this target. The baseline binding is intentionally retained after header review.",
+      "evidence": [
+        "externals/FirebaseAuth.xcframework/ios-arm64/FirebaseAuth.framework/Headers/FirebaseAuth-Swift.h#L1997-L2393"
+      ]
+    },
+    {
+      "id": "auth-type-user-member-is-email-verified-generator-omission",
+      "target": "Auth",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Auth.User",
+      "memberName": "IsEmailVerified",
+      "selector": "emailVerified",
+      "comparisonTypeKey": "FIRUser",
+      "comparisonMemberKey": "export|emailVerified",
+      "reason": "The Firebase 12.6 Auth headers expose this symbol, but swift-dotnet-bindings currently emits a sparse FirebaseAuth surface for this target. The baseline binding is intentionally retained after header review.",
+      "evidence": [
+        "externals/FirebaseAuth.xcframework/ios-arm64/FirebaseAuth.framework/Headers/FirebaseAuth-Swift.h#L1997-L2393"
+      ]
+    },
+    {
+      "id": "auth-type-user-member-refresh-token-generator-omission",
+      "target": "Auth",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Auth.User",
+      "memberName": "RefreshToken",
+      "selector": "refreshToken",
+      "comparisonTypeKey": "FIRUser",
+      "comparisonMemberKey": "export|refreshToken",
+      "reason": "The Firebase 12.6 Auth headers expose this symbol, but swift-dotnet-bindings currently emits a sparse FirebaseAuth surface for this target. The baseline binding is intentionally retained after header review.",
+      "evidence": [
+        "externals/FirebaseAuth.xcframework/ios-arm64/FirebaseAuth.framework/Headers/FirebaseAuth-Swift.h#L1997-L2393"
+      ]
+    },
+    {
+      "id": "auth-type-user-member-provider-data-generator-omission",
+      "target": "Auth",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Auth.User",
+      "memberName": "ProviderData",
+      "selector": "providerData",
+      "comparisonTypeKey": "FIRUser",
+      "comparisonMemberKey": "export|providerData",
+      "reason": "The Firebase 12.6 Auth headers expose this symbol, but swift-dotnet-bindings currently emits a sparse FirebaseAuth surface for this target. The baseline binding is intentionally retained after header review.",
+      "evidence": [
+        "externals/FirebaseAuth.xcframework/ios-arm64/FirebaseAuth.framework/Headers/FirebaseAuth-Swift.h#L1997-L2393"
+      ]
+    },
+    {
+      "id": "auth-type-user-member-metadata-generator-omission",
+      "target": "Auth",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Auth.User",
+      "memberName": "Metadata",
+      "selector": "metadata",
+      "comparisonTypeKey": "FIRUser",
+      "comparisonMemberKey": "export|metadata",
+      "reason": "The Firebase 12.6 Auth headers expose this symbol, but swift-dotnet-bindings currently emits a sparse FirebaseAuth surface for this target. The baseline binding is intentionally retained after header review.",
+      "evidence": [
+        "externals/FirebaseAuth.xcframework/ios-arm64/FirebaseAuth.framework/Headers/FirebaseAuth-Swift.h#L1997-L2393"
+      ]
+    },
+    {
+      "id": "auth-type-user-member-multi-factor-generator-omission",
+      "target": "Auth",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Auth.User",
+      "memberName": "MultiFactor",
+      "selector": "multiFactor",
+      "comparisonTypeKey": "FIRUser",
+      "comparisonMemberKey": "export|multiFactor",
+      "reason": "The Firebase 12.6 Auth headers expose this symbol, but swift-dotnet-bindings currently emits a sparse FirebaseAuth surface for this target. The baseline binding is intentionally retained after header review.",
+      "evidence": [
+        "externals/FirebaseAuth.xcframework/ios-arm64/FirebaseAuth.framework/Headers/FirebaseAuth-Swift.h#L1997-L2393"
+      ]
+    },
+    {
+      "id": "auth-type-user-member-profile-change-request-generator-omission",
+      "target": "Auth",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Auth.User",
+      "memberName": "ProfileChangeRequest",
+      "selector": "profileChangeRequest",
+      "comparisonTypeKey": "FIRUser",
+      "comparisonMemberKey": "export|profileChangeRequest",
+      "reason": "The Firebase 12.6 Auth headers expose this symbol, but swift-dotnet-bindings currently emits a sparse FirebaseAuth surface for this target. The baseline binding is intentionally retained after header review.",
+      "evidence": [
+        "externals/FirebaseAuth.xcframework/ios-arm64/FirebaseAuth.framework/Headers/FirebaseAuth-Swift.h#L1997-L2393"
+      ]
+    },
+    {
+      "id": "auth-type-user-profile-change-request-generator-omission",
+      "target": "Auth",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Auth.UserProfileChangeRequest",
+      "comparisonTypeKey": "FIRUserProfileChangeRequest",
+      "reason": "The Firebase 12.6 Auth headers expose this symbol, but swift-dotnet-bindings currently emits a sparse FirebaseAuth surface for this target. The baseline binding is intentionally retained after header review.",
+      "evidence": [
+        "externals/FirebaseAuth.xcframework/ios-arm64/FirebaseAuth.framework/Headers/FirebaseAuth-Swift.h#L310-L2425"
+      ]
+    },
+    {
+      "id": "auth-type-user-info-generator-omission",
+      "target": "Auth",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Auth.UserInfo",
+      "comparisonTypeKey": "FIRUserInfo",
+      "reason": "The Firebase 12.6 Auth headers expose this symbol, but swift-dotnet-bindings currently emits a sparse FirebaseAuth surface for this target. The baseline binding is intentionally retained after header review.",
+      "evidence": [
+        "externals/FirebaseAuth.xcframework/ios-arm64/FirebaseAuth.framework/Headers/FirebaseAuth-Swift.h#L310-L2425"
+      ]
+    },
+    {
+      "id": "auth-type-user-metadata-generator-omission",
+      "target": "Auth",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Auth.UserMetadata",
+      "comparisonTypeKey": "FIRUserMetadata",
+      "reason": "The Firebase 12.6 Auth headers expose this symbol, but swift-dotnet-bindings currently emits a sparse FirebaseAuth surface for this target. The baseline binding is intentionally retained after header review.",
+      "evidence": [
+        "externals/FirebaseAuth.xcframework/ios-arm64/FirebaseAuth.framework/Headers/FirebaseAuth-Swift.h#L310-L2425"
+      ]
+    },
+    {
+      "id": "auth-type-user-update-handler-delegate-name-shape",
+      "target": "Auth",
+      "category": "signature-drift",
+      "typeName": "Firebase.Auth.UserUpdateHandler",
+      "comparisonTypeKey": "UserUpdateHandler",
+      "reason": "The Firebase 12.6 header declares the FIR-prefixed callback typedef with the same managed callback shape. The baseline keeps the existing public delegate name.",
+      "evidence": [
+        "externals/FirebaseAuth.xcframework/ios-arm64/FirebaseAuth.framework/Headers/FIRAuth.h#L32-L166"
+      ]
+    },
+    {
+      "id": "auth-type-auth-state-did-change-listener-handler-generator-omission",
+      "target": "Auth",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Auth.AuthStateDidChangeListenerHandler",
+      "comparisonTypeKey": "AuthStateDidChangeListenerHandler",
+      "reason": "The Firebase 12.6 Auth headers expose this symbol, but swift-dotnet-bindings currently emits a sparse FirebaseAuth surface for this target. The baseline binding is intentionally retained after header review.",
+      "evidence": [
+        "externals/FirebaseAuth.xcframework/ios-arm64/FirebaseAuth.framework/Headers/FIRAuth.h#L32-L166"
+      ]
+    },
+    {
+      "id": "auth-type-id-token-did-change-listener-handler-generator-omission",
+      "target": "Auth",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Auth.IdTokenDidChangeListenerHandler",
+      "comparisonTypeKey": "IdTokenDidChangeListenerHandler",
+      "reason": "The Firebase 12.6 Auth headers expose this symbol, but swift-dotnet-bindings currently emits a sparse FirebaseAuth surface for this target. The baseline binding is intentionally retained after header review.",
+      "evidence": [
+        "externals/FirebaseAuth.xcframework/ios-arm64/FirebaseAuth.framework/Headers/FIRAuth.h#L32-L166"
+      ]
+    },
+    {
+      "id": "auth-type-auth-data-result-handler-generator-omission",
+      "target": "Auth",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Auth.AuthDataResultHandler",
+      "comparisonTypeKey": "AuthDataResultHandler",
+      "reason": "The Firebase 12.6 Auth headers expose this symbol, but swift-dotnet-bindings currently emits a sparse FirebaseAuth surface for this target. The baseline binding is intentionally retained after header review.",
+      "evidence": [
+        "externals/FirebaseAuth.xcframework/ios-arm64/FirebaseAuth.framework/Headers/FIRAuth.h#L32-L166"
+      ]
+    },
+    {
+      "id": "auth-type-auth-result-handler-generator-omission",
+      "target": "Auth",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Auth.AuthResultHandler",
+      "comparisonTypeKey": "AuthResultHandler",
+      "reason": "The Firebase 12.6 Auth headers expose this symbol, but swift-dotnet-bindings currently emits a sparse FirebaseAuth surface for this target. The baseline binding is intentionally retained after header review.",
+      "evidence": [
+        "externals/FirebaseAuth.xcframework/ios-arm64/FirebaseAuth.framework/Headers/FIRAuth.h#L32-L166"
+      ]
+    },
+    {
+      "id": "auth-type-provider-query-handler-delegate-name-shape",
+      "target": "Auth",
+      "category": "signature-drift",
+      "typeName": "Firebase.Auth.ProviderQueryHandler",
+      "comparisonTypeKey": "ProviderQueryHandler",
+      "reason": "The Firebase 12.6 header declares the FIR-prefixed callback typedef with the same managed callback shape. The baseline keeps the existing public delegate name.",
+      "evidence": [
+        "externals/FirebaseAuth.xcframework/ios-arm64/FirebaseAuth.framework/Headers/FIRAuth.h#L32-L166"
+      ]
+    },
+    {
+      "id": "auth-type-sign-in-method-query-handler-delegate-name-shape",
+      "target": "Auth",
+      "category": "signature-drift",
+      "typeName": "Firebase.Auth.SignInMethodQueryHandler",
+      "comparisonTypeKey": "SignInMethodQueryHandler",
+      "reason": "The Firebase 12.6 header declares the FIR-prefixed callback typedef with the same managed callback shape. The baseline keeps the existing public delegate name.",
+      "evidence": [
+        "externals/FirebaseAuth.xcframework/ios-arm64/FirebaseAuth.framework/Headers/FIRAuth.h#L32-L166"
+      ]
+    },
+    {
+      "id": "auth-type-send-password-reset-handler-delegate-name-shape",
+      "target": "Auth",
+      "category": "signature-drift",
+      "typeName": "Firebase.Auth.SendPasswordResetHandler",
+      "comparisonTypeKey": "SendPasswordResetHandler",
+      "reason": "The Firebase 12.6 header declares the FIR-prefixed callback typedef with the same managed callback shape. The baseline keeps the existing public delegate name.",
+      "evidence": [
+        "externals/FirebaseAuth.xcframework/ios-arm64/FirebaseAuth.framework/Headers/FIRAuth.h#L32-L166"
+      ]
+    },
+    {
+      "id": "auth-type-send-sign-in-link-to-email-handler-delegate-name-shape",
+      "target": "Auth",
+      "category": "signature-drift",
+      "typeName": "Firebase.Auth.SendSignInLinkToEmailHandler",
+      "comparisonTypeKey": "SendSignInLinkToEmailHandler",
+      "reason": "The Firebase 12.6 header declares the FIR-prefixed callback typedef with the same managed callback shape. The baseline keeps the existing public delegate name.",
+      "evidence": [
+        "externals/FirebaseAuth.xcframework/ios-arm64/FirebaseAuth.framework/Headers/FIRAuth.h#L32-L166"
+      ]
+    },
+    {
+      "id": "auth-type-confirm-password-reset-handler-delegate-name-shape",
+      "target": "Auth",
+      "category": "signature-drift",
+      "typeName": "Firebase.Auth.ConfirmPasswordResetHandler",
+      "comparisonTypeKey": "ConfirmPasswordResetHandler",
+      "reason": "The Firebase 12.6 header declares the FIR-prefixed callback typedef with the same managed callback shape. The baseline keeps the existing public delegate name.",
+      "evidence": [
+        "externals/FirebaseAuth.xcframework/ios-arm64/FirebaseAuth.framework/Headers/FIRAuth.h#L32-L166"
+      ]
+    },
+    {
+      "id": "auth-type-verify-password-reset-code-handler-delegate-name-shape",
+      "target": "Auth",
+      "category": "signature-drift",
+      "typeName": "Firebase.Auth.VerifyPasswordResetCodeHandler",
+      "comparisonTypeKey": "VerifyPasswordResetCodeHandler",
+      "reason": "The Firebase 12.6 header declares the FIR-prefixed callback typedef with the same managed callback shape. The baseline keeps the existing public delegate name.",
+      "evidence": [
+        "externals/FirebaseAuth.xcframework/ios-arm64/FirebaseAuth.framework/Headers/FIRAuth.h#L32-L166"
+      ]
+    },
+    {
+      "id": "auth-type-apply-action-code-handler-delegate-name-shape",
+      "target": "Auth",
+      "category": "signature-drift",
+      "typeName": "Firebase.Auth.ApplyActionCodeHandler",
+      "comparisonTypeKey": "ApplyActionCodeHandler",
+      "reason": "The Firebase 12.6 header declares the FIR-prefixed callback typedef with the same managed callback shape. The baseline keeps the existing public delegate name.",
+      "evidence": [
+        "externals/FirebaseAuth.xcframework/ios-arm64/FirebaseAuth.framework/Headers/FIRAuth.h#L32-L166"
+      ]
+    },
+    {
+      "id": "auth-type-auth-void-error-handler-delegate-name-shape",
+      "target": "Auth",
+      "category": "signature-drift",
+      "typeName": "Firebase.Auth.AuthVoidErrorHandler",
+      "comparisonTypeKey": "AuthVoidErrorHandler",
+      "reason": "The Firebase 12.6 header declares the FIR-prefixed callback typedef with the same managed callback shape. The baseline keeps the existing public delegate name.",
+      "evidence": [
+        "externals/FirebaseAuth.xcframework/ios-arm64/FirebaseAuth.framework/Headers/FIRAuth.h#L32-L166"
+      ]
+    },
+    {
+      "id": "auth-type-check-action-code-handler-generator-omission",
+      "target": "Auth",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Auth.CheckActionCodeHandler",
+      "comparisonTypeKey": "CheckActionCodeHandler",
+      "reason": "The Firebase 12.6 Auth headers expose this symbol, but swift-dotnet-bindings currently emits a sparse FirebaseAuth surface for this target. The baseline binding is intentionally retained after header review.",
+      "evidence": [
+        "externals/FirebaseAuth.xcframework/ios-arm64/FirebaseAuth.framework/Headers/FIRAuth.h#L32-L166"
+      ]
+    },
+    {
+      "id": "auth-type-auth-credential-callback-handler-generator-omission",
+      "target": "Auth",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Auth.AuthCredentialCallbackHandler",
+      "comparisonTypeKey": "AuthCredentialCallbackHandler",
+      "reason": "The Firebase 12.6 Auth headers expose this symbol, but swift-dotnet-bindings currently emits a sparse FirebaseAuth surface for this target. The baseline binding is intentionally retained after header review.",
+      "evidence": [
+        "externals/FirebaseAuth.xcframework/ios-arm64/FirebaseAuth.framework/Headers/FIRFederatedAuthProvider.h#L23-L29"
+      ]
+    },
+    {
+      "id": "auth-type-game-center-credential-callback-handler-generator-omission",
+      "target": "Auth",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Auth.GameCenterCredentialCallbackHandler",
+      "comparisonTypeKey": "GameCenterCredentialCallbackHandler",
+      "reason": "The Firebase 12.6 Auth headers expose this symbol, but swift-dotnet-bindings currently emits a sparse FirebaseAuth surface for this target. The baseline binding is intentionally retained after header review.",
+      "evidence": [
+        "externals/FirebaseAuth.xcframework/ios-arm64/FirebaseAuth.framework/Headers/FIRGameCenterAuthProvider.h#L34-L40"
+      ]
+    },
+    {
+      "id": "auth-type-multi-factor-session-handler-generator-omission",
+      "target": "Auth",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Auth.MultiFactorSessionHandler",
+      "comparisonTypeKey": "MultiFactorSessionHandler",
+      "reason": "The Firebase 12.6 Auth headers expose this symbol, but swift-dotnet-bindings currently emits a sparse FirebaseAuth surface for this target. The baseline binding is intentionally retained after header review.",
+      "evidence": [
+        "externals/FirebaseAuth.xcframework/ios-arm64/FirebaseAuth.framework/Headers/FIRMultiFactor.h#L23-L30"
+      ]
+    },
+    {
+      "id": "auth-type-verification-result-handler-delegate-name-shape",
+      "target": "Auth",
+      "category": "signature-drift",
+      "typeName": "Firebase.Auth.VerificationResultHandler",
+      "comparisonTypeKey": "VerificationResultHandler",
+      "reason": "The Firebase 12.6 header declares the FIR-prefixed callback typedef with the same managed callback shape. The baseline keeps the existing public delegate name.",
+      "evidence": [
+        "externals/FirebaseAuth.xcframework/ios-arm64/FirebaseAuth.framework/Headers/FIRPhoneAuthProvider.h#L35-L43"
+      ]
+    },
+    {
+      "id": "auth-type-auth-token-handler-generator-omission",
+      "target": "Auth",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Auth.AuthTokenHandler",
+      "comparisonTypeKey": "AuthTokenHandler",
+      "reason": "The Firebase 12.6 Auth headers expose this symbol, but swift-dotnet-bindings currently emits a sparse FirebaseAuth surface for this target. The baseline binding is intentionally retained after header review.",
+      "evidence": [
+        "externals/FirebaseAuth.xcframework/ios-arm64/FirebaseAuth.framework/Headers/FIRUser.h#L27-L68"
+      ]
+    },
+    {
+      "id": "auth-type-auth-token-result-handler-generator-omission",
+      "target": "Auth",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Auth.AuthTokenResultHandler",
+      "comparisonTypeKey": "AuthTokenResultHandler",
+      "reason": "The Firebase 12.6 Auth headers expose this symbol, but swift-dotnet-bindings currently emits a sparse FirebaseAuth surface for this target. The baseline binding is intentionally retained after header review.",
+      "evidence": [
+        "externals/FirebaseAuth.xcframework/ios-arm64/FirebaseAuth.framework/Headers/FIRUser.h#L27-L68"
+      ]
+    },
+    {
+      "id": "auth-type-user-profile-change-handler-generator-omission",
+      "target": "Auth",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Auth.UserProfileChangeHandler",
+      "comparisonTypeKey": "UserProfileChangeHandler",
+      "reason": "The Firebase 12.6 Auth headers expose this symbol, but swift-dotnet-bindings currently emits a sparse FirebaseAuth surface for this target. The baseline binding is intentionally retained after header review.",
+      "evidence": [
+        "externals/FirebaseAuth.xcframework/ios-arm64/FirebaseAuth.framework/Headers/FIRUser.h#L27-L68"
+      ]
+    },
+    {
+      "id": "auth-type-send-email-verification-handler-generator-omission",
+      "target": "Auth",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Auth.SendEmailVerificationHandler",
+      "comparisonTypeKey": "SendEmailVerificationHandler",
+      "reason": "The Firebase 12.6 Auth headers expose this symbol, but swift-dotnet-bindings currently emits a sparse FirebaseAuth surface for this target. The baseline binding is intentionally retained after header review.",
+      "evidence": [
+        "externals/FirebaseAuth.xcframework/ios-arm64/FirebaseAuth.framework/Headers/FIRUser.h#L27-L68"
+      ]
+    },
+    {
+      "id": "auth-type-auth-apns-token-type-generator-omission",
+      "target": "Auth",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Auth.AuthApnsTokenType",
+      "comparisonTypeKey": "AuthApnsTokenType",
+      "reason": "The Firebase 12.6 Auth headers expose this symbol, but swift-dotnet-bindings currently emits a sparse FirebaseAuth surface for this target. The baseline binding is intentionally retained after header review.",
+      "evidence": [
+        "externals/FirebaseAuth.xcframework/ios-arm64/FirebaseAuth.framework/Headers/FirebaseAuth-Swift.h#L1052-L1059"
+      ]
+    },
+    {
+      "id": "auth-type-action-code-operation-generator-omission",
+      "target": "Auth",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Auth.ActionCodeOperation",
+      "comparisonTypeKey": "ActionCodeOperation",
+      "reason": "The Firebase 12.6 Auth headers expose this symbol, but swift-dotnet-bindings currently emits a sparse FirebaseAuth surface for this target. The baseline binding is intentionally retained after header review.",
+      "evidence": [
+        "externals/FirebaseAuth.xcframework/ios-arm64/FirebaseAuth.framework/Headers/FirebaseAuth-Swift.h#L327-L341"
+      ]
+    },
+    {
+      "id": "auth-type-auth-error-code-generator-omission",
+      "target": "Auth",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.Auth.AuthErrorCode",
+      "comparisonTypeKey": "AuthErrorCode",
+      "reason": "The Firebase 12.6 Auth headers expose this symbol, but swift-dotnet-bindings currently emits a sparse FirebaseAuth surface for this target. The baseline binding is intentionally retained after header review.",
+      "evidence": [
+        "externals/FirebaseAuth.xcframework/ios-arm64/FirebaseAuth.framework/Headers/FirebaseAuth-Swift.h#L1099-L1301"
       ]
     }
   ]
