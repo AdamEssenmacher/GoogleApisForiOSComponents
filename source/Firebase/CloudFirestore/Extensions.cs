@@ -8,7 +8,7 @@ namespace Firebase.CloudFirestore
 {
 	class CloudFirestoreHelper
 	{
-		public static NSObject [] GetNSObjects (object [] objects)
+		public static NSObject []? GetNSObjects (object []? objects)
 		{
 			if (objects == null)
 				return null;
@@ -25,21 +25,21 @@ namespace Firebase.CloudFirestore
 	public partial class Firestore
 	{
 		// id  _Nullable (^ _Nonnull)(FIRTransaction * _Nonnull, NSError * _Nullable * _Nullable)
-		public delegate NSObject TransactionUpdateHandler (Transaction transaction, ref NSError error);
+		public delegate NSObject? TransactionUpdateHandler (Transaction transaction, ref NSError? error);
 
 		public void RunTransaction (TransactionUpdateHandler updateHandler, TransactionCompletionHandler completion)
 		{
+			if (updateHandler == null)
+				throw new ArgumentNullException (nameof (updateHandler));
+
 			_RunTransaction (InternalUpdateHandler, completion);
 
-			NSObject InternalUpdateHandler (Transaction transaction, IntPtr pError)
+			NSObject? InternalUpdateHandler (Transaction transaction, IntPtr pError)
 			{
-				if (updateHandler == null)
-					return null;
-
-				NSError error = null;
+				NSError? error = null;
 				var result = updateHandler (transaction, ref error);
 
-				if (error != null)
+				if (pError != IntPtr.Zero && error != null)
 					Marshal.WriteIntPtr (pError, error.Handle);
 
 				return result;
@@ -48,26 +48,26 @@ namespace Firebase.CloudFirestore
 
 		public void RunTransaction (TransactionOptions options, TransactionUpdateHandler updateHandler, TransactionCompletionHandler completion)
 		{
+			if (updateHandler == null)
+				throw new ArgumentNullException (nameof (updateHandler));
+
 			_RunTransaction (options, InternalUpdateHandler, completion);
 
-			NSObject InternalUpdateHandler (Transaction transaction, IntPtr pError)
+			NSObject? InternalUpdateHandler (Transaction transaction, IntPtr pError)
 			{
-				if (updateHandler == null)
-					return null;
-
-				NSError error = null;
+				NSError? error = null;
 				var result = updateHandler (transaction, ref error);
 
-				if (error != null)
+				if (pError != IntPtr.Zero && error != null)
 					Marshal.WriteIntPtr (pError, error.Handle);
 
 				return result;
 			}
 		}
 
-		public Task<NSObject> RunTransactionAsync (TransactionUpdateHandler updateHandler)
+		public Task<NSObject?> RunTransactionAsync (TransactionUpdateHandler updateHandler)
 		{
-			var tcs = new TaskCompletionSource<NSObject> ();
+			var tcs = new TaskCompletionSource<NSObject?> ();
 			RunTransaction (updateHandler, (result_, error_) => {
 				if (error_ != null)
 					tcs.SetException (new NSErrorException (error_));
@@ -77,9 +77,9 @@ namespace Firebase.CloudFirestore
 			return tcs.Task;
 		}
 
-		public Task<NSObject> RunTransactionAsync (TransactionOptions options, TransactionUpdateHandler updateHandler)
+		public Task<NSObject?> RunTransactionAsync (TransactionOptions options, TransactionUpdateHandler updateHandler)
 		{
-			var tcs = new TaskCompletionSource<NSObject> ();
+			var tcs = new TaskCompletionSource<NSObject?> ();
 			RunTransaction (options, updateHandler, (result_, error_) => {
 				if (error_ != null)
 					tcs.SetException (new NSErrorException (error_));
