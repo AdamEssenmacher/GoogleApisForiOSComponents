@@ -8,13 +8,16 @@ namespace Firebase.Core {
 		[DllImport ("__Internal", EntryPoint = "FIRFirebaseVersion")]
 		extern internal static IntPtr _FIRFirebaseVersion ();
 
-		static string firebaseVersion;
+		static string? firebaseVersion;
 		public static string FirebaseVersion {
 			get {
 				if (firebaseVersion == null) {
-
 					IntPtr verStrPtr = _FIRFirebaseVersion ();
-					firebaseVersion = NSString.FromHandle (verStrPtr);
+					if (verStrPtr == IntPtr.Zero)
+						throw new InvalidOperationException ("Unable to resolve FIRFirebaseVersion.");
+
+					firebaseVersion = NSString.FromHandle (verStrPtr)
+						?? throw new InvalidOperationException ("Unable to read FIRFirebaseVersion.");
 				}
 
 				return firebaseVersion;
