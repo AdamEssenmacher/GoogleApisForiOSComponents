@@ -14,8 +14,10 @@ namespace Firebase.Database
 
 		public void SetValues (NSObject [] values)
 		{
-			if (values == null)
+			if (values == null) {
 				_SetValue (null);
+				return;
+			}
 
 			var nsArray = VerifyArray (values);
 
@@ -24,8 +26,10 @@ namespace Firebase.Database
 
 		public void SetValues<T> (T [] values) where T : NSObject
 		{
-			if (values == null)
+			if (values == null) {
 				_SetValue (null);
+				return;
+			}
 
 			var nsArray = VerifyArray (values);
 
@@ -48,8 +52,10 @@ namespace Firebase.Database
 			if (completionHandler == null)
 				throw new ArgumentNullException (nameof (completionHandler));
 
-			if (values == null)
+			if (values == null) {
 				_SetValue (null, completionHandler);
+				return;
+			}
 
 			var nsArray = VerifyArray (values);
 
@@ -66,8 +72,10 @@ namespace Firebase.Database
 
 		public void SetValues (NSObject [] values, NSObject priority)
 		{
-			if (values == null)
+			if (values == null) {
 				_SetValue (null, priority);
+				return;
+			}
 
 			var nsArray = VerifyArray (values);
 
@@ -76,8 +84,10 @@ namespace Firebase.Database
 
 		public void SetValues<T> (T [] values, NSObject priority) where T : NSObject
 		{
-			if (values == null)
+			if (values == null) {
 				_SetValue (null, priority);
+				return;
+			}
 
 			var nsArray = VerifyArray (values);
 
@@ -100,8 +110,10 @@ namespace Firebase.Database
 			if (completionHandler == null)
 				throw new ArgumentNullException (nameof (completionHandler));
 			
-			if (values == null)
-				_SetValue (null, priority);
+			if (values == null) {
+				_SetValue (null, priority, completionHandler);
+				return;
+			}
 
 			var nsArray = VerifyArray (values);
 
@@ -113,8 +125,10 @@ namespace Firebase.Database
 			if (completionHandler == null)
 				throw new ArgumentNullException (nameof (completionHandler));
 
-			if (values == null)
-				_SetValue (null, priority);
+			if (values == null) {
+				_SetValue (null, priority, completionHandler);
+				return;
+			}
 
 			var nsArray = VerifyArray (values);
 
@@ -131,8 +145,10 @@ namespace Firebase.Database
 
 		public void SetValuesOnDisconnect (NSObject [] values)
 		{
-			if (values == null)
+			if (values == null) {
 				_SetValueOnDisconnect (null);
+				return;
+			}
 
 			var nsArray = VerifyArray (values);
 
@@ -141,8 +157,10 @@ namespace Firebase.Database
 
 		public void SetValuesOnDisconnect<T> (T [] values) where T : NSObject
 		{
-			if (values == null)
+			if (values == null) {
 				_SetValueOnDisconnect (null);
+				return;
+			}
 
 			var nsArray = VerifyArray (values);
 
@@ -165,8 +183,10 @@ namespace Firebase.Database
 			if (completionHandler == null)
 				throw new ArgumentNullException (nameof (completionHandler));
 
-			if (values == null)
+			if (values == null) {
 				_SetValueOnDisconnect (null, completionHandler);
+				return;
+			}
 
 			var nsArray = VerifyArray (values);
 
@@ -178,8 +198,10 @@ namespace Firebase.Database
 			if (completionHandler == null)
 				throw new ArgumentNullException (nameof (completionHandler));
 
-			if (values == null)
+			if (values == null) {
 				_SetValueOnDisconnect (null, completionHandler);
+				return;
+			}
 
 			var nsArray = VerifyArray (values);
 
@@ -202,8 +224,10 @@ namespace Firebase.Database
 			if (priority == null)
 				throw new ArgumentNullException (nameof (priority));
 
-			if (values == null)
+			if (values == null) {
 				_SetValueOnDisconnect (null, priority);
+				return;
+			}
 
 			var nsArray = VerifyArray (values);
 
@@ -215,8 +239,10 @@ namespace Firebase.Database
 			if (priority == null)
 				throw new ArgumentNullException (nameof (priority));
 
-			if (values == null)
+			if (values == null) {
 				_SetValueOnDisconnect (null, priority);
+				return;
+			}
 
 			var nsArray = VerifyArray (values);
 
@@ -239,8 +265,10 @@ namespace Firebase.Database
 			if (completionHandler == null)
 				throw new ArgumentNullException (nameof (completionHandler));
 
-			if (values == null)
+			if (values == null) {
 				_SetValueOnDisconnect (null, priority, completionHandler);
+				return;
+			}
 
 			var nsArray = VerifyArray (values);
 
@@ -252,8 +280,10 @@ namespace Firebase.Database
 			if (completionHandler == null)
 				throw new ArgumentNullException (nameof (completionHandler));
 
-			if (values == null)
+			if (values == null) {
 				_SetValueOnDisconnect (null, priority, completionHandler);
+				return;
+			}
 
 			var nsArray = VerifyArray (values);
 
@@ -284,7 +314,7 @@ namespace Firebase.Database
 
 	public partial class DataSnapshot
 	{
-		public NSObject GetValue ()
+		public NSObject? GetValue ()
 		{
 			var ret = _Value;
 			if (ret == IntPtr.Zero)
@@ -294,7 +324,7 @@ namespace Firebase.Database
 			return nsObject;
 		}
 
-		public T GetValue<T> () where T : NSObject
+		public T? GetValue<T> () where T : NSObject
 		{
 			var ret = _Value;
 			if (ret == IntPtr.Zero)
@@ -304,7 +334,7 @@ namespace Firebase.Database
 			return nsObject;
 		}
 
-		public NSObject [] GetValues ()
+		public NSObject []? GetValues ()
 		{
 			var ret = _Value;
 			if (ret == IntPtr.Zero)
@@ -314,7 +344,7 @@ namespace Firebase.Database
 			return objects;
 		}
 
-		public T [] GetValues<T> () where T : NSObject
+		public T []? GetValues<T> () where T : NSObject
 		{
 			var ret = _Value;
 			if (ret == IntPtr.Zero)
@@ -327,7 +357,7 @@ namespace Firebase.Database
 
 	public partial class MutableData
 	{
-		public NSObject GetValue ()
+		public NSObject? GetValue ()
 		{
 			var ret = _Value;
 			if (ret == IntPtr.Zero)
@@ -337,7 +367,7 @@ namespace Firebase.Database
 			return nsObject;
 		}
 
-		public T GetValue<T> () where T : NSObject
+		public T? GetValue<T> () where T : NSObject
 		{
 			var ret = _Value;
 			if (ret == IntPtr.Zero)
@@ -347,7 +377,7 @@ namespace Firebase.Database
 			return nsObject;
 		}
 
-		public NSObject [] GetValues ()
+		public NSObject []? GetValues ()
 		{
 			var ret = _Value;
 			if (ret == IntPtr.Zero)
@@ -357,7 +387,7 @@ namespace Firebase.Database
 			return objects;
 		}
 
-		public T [] GetValues<T> () where T : NSObject
+		public T []? GetValues<T> () where T : NSObject
 		{
 			var ret = _Value;
 			if (ret == IntPtr.Zero)
@@ -377,8 +407,10 @@ namespace Firebase.Database
 
 		public void SetValues (NSObject [] values)
 		{
-			if (values == null)
+			if (values == null) {
 				_Value = IntPtr.Zero;
+				return;
+			}
 
 			var nsArray = VerifyArray (values);
 
@@ -387,8 +419,10 @@ namespace Firebase.Database
 
 		public void SetValues<T> (T [] values) where T : NSObject
 		{
-			if (values == null)
+			if (values == null) {
 				_Value = IntPtr.Zero;
+				return;
+			}
 
 			var nsArray = VerifyArray (values);
 
