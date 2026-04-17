@@ -125,16 +125,23 @@ namespace Firebase.Analytics
 	public partial class Analytics {
 		public static void SetConsent (Dictionary<ConsentType, ConsentStatus> consentSettings)
 		{
+			if (consentSettings == null)
+				throw new ArgumentNullException (nameof (consentSettings));
+
 			var keys = new List<NSString> ();
 			var values = new List<NSString> ();
 
 			foreach (var kv in consentSettings) {
-				keys.Add (global::Firebase.Analytics.ConsentTypeExtensions.GetConstant (kv.Key));
-				values.Add (global::Firebase.Analytics.ConsentStatusExtensions.GetConstant (kv.Value));
+				var key = global::Firebase.Analytics.ConsentTypeExtensions.GetConstant (kv.Key)
+					?? throw new ArgumentOutOfRangeException (nameof (consentSettings), kv.Key, "Unknown consent type.");
+				var value = global::Firebase.Analytics.ConsentStatusExtensions.GetConstant (kv.Value)
+					?? throw new ArgumentOutOfRangeException (nameof (consentSettings), kv.Value, "Unknown consent status.");
+
+				keys.Add (key);
+				values.Add (value);
 			}
 
 			_SetConsent (new NSDictionary<NSString, NSString> (keys.ToArray (), values.ToArray ()));
 		}
 	}
 }
-
