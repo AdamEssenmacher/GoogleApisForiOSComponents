@@ -13,6 +13,7 @@
     <IPhoneResourcePrefix>Resources</IPhoneResourcePrefix>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <CompressBindingResourcePackage>true</CompressBindingResourcePackage>
+    <NoWarn>$(NoWarn);NU1603</NoWarn>
   </PropertyGroup>
   <PropertyGroup>
     <PackageId>AdamE.Google.iOS.AppCheckCore</PackageId>

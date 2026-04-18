@@ -5,6 +5,8 @@ using Foundation;
 using ObjCRuntime;
 using CoreFoundation;
 
+#pragma warning disable CS8632 // BGen compiles API definitions outside the project nullable context.
+
 namespace Firebase.CloudFirestore
 {
 	// void (^ _Nullable)(NSError * _Nullable)

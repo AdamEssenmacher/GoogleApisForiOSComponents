@@ -10,6 +10,16 @@ indent_size = 2
 [*.cs]
 max_line_length = 120
 
+# Firebase generated/binding warning suppressions
+[source/Firebase/CloudFirestore/Extensions.cs]
+dotnet_diagnostic.CS8621.severity = none
+
+[source/Firebase/CloudFirestore/obj/**/Firebase.CloudFirestore/*.g.cs]
+dotnet_diagnostic.CS8604.severity = none
+
+[source/Firebase/Database/obj/**/Firebase.Database/DatabaseQuery.g.cs]
+dotnet_diagnostic.CS0109.severity = none
+
 #### Core EditorConfig Options ####
 
 # Indentation and spacing
