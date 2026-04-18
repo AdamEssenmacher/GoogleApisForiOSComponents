@@ -8,7 +8,7 @@ This repo builds .NET iOS/macOS bindings and NuGet packages using Cake.
 - Xcode (matching the installed iOS workload requirements)
 - CocoaPods (`pod`)
 
-Restore the local Cake tool (any version `< 1.0` should work):
+Restore the local Cake tool from the checked-in .NET tool manifest:
 
 ```sh
 dotnet tool restore
