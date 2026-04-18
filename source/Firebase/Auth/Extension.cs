@@ -13,12 +13,12 @@ namespace Firebase.Auth
 						throw new InvalidOperationException ("Unable to open the main program handle.");
 
 					try {
-						IntPtr ptr = Dlfcn.dlsym (RTLD_MAIN_ONLY, "FirebaseAuthVersionStr");
+						IntPtr ptr = Dlfcn.dlsym (RTLD_MAIN_ONLY, "FirebaseAuthVersionString");
 						if (ptr == IntPtr.Zero)
-							throw new InvalidOperationException ("Unable to resolve FirebaseAuthVersionStr.");
+							throw new InvalidOperationException ("Unable to resolve FirebaseAuthVersionString.");
 
 						currentVersion = Marshal.PtrToStringAnsi (ptr)
-							?? throw new InvalidOperationException ("Unable to read FirebaseAuthVersionStr.");
+							?? throw new InvalidOperationException ("Unable to read FirebaseAuthVersionString.");
 					} finally {
 						Dlfcn.dlclose (RTLD_MAIN_ONLY);
 					}

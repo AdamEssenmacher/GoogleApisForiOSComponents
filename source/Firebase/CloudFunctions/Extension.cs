@@ -12,12 +12,12 @@ namespace Firebase.CloudFunctions {
 						throw new InvalidOperationException ("Unable to open the main program handle.");
 
 					try {
-						IntPtr ptr = Dlfcn.dlsym (RTLD_MAIN_ONLY, "FirebaseCloudFunctionsVersionStr");
+						IntPtr ptr = Dlfcn.dlsym (RTLD_MAIN_ONLY, "FirebaseFunctionsVersionString");
 						if (ptr == IntPtr.Zero)
-							throw new InvalidOperationException ("Unable to resolve FirebaseCloudFunctionsVersionStr.");
+							throw new InvalidOperationException ("Unable to resolve FirebaseFunctionsVersionString.");
 
 						currentVersion = Marshal.PtrToStringAnsi (ptr)
-							?? throw new InvalidOperationException ("Unable to read FirebaseCloudFunctionsVersionStr.");
+							?? throw new InvalidOperationException ("Unable to read FirebaseFunctionsVersionString.");
 					} finally {
 						Dlfcn.dlclose (RTLD_MAIN_ONLY);
 					}
