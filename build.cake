@@ -1,7 +1,3 @@
-#addin nuget:?package=Cake.XCode&version=4.2.0
-#addin nuget:?package=Cake.Xamarin.Build&version=4.1.1
-#addin nuget:?package=Cake.FileHelpers&version=3.2.0
-
 #load "poco.cake"
 #load "components.cake"
 #load "common.cake"
@@ -55,9 +51,6 @@ void BuildCake (string target)
 	// Run the script from the subfolder
 	CakeExecuteScript ("./build.cake", cakeSettings);
 }
-
-// From Cake.Xamarin.Build, dumps out versions of things
-// LogSystemInfo ();
 
 Setup (context =>
 {
@@ -175,9 +168,9 @@ Task ("libs")
 	.IsDependentOn("ci-setup")
 	.Does(() =>
 {
-	var dotNetCoreBuildSettings = new DotNetCoreBuildSettings { 
+	var dotNetBuildSettings = new DotNetBuildSettings {
 		Configuration = "Release",
-		Verbosity = DotNetCoreVerbosity.Diagnostic,
+		Verbosity = DotNetVerbosity.Diagnostic,
 		NoRestore = false
 	};
 	
@@ -185,7 +178,7 @@ Task ("libs")
 	foreach (var artifact in ARTIFACTS_TO_BUILD) {
 		var csprojPath = $"./source/{artifact.ComponentGroup}/{artifact.CsprojName}/{artifact.CsprojName}.csproj";
 		Information ($"Building: {csprojPath}");
-		DotNetCoreBuild(csprojPath, dotNetCoreBuildSettings);
+		DotNetBuild(csprojPath, dotNetBuildSettings);
 	}
 });
 
@@ -193,14 +186,14 @@ Task ("samples")
 	.IsDependentOn("libs")
 	.Does(() =>
 {
-	var msBuildSettings = new DotNetCoreMSBuildSettings ();
+	var msBuildSettings = new DotNetMSBuildSettings ();
 	msBuildSettings.Properties ["Platform"] = new [] { "iPhoneSimulator" };
 	msBuildSettings.Properties ["RuntimeIdentifier"] = new [] { GetDefaultiOSSimulatorRuntimeIdentifier () };
 	msBuildSettings.Properties ["EnableCodeSigning"] = new [] { "false" };
 
-	var dotNetCoreBuildSettings = new DotNetCoreBuildSettings { 
+	var dotNetBuildSettings = new DotNetBuildSettings {
 		Configuration = "Release",
-		Verbosity = DotNetCoreVerbosity.Diagnostic,
+		Verbosity = DotNetVerbosity.Diagnostic,
 		NoRestore = false,
 		MSBuildSettings = msBuildSettings
 	};
@@ -213,7 +206,7 @@ Task ("samples")
 			var samplePath = $"./samples/{artifact.ComponentGroup}/{sample}/{sample}.csproj";
 			if (FileExists(samplePath)) {
 				Information ($"Building sample: {samplePath}");
-				DotNetCoreBuild(samplePath, dotNetCoreBuildSettings);
+				DotNetBuild(samplePath, dotNetBuildSettings);
 			}
 		}
 	}
@@ -225,19 +218,19 @@ Task ("nuget")
 {
 	EnsureDirectoryExists("./output/");
 
-	var dotNetCorePackSettings = new DotNetCorePackSettings {
+	var dotNetPackSettings = new DotNetPackSettings {
 		Configuration = "Release",
 		NoRestore = true,
 		NoBuild = true,
 		OutputDirectory = "./output/",
-		Verbosity = DotNetCoreVerbosity.Diagnostic,
+		Verbosity = DotNetVerbosity.Diagnostic,
 	};
 
 	// Pack each artifact's csproj directly
 	foreach (var artifact in ARTIFACTS_TO_BUILD) {
 		var csprojPath = $"./source/{artifact.ComponentGroup}/{artifact.CsprojName}/{artifact.CsprojName}.csproj";
 		Information ($"Packing: {csprojPath}");
-		DotNetCorePack(csprojPath, dotNetCorePackSettings);
+		DotNetPack(csprojPath, dotNetPackSettings);
 	}
 });
 

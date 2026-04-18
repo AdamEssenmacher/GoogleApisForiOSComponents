@@ -13,6 +13,122 @@ var PODFILE_END = new [] {
 	"end",
 };
 
+class XCodeBuildSettings
+{
+	public bool Archive { get; set; }
+	public string ArchivePath { get; set; }
+	public string Arch { get; set; }
+	public Dictionary<string, string> BuildSettings { get; set; }
+	public bool Clean { get; set; }
+	public string Configuration { get; set; }
+	public string Project { get; set; }
+	public string Scheme { get; set; }
+	public string Sdk { get; set; }
+	public string Target { get; set; }
+	public bool Verbose { get; set; }
+}
+
+string QuoteArgument (string value)
+	=> "\"" + value.Replace ("\"", "\\\"") + "\"";
+
+void ThrowIfProcessFailed (string tool, int exitCode)
+{
+	if (exitCode != 0)
+		throw new Exception ($"{tool} failed with exit code {exitCode}.");
+}
+
+void CocoaPodRepoUpdate ()
+{
+	var args = new ProcessArgumentBuilder ();
+	args.Append ("repo");
+	args.Append ("update");
+
+	ThrowIfProcessFailed ("pod repo update", StartProcess ("pod", new ProcessSettings { Arguments = args }));
+}
+
+void CocoaPodInstall (DirectoryPath projectDirectory)
+{
+	var args = new ProcessArgumentBuilder ();
+	args.Append ("install");
+	args.Append ("--project-directory=" + QuoteArgument (MakeAbsolute (projectDirectory).FullPath));
+
+	ThrowIfProcessFailed ("pod install", StartProcess ("pod", new ProcessSettings { Arguments = args }));
+}
+
+void XCodeBuild (XCodeBuildSettings settings)
+{
+	var args = new ProcessArgumentBuilder ();
+
+	if (settings.Verbose)
+		args.Append ("-verbose");
+	if (!string.IsNullOrWhiteSpace (settings.Project))
+		args.Append ($"-project {QuoteArgument (settings.Project)}");
+	if (!string.IsNullOrWhiteSpace (settings.Target))
+		args.Append ($"-target {QuoteArgument (settings.Target)}");
+	if (!string.IsNullOrWhiteSpace (settings.Scheme))
+		args.Append ($"-scheme {QuoteArgument (settings.Scheme)}");
+	if (!string.IsNullOrWhiteSpace (settings.Configuration))
+		args.Append ($"-configuration {QuoteArgument (settings.Configuration)}");
+	if (!string.IsNullOrWhiteSpace (settings.Arch))
+		args.Append ($"-arch {QuoteArgument (settings.Arch)}");
+	if (!string.IsNullOrWhiteSpace (settings.Sdk))
+		args.Append ($"-sdk {QuoteArgument (settings.Sdk)}");
+	if (!string.IsNullOrWhiteSpace (settings.ArchivePath))
+		args.Append ($"-archivePath {QuoteArgument (MakeAbsolute ((DirectoryPath)settings.ArchivePath).FullPath)}");
+
+	args.Append (settings.Archive ? "archive" : "build");
+
+	if (settings.Clean)
+		args.Append ("clean");
+
+	if (settings.BuildSettings != null)
+		foreach (var buildSetting in settings.BuildSettings)
+			args.Append ($"{buildSetting.Key}={buildSetting.Value}");
+
+	ThrowIfProcessFailed ("xcodebuild", StartProcess ("xcodebuild", new ProcessSettings { Arguments = args }));
+}
+
+void RunLipoCreate (DirectoryPath workingDirectory, string output, params FilePath[] inputs)
+	=> RunLipoCreate (workingDirectory, (FilePath)output, inputs);
+
+void RunLipoCreate (DirectoryPath workingDirectory, FilePath output, params FilePath[] inputs)
+{
+	if (!IsRunningOnUnix ()) {
+		Warning("{0} is not available on the current platform.", "lipo");
+		return;
+	}
+
+	var args = new ProcessArgumentBuilder ();
+	args.Append ("-create");
+	args.Append ("-output");
+	args.AppendQuoted (output.ToString ());
+
+	foreach (var input in inputs)
+		args.AppendQuoted (input.ToString ());
+
+	ThrowIfProcessFailed ("lipo", StartProcess ("lipo", new ProcessSettings {
+		Arguments = args,
+		WorkingDirectory = workingDirectory
+	}));
+}
+
+void FileWriteLines (FilePath path, string[] lines)
+{
+	System.IO.File.WriteAllLines (MakeAbsolute (path).FullPath, lines);
+}
+
+void ReplaceTextInFiles (string glob, string oldValue, string newValue)
+{
+	foreach (var file in GetFiles (glob)) {
+		var path = MakeAbsolute (file).FullPath;
+		var text = System.IO.File.ReadAllText (path);
+		var updatedText = text.Replace (oldValue, newValue);
+
+		if (!string.Equals (text, updatedText, StringComparison.Ordinal))
+			System.IO.File.WriteAllText (path, updatedText);
+	}
+}
+
 void CopyDirectoryWithSymlinks (DirectoryPath source, DirectoryPath destination)
 {
 	if (DirectoryExists (destination)) {
