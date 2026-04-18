@@ -144,8 +144,6 @@ These projects exist in this repository, but I could not confirm current nuget.o
 - `AdamE.MLKit.iOS.TextRecognition.Latin` is present in `source/` at `1.4.0.3`, but is not currently published on nuget.org.
 - `AdamE.MLKit.iOS.Vision` is present in `source/` at `3.0.0`, but is not currently published on nuget.org.
 
-Older Xamarin-era package lines are also retained under `deprecated/` for reference.
-
 ## Troubleshooting
 
 ### Duplicate native dependency conflicts
