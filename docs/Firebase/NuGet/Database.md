@@ -107,9 +107,9 @@ Example:
 
 ```xml
 <ItemGroup>
-  <PackageReference Include="AdamE.Firebase.iOS.Core" Version="12.6.0.3" />
-  <PackageReference Include="AdamE.Firebase.iOS.Auth" Version="12.6.0.2" />
-  <PackageReference Include="AdamE.Firebase.iOS.CloudFirestore" Version="12.6.0.5" />
+  <PackageReference Include="AdamE.Firebase.iOS.Core" Version="12.6.0" />
+  <PackageReference Include="AdamE.Firebase.iOS.Auth" Version="12.6.0" />
+  <PackageReference Include="AdamE.Firebase.iOS.CloudFirestore" Version="12.6.0" />
 </ItemGroup>
 ```
 
