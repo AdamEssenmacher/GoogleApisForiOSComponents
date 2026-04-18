@@ -50,7 +50,7 @@ If your project targets multiple platforms, keep these packages inside Apple-onl
 
 ```xml
 <ItemGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">
-  <PackageReference Include="AdamE.Firebase.iOS.Core" Version="12.5.0.4" />
+  <PackageReference Include="AdamE.Firebase.iOS.Core" Version="12.6.0" />
 </ItemGroup>
 ```
 
@@ -74,26 +74,30 @@ Archiving can still be more reliable on macOS or from the command line.
 
 The lists below reflect what is currently published on [nuget.org](https://www.nuget.org/profiles/adamessenmacher) under the `adamessenmacher` owner profile. That is intentionally different from the repo state in [`components.cake`](components.cake): the repo can contain projects or version bumps that have not been published yet.
 
+Firebase `12.6.0` is the current published Firebase package line.
+
 ### Currently published on nuget.org
 
 #### Firebase packages (`AdamE.Firebase.iOS.*`)
 
 | Package | Version |
 | --- | --- |
-| `ABTesting` | `12.5.0.4` |
-| `Analytics` | `12.5.0.4` |
-| `AppCheck` | `12.5.0.4` |
-| `Auth` | `12.5.0.4` |
-| `CloudFirestore` | `12.5.0.4` |
-| `CloudFunctions` | `12.5.0.4` |
-| `CloudMessaging` | `12.5.0.4` |
-| `Core` | `12.5.0.4` |
-| `Crashlytics` | `12.5.0.4` |
-| `Database` | `12.5.0.4` |
-| `Installations` | `12.5.0.4` |
-| `PerformanceMonitoring` | `12.5.0.4` |
-| `RemoteConfig` | `12.5.0.4` |
-| `Storage` | `12.5.0.4` |
+| `ABTesting` | `12.6.0` |
+| `Analytics` | `12.6.0` |
+| `AppCheck` | `12.6.0` |
+| `AppDistribution` | `12.6.0` |
+| `Auth` | `12.6.0` |
+| `CloudFirestore` | `12.6.0` |
+| `CloudFunctions` | `12.6.0` |
+| `CloudMessaging` | `12.6.0` |
+| `Core` | `12.6.0` |
+| `Crashlytics` | `12.6.0` |
+| `Database` | `12.6.0` |
+| `InAppMessaging` | `12.6.0` |
+| `Installations` | `12.6.0` |
+| `PerformanceMonitoring` | `12.6.0` |
+| `RemoteConfig` | `12.6.0` |
+| `Storage` | `12.6.0` |
 
 #### Google packages (`AdamE.Google.iOS.*`)
 
@@ -110,7 +114,7 @@ These packages are usually consumed transitively rather than referenced directly
 | Package | Version |
 | --- | --- |
 | `AppCheckCore` | `11.2.0` |
-| `GoogleAppMeasurement` | `12.5.0.4` |
+| `GoogleAppMeasurement` | `12.6.0` |
 | `GoogleDataTransport` | `10.1.0.5` |
 | `GoogleUtilities` | `8.1.0.3` |
 | `Nanopb` | `3.30910.0.5` |
@@ -134,8 +138,6 @@ These packages are still published on nuget.org, but they are not part of the cu
 
 These projects exist in this repository, but I could not confirm current nuget.org packages for them under the `AdamE.*` package names:
 
-- `AdamE.Firebase.iOS.AppDistribution` is present in `source/` at `8.10.0`, but is not currently published on nuget.org.
-- `AdamE.Firebase.iOS.InAppMessaging` is present in `source/` at `8.10.0.3`, but is not currently published on nuget.org.
 - `AdamE.Google.iOS.Analytics`, `Cast`, `MobileAds`, `TagManager`, and `UserMessagingPlatform` are present in `source/`, but are not listed in the current nuget.org package set.
 - `AdamE.MLKit.iOS.DigitalInkRecognition`, `FaceDetection`, `ImageLabeling`, and `ObjectDetection` are present in `source/` at `1.5.0`, but are not currently published on nuget.org.
 - `AdamE.MLKit.iOS.TextRecognition`, `TextRecognition.Chinese`, `TextRecognition.Devanagari`, `TextRecognition.Japanese`, and `TextRecognition.Korean` are present in `source/` at `1.0.0.3`, but are not currently published on nuget.org.
