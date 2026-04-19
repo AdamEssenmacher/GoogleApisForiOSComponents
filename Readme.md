@@ -230,7 +230,7 @@ These packages are still published on nuget.org, but they are not part of the cu
 
 These projects exist in this repository, but I could not confirm current nuget.org packages for them under the `AdamE.*` package names:
 
-- `AdamE.Google.iOS.Analytics`, `Cast`, `MobileAds`, `TagManager`, and `UserMessagingPlatform` are present in `source/`, but are not listed in the current nuget.org package set.
+- `AdamE.Google.iOS.Analytics`, `Cast`, `TagManager`, and `UserMessagingPlatform` are present in `source/`, but are not listed in the current nuget.org package set.
 - `AdamE.MLKit.iOS.DigitalInkRecognition`, `FaceDetection`, `ImageLabeling`, and `ObjectDetection` are present in `source/` at `1.5.0`, but are not currently published on nuget.org.
 - `AdamE.MLKit.iOS.TextRecognition`, `TextRecognition.Chinese`, `TextRecognition.Devanagari`, `TextRecognition.Japanese`, and `TextRecognition.Korean` are present in `source/` at `1.0.0.3`, but are not currently published on nuget.org.
 - `AdamE.MLKit.iOS.TextRecognition.Latin` is present in `source/` at `1.4.0.3`, but is not currently published on nuget.org.

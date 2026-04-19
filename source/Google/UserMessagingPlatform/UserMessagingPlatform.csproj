@@ -22,7 +22,6 @@
     <Authors>Microsoft, Adam Essenmacher</Authors>
     <Owners>Adam Essenmacher</Owners>
     <Copyright>© Microsoft Corporation. All rights reserved. © 2024, Adam Essenmacher.</Copyright>
-    <PackageIcon>googleiosmobileads_128x128.png</PackageIcon>
     <PackageProjectUrl>https://github.com/AdamEssenmacher/GoogleApisForiOSComponents</PackageProjectUrl>
     <PackageLicenseFile>License.md</PackageLicenseFile>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
@@ -39,7 +38,6 @@
     <None Include="UserMessagingPlatform.targets" Pack="True" PackagePath="buildTransitive/AdamE.Google.iOS.UserMessagingPlatform.targets" />
     <None Include="External-Dependency-Info.txt" Pack="True" PackagePath="THIRD-PARTY-NOTICES.txt" />
     <None Include="License.md" Pack="True" PackagePath="License.md" />
-    <None Include="../../../icons/googleiosmobileads_128x128.png" Pack="True" PackagePath="googleiosmobileads_128x128.png" />
   </ItemGroup>
   <ItemGroup>
     <ObjcBindingApiDefinition Include="Enums.cs" />

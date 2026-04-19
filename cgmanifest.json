@@ -193,15 +193,6 @@
 			"Component": {
 				"Type": "Pod",
 				"Pod": {
-					"Name": "Google-Mobile-Ads-SDK",
-					"Version": "8.13.0"
-				}
-			}
-		},
-		{
-			"Component": {
-				"Type": "Pod",
-				"Pod": {
 					"Name": "GoogleUserMessagingPlatform",
 					"Version": "1.1.0"
 				}
