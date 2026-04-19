@@ -18,21 +18,19 @@ This repo primarily contains:
 
 * **Bindings** (C# API surface + native frameworks packaged into NuGet)
 * **Build automation** (Cake scripts that fetch/build Pods and pack NuGets)
-* **Samples** (small apps to validate the bindings work end-to-end)
 * **Docs** (how to build, validate, publish)
 
 Most contributions fall into one of these buckets:
 
-* **Docs-only**: clarify setup, sample configuration, gotchas.
-* **Dependency bumps**: update a Pod version (and any required transitive Pods), then ensure the binding still packs and the sample still builds.
+* **Docs-only**: clarify setup, configuration, gotchas.
+* **Dependency bumps**: update a Pod version (and any required transitive Pods), then ensure the binding still packs.
 * **Binding fixes**: API surface adjustments, linker/NativeReference fixes, or changes needed after a native SDK update.
 
 ## Repository orientation (quick map)
 
-* `components.cake`: component definitions (Pod specs, sample names, dependency graph).
+* `components.cake`: component definitions (Pod specs, dependency graph).
 * `externals/`: generated/native artifacts produced from Pods (created by the build).
 * `source/`: binding projects (what becomes NuGet packages).
-* `samples/`: sample apps that reference the bindings.
 * `.github/workflows/`: CI validation and publishing.
 
 ## Common pitfalls with iOS bindings
@@ -73,9 +71,8 @@ At minimum, validate the component(s) you touched:
 
 * `dotnet tool restore`
 * `dotnet tool run dotnet-cake -- --target=nuget --names=<ComponentName>`
-* `dotnet tool run dotnet-cake -- --target=samples --names=<ComponentName>`
 
 Also:
 
-* Keep samples and docs **generic** (no app-specific context).
+* Keep docs **generic** (no app-specific context).
 * Do not commit secrets or service configuration files; prefer `.template` files and document the required local steps.

@@ -155,66 +155,6 @@ public void UpdateNuspecDependencyVersion (GoogleBase component)
 	}
 }
 
-// This method is only called if we are updating XBD
-// Updates XBD's version in all packages.config files of component's samples
-public void UpdateSamplesPackagesConfigVersion (GoogleBase component)
-{
-	foreach	(var name in component.BaseOf) {
-		// A component could have more than one sample, so, 
-		// we need to iterate through all of sample's packages.config
-		var packagesPaths = GetFiles ($"./{name}/samples/**/packages.config");
-
-		foreach (var packagePath in packagesPaths) {
-			Information ($"Updating {component.Name} version in packages.config file of {name} sample component.");
-			XmlPoke (packagePath, $"/packages/package[@id='{component.Name}']/@version", component.NewVersion);
-		}
-	}
-}
-
-// This method is only called if we are updating XBD
-// Updates XBD's version in all .csproj files of component's samples
-public void UpdateCsprojVersion (GoogleBase component)
-{
-	// Xml .csproj has Namespaces, we need to pass the namespaces
-	// to XPath to be able to find the desired node.
-	var xmlPeekSettings = new XmlPeekSettings {
-		Namespaces = new Dictionary<string, string> { { "Project", "http://schemas.microsoft.com/developer/msbuild/2003" } }
-	};
-	var xmlPokeSettings = new XmlPokeSettings {
-		Namespaces = new Dictionary<string, string> { { "Project", "http://schemas.microsoft.com/developer/msbuild/2003" } }
-	};
-	
-	foreach	(var name in component.BaseOf) {
-		// A component could have more than one sample, so, 
-		// we need to iterate through all of sample's .csproj
-		var csprojPaths = GetFiles ($"./{name}/samples/**/*.csproj");
-
-		foreach (var csprojPath in csprojPaths) {
-			Information ($"Updating {component.Name} version in .csproj file of {name} sample component.");
-
-			var result = XmlPeek (csprojPath, $"/Project:Project/Project:Import[contains(@Project, '{component.Name}.props')]/@Project", xmlPeekSettings);
-			var parts = result.Split (new [] { component.CurrentVersion }, StringSplitOptions.RemoveEmptyEntries);
-			var newValue = string.Join (component.NewVersion, parts);
-			XmlPoke (csprojPath, $"/Project:Project/Project:Import[contains(@Project, '{component.Name}.props')]/@Project", newValue, xmlPokeSettings);
-
-			result = XmlPeek (csprojPath, $"/Project:Project/Project:Import[contains(@Project, '{component.Name}.props')]/@Condition", xmlPeekSettings);
-			parts = result.Split (new [] { component.CurrentVersion }, StringSplitOptions.RemoveEmptyEntries);
-			newValue = string.Join (component.NewVersion, parts);
-			XmlPoke (csprojPath, $"/Project:Project/Project:Import[contains(@Project, '{component.Name}.props')]/@Condition", newValue, xmlPokeSettings);
-
-			result = XmlPeek (csprojPath, $"/Project:Project/Project:Import[contains(@Project, '{component.Name}.targets')]/@Project", xmlPeekSettings);
-			parts = result.Split (new [] { component.CurrentVersion }, StringSplitOptions.RemoveEmptyEntries);
-			newValue = string.Join (component.NewVersion, parts);
-			XmlPoke (csprojPath, $"/Project:Project/Project:Import[contains(@Project, '{component.Name}.targets')]/@Project", newValue, xmlPokeSettings);
-
-			result = XmlPeek (csprojPath, $"/Project:Project/Project:Import[contains(@Project, '{component.Name}.targets')]/@Condition", xmlPeekSettings);
-			parts = result.Split (new [] { component.CurrentVersion }, StringSplitOptions.RemoveEmptyEntries);
-			newValue = string.Join (component.NewVersion, parts);
-			XmlPoke (csprojPath, $"/Project:Project/Project:Import[contains(@Project, '{component.Name}.targets')]/@Condition", newValue, xmlPokeSettings);
-		}
-	}
-}
-
 public void UpdateComponentVersion (Dictionary<string, GoogleBase> components, string componentName, bool bumpDependents)
 {
 	var message = $"Working on {componentName} component";
@@ -227,11 +167,6 @@ public void UpdateComponentVersion (Dictionary<string, GoogleBase> components, s
 	UpdateYamlVersions (component);
 	UpdateNuspecMainVersion (component);
 	UpdateNuspecDependencyVersion (component);
-
-	if (component is Xamarin.Build.Download) {
-		UpdateSamplesPackagesConfigVersion (component);
-		UpdateCsprojVersion (component);
-	}
 
 	if (!bumpDependents)
 		return;

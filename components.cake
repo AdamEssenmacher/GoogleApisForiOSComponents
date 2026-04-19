@@ -102,18 +102,18 @@ void SetArtifactsDependencies ()
 {
 	FIREBASE_AB_TESTING_ARTIFACT.Dependencies              = new [] { FIREBASE_CORE_ARTIFACT };
 	FIREBASE_ANALYTICS_ARTIFACT.Dependencies               = new [] { FIREBASE_CORE_ARTIFACT, FIREBASE_INSTALLATIONS_ARTIFACT, GOOGLE_GOOGLE_APP_MEASUREMENT_ARTIFACT };
-	FIREBASE_AUTH_ARTIFACT.Dependencies                    = new [] { FIREBASE_CORE_ARTIFACT, GOOGLE_GTM_SESSION_FETCHER_ARTIFACT /* Needed for sample GOOGLE_SIGN_IN_ARTIFACT */ };
-	FIREBASE_CLOUD_FIRESTORE_ARTIFACT.Dependencies         = new [] { FIREBASE_CORE_ARTIFACT, /* Needed for sample */ FIREBASE_AUTH_ARTIFACT };
+	FIREBASE_AUTH_ARTIFACT.Dependencies                    = new [] { FIREBASE_CORE_ARTIFACT, GOOGLE_GTM_SESSION_FETCHER_ARTIFACT };
+	FIREBASE_CLOUD_FIRESTORE_ARTIFACT.Dependencies         = new [] { FIREBASE_CORE_ARTIFACT, FIREBASE_AUTH_ARTIFACT };
 	FIREBASE_CLOUD_FUNCTIONS_ARTIFACT.Dependencies         = new [] { FIREBASE_CORE_ARTIFACT, GOOGLE_GTM_SESSION_FETCHER_ARTIFACT };
 	FIREBASE_CLOUD_MESSAGING_ARTIFACT.Dependencies         = new [] { FIREBASE_CORE_ARTIFACT, FIREBASE_INSTALLATIONS_ARTIFACT };
 	FIREBASE_CORE_ARTIFACT.Dependencies                    = new [] { GOOGLE_GOOGLE_DATA_TRANSPORT_ARTIFACT, GOOGLE_GOOGLE_UTILITIES_ARTIFACT, GOOGLE_NANOPB_ARTIFACT, GOOGLE_PROMISES_OBJC_ARTIFACT};
 	FIREBASE_CRASHLYTICS_ARTIFACT.Dependencies             = new [] { FIREBASE_CORE_ARTIFACT, FIREBASE_INSTALLATIONS_ARTIFACT };
-	FIREBASE_DATABASE_ARTIFACT.Dependencies                = new [] { FIREBASE_CORE_ARTIFACT, /* Needed for sample FIREBASE_AUTH_ARTIFACT */ };
+	FIREBASE_DATABASE_ARTIFACT.Dependencies                = new [] { FIREBASE_CORE_ARTIFACT };
 	FIREBASE_IN_APP_MESSAGING_ARTIFACT.Dependencies        = new [] { FIREBASE_CORE_ARTIFACT, FIREBASE_INSTALLATIONS_ARTIFACT, FIREBASE_AB_TESTING_ARTIFACT };
 	FIREBASE_INSTALLATIONS_ARTIFACT.Dependencies           = new [] { FIREBASE_CORE_ARTIFACT };
 	FIREBASE_PERFORMANCE_MONITORING_ARTIFACT.Dependencies  = new [] { FIREBASE_CORE_ARTIFACT, FIREBASE_INSTALLATIONS_ARTIFACT, FIREBASE_AB_TESTING_ARTIFACT, FIREBASE_REMOTE_CONFIG_ARTIFACT };
 	FIREBASE_REMOTE_CONFIG_ARTIFACT.Dependencies           = new [] { FIREBASE_CORE_ARTIFACT, FIREBASE_INSTALLATIONS_ARTIFACT, FIREBASE_AB_TESTING_ARTIFACT };
-	FIREBASE_STORAGE_ARTIFACT.Dependencies                 = new [] { FIREBASE_CORE_ARTIFACT, FIREBASE_DATABASE_ARTIFACT, GOOGLE_GTM_SESSION_FETCHER_ARTIFACT /* Needed for sample FIREBASE_AUTH_ARTIFACT */ };
+	FIREBASE_STORAGE_ARTIFACT.Dependencies                 = new [] { FIREBASE_CORE_ARTIFACT, FIREBASE_DATABASE_ARTIFACT, GOOGLE_GTM_SESSION_FETCHER_ARTIFACT };
 	FIREBASE_APP_DISTRIBUTION_ARTIFACT.Dependencies        = new [] { FIREBASE_CORE_ARTIFACT, FIREBASE_INSTALLATIONS_ARTIFACT };
 	FIREBASE_APP_CHECK_ARTIFACT.Dependencies               = new [] { FIREBASE_CORE_ARTIFACT, FIREBASE_INSTALLATIONS_ARTIFACT, GOOGLE_APP_CHECK_CORE_ARTIFACT };
 
@@ -405,37 +405,4 @@ void SetArtifactsExtraPodfileLines ()
 	inAppMessagingLines.AddRange (inAppMessagingWorkaround);
 
 	FIREBASE_IN_APP_MESSAGING_ARTIFACT.ExtraPodfileLines = inAppMessagingLines.ToArray ();
-}
-
-void SetArtifactsSamples ()
-{
-	// Firebase components
-	FIREBASE_AB_TESTING_ARTIFACT.Samples              = null;
-	FIREBASE_ANALYTICS_ARTIFACT.Samples               = new [] { "AnalyticsSample" };
-	FIREBASE_AUTH_ARTIFACT.Samples                    = new [] { "AuthSample" };
-	FIREBASE_CLOUD_FIRESTORE_ARTIFACT.Samples         = new [] { "CloudFirestoreSample" };
-	FIREBASE_CLOUD_FUNCTIONS_ARTIFACT.Samples         = new [] { "CloudFunctionsSample" };
-	FIREBASE_CLOUD_MESSAGING_ARTIFACT.Samples         = new [] { "CloudMessagingSample" };
-	FIREBASE_CORE_ARTIFACT.Samples                    = null;
-	FIREBASE_CRASHLYTICS_ARTIFACT.Samples             = new [] { "CrashlyticsSample" };
-	FIREBASE_DATABASE_ARTIFACT.Samples                = new [] { "DatabaseSample" };
-	//FIREBASE_IN_APP_MESSAGING_ARTIFACT.Samples        = new [] { "InAppMessagingSample" };
-	FIREBASE_INSTALLATIONS_ARTIFACT.Samples           = null;
-	FIREBASE_PERFORMANCE_MONITORING_ARTIFACT.Samples  = new [] { "PerformanceMonitoringSample" };
-	FIREBASE_REMOTE_CONFIG_ARTIFACT.Samples           = new [] { "RemoteConfigSample" };
-	FIREBASE_STORAGE_ARTIFACT.Samples                 = new [] { "StorageSample" };
-	FIREBASE_APP_DISTRIBUTION_ARTIFACT.Samples        = null;
-	FIREBASE_APP_CHECK_ARTIFACT.Samples                = new [] { "AppCheckSample" };
-
-	// Google components
-	GOOGLE_ANALYTICS_ARTIFACT.Samples                 = new [] { "AnalyticsSample" };
-	GOOGLE_CAST_ARTIFACT.Samples                      = new [] { "CastSample" };
-	GOOGLE_MAPS_ARTIFACT.Samples                      = new [] { "GoogleMapsSample" };
-	GOOGLE_MOBILE_ADS_ARTIFACT.Samples                = new [] { "MobileAdsExample" };
-	GOOGLE_PLACES_ARTIFACT.Samples                    = new [] { "GooglePlacesSample" };
-	GOOGLE_SIGN_IN_ARTIFACT.Samples                   = new [] { "SignInExample" };
-	GOOGLE_TAG_MANAGER_ARTIFACT.Samples               = new [] { "TagManagerSample" };
-
-	// MLKit
-	MLKIT_VISION.Samples                              = new [] { "MLKitVisionSample" };
 }

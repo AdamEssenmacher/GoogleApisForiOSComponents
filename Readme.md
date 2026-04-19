@@ -8,7 +8,7 @@ This repository is a community-supported continuation of the Xamarin Google/Fire
 
 The goal is to give .NET for iOS and Mac Catalyst developers a common binding baseline for Google, Firebase, and ML Kit native SDKs. That helps downstream libraries share the same native dependencies instead of each shipping incompatible copies of overlapping xcframeworks.
 
-This repo contains the binding projects, Cake build automation, documentation, and sample apps used to build and validate those packages.
+This repo contains the binding projects, Cake build automation, and documentation used to build and validate those packages.
 
 ## Quick links
 
@@ -166,7 +166,7 @@ If package extraction appears to be failing on Windows, see [this issue comment]
 
 ## Contributing and support
 
-Pull requests are welcome, especially for stale bindings, dependency updates, docs improvements, and sample fixes. For anything non-trivial, please open an issue or discussion first so we can align on the approach before you spend time on build tooling or binding surface changes.
+Pull requests are welcome, especially for stale bindings, dependency updates, docs improvements, and build fixes. For anything non-trivial, please open an issue or discussion first so we can align on the approach before you spend time on build tooling or binding surface changes.
 
 For contributor workflow details, see [CONTRIBUTING.md](CONTRIBUTING.md) and [docs/BUILDING.md](docs/BUILDING.md).
 

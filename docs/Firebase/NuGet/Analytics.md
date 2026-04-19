@@ -87,7 +87,7 @@ Analytics.SetUserId("user-123");
 
 Firebase apps commonly require app-specific configuration from your own Firebase project, such as `GoogleService-Info.plist`.
 
-Keep app-specific Firebase configuration in the application project or sample app, not in reusable library projects.
+Keep app-specific Firebase configuration in application projects, not in reusable library projects.
 
 If the official Firebase docs for this feature require additional setup, follow those docs first.
 
