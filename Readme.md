@@ -10,6 +10,98 @@ The goal is to give .NET for iOS and Mac Catalyst developers a common binding ba
 
 This repo contains the binding projects, Cake build automation, and documentation used to build and validate those packages.
 
+## Firebase 12.6+ modernization notes
+
+Starting with the Firebase `12.6.0` release, this project has been undergoing a Codex-assisted modernization wave. The goals are to make these binding packages easier to maintain, automate more of the native SDK upgrade process, detect and fix API drift across native version bumps, expand binding-focused E2E validation, improve documentation, and publish active Firebase products that were missing from the current package set.
+
+That created a lot of repository churn around the `12.6.0` line. Much of that churn was tooling, validation, package metadata, documentation, and removal of stale repository content rather than changes to user-authored binding definitions. When binding definitions did change, it was usually for one of these reasons:
+
+- an existing binding was proven to be broken at runtime, so current consumers could not reliably use that surface;
+- a native API was missing from the managed binding, so the change was additive;
+- missing enum values or native support enums were added;
+- nullability was corrected to match the native Firebase headers;
+- return or parameter types were corrected to match native declarations, such as native integer widths or protocol-typed return values.
+
+Nullability updates are generally compile-time metadata changes, but they can surface new warnings in consumer code. Type corrections are more visible and can require source changes when the previous managed signature did not match the native SDK. In those cases, the pre-`12.6.0` binding was either stale, too broad, missing, or already capable of dispatching an invalid selector or marshaling the wrong native object.
+
+<details>
+<summary>Notable Modernization PRs:</summary>
+
+| PR | Summary |
+| --- | --- |
+| [#111](https://github.com/AdamEssenmacher/GoogleApisForiOSComponents/pull/111) | Aligned nullability for multiple Firebase bindings and introduced Firebase Foundation E2E validation. |
+| [#112](https://github.com/AdamEssenmacher/GoogleApisForiOSComponents/pull/112) | Fixed Firestore `GetQueryNamed` type drift and added reusable targeted runtime-drift E2E mode and backlog tracking. |
+| [#113](https://github.com/AdamEssenmacher/GoogleApisForiOSComponents/pull/113) | Replaced stale CloudFunctions emulator selector usage with the current native emulator API and added a regression case. |
+| [#114](https://github.com/AdamEssenmacher/GoogleApisForiOSComponents/pull/114) | Typed ABTesting `ActivateExperiment` to `ABTExperimentPayload`, replacing a runtime-broken `NSObject` parameter. |
+| [#115](https://github.com/AdamEssenmacher/GoogleApisForiOSComponents/pull/115) | Typed ABTesting `ValidateRunningExperiments` payload arrays and added failure-proof/regression coverage. |
+| [#116](https://github.com/AdamEssenmacher/GoogleApisForiOSComponents/pull/116) | Typed ABTesting update overflow policy as the native enum and hardened targeted E2E restore behavior. |
+| [#117](https://github.com/AdamEssenmacher/GoogleApisForiOSComponents/pull/117) | Added Database `ServerValue.Increment` and targeted E2E coverage. |
+| [#118](https://github.com/AdamEssenmacher/GoogleApisForiOSComponents/pull/118) | Added Analytics `SessionIdWithCompletion` and targeted E2E coverage. |
+| [#119](https://github.com/AdamEssenmacher/GoogleApisForiOSComponents/pull/119) | Corrected the Crashlytics `StackFrame.Create` selector and added runtime-drift coverage. |
+| [#120](https://github.com/AdamEssenmacher/GoogleApisForiOSComponents/pull/120) | Added Analytics on-device conversion APIs and selector E2E coverage. |
+| [#121](https://github.com/AdamEssenmacher/GoogleApisForiOSComponents/pull/121) | Added RemoteConfig realtime update and custom signal APIs, related enums/domains, and E2E coverage. |
+| [#122](https://github.com/AdamEssenmacher/GoogleApisForiOSComponents/pull/122) | Added Firestore vector value binding and targeted E2E coverage. |
+| [#124](https://github.com/AdamEssenmacher/GoogleApisForiOSComponents/pull/124) | Added Firestore aggregate/count query surface and targeted E2E coverage. |
+| [#125](https://github.com/AdamEssenmacher/GoogleApisForiOSComponents/pull/125) | Added Firestore filter APIs, `notIn`/`isNotEqualTo` overloads, and backend-backed E2E coverage. |
+| [#126](https://github.com/AdamEssenmacher/GoogleApisForiOSComponents/pull/126) | Added Firestore snapshot listen options, listen source enum, listener overloads, and E2E coverage. |
+| [#127](https://github.com/AdamEssenmacher/GoogleApisForiOSComponents/pull/127) | Added Firestore named-database factories and E2E coverage. |
+| [#128](https://github.com/AdamEssenmacher/GoogleApisForiOSComponents/pull/128) | Added Firestore cache settings and persistent cache index manager surface with E2E coverage. |
+| [#129](https://github.com/AdamEssenmacher/GoogleApisForiOSComponents/pull/129) | Added AppCheck limited-use token APIs and targeted E2E coverage. |
+| [#130](https://github.com/AdamEssenmacher/GoogleApisForiOSComponents/pull/130) | Refactored E2E drift helpers and centralized Objective-C exception/reflection checks. |
+| [#131](https://github.com/AdamEssenmacher/GoogleApisForiOSComponents/pull/131) | Added Crashlytics `RecordError` user-info overload and selector coverage. |
+| [#132](https://github.com/AdamEssenmacher/GoogleApisForiOSComponents/pull/132) | Made AppCheck debug provider conform to the provider protocol, exposing the standard token methods. |
+| [#133](https://github.com/AdamEssenmacher/GoogleApisForiOSComponents/pull/133) | Added Firestore transaction options and matching `RunTransaction` overloads. |
+| [#134](https://github.com/AdamEssenmacher/GoogleApisForiOSComponents/pull/134) | Added Firestore index configuration APIs and E2E coverage. |
+| [#135](https://github.com/AdamEssenmacher/GoogleApisForiOSComponents/pull/135) | Added Realtime Database query-level `GetData` and E2E coverage. |
+| [#136](https://github.com/AdamEssenmacher/GoogleApisForiOSComponents/pull/136) | Added Core `Configuration.LoggerLevel` getter and E2E coverage. |
+| [#137](https://github.com/AdamEssenmacher/GoogleApisForiOSComponents/pull/137) | Removed stale GoogleAppMeasurement podspec metadata from Firebase Core. |
+| [#138](https://github.com/AdamEssenmacher/GoogleApisForiOSComponents/pull/138) | Moved FirebaseSessions packaging from Core to Installations to match the native dependency graph. |
+| [#139](https://github.com/AdamEssenmacher/GoogleApisForiOSComponents/pull/139) | Added NuGet READMEs for all 16 Firebase packages and wired package readme metadata. |
+| [#140](https://github.com/AdamEssenmacher/GoogleApisForiOSComponents/pull/140) | Typed Firestore cache settings through native protocol interfaces and updated E2E checks. |
+| [#141](https://github.com/AdamEssenmacher/GoogleApisForiOSComponents/pull/141) | Added Firebase binding audit runner/config, suppression support, comparer policy, and docs. |
+| [#142](https://github.com/AdamEssenmacher/GoogleApisForiOSComponents/pull/142) | Added all-target binding-surface coverage that checks managed members and native runtime metadata. |
+| [#143](https://github.com/AdamEssenmacher/GoogleApisForiOSComponents/pull/143) | Fixed AppCheck error enum packaging so `Firebase.AppCheck.ErrorCode` ships in the binding assembly. |
+| [#144](https://github.com/AdamEssenmacher/GoogleApisForiOSComponents/pull/144) | Bound Auth action-code URL as an initializer to match the native designated initializer. |
+| [#145](https://github.com/AdamEssenmacher/GoogleApisForiOSComponents/pull/145) | Made Auth APNS token readonly to match the native property. |
+| [#146](https://github.com/AdamEssenmacher/GoogleApisForiOSComponents/pull/146) | Made Storage MD5 hash readonly to match the native property. |
+| [#147](https://github.com/AdamEssenmacher/GoogleApisForiOSComponents/pull/147) | Removed stale Storage metadata reference property that is not present in Firebase Storage `12.6.0`. |
+| [#148](https://github.com/AdamEssenmacher/GoogleApisForiOSComponents/pull/148) | Cleaned generated header comments without changing APIs. |
+| [#149](https://github.com/AdamEssenmacher/GoogleApisForiOSComponents/pull/149) | Added FirebaseDatabase `icucore` linker metadata. |
+| [#150](https://github.com/AdamEssenmacher/GoogleApisForiOSComponents/pull/150) | Added FirebaseAppCheck DeviceCheck weak-framework metadata. |
+| [#151](https://github.com/AdamEssenmacher/GoogleApisForiOSComponents/pull/151) | Added `leveldb` C++ linker metadata. |
+| [#152](https://github.com/AdamEssenmacher/GoogleApisForiOSComponents/pull/152) | Added CloudFirestore UIKit framework and gRPC C++ linker metadata. |
+| [#153](https://github.com/AdamEssenmacher/GoogleApisForiOSComponents/pull/153) | Restored Firebase AppDistribution `12.6.0` package metadata, bindings, and docs. |
+| [#154](https://github.com/AdamEssenmacher/GoogleApisForiOSComponents/pull/154) | Fixed binding-surface coverage false positives for shorthand types and helper exports. |
+| [#155](https://github.com/AdamEssenmacher/GoogleApisForiOSComponents/pull/155) | Restored Firebase InAppMessaging `12.6.0`, including Mac Catalyst assets, bindings, audit, and coverage metadata. |
+| [#156](https://github.com/AdamEssenmacher/GoogleApisForiOSComponents/pull/156) | Corrected PerformanceMonitoring payload size properties to native `long`. |
+| [#157](https://github.com/AdamEssenmacher/GoogleApisForiOSComponents/pull/157) | Corrected Installations error enum backing type to signed `long`. |
+| [#158](https://github.com/AdamEssenmacher/GoogleApisForiOSComponents/pull/158) | Corrected AppCheck provider factory return type to `IAppCheckProvider`. |
+| [#159](https://github.com/AdamEssenmacher/GoogleApisForiOSComponents/pull/159) | Corrected CloudMessaging error enum backing type to signed `long`. |
+| [#160](https://github.com/AdamEssenmacher/GoogleApisForiOSComponents/pull/160) | Corrected Database emulator port type to native `nint`. |
+| [#161](https://github.com/AdamEssenmacher/GoogleApisForiOSComponents/pull/161) | Corrected Storage emulator port type, added upload chunk size, and completed Storage error enum values. |
+| [#162](https://github.com/AdamEssenmacher/GoogleApisForiOSComponents/pull/162) | Corrected CloudFirestore emulator port type to native `nint`. |
+| [#163](https://github.com/AdamEssenmacher/GoogleApisForiOSComponents/pull/163) | Added Auth tenant, custom-domain, reCAPTCHA, and revoke-token APIs, and refreshed Auth errors/nullability. |
+| [#164](https://github.com/AdamEssenmacher/GoogleApisForiOSComponents/pull/164) | Added CloudFunctions callable options/URL overloads and corrected emulator API typing. |
+| [#165](https://github.com/AdamEssenmacher/GoogleApisForiOSComponents/pull/165) | Made audit staged umbrella imports configurable so CloudFunctions generates a real primary surface. |
+| [#166](https://github.com/AdamEssenmacher/GoogleApisForiOSComponents/pull/166) | Committed curated Firebase `12.6.0` audit suppressions after a full 16-target audit passed. |
+| [#167](https://github.com/AdamEssenmacher/GoogleApisForiOSComponents/pull/167) | Fixed Database nullable value helper flow and nullable getter annotations. |
+| [#168](https://github.com/AdamEssenmacher/GoogleApisForiOSComponents/pull/168) | Aligned Firestore transaction result/error flow with native nullable contracts. |
+| [#169](https://github.com/AdamEssenmacher/GoogleApisForiOSComponents/pull/169) | Hardened Firebase version string caches with explicit failure paths and `dlopen` cleanup. |
+| [#170](https://github.com/AdamEssenmacher/GoogleApisForiOSComponents/pull/170) | Added validation for Analytics consent dictionaries and enum values. |
+| [#171](https://github.com/AdamEssenmacher/GoogleApisForiOSComponents/pull/171) | Hardened Storage task snapshot access while keeping public APIs non-null. |
+| [#172](https://github.com/AdamEssenmacher/GoogleApisForiOSComponents/pull/172) | Suppressed remaining non-actionable Firebase build warnings after source-level fixes. |
+| [#173](https://github.com/AdamEssenmacher/GoogleApisForiOSComponents/pull/173) | Fixed Auth and CloudFunctions native version symbol lookups caught by E2E coverage. |
+| [#174](https://github.com/AdamEssenmacher/GoogleApisForiOSComponents/pull/174) | Updated README and NuGet docs to reflect the published Firebase `12.6.0` package set. |
+| [#175](https://github.com/AdamEssenmacher/GoogleApisForiOSComponents/pull/175) | Removed the retired deprecated component subtree from the active repository. |
+| [#176](https://github.com/AdamEssenmacher/GoogleApisForiOSComponents/pull/176) | Removed stale NuGet sample solution/projects. |
+| [#177](https://github.com/AdamEssenmacher/GoogleApisForiOSComponents/pull/177) | Removed retired product docs not represented by active packages. |
+| [#178](https://github.com/AdamEssenmacher/GoogleApisForiOSComponents/pull/178) | Removed obsolete Azure/manifest CI files, leaving GitHub Actions as the active CI surface. |
+| [#179](https://github.com/AdamEssenmacher/GoogleApisForiOSComponents/pull/179) | Updated Cake from `0.38.5` to `6.1.0` and modernized build wrappers/docs. |
+| [#180](https://github.com/AdamEssenmacher/GoogleApisForiOSComponents/pull/180) | Removed the obsolete Firebase AdMob sample and solution entries. |
+| [#181](https://github.com/AdamEssenmacher/GoogleApisForiOSComponents/pull/181) | Added deterministic Firebase release check/update Cake tooling and dependency-first packing. |
+
+</details>
+
 ## Quick links
 
 - Build locally: [docs/BUILDING.md](docs/BUILDING.md)
