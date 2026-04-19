@@ -8,6 +8,11 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace FirebaseBindingAudit;
 
+internal static class FirebasePackageVersions
+{
+    public const string DefaultFirebasePackageVersion = "12.6.0";
+}
+
 internal sealed class BindingSurfaceCoverageManifest
 {
     public List<BindingSurfaceCoverageTargetManifest> Targets { get; set; } = [];
@@ -32,7 +37,7 @@ internal sealed class BindingSurfacePackageReference
 {
     public string Id { get; set; } = string.Empty;
 
-    public string Version { get; set; } = "12.6.0";
+    public string Version { get; set; } = FirebasePackageVersions.DefaultFirebasePackageVersion;
 }
 
 internal sealed class BindingSurfaceWaiver
@@ -201,7 +206,7 @@ internal sealed class BindingSurfaceCoverageBuilder
             }
 
             var requiredPackages = new Dictionary<string, BindingSurfacePackageReference>(StringComparer.Ordinal);
-            AddPackage(requiredPackages, targetManifest.PackageId, "12.6.0");
+            AddPackage(requiredPackages, targetManifest.PackageId, FirebasePackageVersions.DefaultFirebasePackageVersion);
             foreach (var package in targetManifest.RequiredExtraPackages)
             {
                 AddPackage(requiredPackages, package.Id, package.Version);
@@ -1082,7 +1087,7 @@ internal sealed class BindingSurfaceCoverageBuilder
         packages.TryAdd(packageId, new BindingSurfacePackageReference
         {
             Id = packageId,
-            Version = string.IsNullOrWhiteSpace(version) ? "12.6.0" : version
+            Version = string.IsNullOrWhiteSpace(version) ? FirebasePackageVersions.DefaultFirebasePackageVersion : version
         });
     }
 
