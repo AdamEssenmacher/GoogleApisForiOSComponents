@@ -75,7 +75,7 @@ public sealed class BindingSurfaceCoverageValidatorTests
                     "AdamE.Firebase.iOS.Core",
                     "VerifyCoreBindingSurfaceAsync",
                     ["source/Firebase/Core/ApiDefinition.cs"],
-                    [new BindingSurfacePackageReference { Id = "AdamE.Firebase.iOS.Core", Version = "12.6.0" }],
+                    [new BindingSurfacePackageReference { Id = "AdamE.Firebase.iOS.Core", Version = FirebasePackageVersions.DefaultFirebasePackageVersion }],
                     [surface])
             ],
             waivers ?? []);

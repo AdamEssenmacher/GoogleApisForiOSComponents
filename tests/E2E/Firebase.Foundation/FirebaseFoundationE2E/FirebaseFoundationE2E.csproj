@@ -20,6 +20,8 @@
     <RuntimeDriftCasePropsPath></RuntimeDriftCasePropsPath>
     <BindingSurfaceCoverageTarget></BindingSurfaceCoverageTarget>
     <BindingSurfaceCoveragePropsPath></BindingSurfaceCoveragePropsPath>
+    <FirebasePackageVersion>12.6.0</FirebasePackageVersion>
+    <GoogleAppMeasurementPackageVersion>12.6.0</GoogleAppMeasurementPackageVersion>
   </PropertyGroup>
 
   <Import Project="$(RuntimeDriftCasePropsPath)" Condition="'$(RuntimeDriftCasePropsPath)' != '' and Exists('$(RuntimeDriftCasePropsPath)')" />
@@ -73,10 +75,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="AdamE.Firebase.iOS.Analytics" Version="12.6.0" />
-    <PackageReference Include="AdamE.Firebase.iOS.Core" Version="12.6.0" />
-    <PackageReference Include="AdamE.Firebase.iOS.Installations" Version="12.6.0" />
-    <PackageReference Include="AdamE.Google.iOS.GoogleAppMeasurement" Version="12.6.0" />
+    <PackageReference Include="AdamE.Firebase.iOS.Analytics" Version="$(FirebasePackageVersion)" />
+    <PackageReference Include="AdamE.Firebase.iOS.Core" Version="$(FirebasePackageVersion)" />
+    <PackageReference Include="AdamE.Firebase.iOS.Installations" Version="$(FirebasePackageVersion)" />
+    <PackageReference Include="AdamE.Google.iOS.GoogleAppMeasurement" Version="$(GoogleAppMeasurementPackageVersion)" />
     <PackageReference Include="AdamE.Google.iOS.GoogleDataTransport" Version="10.1.0.5" />
     <PackageReference Include="AdamE.Google.iOS.GoogleUtilities" Version="8.1.0.3" />
     <PackageReference Include="AdamE.Google.iOS.Nanopb" Version="3.30910.0.5" />
@@ -84,14 +86,14 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(EnableNullabilityValidation)' == 'true'">
-    <PackageReference Include="AdamE.Firebase.iOS.CloudFirestore" Version="12.6.0" />
+    <PackageReference Include="AdamE.Firebase.iOS.CloudFirestore" Version="$(FirebasePackageVersion)" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(EnableNullabilityValidation)' == 'true'">
-    <PackageReference Include="AdamE.Firebase.iOS.AppCheck" Version="12.6.0" />
-    <PackageReference Include="AdamE.Firebase.iOS.CloudMessaging" Version="12.6.0" />
-    <PackageReference Include="AdamE.Firebase.iOS.Crashlytics" Version="12.6.0" />
-    <PackageReference Include="AdamE.Firebase.iOS.Database" Version="12.6.0" />
-    <PackageReference Include="AdamE.Firebase.iOS.PerformanceMonitoring" Version="12.6.0" />
+    <PackageReference Include="AdamE.Firebase.iOS.AppCheck" Version="$(FirebasePackageVersion)" />
+    <PackageReference Include="AdamE.Firebase.iOS.CloudMessaging" Version="$(FirebasePackageVersion)" />
+    <PackageReference Include="AdamE.Firebase.iOS.Crashlytics" Version="$(FirebasePackageVersion)" />
+    <PackageReference Include="AdamE.Firebase.iOS.Database" Version="$(FirebasePackageVersion)" />
+    <PackageReference Include="AdamE.Firebase.iOS.PerformanceMonitoring" Version="$(FirebasePackageVersion)" />
   </ItemGroup>
 </Project>

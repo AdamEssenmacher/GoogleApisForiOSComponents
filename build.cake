@@ -2,6 +2,7 @@
 #load "components.cake"
 #load "common.cake"
 #load "custom_externals_download.cake"
+#load "firebase_release.cake"
 
 var TARGET = Argument ("t", Argument ("target", "ci"));
 var NAMES = Argument ("names", "");
@@ -52,6 +53,40 @@ void BuildCake (string target)
 	CakeExecuteScript ("./build.cake", cakeSettings);
 }
 
+void AddArtifactInDependencyOrder (List<Artifact> orderedArtifacts, HashSet<string> visitingArtifacts, HashSet<string> visitedArtifacts, Artifact artifact)
+{
+	if (artifact == null || artifact.Ignore)
+		return;
+
+	if (visitedArtifacts.Contains (artifact.Id))
+		return;
+
+	if (visitingArtifacts.Contains (artifact.Id))
+		throw new Exception ($"Dependency cycle detected while preparing {artifact.Id}.");
+
+	visitingArtifacts.Add (artifact.Id);
+
+	if (artifact.Dependencies != null)
+		foreach (var dependency in artifact.Dependencies)
+			AddArtifactInDependencyOrder (orderedArtifacts, visitingArtifacts, visitedArtifacts, dependency);
+
+	visitingArtifacts.Remove (artifact.Id);
+	visitedArtifacts.Add (artifact.Id);
+	orderedArtifacts.Add (artifact);
+}
+
+List<Artifact> OrderArtifactsByDependencies (IEnumerable<Artifact> artifacts)
+{
+	var orderedArtifacts = new List<Artifact> ();
+	var visitingArtifacts = new HashSet<string> ();
+	var visitedArtifacts = new HashSet<string> ();
+
+	foreach (var artifact in artifacts)
+		AddArtifactInDependencyOrder (orderedArtifacts, visitingArtifacts, visitedArtifacts, artifact);
+
+	return orderedArtifacts;
+}
+
 Setup (context =>
 {
 	IS_LOCAL_BUILD = string.IsNullOrWhiteSpace (EnvironmentVariable ("AGENT_ID"));
@@ -79,12 +114,12 @@ Task("prepare-artifacts")
 	SetArtifactsExtraPodfileLines ();
 	SetArtifactsSamples ();
 
-	var orderedArtifactsForBuild = new List<Artifact> ();
+	var selectedArtifactsForBuild = new List<Artifact> ();
 	var orderedArtifactsForSamples = new List<Artifact> ();
 
 	if (string.IsNullOrWhiteSpace (NAMES)) {
 		var artifacts = ARTIFACTS.Values.Where (a => !a.Ignore);
-		orderedArtifactsForBuild.AddRange (artifacts);
+		selectedArtifactsForBuild.AddRange (artifacts);
 		orderedArtifactsForSamples.AddRange (artifacts);
 	} else {
 		var names = NAMES.Split (',');
@@ -95,17 +130,15 @@ Task("prepare-artifacts")
 			if (artifact.Ignore)
 				continue;
 
-			orderedArtifactsForBuild.Add (artifact);
-			AddArtifactDependencies (orderedArtifactsForBuild, artifact.Dependencies);
+			selectedArtifactsForBuild.Add (artifact);
 			orderedArtifactsForSamples.Add (artifact);
 		}
 
-		orderedArtifactsForBuild = orderedArtifactsForBuild.Distinct ().ToList ();
+		selectedArtifactsForBuild = selectedArtifactsForBuild.Distinct ().ToList ();
 		orderedArtifactsForSamples = orderedArtifactsForSamples.Distinct ().ToList ();
 	}
 
-	orderedArtifactsForBuild.Sort ((f, s) => s.BuildOrder.CompareTo (f.BuildOrder));
-	orderedArtifactsForSamples.Sort ((f, s) => s.BuildOrder.CompareTo (f.BuildOrder));
+	var orderedArtifactsForBuild = OrderArtifactsByDependencies (selectedArtifactsForBuild);
 	ARTIFACTS_TO_BUILD.AddRange (orderedArtifactsForBuild);
 
 	Information ("Build order:");
@@ -213,10 +246,22 @@ Task ("samples")
 });
 
 Task ("nuget")
-	.IsDependentOn("libs")
+	.IsDependentOn("externals")
+	.IsDependentOn("ci-setup")
 	.Does(() =>
 {
 	EnsureDirectoryExists("./output/");
+
+	var outputPath = MakeAbsolute ((DirectoryPath)"./output/");
+	var dotNetBuildMsBuildSettings = new DotNetMSBuildSettings ();
+	dotNetBuildMsBuildSettings.Properties ["RestoreAdditionalProjectSources"] = new [] { outputPath.FullPath };
+
+	var dotNetBuildSettings = new DotNetBuildSettings {
+		Configuration = "Release",
+		Verbosity = DotNetVerbosity.Diagnostic,
+		NoRestore = false,
+		MSBuildSettings = dotNetBuildMsBuildSettings
+	};
 
 	var dotNetPackSettings = new DotNetPackSettings {
 		Configuration = "Release",
@@ -229,6 +274,8 @@ Task ("nuget")
 	// Pack each artifact's csproj directly
 	foreach (var artifact in ARTIFACTS_TO_BUILD) {
 		var csprojPath = $"./source/{artifact.ComponentGroup}/{artifact.CsprojName}/{artifact.CsprojName}.csproj";
+		Information ($"Building for pack: {csprojPath}");
+		DotNetBuild(csprojPath, dotNetBuildSettings);
 		Information ($"Packing: {csprojPath}");
 		DotNetPack(csprojPath, dotNetPackSettings);
 	}
@@ -259,7 +306,9 @@ Task ("ci")
 
 Teardown (context =>
 {
-	var artifacts = GetFiles ("./output/**/*");
+	var artifacts = GetFiles ("./output/**/*")
+		.Where (path => !path.FullPath.Contains ("/output/firebase-release-check/"))
+		.ToList ();
 
 	if (artifacts?.Count () <= 0)
 		return;
