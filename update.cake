@@ -25,7 +25,6 @@ public Dictionary<string, GoogleBase> CreateComponents ()
 	var googleComponents = new Dictionary<string, GoogleBase> ();
 	
 	googleComponents ["Firebase.ABTesting"] = GetComponent<Firebase.ABTesting> ();
-	googleComponents ["Firebase.AdMob"] = GetComponent<Firebase.AdMob> ();
 	googleComponents ["Firebase.Analytics"] = GetComponent<Firebase.Analytics> ();
 	googleComponents ["Firebase.Auth"] = GetComponent<Firebase.Auth> ();
 	googleComponents ["Firebase.CloudFirestore"] = GetComponent<Firebase.CloudFirestore> ();
@@ -46,7 +45,6 @@ public Dictionary<string, GoogleBase> CreateComponents ()
 	googleComponents ["Google.Analytics"] = GetComponent<Google.Analytics> ();
 	googleComponents ["Google.Cast"] = GetComponent<Google.Cast> ();
 	googleComponents ["Google.Maps"] = GetComponent<Google.Maps> ();
-	googleComponents ["Google.MobileAds"] = GetComponent<Google.MobileAds> ();
 	googleComponents ["Google.Places"] = GetComponent<Google.Places> ();
 	googleComponents ["Google.SignIn"] = GetComponent<Google.SignIn> ();
 	googleComponents ["Google.TagManager"] = GetComponent<Google.TagManager> ();

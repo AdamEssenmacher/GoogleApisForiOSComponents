@@ -20,7 +20,6 @@ Artifact FIREBASE_APP_CHECK_ARTIFACT               = new Artifact ("Firebase.App
 Artifact GOOGLE_ANALYTICS_ARTIFACT                 = new Artifact ("Google.Analytics",                "3.20.0.2",  "15.0", ComponentGroup.Google, csprojName: "Analytics");
 Artifact GOOGLE_CAST_ARTIFACT                      = new Artifact ("Google.Cast",                     "4.7.0.1",   "15.0", ComponentGroup.Google, csprojName: "Cast");
 Artifact GOOGLE_MAPS_ARTIFACT                      = new Artifact ("Google.Maps",                     "9.2.0.8",   "15.0", ComponentGroup.Google, csprojName: "Maps");
-Artifact GOOGLE_MOBILE_ADS_ARTIFACT                = new Artifact ("Google.MobileAds",                "8.13.0.3",  "15.0", ComponentGroup.Google, csprojName: "MobileAds");
 Artifact GOOGLE_UMP_ARTIFACT                       = new Artifact ("Google.UserMessagingPlatform",    "1.1.0.1",   "15.0", ComponentGroup.Google, csprojName: "UserMessagingPlatform");
 Artifact GOOGLE_PLACES_ARTIFACT                    = new Artifact ("Google.Places",                   "7.4.0.2",   "15.0", ComponentGroup.Google, csprojName: "Places");
 Artifact GOOGLE_APP_CHECK_CORE_ARTIFACT            = new Artifact ("Google.AppCheckCore",             "11.2.0.0",  "15.0", ComponentGroup.Google, csprojName: "AppCheckCore");
@@ -69,9 +68,8 @@ var ARTIFACTS = new Dictionary<string, Artifact> {
 
     { "Google.GoogleAppMeasurement",  GOOGLE_GOOGLE_APP_MEASUREMENT_ARTIFACT },
 	{ "Google.Analytics",             GOOGLE_ANALYTICS_ARTIFACT },
-	{ "Google.Cast",                  GOOGLE_CAST_ARTIFACT },	
+	{ "Google.Cast",                  GOOGLE_CAST_ARTIFACT },
 	{ "Google.Maps",                  GOOGLE_MAPS_ARTIFACT },
-	{ "Google.MobileAds",             GOOGLE_MOBILE_ADS_ARTIFACT },
 	{ "Google.UserMessagingPlatform", GOOGLE_UMP_ARTIFACT },
 	{ "Google.Places",                GOOGLE_PLACES_ARTIFACT },
 	{ "Google.SignIn",                GOOGLE_SIGN_IN_ARTIFACT },
@@ -120,7 +118,6 @@ void SetArtifactsDependencies ()
 	GOOGLE_ANALYTICS_ARTIFACT.Dependencies             = null;
 	GOOGLE_CAST_ARTIFACT.Dependencies                  = new [] { FIREBASE_CORE_ARTIFACT };
 	GOOGLE_MAPS_ARTIFACT.Dependencies                  = null;
-	GOOGLE_MOBILE_ADS_ARTIFACT.Dependencies            = new [] { FIREBASE_CORE_ARTIFACT };
 	GOOGLE_UMP_ARTIFACT.Dependencies                   = null;
 	GOOGLE_PLACES_ARTIFACT.Dependencies                = null;
 	GOOGLE_SIGN_IN_ARTIFACT.Dependencies               = new [] { GOOGLE_GTM_SESSION_FETCHER_ARTIFACT, GOOGLE_PROMISES_OBJC_ARTIFACT, GOOGLE_GOOGLE_UTILITIES_ARTIFACT, GOOGLE_APP_CHECK_CORE_ARTIFACT };
@@ -224,9 +221,6 @@ void SetArtifactsPodSpecs ()
 	};
 	GOOGLE_MAPS_ARTIFACT.PodSpecs = new [] {
 		PodSpec.Create ("GoogleMaps", "9.2.0")
-	};
-	GOOGLE_MOBILE_ADS_ARTIFACT.PodSpecs = new [] {
-		PodSpec.Create ("Google-Mobile-Ads-SDK", "8.13.0")
 	};
 	GOOGLE_UMP_ARTIFACT.PodSpecs = new [] {
 		PodSpec.Create ("GoogleUserMessagingPlatform", "1.1.0")

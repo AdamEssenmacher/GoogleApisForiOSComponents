@@ -1,6 +1,6 @@
 ﻿<Project>
   <PropertyGroup>
-    <_GoogleUserMessagingPlatformAssemblyName>Google.UserMessagingPlatform, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null</_GoogleMobileAdsAssemblyName>
+    <_GoogleUserMessagingPlatformAssemblyName>Google.UserMessagingPlatform, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null</_GoogleUserMessagingPlatformAssemblyName>
     <_GoogleUserMessagingPlatformId>GUsrMess-1.1.0</_GoogleUserMessagingPlatformId>
     <_GoogleUserMessagingPlatformSDKBaseFolder>$(XamarinBuildDownloadDir)$(_GoogleUserMessagingPlatformId)\Frameworks\Release\</_GoogleUserMessagingPlatformSDKBaseFolder>    
   </PropertyGroup>
