@@ -1,9 +1,9 @@
 # Agent Instructions (public OSS)
 
 ## Non-negotiables
-- Documentation and samples must be generic (not app-specific).
+- Documentation must be generic (not app-specific).
 - Do not reference private business context.
-- Do not commit secrets; samples must rely on local config templates.
+- Do not commit secrets; rely on local config templates.
 
 ## Working agreements
 - Keep changes reviewable and releaseable (small PR-sized diffs).

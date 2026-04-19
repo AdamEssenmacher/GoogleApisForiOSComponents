@@ -21,7 +21,6 @@ var EXTERNALS_PATH = new DirectoryPath ("./externals");
 var ARTIFACTS_TO_BUILD = new List<Artifact> ();
 
 var SOURCES_TARGETS = new List<string> ();
-var SAMPLES_TARGETS = new List<string> ();
 
 FilePath GetCakeToolPath ()
 {
@@ -99,7 +98,6 @@ Task("build")
 	.Does(() =>
 {
 	BuildCake ("nuget");
-	BuildCake ("samples");
 });
 
 // Prepares the artifacts to be built.
@@ -112,15 +110,12 @@ Task("prepare-artifacts")
 	SetArtifactsDependencies ();
 	SetArtifactsPodSpecs ();
 	SetArtifactsExtraPodfileLines ();
-	SetArtifactsSamples ();
 
 	var selectedArtifactsForBuild = new List<Artifact> ();
-	var orderedArtifactsForSamples = new List<Artifact> ();
 
 	if (string.IsNullOrWhiteSpace (NAMES)) {
 		var artifacts = ARTIFACTS.Values.Where (a => !a.Ignore);
 		selectedArtifactsForBuild.AddRange (artifacts);
-		orderedArtifactsForSamples.AddRange (artifacts);
 	} else {
 		var names = NAMES.Split (',');
 		foreach (var name in names) {
@@ -131,11 +126,9 @@ Task("prepare-artifacts")
 				continue;
 
 			selectedArtifactsForBuild.Add (artifact);
-			orderedArtifactsForSamples.Add (artifact);
 		}
 
 		selectedArtifactsForBuild = selectedArtifactsForBuild.Distinct ().ToList ();
-		orderedArtifactsForSamples = orderedArtifactsForSamples.Distinct ().ToList ();
 	}
 
 	var orderedArtifactsForBuild = OrderArtifactsByDependencies (selectedArtifactsForBuild);
@@ -147,11 +140,6 @@ Task("prepare-artifacts")
 		SOURCES_TARGETS.Add($@"{artifact.ComponentGroup}{BACKSLASH}{artifact.CsprojName.Replace ('.', '_')}");
 		Information (artifact.Id);
 	}
-
-	foreach (var artifact in orderedArtifactsForSamples)
-		if (artifact.Samples != null)
-			foreach (var sample in artifact.Samples)
-				SAMPLES_TARGETS.Add($@"{artifact.ComponentGroup}{BACKSLASH}{sample.Replace ('.', '_')}");
 });
 
 Task ("externals")
@@ -215,36 +203,6 @@ Task ("libs")
 	}
 });
 
-Task ("samples")
-	.IsDependentOn("libs")
-	.Does(() =>
-{
-	var msBuildSettings = new DotNetMSBuildSettings ();
-	msBuildSettings.Properties ["Platform"] = new [] { "iPhoneSimulator" };
-	msBuildSettings.Properties ["RuntimeIdentifier"] = new [] { GetDefaultiOSSimulatorRuntimeIdentifier () };
-	msBuildSettings.Properties ["EnableCodeSigning"] = new [] { "false" };
-
-	var dotNetBuildSettings = new DotNetBuildSettings {
-		Configuration = "Release",
-		Verbosity = DotNetVerbosity.Diagnostic,
-		NoRestore = false,
-		MSBuildSettings = msBuildSettings
-	};
-	
-	// Build each sample csproj directly
-	foreach (var artifact in ARTIFACTS_TO_BUILD) {
-		if (artifact.Samples == null)
-			continue;
-		foreach (var sample in artifact.Samples) {
-			var samplePath = $"./samples/{artifact.ComponentGroup}/{sample}/{sample}.csproj";
-			if (FileExists(samplePath)) {
-				Information ($"Building sample: {samplePath}");
-				DotNetBuild(samplePath, dotNetBuildSettings);
-			}
-		}
-	}
-});
-
 Task ("nuget")
 	.IsDependentOn("externals")
 	.IsDependentOn("ci-setup")
@@ -301,8 +259,7 @@ Task ("clean")
 Task ("ci")
 	.IsDependentOn("externals")
 	.IsDependentOn("libs")
-	.IsDependentOn("nuget")
-	.IsDependentOn("samples");
+	.IsDependentOn("nuget");
 
 Teardown (context =>
 {
