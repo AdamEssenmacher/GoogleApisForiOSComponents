@@ -794,15 +794,27 @@ string ResolveFirebaseReleaseTagCommit (string version)
 	args.Append ("ls-remote");
 	args.Append ("--tags");
 	args.Append ("https://github.com/firebase/firebase-ios-sdk.git");
-	args.Append (version);
+	args.Append ("refs/tags/" + version);
+	args.Append ("refs/tags/" + version + "^{}");
 
 	var output = RunFirebaseReleaseProcess ("git", args, ".");
 	var expectedRef = "refs/tags/" + version;
+	var expectedPeeledRef = expectedRef + "^{}";
+	string tagSha = null;
 	foreach (var line in output.Split (new [] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries)) {
 		var parts = line.Split (new [] { '\t' }, StringSplitOptions.RemoveEmptyEntries);
-		if (parts.Length == 2 && parts [1] == expectedRef)
+		if (parts.Length != 2)
+			continue;
+
+		if (parts [1] == expectedPeeledRef)
 			return parts [0];
+
+		if (parts [1] == expectedRef)
+			tagSha = parts [0];
 	}
+
+	if (!string.IsNullOrWhiteSpace (tagSha))
+		return tagSha;
 
 	throw new Exception ($"Could not resolve firebase-ios-sdk tag {version}.");
 }
