@@ -33,11 +33,19 @@ When multi-targeting, condition package references so they restore only for Appl
 </ItemGroup>
 ```
 
+## Installation
+
+```sh
+dotnet add package AdamE.Firebase.iOS.ABTesting
+```
+
 ## Binding Notes
 
 Use the official Firebase Apple docs for setup and usage. In .NET, call the equivalent APIs from the managed namespace listed above. Keep app-specific Firebase configuration, such as `GoogleService-Info.plist`, in the application project.
 
-No product walkthrough is maintained here. Add only binding-specific caveats that are not covered by the native docs.
+Most Firebase feature packages require `AdamE.Firebase.iOS.Core` and app startup should call `Firebase.Core.App.Configure()` before feature APIs are used. This is the .NET binding for native `FirebaseApp.configure()`.
+
+Most app code uses A/B Testing indirectly through Remote Config, In-App Messaging, or Performance Monitoring. Direct use still requires Firebase to be configured first.
 
 ## Version Alignment
 

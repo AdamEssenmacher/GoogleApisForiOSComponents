@@ -33,11 +33,17 @@ When multi-targeting, condition package references so they restore only for Appl
 </ItemGroup>
 ```
 
+## Installation
+
+```sh
+dotnet add package AdamE.Firebase.iOS.Core
+```
+
 ## Binding Notes
 
 Use the official Firebase Apple docs for setup and usage. In .NET, call the equivalent APIs from the managed namespace listed above. Keep app-specific Firebase configuration, such as `GoogleService-Info.plist`, in the application project.
 
-Binding-specific caveat: Most Firebase feature packages require the application to configure Firebase according to the official Apple setup docs before calling feature APIs.
+Call `Firebase.Core.App.Configure()` once from application startup after bundling the app-specific Firebase configuration. This is the .NET binding for native `FirebaseApp.configure()`.
 
 ## Version Alignment
 

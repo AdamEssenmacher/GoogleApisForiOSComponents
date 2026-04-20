@@ -33,11 +33,19 @@ When multi-targeting, condition package references so they restore only for Appl
 </ItemGroup>
 ```
 
+## Installation
+
+```sh
+dotnet add package AdamE.Firebase.iOS.Crashlytics
+```
+
 ## Binding Notes
 
 Use the official Firebase Apple docs for setup and usage. In .NET, call the equivalent APIs from the managed namespace listed above. Keep app-specific Firebase configuration, such as `GoogleService-Info.plist`, in the application project.
 
-Binding-specific caveat: Crashlytics is native crash reporting. It is not a complete managed .NET exception-reporting replacement.
+Most Firebase feature packages require `AdamE.Firebase.iOS.Core` and app startup should call `Firebase.Core.App.Configure()` before feature APIs are used. This is the .NET binding for native `FirebaseApp.configure()`.
+
+Crashlytics is native crash reporting, not a complete managed .NET exception-reporting replacement. On .NET 8 iOS projects, the top-level README includes an `_ExportSymbolsExplicitly` workaround for missing symbol/export issues.
 
 ## Version Alignment
 

@@ -14,4 +14,8 @@ These packages are thin .NET bindings over native Google Apple SDKs. Use the off
 - Managed namespace: `Google.Maps`
 - Status note: This binding project is present in the repository and is part of the current Google package set described by the top-level README.
 
+## Binding Notes
+
+The native `GMSServices.provideAPIKey` setup maps to `Google.Maps.MapServices.ProvideApiKey(apiKey)` in this binding. The managed namespace is `Google.Maps`.
+
 Document only binding-specific caveats in this repository. Product usage guidance belongs in the official native docs.

@@ -14,4 +14,8 @@ These packages are thin .NET bindings over native Google Apple SDKs. Use the off
 - Managed namespace: `Google.TagManager`
 - Status note: This binding project is present in the repository. Check the top-level README and package feed for current publication status before depending on it.
 
+## Binding Notes
+
+Tag Manager initialization is exposed as `Google.TagManager.TagManager.Configure()`. Firebase-backed Tag Manager usage also depends on Firebase app initialization through `Firebase.Core.App.Configure()`.
+
 Document only binding-specific caveats in this repository. Product usage guidance belongs in the official native docs.

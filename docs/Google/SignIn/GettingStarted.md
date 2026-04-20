@@ -14,4 +14,8 @@ These packages are thin .NET bindings over native Google Apple SDKs. Use the off
 - Managed namespace: `Google.SignIn`
 - Status note: This binding project is present in the repository and is part of the current Google package set described by the top-level README.
 
+## Binding Notes
+
+Use `Google.SignIn.Configuration` for native `GIDConfiguration`, assign it to `SignIn.SharedInstance.Configuration`, and pass callback URLs to `SignIn.SharedInstance.HandleUrl(url)`. Sign-in entry points are exposed on `SignIn.SharedInstance`.
+
 Document only binding-specific caveats in this repository. Product usage guidance belongs in the official native docs.
