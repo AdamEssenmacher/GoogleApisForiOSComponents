@@ -1,119 +1,43 @@
 using System.Reflection;
+using Foundation;
+using ObjCRuntime;
 
 #if ENABLE_RUNTIME_DRIFT_CASE_CORE_CONFIGURATION_LOGGERLEVEL
 using Firebase.Core;
-using Foundation;
-using ObjCRuntime;
 #endif
 
-#if ENABLE_RUNTIME_DRIFT_CASE_ANALYTICS_SESSIONIDWITHCOMPLETION
+#if ENABLE_RUNTIME_DRIFT_CASE_ANALYTICS_SESSIONIDWITHCOMPLETION || ENABLE_RUNTIME_DRIFT_CASE_ANALYTICS_ONDEVICECONVERSION
 using Firebase.Analytics;
-using Foundation;
-using ObjCRuntime;
-#endif
-
-#if ENABLE_RUNTIME_DRIFT_CASE_ANALYTICS_ONDEVICECONVERSION
-using Firebase.Analytics;
-using Foundation;
-using ObjCRuntime;
 #endif
 
 #if ENABLE_RUNTIME_DRIFT_CASE_APPCHECK_LIMITED_USE_TOKENS
 using Firebase.AppCheck;
 using FirebaseCoreApp = Firebase.Core.App;
-using Foundation;
-using ObjCRuntime;
 #endif
 
 #if ENABLE_RUNTIME_DRIFT_CASE_REMOTECONFIG_REALTIME_CUSTOMSIGNALS
 using Firebase.RemoteConfig;
-using Foundation;
-using ObjCRuntime;
 #endif
 
 #if ENABLE_RUNTIME_DRIFT_CASE_DATABASE_SERVERVALUE_INCREMENT || ENABLE_RUNTIME_DRIFT_CASE_DATABASE_QUERY_GETDATA
 using Firebase.Database;
 using FirebaseCoreOptions = Firebase.Core.Options;
-using Foundation;
-using ObjCRuntime;
 #endif
 
-#if ENABLE_RUNTIME_DRIFT_CASE_ABTESTING_UPDATEEXPERIMENTS
+#if ENABLE_RUNTIME_DRIFT_CASE_ABTESTING_UPDATEEXPERIMENTS || ENABLE_RUNTIME_DRIFT_CASE_ABTESTING_ACTIVATEEXPERIMENT || ENABLE_RUNTIME_DRIFT_CASE_ABTESTING_VALIDATERUNNINGEXPERIMENTS
 using Firebase.ABTesting;
-using Foundation;
-using ObjCRuntime;
 #endif
 
-#if ENABLE_RUNTIME_DRIFT_CASE_ABTESTING_ACTIVATEEXPERIMENT
-using Firebase.ABTesting;
-using Foundation;
-using ObjCRuntime;
-#endif
-
-#if ENABLE_RUNTIME_DRIFT_CASE_ABTESTING_VALIDATERUNNINGEXPERIMENTS
-using Firebase.ABTesting;
-using Foundation;
-using ObjCRuntime;
-#endif
-
-#if ENABLE_RUNTIME_DRIFT_CASE_CLOUDFIRESTORE_GETQUERYNAMED
+#if ENABLE_RUNTIME_DRIFT_CASE_CLOUDFIRESTORE_GETQUERYNAMED || ENABLE_RUNTIME_DRIFT_CASE_CLOUDFIRESTORE_FIELDVALUE_VECTORWITHARRAY || ENABLE_RUNTIME_DRIFT_CASE_CLOUDFIRESTORE_AGGREGATE_QUERY || ENABLE_RUNTIME_DRIFT_CASE_CLOUDFIRESTORE_QUERY_FILTERS || ENABLE_RUNTIME_DRIFT_CASE_CLOUDFIRESTORE_SNAPSHOT_LISTEN_OPTIONS || ENABLE_RUNTIME_DRIFT_CASE_CLOUDFIRESTORE_NAMED_DATABASE || ENABLE_RUNTIME_DRIFT_CASE_CLOUDFIRESTORE_CACHE_SETTINGS || ENABLE_RUNTIME_DRIFT_CASE_CLOUDFIRESTORE_INDEX_CONFIGURATION
 using Firebase.CloudFirestore;
-using Foundation;
-using ObjCRuntime;
-#endif
-
-#if ENABLE_RUNTIME_DRIFT_CASE_CLOUDFIRESTORE_FIELDVALUE_VECTORWITHARRAY
-using Firebase.CloudFirestore;
-using Foundation;
-using ObjCRuntime;
-#endif
-
-#if ENABLE_RUNTIME_DRIFT_CASE_CLOUDFIRESTORE_AGGREGATE_QUERY
-using Firebase.CloudFirestore;
-using Foundation;
-using ObjCRuntime;
-#endif
-
-#if ENABLE_RUNTIME_DRIFT_CASE_CLOUDFIRESTORE_QUERY_FILTERS
-using Firebase.CloudFirestore;
-using Foundation;
-using ObjCRuntime;
-#endif
-
-#if ENABLE_RUNTIME_DRIFT_CASE_CLOUDFIRESTORE_SNAPSHOT_LISTEN_OPTIONS
-using Firebase.CloudFirestore;
-using Foundation;
-using ObjCRuntime;
-#endif
-
-#if ENABLE_RUNTIME_DRIFT_CASE_CLOUDFIRESTORE_NAMED_DATABASE
-using Firebase.CloudFirestore;
-using Foundation;
-using ObjCRuntime;
-#endif
-
-#if ENABLE_RUNTIME_DRIFT_CASE_CLOUDFIRESTORE_CACHE_SETTINGS
-using Firebase.CloudFirestore;
-using Foundation;
-using ObjCRuntime;
-#endif
-
-#if ENABLE_RUNTIME_DRIFT_CASE_CLOUDFIRESTORE_INDEX_CONFIGURATION
-using Firebase.CloudFirestore;
-using Foundation;
-using ObjCRuntime;
 #endif
 
 #if ENABLE_RUNTIME_DRIFT_CASE_CLOUDFUNCTIONS_USEFUNCTIONSEMULATORORIGIN
 using Firebase.CloudFunctions;
-using Foundation;
-using ObjCRuntime;
 #endif
 
 #if ENABLE_RUNTIME_DRIFT_CASE_CRASHLYTICS_STACKFRAMEWITHADDRESS || ENABLE_RUNTIME_DRIFT_CASE_CRASHLYTICS_RECORD_ERROR_USER_INFO
 using Firebase.Crashlytics;
-using Foundation;
-using ObjCRuntime;
 #endif
 
 namespace FirebaseFoundationE2E;
@@ -122,9 +46,37 @@ static partial class FirebaseRuntimeDriftCases
 {
     static readonly TimeSpan AsyncTimeout = TimeSpan.FromSeconds(5);
 
+    public sealed record RuntimeDriftCase(string Id, string MethodName);
+
     public static string? GetConfiguredCaseId()
     {
         return GetAssemblyMetadataValue("RuntimeDriftCase");
+    }
+
+    public static IReadOnlyList<RuntimeDriftCase> GetConfiguredCases()
+    {
+        var configuredCases = GetAssemblyMetadataValue("RuntimeDriftCases");
+        if (!string.IsNullOrWhiteSpace(configuredCases))
+        {
+            return configuredCases
+                .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                .Select(ParseConfiguredCase)
+                .ToArray();
+        }
+
+        var caseId = GetConfiguredCaseId();
+        if (string.IsNullOrWhiteSpace(caseId))
+        {
+            return Array.Empty<RuntimeDriftCase>();
+        }
+
+        var methodName = GetAssemblyMetadataValue("RuntimeDriftCaseMethod");
+        if (string.IsNullOrWhiteSpace(methodName))
+        {
+            throw new InvalidOperationException($"Runtime drift case '{caseId}' is missing RuntimeDriftCaseMethod metadata.");
+        }
+
+        return new[] { new RuntimeDriftCase(caseId, methodName) };
     }
 
     public static async Task<string> ExecuteConfiguredCaseAsync()
@@ -136,23 +88,40 @@ static partial class FirebaseRuntimeDriftCases
         }
 
         var methodName = GetAssemblyMetadataValue("RuntimeDriftCaseMethod");
-        if (string.IsNullOrWhiteSpace(methodName))
+        var configuredCase = new RuntimeDriftCase(caseId, methodName ?? string.Empty);
+        return await ExecuteConfiguredCaseAsync(configuredCase);
+    }
+
+    public static async Task<string> ExecuteConfiguredCaseAsync(RuntimeDriftCase configuredCase)
+    {
+        if (string.IsNullOrWhiteSpace(configuredCase.MethodName))
         {
-            throw new InvalidOperationException($"Runtime drift case '{caseId}' is missing RuntimeDriftCaseMethod metadata.");
+            throw new InvalidOperationException($"Runtime drift case '{configuredCase.Id}' is missing RuntimeDriftCaseMethod metadata.");
         }
 
-        var method = typeof(FirebaseRuntimeDriftCases).GetMethod(methodName, BindingFlags.Static | BindingFlags.NonPublic);
+        var method = typeof(FirebaseRuntimeDriftCases).GetMethod(configuredCase.MethodName, BindingFlags.Static | BindingFlags.NonPublic);
         if (method is null)
         {
-            throw new InvalidOperationException($"Runtime drift case '{caseId}' points at missing method '{methodName}'.");
+            throw new InvalidOperationException($"Runtime drift case '{configuredCase.Id}' points at missing method '{configuredCase.MethodName}'.");
         }
 
         if (method.Invoke(null, null) is not Task<string> task)
         {
-            throw new InvalidOperationException($"Runtime drift case '{caseId}' method '{methodName}' did not return Task<string>.");
+            throw new InvalidOperationException($"Runtime drift case '{configuredCase.Id}' method '{configuredCase.MethodName}' did not return Task<string>.");
         }
 
         return await task;
+    }
+
+    static RuntimeDriftCase ParseConfiguredCase(string value)
+    {
+        var separatorIndex = value.IndexOf('=');
+        if (separatorIndex <= 0 || separatorIndex == value.Length - 1)
+        {
+            throw new InvalidOperationException($"Runtime drift case metadata entry '{value}' must use '<id>=<method>' format.");
+        }
+
+        return new RuntimeDriftCase(value[..separatorIndex], value[(separatorIndex + 1)..]);
     }
 
     static string? GetAssemblyMetadataValue(string key)

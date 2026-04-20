@@ -17,6 +17,7 @@
     <EnableNullabilityValidation>false</EnableNullabilityValidation>
     <RuntimeDriftCase></RuntimeDriftCase>
     <RuntimeDriftCaseMethod></RuntimeDriftCaseMethod>
+    <RuntimeDriftCases></RuntimeDriftCases>
     <RuntimeDriftCasePropsPath></RuntimeDriftCasePropsPath>
     <BindingSurfaceCoverageTarget></BindingSurfaceCoverageTarget>
     <BindingSurfaceCoveragePropsPath></BindingSurfaceCoveragePropsPath>
@@ -64,6 +65,10 @@
     <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute" Condition="'$(RuntimeDriftCaseMethod)' != ''">
       <_Parameter1>RuntimeDriftCaseMethod</_Parameter1>
       <_Parameter2>$(RuntimeDriftCaseMethod)</_Parameter2>
+    </AssemblyAttribute>
+    <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute" Condition="'$(RuntimeDriftCases)' != ''">
+      <_Parameter1>RuntimeDriftCases</_Parameter1>
+      <_Parameter2>$(RuntimeDriftCases)</_Parameter2>
     </AssemblyAttribute>
   </ItemGroup>
 

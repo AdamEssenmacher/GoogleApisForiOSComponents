@@ -81,9 +81,9 @@ dotnet tool run dotnet-cake -- --target=nuget --names="Firebase.Analytics,Fireba
 tools/e2e/run-firebase-foundation.sh --package-dir output --configuration Debug --enable-nullability-validation
 ```
 
-## Targeted runtime drift mode
+## Runtime drift mode
 
-The harness also supports a targeted runtime-drift lane for one binding drift at a time. This mode runs only `ConfigureApp` plus the selected drift case, so each remediation PR can prove the unfixed runtime failure locally, then keep only the success-oriented regression test in the final diff.
+The harness also supports a runtime-drift lane for binding-layer checks that need simulator execution. This mode runs only `ConfigureApp` plus the selected drift case, so each remediation PR can prove the unfixed runtime failure locally, then keep only the success-oriented regression test in the final diff. Use `all` to build once and run every checked-in drift case in the same app launch.
 
 The checked-in case manifest lives at [`runtime-drift-cases.json`](./runtime-drift-cases.json), and the backlog/queue is tracked in [`docs/firebase-runtime-failure-backlog.md`](../../docs/firebase-runtime-failure-backlog.md).
 
@@ -91,6 +91,7 @@ Run a specific drift case with:
 
 ```sh
 tools/e2e/run-firebase-foundation.sh --package-dir output --configuration Debug --runtime-drift-case cloudfirestore-getquerynamed
+tools/e2e/run-firebase-foundation.sh --package-dir output --configuration Debug --runtime-drift-case all
 ```
 
 ## Binding surface coverage mode
