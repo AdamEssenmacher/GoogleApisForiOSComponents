@@ -1,4 +1,17 @@
+# Google Sign-In
 
-Google Sign-In is a secure authentication system that reduces the burden of login for your users, by enabling them to sign in with their Google account—the same account they already use with Gmail, Play, Google+, and other Google services.
+This path is retained for existing links, but this repository does not maintain a copied Google Sign-In walkthrough.
 
-Google Sign-In is also your gateway to connecting with Google’s users and services in a secure manner. You can give your users the opportunity to pay with Android Pay, share with their Google-wide contacts, save a file to Drive, add an event to Calendar, and more. Integrate Google’s user-centric APIs and services inside your app to help your users take action and convert.
+These packages are thin .NET bindings over native Google Apple SDKs. Use the official native documentation as the source of truth for setup, product behavior, console workflows, quotas, policy requirements, and examples.
+
+## Native Documentation
+
+- Google Sign-In documentation: https://developers.google.com/identity/sign-in/ios/start-integrating
+
+## Binding Project
+
+- Package ID: `AdamE.Google.iOS.SignIn`
+- Managed namespace: `Google.SignIn`
+- Status note: This binding project is present in the repository and is part of the current Google package set described by the top-level README.
+
+Document only binding-specific caveats in this repository. Product usage guidance belongs in the official native docs.
