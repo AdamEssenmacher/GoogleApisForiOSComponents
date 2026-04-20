@@ -45,6 +45,8 @@ Use the official Firebase Apple docs for setup and usage. In .NET, call the equi
 
 Most Firebase feature packages require `AdamE.Firebase.iOS.Core` and app startup should call `Firebase.Core.App.Configure()` before feature APIs are used. This is the .NET binding for native `FirebaseApp.configure()`.
 
+App delegate callback helpers are exposed on `Firebase.Auth.Auth.DefaultInstance`, including `CanHandleUrl(url)`, `CanHandleNotification(userInfo)`, and `SetApnsToken(...)`. For phone-auth test flows, set `Auth.DefaultInstance.Settings.AppVerificationDisabledForTesting` before verification calls.
+
 ## Version Alignment
 
 Firebase Apple SDKs are packaged as native xcframeworks. Applications should pin package versions intentionally and keep all `AdamE.Firebase.iOS.*` packages on the same major/minor Firebase line.

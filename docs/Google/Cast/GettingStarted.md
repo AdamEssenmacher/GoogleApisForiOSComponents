@@ -14,4 +14,8 @@ These packages are thin .NET bindings over native Google Apple SDKs. Use the off
 - Managed namespace: `Google.Cast`
 - Status note: This binding project is present in the repository. Check the top-level README and package feed for current publication status before depending on it.
 
+## Binding Notes
+
+The native `GCKCastContext.setSharedInstanceWithOptions` setup maps to `Google.Cast.CastContext.SetSharedInstance(options)`. After setup, use `Google.Cast.CastContext.SharedInstance`.
+
 Document only binding-specific caveats in this repository. Product usage guidance belongs in the official native docs.

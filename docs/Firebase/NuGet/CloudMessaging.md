@@ -47,6 +47,8 @@ Most Firebase feature packages require `AdamE.Firebase.iOS.Core` and app startup
 
 Follow the official Firebase and Apple documentation for APNs registration and notification permissions; this package only exposes the managed binding surface.
 
+The managed entry point is `Firebase.CloudMessaging.Messaging.SharedInstance`. Set `Delegate` to an `IMessagingDelegate`, pass APNs tokens through `ApnsToken` or `SetApnsToken(...)`, and read or fetch FCM tokens through `FcmToken` or `FetchToken(...)`. If you disable swizzling with `FirebaseAppDelegateProxyEnabled`, route AppDelegate notification callbacks manually as described by the native docs.
+
 ## Version Alignment
 
 Firebase Apple SDKs are packaged as native xcframeworks. Applications should pin package versions intentionally and keep all `AdamE.Firebase.iOS.*` packages on the same major/minor Firebase line.

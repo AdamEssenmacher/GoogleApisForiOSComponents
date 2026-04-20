@@ -14,4 +14,8 @@ These packages are thin .NET bindings over native Google Apple SDKs. Use the off
 - Managed namespace: `Google.Analytics`
 - Status note: This binding project is present in the repository. Check the top-level README and package feed for current publication status before depending on it.
 
+## Binding Notes
+
+The native Google Analytics v3 singleton maps to `Google.Analytics.Gai.SharedInstance` in this binding.
+
 Document only binding-specific caveats in this repository. Product usage guidance belongs in the official native docs.
