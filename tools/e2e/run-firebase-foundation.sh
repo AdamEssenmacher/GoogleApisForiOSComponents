@@ -402,7 +402,13 @@ xcrun simctl launch --terminate-running-process "$simulator_udid" "$bundle_id" >
 data_container="$(xcrun simctl get_app_container "$simulator_udid" "$bundle_id" data)"
 container_result_file="$data_container/Library/Caches/firebase-foundation-e2e-result.json"
 
-timeout_seconds="${E2E_TIMEOUT_SECONDS:-90}"
+default_timeout_seconds=90
+timeout_seconds="${E2E_TIMEOUT_SECONDS:-$default_timeout_seconds}"
+if [[ -z "${E2E_TIMEOUT_SECONDS:-}" && "$runtime_drift_case" == "all" && "$runtime_drift_case_count" == <-> ]]; then
+  timeout_seconds=$((default_timeout_seconds + runtime_drift_case_count * 10))
+fi
+echo "Waiting up to $timeout_seconds seconds for E2E result"
+
 elapsed=0
 while [[ ! -f "$container_result_file" ]]; do
   if (( elapsed >= timeout_seconds )); then
