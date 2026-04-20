@@ -1606,6 +1606,391 @@
       ]
     },
     {
+      "id": "cloudfirestore-exprbridge-sharpie-wrapper-omission",
+      "target": "CloudFirestore",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.CloudFirestore.ExprBridge",
+      "comparisonTypeKey": "FIRExprBridge",
+      "reason": "Sharpie currently fails to build the FirebaseFirestore wrapper module during this audit pass, so fresh output omits this baseline binding. The declaration is present in FIRPipelineBridge.h in the observable FirebaseFirestoreInternal headers imported by the public FirebaseFirestore framework.",
+      "evidence": [
+        "externals/FirebaseFirestoreInternal.xcframework/ios-arm64/FirebaseFirestoreInternal.framework/Headers/FIRPipelineBridge.h#L32-L35"
+      ]
+    },
+    {
+      "id": "cloudfirestore-fieldbridge-sharpie-wrapper-omission",
+      "target": "CloudFirestore",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.CloudFirestore.FieldBridge",
+      "comparisonTypeKey": "FIRFieldBridge",
+      "reason": "Sharpie currently fails to build the FirebaseFirestore wrapper module during this audit pass, so fresh output omits this baseline binding. The declaration is present in FIRPipelineBridge.h in the observable FirebaseFirestoreInternal headers imported by the public FirebaseFirestore framework.",
+      "evidence": [
+        "externals/FirebaseFirestoreInternal.xcframework/ios-arm64/FirebaseFirestoreInternal.framework/Headers/FIRPipelineBridge.h#L37-L43"
+      ]
+    },
+    {
+      "id": "cloudfirestore-constantbridge-sharpie-wrapper-omission",
+      "target": "CloudFirestore",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.CloudFirestore.ConstantBridge",
+      "comparisonTypeKey": "FIRConstantBridge",
+      "reason": "Sharpie currently fails to build the FirebaseFirestore wrapper module during this audit pass, so fresh output omits this baseline binding. The declaration is present in FIRPipelineBridge.h in the observable FirebaseFirestoreInternal headers imported by the public FirebaseFirestore framework.",
+      "evidence": [
+        "externals/FirebaseFirestoreInternal.xcframework/ios-arm64/FirebaseFirestoreInternal.framework/Headers/FIRPipelineBridge.h#L45-L49"
+      ]
+    },
+    {
+      "id": "cloudfirestore-functionexprbridge-sharpie-wrapper-omission",
+      "target": "CloudFirestore",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.CloudFirestore.FunctionExprBridge",
+      "comparisonTypeKey": "FIRFunctionExprBridge",
+      "reason": "Sharpie currently fails to build the FirebaseFirestore wrapper module during this audit pass, so fresh output omits this baseline binding. The declaration is present in FIRPipelineBridge.h in the observable FirebaseFirestoreInternal headers imported by the public FirebaseFirestore framework.",
+      "evidence": [
+        "externals/FirebaseFirestoreInternal.xcframework/ios-arm64/FirebaseFirestoreInternal.framework/Headers/FIRPipelineBridge.h#L51-L55"
+      ]
+    },
+    {
+      "id": "cloudfirestore-aggregatefunctionbridge-sharpie-wrapper-omission",
+      "target": "CloudFirestore",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.CloudFirestore.AggregateFunctionBridge",
+      "comparisonTypeKey": "FIRAggregateFunctionBridge",
+      "reason": "Sharpie currently fails to build the FirebaseFirestore wrapper module during this audit pass, so fresh output omits this baseline binding. The declaration is present in FIRPipelineBridge.h in the observable FirebaseFirestoreInternal headers imported by the public FirebaseFirestore framework.",
+      "evidence": [
+        "externals/FirebaseFirestoreInternal.xcframework/ios-arm64/FirebaseFirestoreInternal.framework/Headers/FIRPipelineBridge.h#L57-L61"
+      ]
+    },
+    {
+      "id": "cloudfirestore-orderingbridge-sharpie-wrapper-omission",
+      "target": "CloudFirestore",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.CloudFirestore.OrderingBridge",
+      "comparisonTypeKey": "FIROrderingBridge",
+      "reason": "Sharpie currently fails to build the FirebaseFirestore wrapper module during this audit pass, so fresh output omits this baseline binding. The declaration is present in FIRPipelineBridge.h in the observable FirebaseFirestoreInternal headers imported by the public FirebaseFirestore framework.",
+      "evidence": [
+        "externals/FirebaseFirestoreInternal.xcframework/ios-arm64/FirebaseFirestoreInternal.framework/Headers/FIRPipelineBridge.h#L63-L67"
+      ]
+    },
+    {
+      "id": "cloudfirestore-stagebridge-sharpie-wrapper-omission",
+      "target": "CloudFirestore",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.CloudFirestore.StageBridge",
+      "comparisonTypeKey": "FIRStageBridge",
+      "reason": "Sharpie currently fails to build the FirebaseFirestore wrapper module during this audit pass, so fresh output omits this baseline binding. The declaration is present in FIRPipelineBridge.h in the observable FirebaseFirestoreInternal headers imported by the public FirebaseFirestore framework.",
+      "evidence": [
+        "externals/FirebaseFirestoreInternal.xcframework/ios-arm64/FirebaseFirestoreInternal.framework/Headers/FIRPipelineBridge.h#L69-L73"
+      ]
+    },
+    {
+      "id": "cloudfirestore-collectionsourcestagebridge-sharpie-wrapper-omission",
+      "target": "CloudFirestore",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.CloudFirestore.CollectionSourceStageBridge",
+      "comparisonTypeKey": "FIRCollectionSourceStageBridge",
+      "reason": "Sharpie currently fails to build the FirebaseFirestore wrapper module during this audit pass, so fresh output omits this baseline binding. The declaration is present in FIRPipelineBridge.h in the observable FirebaseFirestoreInternal headers imported by the public FirebaseFirestore framework.",
+      "evidence": [
+        "externals/FirebaseFirestoreInternal.xcframework/ios-arm64/FirebaseFirestoreInternal.framework/Headers/FIRPipelineBridge.h#L75-L80"
+      ]
+    },
+    {
+      "id": "cloudfirestore-databasesourcestagebridge-sharpie-wrapper-omission",
+      "target": "CloudFirestore",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.CloudFirestore.DatabaseSourceStageBridge",
+      "comparisonTypeKey": "FIRDatabaseSourceStageBridge",
+      "reason": "Sharpie currently fails to build the FirebaseFirestore wrapper module during this audit pass, so fresh output omits this baseline binding. The declaration is present in FIRPipelineBridge.h in the observable FirebaseFirestoreInternal headers imported by the public FirebaseFirestore framework.",
+      "evidence": [
+        "externals/FirebaseFirestoreInternal.xcframework/ios-arm64/FirebaseFirestoreInternal.framework/Headers/FIRPipelineBridge.h#L82-L87"
+      ]
+    },
+    {
+      "id": "cloudfirestore-collectiongroupsourcestagebridge-sharpie-wrapper-omission",
+      "target": "CloudFirestore",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.CloudFirestore.CollectionGroupSourceStageBridge",
+      "comparisonTypeKey": "FIRCollectionGroupSourceStageBridge",
+      "reason": "Sharpie currently fails to build the FirebaseFirestore wrapper module during this audit pass, so fresh output omits this baseline binding. The declaration is present in FIRPipelineBridge.h in the observable FirebaseFirestoreInternal headers imported by the public FirebaseFirestore framework.",
+      "evidence": [
+        "externals/FirebaseFirestoreInternal.xcframework/ios-arm64/FirebaseFirestoreInternal.framework/Headers/FIRPipelineBridge.h#L89-L94"
+      ]
+    },
+    {
+      "id": "cloudfirestore-documentssourcestagebridge-sharpie-wrapper-omission",
+      "target": "CloudFirestore",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.CloudFirestore.DocumentsSourceStageBridge",
+      "comparisonTypeKey": "FIRDocumentsSourceStageBridge",
+      "reason": "Sharpie currently fails to build the FirebaseFirestore wrapper module during this audit pass, so fresh output omits this baseline binding. The declaration is present in FIRPipelineBridge.h in the observable FirebaseFirestoreInternal headers imported by the public FirebaseFirestore framework.",
+      "evidence": [
+        "externals/FirebaseFirestoreInternal.xcframework/ios-arm64/FirebaseFirestoreInternal.framework/Headers/FIRPipelineBridge.h#L96-L101"
+      ]
+    },
+    {
+      "id": "cloudfirestore-wherestagebridge-sharpie-wrapper-omission",
+      "target": "CloudFirestore",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.CloudFirestore.WhereStageBridge",
+      "comparisonTypeKey": "FIRWhereStageBridge",
+      "reason": "Sharpie currently fails to build the FirebaseFirestore wrapper module during this audit pass, so fresh output omits this baseline binding. The declaration is present in FIRPipelineBridge.h in the observable FirebaseFirestoreInternal headers imported by the public FirebaseFirestore framework.",
+      "evidence": [
+        "externals/FirebaseFirestoreInternal.xcframework/ios-arm64/FirebaseFirestoreInternal.framework/Headers/FIRPipelineBridge.h#L103-L108"
+      ]
+    },
+    {
+      "id": "cloudfirestore-limitstagebridge-sharpie-wrapper-omission",
+      "target": "CloudFirestore",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.CloudFirestore.LimitStageBridge",
+      "comparisonTypeKey": "FIRLimitStageBridge",
+      "reason": "Sharpie currently fails to build the FirebaseFirestore wrapper module during this audit pass, so fresh output omits this baseline binding. The declaration is present in FIRPipelineBridge.h in the observable FirebaseFirestoreInternal headers imported by the public FirebaseFirestore framework.",
+      "evidence": [
+        "externals/FirebaseFirestoreInternal.xcframework/ios-arm64/FirebaseFirestoreInternal.framework/Headers/FIRPipelineBridge.h#L110-L115"
+      ]
+    },
+    {
+      "id": "cloudfirestore-offsetstagebridge-sharpie-wrapper-omission",
+      "target": "CloudFirestore",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.CloudFirestore.OffsetStageBridge",
+      "comparisonTypeKey": "FIROffsetStageBridge",
+      "reason": "Sharpie currently fails to build the FirebaseFirestore wrapper module during this audit pass, so fresh output omits this baseline binding. The declaration is present in FIRPipelineBridge.h in the observable FirebaseFirestoreInternal headers imported by the public FirebaseFirestore framework.",
+      "evidence": [
+        "externals/FirebaseFirestoreInternal.xcframework/ios-arm64/FirebaseFirestoreInternal.framework/Headers/FIRPipelineBridge.h#L117-L122"
+      ]
+    },
+    {
+      "id": "cloudfirestore-addfieldsstagebridge-sharpie-wrapper-omission",
+      "target": "CloudFirestore",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.CloudFirestore.AddFieldsStageBridge",
+      "comparisonTypeKey": "FIRAddFieldsStageBridge",
+      "reason": "Sharpie currently fails to build the FirebaseFirestore wrapper module during this audit pass, so fresh output omits this baseline binding. The declaration is present in FIRPipelineBridge.h in the observable FirebaseFirestoreInternal headers imported by the public FirebaseFirestore framework.",
+      "evidence": [
+        "externals/FirebaseFirestoreInternal.xcframework/ios-arm64/FirebaseFirestoreInternal.framework/Headers/FIRPipelineBridge.h#L124-L128"
+      ]
+    },
+    {
+      "id": "cloudfirestore-removefieldsstagebridge-sharpie-wrapper-omission",
+      "target": "CloudFirestore",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.CloudFirestore.RemoveFieldsStageBridge",
+      "comparisonTypeKey": "FIRRemoveFieldsStageBridge",
+      "reason": "Sharpie currently fails to build the FirebaseFirestore wrapper module during this audit pass, so fresh output omits this baseline binding. The declaration is present in FIRPipelineBridge.h in the observable FirebaseFirestoreInternal headers imported by the public FirebaseFirestore framework.",
+      "evidence": [
+        "externals/FirebaseFirestoreInternal.xcframework/ios-arm64/FirebaseFirestoreInternal.framework/Headers/FIRPipelineBridge.h#L130-L134"
+      ]
+    },
+    {
+      "id": "cloudfirestore-selectstagebridge-sharpie-wrapper-omission",
+      "target": "CloudFirestore",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.CloudFirestore.SelectStageBridge",
+      "comparisonTypeKey": "FIRSelectStageBridge",
+      "reason": "Sharpie currently fails to build the FirebaseFirestore wrapper module during this audit pass, so fresh output omits this baseline binding. The declaration is present in FIRPipelineBridge.h in the observable FirebaseFirestoreInternal headers imported by the public FirebaseFirestore framework.",
+      "evidence": [
+        "externals/FirebaseFirestoreInternal.xcframework/ios-arm64/FirebaseFirestoreInternal.framework/Headers/FIRPipelineBridge.h#L136-L140"
+      ]
+    },
+    {
+      "id": "cloudfirestore-distinctstagebridge-sharpie-wrapper-omission",
+      "target": "CloudFirestore",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.CloudFirestore.DistinctStageBridge",
+      "comparisonTypeKey": "FIRDistinctStageBridge",
+      "reason": "Sharpie currently fails to build the FirebaseFirestore wrapper module during this audit pass, so fresh output omits this baseline binding. The declaration is present in FIRPipelineBridge.h in the observable FirebaseFirestoreInternal headers imported by the public FirebaseFirestore framework.",
+      "evidence": [
+        "externals/FirebaseFirestoreInternal.xcframework/ios-arm64/FirebaseFirestoreInternal.framework/Headers/FIRPipelineBridge.h#L142-L146"
+      ]
+    },
+    {
+      "id": "cloudfirestore-aggregatestagebridge-sharpie-wrapper-omission",
+      "target": "CloudFirestore",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.CloudFirestore.AggregateStageBridge",
+      "comparisonTypeKey": "FIRAggregateStageBridge",
+      "reason": "Sharpie currently fails to build the FirebaseFirestore wrapper module during this audit pass, so fresh output omits this baseline binding. The declaration is present in FIRPipelineBridge.h in the observable FirebaseFirestoreInternal headers imported by the public FirebaseFirestore framework.",
+      "evidence": [
+        "externals/FirebaseFirestoreInternal.xcframework/ios-arm64/FirebaseFirestoreInternal.framework/Headers/FIRPipelineBridge.h#L148-L153"
+      ]
+    },
+    {
+      "id": "cloudfirestore-findneareststagebridge-sharpie-wrapper-omission",
+      "target": "CloudFirestore",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.CloudFirestore.FindNearestStageBridge",
+      "comparisonTypeKey": "FIRFindNearestStageBridge",
+      "reason": "Sharpie currently fails to build the FirebaseFirestore wrapper module during this audit pass, so fresh output omits this baseline binding. The declaration is present in FIRPipelineBridge.h in the observable FirebaseFirestoreInternal headers imported by the public FirebaseFirestore framework.",
+      "evidence": [
+        "externals/FirebaseFirestoreInternal.xcframework/ios-arm64/FirebaseFirestoreInternal.framework/Headers/FIRPipelineBridge.h#L155-L163"
+      ]
+    },
+    {
+      "id": "cloudfirestore-sortstagebridge-sharpie-wrapper-omission",
+      "target": "CloudFirestore",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.CloudFirestore.SortStageBridge",
+      "comparisonTypeKey": "FIRSorStageBridge",
+      "reason": "Sharpie currently fails to build the FirebaseFirestore wrapper module during this audit pass, so fresh output omits this baseline binding. The declaration is present in FIRPipelineBridge.h in the observable FirebaseFirestoreInternal headers imported by the public FirebaseFirestore framework.",
+      "evidence": [
+        "externals/FirebaseFirestoreInternal.xcframework/ios-arm64/FirebaseFirestoreInternal.framework/Headers/FIRPipelineBridge.h#L165-L169"
+      ]
+    },
+    {
+      "id": "cloudfirestore-replacewithstagebridge-sharpie-wrapper-omission",
+      "target": "CloudFirestore",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.CloudFirestore.ReplaceWithStageBridge",
+      "comparisonTypeKey": "FIRReplaceWithStageBridge",
+      "reason": "Sharpie currently fails to build the FirebaseFirestore wrapper module during this audit pass, so fresh output omits this baseline binding. The declaration is present in FIRPipelineBridge.h in the observable FirebaseFirestoreInternal headers imported by the public FirebaseFirestore framework.",
+      "evidence": [
+        "externals/FirebaseFirestoreInternal.xcframework/ios-arm64/FirebaseFirestoreInternal.framework/Headers/FIRPipelineBridge.h#L171-L175"
+      ]
+    },
+    {
+      "id": "cloudfirestore-samplestagebridge-sharpie-wrapper-omission",
+      "target": "CloudFirestore",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.CloudFirestore.SampleStageBridge",
+      "comparisonTypeKey": "FIRSampleStageBridge",
+      "reason": "Sharpie currently fails to build the FirebaseFirestore wrapper module during this audit pass, so fresh output omits this baseline binding. The declaration is present in FIRPipelineBridge.h in the observable FirebaseFirestoreInternal headers imported by the public FirebaseFirestore framework.",
+      "evidence": [
+        "externals/FirebaseFirestoreInternal.xcframework/ios-arm64/FirebaseFirestoreInternal.framework/Headers/FIRPipelineBridge.h#L177-L182"
+      ]
+    },
+    {
+      "id": "cloudfirestore-unionstagebridge-sharpie-wrapper-omission",
+      "target": "CloudFirestore",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.CloudFirestore.UnionStageBridge",
+      "comparisonTypeKey": "FIRUnionStageBridge",
+      "reason": "Sharpie currently fails to build the FirebaseFirestore wrapper module during this audit pass, so fresh output omits this baseline binding. The declaration is present in FIRPipelineBridge.h in the observable FirebaseFirestoreInternal headers imported by the public FirebaseFirestore framework.",
+      "evidence": [
+        "externals/FirebaseFirestoreInternal.xcframework/ios-arm64/FirebaseFirestoreInternal.framework/Headers/FIRPipelineBridge.h#L184-L188"
+      ]
+    },
+    {
+      "id": "cloudfirestore-unneststagebridge-sharpie-wrapper-omission",
+      "target": "CloudFirestore",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.CloudFirestore.UnnestStageBridge",
+      "comparisonTypeKey": "FIRUnnestStageBridge",
+      "reason": "Sharpie currently fails to build the FirebaseFirestore wrapper module during this audit pass, so fresh output omits this baseline binding. The declaration is present in FIRPipelineBridge.h in the observable FirebaseFirestoreInternal headers imported by the public FirebaseFirestore framework.",
+      "evidence": [
+        "externals/FirebaseFirestoreInternal.xcframework/ios-arm64/FirebaseFirestoreInternal.framework/Headers/FIRPipelineBridge.h#L190-L196"
+      ]
+    },
+    {
+      "id": "cloudfirestore-rawstagebridge-sharpie-wrapper-omission",
+      "target": "CloudFirestore",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.CloudFirestore.RawStageBridge",
+      "comparisonTypeKey": "FIRRawStageBridge",
+      "reason": "Sharpie currently fails to build the FirebaseFirestore wrapper module during this audit pass, so fresh output omits this baseline binding. The declaration is present in FIRPipelineBridge.h in the observable FirebaseFirestoreInternal headers imported by the public FirebaseFirestore framework.",
+      "evidence": [
+        "externals/FirebaseFirestoreInternal.xcframework/ios-arm64/FirebaseFirestoreInternal.framework/Headers/FIRPipelineBridge.h#L198-L204"
+      ]
+    },
+    {
+      "id": "cloudfirestore-pipelineresultbridge-sharpie-wrapper-omission",
+      "target": "CloudFirestore",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.CloudFirestore.PipelineResultBridge",
+      "comparisonTypeKey": "__FIRPipelineResultBridge",
+      "reason": "Sharpie currently fails to build the FirebaseFirestore wrapper module during this audit pass, so fresh output omits this baseline binding. The declaration is present in FIRPipelineBridge.h in the observable FirebaseFirestoreInternal headers imported by the public FirebaseFirestore framework.",
+      "evidence": [
+        "externals/FirebaseFirestoreInternal.xcframework/ios-arm64/FirebaseFirestoreInternal.framework/Headers/FIRPipelineBridge.h#L206-L228"
+      ]
+    },
+    {
+      "id": "cloudfirestore-pipelineresultchangebridge-sharpie-wrapper-omission",
+      "target": "CloudFirestore",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.CloudFirestore.PipelineResultChangeBridge",
+      "comparisonTypeKey": "__FIRPipelineResultChangeBridge",
+      "reason": "Sharpie currently fails to build the FirebaseFirestore wrapper module during this audit pass, so fresh output omits this baseline binding. The declaration is present in FIRPipelineBridge.h in the observable FirebaseFirestoreInternal headers imported by the public FirebaseFirestore framework.",
+      "evidence": [
+        "externals/FirebaseFirestoreInternal.xcframework/ios-arm64/FirebaseFirestoreInternal.framework/Headers/FIRPipelineBridge.h#L230-L244"
+      ]
+    },
+    {
+      "id": "cloudfirestore-pipelinesnapshotbridge-sharpie-wrapper-omission",
+      "target": "CloudFirestore",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.CloudFirestore.PipelineSnapshotBridge",
+      "comparisonTypeKey": "__FIRPipelineSnapshotBridge",
+      "reason": "Sharpie currently fails to build the FirebaseFirestore wrapper module during this audit pass, so fresh output omits this baseline binding. The declaration is present in FIRPipelineBridge.h in the observable FirebaseFirestoreInternal headers imported by the public FirebaseFirestore framework.",
+      "evidence": [
+        "externals/FirebaseFirestoreInternal.xcframework/ios-arm64/FirebaseFirestoreInternal.framework/Headers/FIRPipelineBridge.h#L246-L254"
+      ]
+    },
+    {
+      "id": "cloudfirestore-pipelinebridge-sharpie-wrapper-omission",
+      "target": "CloudFirestore",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.CloudFirestore.PipelineBridge",
+      "comparisonTypeKey": "FIRPipelineBridge",
+      "reason": "Sharpie currently fails to build the FirebaseFirestore wrapper module during this audit pass, so fresh output omits this baseline binding. The declaration is present in FIRPipelineBridge.h in the observable FirebaseFirestoreInternal headers imported by the public FirebaseFirestore framework.",
+      "evidence": [
+        "externals/FirebaseFirestoreInternal.xcframework/ios-arm64/FirebaseFirestoreInternal.framework/Headers/FIRPipelineBridge.h#L256-L267"
+      ]
+    },
+    {
+      "id": "cloudfirestore-realtimepipelinesnapshotbridge-sharpie-wrapper-omission",
+      "target": "CloudFirestore",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.CloudFirestore.RealtimePipelineSnapshotBridge",
+      "comparisonTypeKey": "__FIRRealtimePipelineSnapshotBridge",
+      "reason": "Sharpie currently fails to build the FirebaseFirestore wrapper module during this audit pass, so fresh output omits this baseline binding. The declaration is present in FIRPipelineBridge.h in the observable FirebaseFirestoreInternal headers imported by the public FirebaseFirestore framework.",
+      "evidence": [
+        "externals/FirebaseFirestoreInternal.xcframework/ios-arm64/FirebaseFirestoreInternal.framework/Headers/FIRPipelineBridge.h#L269-L279"
+      ]
+    },
+    {
+      "id": "cloudfirestore-pipelinelistenoptionsbridge-sharpie-wrapper-omission",
+      "target": "CloudFirestore",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.CloudFirestore.PipelineListenOptionsBridge",
+      "comparisonTypeKey": "__FIRPipelineListenOptionsBridge",
+      "reason": "Sharpie currently fails to build the FirebaseFirestore wrapper module during this audit pass, so fresh output omits this baseline binding. The declaration is present in FIRPipelineBridge.h in the observable FirebaseFirestoreInternal headers imported by the public FirebaseFirestore framework.",
+      "evidence": [
+        "externals/FirebaseFirestoreInternal.xcframework/ios-arm64/FirebaseFirestoreInternal.framework/Headers/FIRPipelineBridge.h#L281-L297"
+      ]
+    },
+    {
+      "id": "cloudfirestore-realtimepipelinebridge-sharpie-wrapper-omission",
+      "target": "CloudFirestore",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.CloudFirestore.RealtimePipelineBridge",
+      "comparisonTypeKey": "FIRRealtimePipelineBridge",
+      "reason": "Sharpie currently fails to build the FirebaseFirestore wrapper module during this audit pass, so fresh output omits this baseline binding. The declaration is present in FIRPipelineBridge.h in the observable FirebaseFirestoreInternal headers imported by the public FirebaseFirestore framework.",
+      "evidence": [
+        "externals/FirebaseFirestoreInternal.xcframework/ios-arm64/FirebaseFirestoreInternal.framework/Headers/FIRPipelineBridge.h#L299-L313"
+      ]
+    },
+    {
+      "id": "cloudfirestore-pipelinesnapshothandler-sharpie-wrapper-omission",
+      "target": "CloudFirestore",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.CloudFirestore.PipelineSnapshotHandler",
+      "comparisonTypeKey": "PipelineSnapshotHandler",
+      "reason": "Sharpie currently fails to build the FirebaseFirestore wrapper module during this audit pass, so fresh output omits this baseline delegate. The matching pipeline completion block is present in FIRPipelineBridge.h in the observable FirebaseFirestoreInternal headers imported by the public FirebaseFirestore framework.",
+      "evidence": [
+        "externals/FirebaseFirestoreInternal.xcframework/ios-arm64/FirebaseFirestoreInternal.framework/Headers/FIRPipelineBridge.h#L263-L264"
+      ]
+    },
+    {
+      "id": "cloudfirestore-realtimepipelinesnapshothandler-sharpie-wrapper-omission",
+      "target": "CloudFirestore",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.CloudFirestore.RealtimePipelineSnapshotHandler",
+      "comparisonTypeKey": "RealtimePipelineSnapshotHandler",
+      "reason": "Sharpie currently fails to build the FirebaseFirestore wrapper module during this audit pass, so fresh output omits this baseline delegate. The matching realtime pipeline listener block is present in FIRPipelineBridge.h in the observable FirebaseFirestoreInternal headers imported by the public FirebaseFirestore framework.",
+      "evidence": [
+        "externals/FirebaseFirestoreInternal.xcframework/ios-arm64/FirebaseFirestoreInternal.framework/Headers/FIRPipelineBridge.h#L306-L310"
+      ]
+    },
+    {
       "id": "cloudfirestore-collectionreference-sharpie-wrapper-omission",
       "target": "CloudFirestore",
       "category": "stale-baseline-binding",
