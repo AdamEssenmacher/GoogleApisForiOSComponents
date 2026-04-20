@@ -1,62 +1,21 @@
-With the Google Maps SDK for iOS, you can add maps based on Google maps data to your application.  The SDK automatically handles access to the Google Maps servers, map display, and response to user gestures such as clicks and drags. You can also add markers, polylines, ground overlays and info windows to your map.  These objects provide additional information for map locations, and allow user interaction with the map.
+# Google Maps
 
-Showing a Map
-=============
+This path is retained for existing links, but this repository does not maintain a copied Google Maps walkthrough.
 
-### AppDelegate
+These packages are thin .NET bindings over native Google Apple SDKs. Use the official native documentation as the source of truth for setup, product behavior, console workflows, quotas, policy requirements, and examples.
 
-```csharp
-using Google.Maps;
-...
+## Native Documentation
 
-const string MapsApiKey = "<Get your ID at https://code.google.com/apis/console/>";
+- Google Maps documentation: https://developers.google.com/maps/documentation/ios-sdk
 
-public override bool FinishedLaunching (UIApplication app, NSDictionary options)
-{
-	MapServices.ProvideAPIKey (MapsApiKey);
-	...
-}
-```
+## Binding Project
 
-### Your View Controller
+- Package ID: `AdamE.Google.iOS.Maps`
+- Managed namespace: `Google.Maps`
+- Status note: This binding project is present in the repository and is part of the current Google package set described by the top-level README.
 
-```csharp
-using Google.Maps;
-...
+## Binding Notes
 
-MapView mapView;
+The native `GMSServices.provideAPIKey` setup maps to `Google.Maps.MapServices.ProvideApiKey(apiKey)` in this binding. The managed namespace is `Google.Maps`.
 
-public override void LoadView ()
-{
-	base.LoadView ();
-	
-	CameraPosition camera = CameraPosition.FromCamera (latitude: 37.797865, 
-			                                           longitude: -122.402526, 
-			                                           zoom: 6);
-	mapView = MapView.FromCamera (CGRect.Empty, camera);
-	mapView.MyLocationEnabled = true;
-
-	View = mapView;
-}
-
-public override void ViewWillAppear (bool animated)
-{
-	base.ViewWillAppear (animated);
-	mapView.StartRendering ();
-}
-
-public override void ViewWillDisappear (bool animated)
-{	
-	mapView.StopRendering ();
-	base.ViewWillDisappear (animated);
-}
-```
-
-Attribution Requirements
-========================
-
-If you use the Google Maps SDK for iOS in your application, you must include the attribution text as part of a legal notices section in your application. Including legal notices as an independent menu item, or as part of an "About" menu item, is recommended.
-
-You can get the attribution text by making a call to `Google.Maps.MapServices.OpenSourceLicenseInfo`
- 
-*Screenshots assembled with [PlaceIt](http://placeit.breezi.com/).*
+Document only binding-specific caveats in this repository. Product usage guidance belongs in the official native docs.

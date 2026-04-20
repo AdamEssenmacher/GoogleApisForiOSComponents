@@ -1,16 +1,18 @@
-Get clear, actionable insight into app issues with this powerful crash reporting solution.
+# Firebase Crashlytics
 
-Firebase Crashlytics is a lightweight, realtime crash reporter that helps you track, prioritize, and fix stability issues that erode your app quality. Crashlytics saves you troubleshooting time by intelligently grouping crashes and highlighting the circumstances that lead up to them.
+This path is retained for existing links, but this repository does not maintain a copied Firebase Crashlytics walkthrough.
 
-Find out if a particular crash is impacting a lot of users. Get alerts when an issue suddenly increases in severity. Figure out which lines of code are causing crashes.
+These packages are thin .NET bindings over the native Firebase Apple SDKs. Use the official native documentation as the source of truth for setup, product behavior, console workflows, quotas, policy requirements, and examples.
 
-## Key capabilities
+## Native Documentation
 
-|  | |
-|-:|-|
-| **Curated crash reports**   | Crashlytics synthesizes an avalanche of crashes into a manageable list of issues, provides contextual information, and highlights the severity and prevalence of crashes so you can pinpoint the root cause faster. |
-| **Cures for the common crash** | Crashlytics offers Crash Insights, helpful tips that highlight common stability problems and provide resources that make them easier to troubleshoot, triage, and resolve. |
-| **Integrated with Analytics** | Crashlytics can capture your app's errors as **app_exception** events in Analytics. The events simplify debugging by giving you access a list of other events leading up to each crash, and provide audience insights by letting you pull Analytics reports for users with crashes. |
-| **Realtime alerts** | Get realtime alerts for new issues, regressed issues, and growing issues that might require immediate attention. |
+- Firebase Apple setup: https://firebase.google.com/docs/ios/setup
+- Firebase Crashlytics documentation: https://firebase.google.com/docs/crashlytics/get-started
 
-<sub>_Portions of this page are modifications based on work created and [shared by Google](https://developers.google.com/readme/policies/) and used according to terms described in the [Creative Commons 3.0 Attribution License](http://creativecommons.org/licenses/by/3.0/). Click [here](https://firebase.google.com/docs/crashlytics/) to see original Firebase documentation._</sub>
+## Binding Package
+
+- Package README: [../NuGet/Crashlytics.md](../NuGet/Crashlytics.md)
+- Package ID: `AdamE.Firebase.iOS.Crashlytics`
+- Managed namespace: `Firebase.Crashlytics`
+
+Document only binding-specific caveats in this repository. Product usage guidance belongs in the official native docs.

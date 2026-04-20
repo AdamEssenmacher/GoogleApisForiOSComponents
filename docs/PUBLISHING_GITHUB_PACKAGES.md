@@ -1,24 +1,21 @@
-# Publishing to GitHub Packages (NuGet)
+# Publishing to GitHub Packages
 
-This repository can publish `.nupkg` files to GitHub Packages (NuGet feed) via GitHub Actions.
+This repository can publish `.nupkg` files to GitHub Packages through GitHub Actions.
 
-## How publishing works
+## How Publishing Works
 
 - A tag push triggers the publish workflow.
 - The workflow builds and packs NuGet packages.
-- Optionally, you can run the workflow manually (`workflow_dispatch`) and pass a custom Cake `--names` value.
-- The workflow pushes packages to:
-  - `https://nuget.pkg.github.com/<OWNER>/index.json`
+- The workflow can also be run manually with `workflow_dispatch` and a custom Cake `--names` value.
+- Packages are pushed to `https://nuget.pkg.github.com/<OWNER>/index.json`.
 
-## Consuming packages
+The publish workflow uses the built-in `GITHUB_TOKEN`; no app-specific publishing secret is required.
 
-Add GitHub Packages as a NuGet source and authenticate using a GitHub PAT (or workflow token in CI).
+## Consuming Packages
 
-Notes:
-- The publish workflow uses the built-in `GITHUB_TOKEN` (no extra repository secret is required).
-- Local development typically uses a GitHub PAT with `read:packages` (and `repo` for private repos).
+Add GitHub Packages as a NuGet source and authenticate using a GitHub token that can read packages for the owner account. Local development usually needs a PAT with `read:packages`; private repositories can also require repository access.
 
-Create a local `NuGet.Config` (or update your existing one) and add:
+Example local `NuGet.Config` source:
 
 ```xml
 <configuration>
@@ -28,4 +25,4 @@ Create a local `NuGet.Config` (or update your existing one) and add:
 </configuration>
 ```
 
-Then restore using credentials for the `<OWNER>` account.
+Keep credentials in local user-level NuGet configuration or local environment variables. Do not commit package-feed credentials.

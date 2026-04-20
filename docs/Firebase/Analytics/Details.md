@@ -1,20 +1,18 @@
-Firebase Analytics is a free app measurement solution that provides insight on app usage and user engagement.
+# Firebase Analytics
 
-At the heart of Firebase is Firebase Analytics, a free and unlimited analytics solution. Analytics integrates across Firebase features and provides you with unlimited reporting for up to 500 distinct events that you can define using the Firebase SDK. Analytics reports help you understand clearly how your users behave, which enables you to make informed decisions regarding app marketing and performance optimizations.
+This path is retained for existing links, but this repository does not maintain a copied Firebase Analytics walkthrough.
 
-## Key capabilities
+These packages are thin .NET bindings over the native Firebase Apple SDKs. Use the official native documentation as the source of truth for setup, product behavior, console workflows, quotas, policy requirements, and examples.
 
-|  | |
-|-:|-|
-| **Unlimited Reporting:**   | Firebase Analytics provides unlimited reporting on up to 500 distinct events. |
-| **Audience Segmentation:** | Custom audiences can be defined in the Firebase console based on device data, custom events, or user properties. These audiences can be used with other Firebase features when targeting new features or notifications messages. |
+## Native Documentation
 
-## How does it work?
+- Firebase Apple setup: https://firebase.google.com/docs/ios/setup
+- Firebase Analytics documentation: https://firebase.google.com/docs/analytics/get-started
 
-Firebase Analytics helps you understand how people use your iOS app. The SDK automatically captures a number of events and user properties and also allows you to define your own custom events to measure the things that uniquely matter to your business. Once the data is captured, it's available in a dashboard through the Firebase console. This dashboard provides detailed insights about your data — from summary data such as active users and demographics, to more detailed data such as identifying your most purchased items.
+## Binding Package
 
-Analytics also integrates with a number of other Firebase features. For example, it automatically logs events that correspond to notification messages sent via the Notifications composer and provides reporting on the impact of each campaign.
+- Package README: [../NuGet/Analytics.md](../NuGet/Analytics.md)
+- Package ID: `AdamE.Firebase.iOS.Analytics`
+- Managed namespace: `Firebase.Analytics`
 
-Firebase Analytics helps you understand how your users behave, so you can make informed decisions about how to market your app. See the performance of your campaigns across organic and paid channels to understand which methods are most effective at driving high-value users. If you need to perform custom analysis or join your data with other sources you can link your Analytics data to BigQuery, which allows for more complex analysis like querying large data sets and joining multiple data sources.
-
-<sub>_Portions of this page are modifications based on work created and [shared by Google](https://developers.google.com/readme/policies/) and used according to terms described in the [Creative Commons 3.0 Attribution License](http://creativecommons.org/licenses/by/3.0/). Click [here](https://firebase.google.com/docs/analytics/) to see original Firebase documentation._</sub>
+Document only binding-specific caveats in this repository. Product usage guidance belongs in the official native docs.

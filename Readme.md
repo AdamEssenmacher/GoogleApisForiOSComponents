@@ -104,6 +104,7 @@ Nullability updates are generally compile-time metadata changes, but they can su
 
 ## Quick links
 
+- Documentation index: [docs/README.md](docs/README.md)
 - Build locally: [docs/BUILDING.md](docs/BUILDING.md)
 - Publish to GitHub Packages: [docs/PUBLISHING_GITHUB_PACKAGES.md](docs/PUBLISHING_GITHUB_PACKAGES.md)
 - Contributing guidelines: [CONTRIBUTING.md](CONTRIBUTING.md)

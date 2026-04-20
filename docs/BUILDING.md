@@ -1,50 +1,47 @@
-# Building locally (macOS)
+# Building Locally
 
-This repo builds .NET iOS/macOS bindings and NuGet packages using Cake.
+This repository builds .NET iOS and Mac Catalyst bindings plus NuGet packages using Cake.
 
 ## Prerequisites
 
-- .NET SDK (see `global.json`)
-- Xcode (matching the installed iOS workload requirements)
-- CocoaPods (`pod`)
+- .NET SDK from `global.json`.
+- Xcode compatible with the installed .NET Apple workloads.
+- CocoaPods (`pod`).
 
-Restore the local Cake tool from the checked-in .NET tool manifest:
+Restore the checked-in Cake tool manifest before building:
 
 ```sh
 dotnet tool restore
 ```
 
-## Configure GitHub Packages feed (for fork contributors)
+## GitHub Packages Feed for Forks
 
-If you are working on a fork of this repository and want to resolve NuGet packages published from your fork, run:
+If you are working from a fork and need to restore packages published from that fork, configure a GitHub Packages source:
 
 ```sh
-# Using GitHub CLI (recommended)
 ./scripts/configure-github-feed.sh --gh
+```
 
-# Or using a personal access token
+You can also use a local personal access token with `read:packages` scope:
+
+```sh
 export GITHUB_PACKAGES_PAT="your_github_pat_here"
 ./scripts/configure-github-feed.sh
 ```
 
-This script:
-- Auto-detects your fork owner from the git remote URL
-- Configures a GitHub Packages feed (`github-<YourUsername>`)
-- Allows `dotnet restore` to resolve packages published from your fork
+Do not commit tokens or generated local NuGet credentials.
 
-**Note**: Your GitHub Personal Access Token must have the `read:packages` scope. See [GitHub docs](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#creating-a-personal-access-token-classic) for token creation.
+The script detects the fork owner from the git remote, adds a source named like `github-<YourUsername>`, and allows `dotnet restore` to resolve fork-published packages.
 
-## Build + pack a component
+## Build and Pack One Component
 
-Build and produce `.nupkg` files into `./output`:
+Build and produce `.nupkg` files under `./output`:
 
 ```sh
 dotnet tool run dotnet-cake -- --target=nuget --names=Google.SignIn
 ```
 
-## Clean-up
-
-To clean generated folders:
+## Clean Generated Output
 
 ```sh
 dotnet tool run dotnet-cake -- --target=clean
@@ -54,34 +51,30 @@ dotnet tool run dotnet-cake -- --target=clean
 
 ### MSB4057: The target "source/..." does not exist
 
-This error can occur when using MSBuild solution-level targets with certain .NET SDK versions. The `build.cake` script avoids this by building each `.csproj` directly in dependency order, which is more explicit and reliable.
+This can happen when using MSBuild solution-level targets with some .NET SDK versions. The Cake script builds `.csproj` files directly in dependency order to avoid that failure mode.
 
 ### NU1101: Unable to find package AdamE.Google.iOS.AppCheckCore
 
-Some packages (like `SignIn`) depend on `AppCheckCore` which is built from this repo. The Cake script handles this automatically by building dependencies first. If you still encounter this:
+Some packages depend on other packages built from this repository. The Cake script handles dependency-first packing. If restore still fails, run the component build through Cake instead of building the project directly:
 
-1. Ensure you're using the latest `build.cake` (it should iterate `ARTIFACTS_TO_BUILD`)
-2. Run the full build: `dotnet tool run dotnet-cake -- --target=nuget --names=Google.SignIn`
+```sh
+dotnet tool run dotnet-cake -- --target=nuget --names=Google.SignIn
+```
 
 ### Code signing errors during xcframework build
 
-The Cake scripts disable code signing by default (`CODE_SIGNING_ALLOWED=NO`) for CI compatibility. If you need signed frameworks, override the build settings in `common.cake`.
+The Cake scripts disable code signing by default (`CODE_SIGNING_ALLOWED=NO`) for CI compatibility. If you need signed frameworks, override the build settings locally instead of committing signing material.
 
 ### NuGet feed issues
 
-If you see errors like:
-```
-NU1101: Unable to find package AdamE.Firebase.iOS.AppCheck [...]
-```
+If restore cannot find packages from a fork, verify the configured sources:
 
-This may occur if your GitHub Packages feed is not configured. See "[Configure GitHub Packages feed](#configure-github-packages-feed-for-fork-contributors)" above.
-
-Verify your feed configuration:
 ```sh
 dotnet nuget list source
 ```
 
-Clear the NuGet cache if needed:
+Then clear local NuGet caches if needed:
+
 ```sh
 dotnet nuget locals all --clear
 dotnet restore
