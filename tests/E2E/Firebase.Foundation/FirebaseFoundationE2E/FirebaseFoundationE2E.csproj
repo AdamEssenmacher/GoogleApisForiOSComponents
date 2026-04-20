@@ -20,8 +20,8 @@
     <RuntimeDriftCasePropsPath></RuntimeDriftCasePropsPath>
     <BindingSurfaceCoverageTarget></BindingSurfaceCoverageTarget>
     <BindingSurfaceCoveragePropsPath></BindingSurfaceCoveragePropsPath>
-    <FirebasePackageVersion>12.7.0</FirebasePackageVersion>
-    <GoogleAppMeasurementPackageVersion>12.7.0</GoogleAppMeasurementPackageVersion>
+    <FirebasePackageVersion>12.8.0</FirebasePackageVersion>
+    <GoogleAppMeasurementPackageVersion>12.8.0</GoogleAppMeasurementPackageVersion>
   </PropertyGroup>
 
   <Import Project="$(RuntimeDriftCasePropsPath)" Condition="'$(RuntimeDriftCasePropsPath)' != '' and Exists('$(RuntimeDriftCasePropsPath)')" />

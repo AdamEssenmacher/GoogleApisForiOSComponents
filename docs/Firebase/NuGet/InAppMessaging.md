@@ -47,7 +47,7 @@ When multi-targeting, condition the package reference so it only restores for Ap
 
 ```xml
 <ItemGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios' Or $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">
-  <PackageReference Include="AdamE.Firebase.iOS.InAppMessaging" Version="12.7.0" />
+  <PackageReference Include="AdamE.Firebase.iOS.InAppMessaging" Version="12.8.0" />
 </ItemGroup>
 ```
 
@@ -79,7 +79,7 @@ inAppMessaging.TriggerEvent("purchase_complete");
 - `AdamE.Firebase.iOS.ABTesting` - package metadata references Firebase A/B Testing for campaign experiment handling.
 - `AdamE.Firebase.iOS.Analytics` - commonly used with In-App Messaging campaign triggers and measurement.
 
-This package is part of the Firebase `12.7.0` package line in this repository. Firebase's aggregate `Firebase/InAppMessaging` `12.7.0` CocoaPods subspec resolves the native `FirebaseInAppMessaging` `12.7.0-beta` pod.
+This package is part of the Firebase `12.8.0` package line in this repository. Firebase's aggregate `Firebase/InAppMessaging` `12.8.0` CocoaPods subspec resolves the native `FirebaseInAppMessaging` `12.8.0-beta` pod.
 
 ## Firebase app configuration
 
@@ -102,9 +102,9 @@ Example:
 
 ```xml
 <ItemGroup>
-  <PackageReference Include="AdamE.Firebase.iOS.Core" Version="12.7.0" />
-  <PackageReference Include="AdamE.Firebase.iOS.Auth" Version="12.7.0" />
-  <PackageReference Include="AdamE.Firebase.iOS.CloudFirestore" Version="12.7.0" />
+  <PackageReference Include="AdamE.Firebase.iOS.Core" Version="12.8.0" />
+  <PackageReference Include="AdamE.Firebase.iOS.Auth" Version="12.8.0" />
+  <PackageReference Include="AdamE.Firebase.iOS.CloudFirestore" Version="12.8.0" />
 </ItemGroup>
 ```
 

@@ -1,5 +1,5 @@
 ﻿<Project>
   <PropertyGroup>
-    <_FirebaseAppCheckAssemblyName>Firebase.AppCheck, Version=12.7.0, Culture=neutral, PublicKeyToken=null</_FirebaseAppCheckAssemblyName>
+    <_FirebaseAppCheckAssemblyName>Firebase.AppCheck, Version=12.8.0, Culture=neutral, PublicKeyToken=null</_FirebaseAppCheckAssemblyName>
   </PropertyGroup>
 </Project>

@@ -46,7 +46,7 @@ When multi-targeting, condition the package reference so it only restores for Ap
 
 ```xml
 <ItemGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios' Or $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">
-  <PackageReference Include="AdamE.Firebase.iOS.AppDistribution" Version="12.7.0" />
+  <PackageReference Include="AdamE.Firebase.iOS.AppDistribution" Version="12.8.0" />
 </ItemGroup>
 ```
 
@@ -88,7 +88,7 @@ if (!appDistribution.IsTesterSignedIn)
 - `AdamE.Firebase.iOS.Core` - Firebase app initialization.
 - `AdamE.Firebase.iOS.Installations` - package metadata references Firebase Installations for underlying Firebase identity support.
 
-This package is part of the Firebase `12.7.0` package line. Firebase's `12.7.0` aggregate CocoaPods spec exposes App Distribution through `Firebase/AppDistribution`, which resolves the native `FirebaseAppDistribution` pod at `12.7.0-beta`.
+This package is part of the Firebase `12.8.0` package line. Firebase's `12.8.0` aggregate CocoaPods spec exposes App Distribution through `Firebase/AppDistribution`, which resolves the native `FirebaseAppDistribution` pod at `12.8.0-beta`.
 
 ## Firebase app configuration
 
@@ -111,9 +111,9 @@ Example:
 
 ```xml
 <ItemGroup>
-  <PackageReference Include="AdamE.Firebase.iOS.Core" Version="12.7.0" />
-  <PackageReference Include="AdamE.Firebase.iOS.Auth" Version="12.7.0" />
-  <PackageReference Include="AdamE.Firebase.iOS.CloudFirestore" Version="12.7.0" />
+  <PackageReference Include="AdamE.Firebase.iOS.Core" Version="12.8.0" />
+  <PackageReference Include="AdamE.Firebase.iOS.Auth" Version="12.8.0" />
+  <PackageReference Include="AdamE.Firebase.iOS.CloudFirestore" Version="12.8.0" />
 </ItemGroup>
 ```
 

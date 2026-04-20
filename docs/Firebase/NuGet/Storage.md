@@ -47,7 +47,7 @@ When multi-targeting, condition the package reference so it only restores for Ap
 
 ```xml
 <ItemGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios' Or $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">
-  <PackageReference Include="AdamE.Firebase.iOS.Storage" Version="12.7.0" />
+  <PackageReference Include="AdamE.Firebase.iOS.Storage" Version="12.8.0" />
 </ItemGroup>
 ```
 
@@ -115,9 +115,9 @@ Example:
 
 ```xml
 <ItemGroup>
-  <PackageReference Include="AdamE.Firebase.iOS.Core" Version="12.7.0" />
-  <PackageReference Include="AdamE.Firebase.iOS.Auth" Version="12.7.0" />
-  <PackageReference Include="AdamE.Firebase.iOS.CloudFirestore" Version="12.7.0" />
+  <PackageReference Include="AdamE.Firebase.iOS.Core" Version="12.8.0" />
+  <PackageReference Include="AdamE.Firebase.iOS.Auth" Version="12.8.0" />
+  <PackageReference Include="AdamE.Firebase.iOS.CloudFirestore" Version="12.8.0" />
 </ItemGroup>
 ```
 
