@@ -29,10 +29,14 @@ public static class FirebaseSelfTestRunner
 #if ENABLE_BINDING_SURFACE_COVERAGE
         await statusViewController.AppendLineAsync("Firebase binding surface coverage mode enabled.");
 #endif
-        var runtimeDriftCase = FirebaseRuntimeDriftCases.GetConfiguredCaseId();
-        if (!string.IsNullOrWhiteSpace(runtimeDriftCase))
+        var runtimeDriftCases = FirebaseRuntimeDriftCases.GetConfiguredCases();
+        if (runtimeDriftCases.Count > 0)
         {
-            await statusViewController.AppendLineAsync($"Runtime drift case mode enabled: {runtimeDriftCase}");
+            var configuredCaseId = FirebaseRuntimeDriftCases.GetConfiguredCaseId();
+            var caseDisplay = string.Equals(configuredCaseId, "all", StringComparison.OrdinalIgnoreCase)
+                ? $"all ({runtimeDriftCases.Count} cases)"
+                : runtimeDriftCases[0].Id;
+            await statusViewController.AppendLineAsync($"Runtime drift case mode enabled: {caseDisplay}");
         }
 
         try
@@ -52,10 +56,13 @@ public static class FirebaseSelfTestRunner
                 return $"Configured app '{defaultApp.Name}'.";
             });
 
-            if (!string.IsNullOrWhiteSpace(runtimeDriftCase))
+            if (runtimeDriftCases.Count > 0)
             {
-                await ExecuteCaseAsync(result, statusViewController, $"RuntimeDrift:{runtimeDriftCase}", () =>
-                    FirebaseRuntimeDriftCases.ExecuteConfiguredCaseAsync());
+                foreach (var runtimeDriftCase in runtimeDriftCases)
+                {
+                    await ExecuteCaseAsync(result, statusViewController, $"RuntimeDrift:{runtimeDriftCase.Id}", () =>
+                        FirebaseRuntimeDriftCases.ExecuteConfiguredCaseAsync(runtimeDriftCase));
+                }
             }
 #if ENABLE_BINDING_SURFACE_COVERAGE
             else if (!string.IsNullOrWhiteSpace(FirebaseBindingSurfaceCoverage.GetConfiguredTarget()))

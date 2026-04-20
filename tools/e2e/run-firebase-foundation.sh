@@ -3,7 +3,7 @@ set -euo pipefail
 
 usage() {
   cat <<'EOF'
-Usage: tools/e2e/run-firebase-foundation.sh [--package-dir output] [--configuration Release] [--enable-nullability-validation] [--runtime-drift-case <id>] [--binding-surface-target <target|all>]
+Usage: tools/e2e/run-firebase-foundation.sh [--package-dir output] [--configuration Release] [--enable-nullability-validation] [--runtime-drift-case <id|all>] [--binding-surface-target <target|all>]
 EOF
 }
 
@@ -27,6 +27,7 @@ runtime_drift_props="$artifacts_dir/runtime-drift-case.generated.props"
 runtime_drift_info="$artifacts_dir/runtime-drift-case.info"
 runtime_drift_method=""
 runtime_drift_binding_package=""
+runtime_drift_case_count=""
 binding_surface_manifest="$repo_root/tests/E2E/Firebase.Foundation/binding-surface-coverage.json"
 binding_surface_document="$artifacts_dir/binding-surface-coverage.generated.json"
 binding_surface_props="$artifacts_dir/binding-surface-coverage.generated.props"
@@ -127,48 +128,113 @@ manifest_path = pathlib.Path(sys.argv[1])
 case_id = sys.argv[2]
 props_path = pathlib.Path(sys.argv[3])
 manifest = json.loads(manifest_path.read_text())
+cases = manifest.get("cases", [])
 
-case = next((entry for entry in manifest.get("cases", []) if entry.get("id") == case_id), None)
-if case is None:
-    available = ", ".join(sorted(entry.get("id", "<missing>") for entry in manifest.get("cases", [])))
-    raise SystemExit(f"Unknown runtime drift case '{case_id}'. Available cases: {available}")
+if case_id == "all":
+    selected_cases = cases
+else:
+    case = next((entry for entry in cases if entry.get("id") == case_id), None)
+    if case is None:
+        available = ", ".join(sorted(entry.get("id", "<missing>") for entry in cases))
+        raise SystemExit(f"Unknown runtime drift case '{case_id}'. Available cases: {available}, all")
+    selected_cases = [case]
 
-method = case.get("method")
-binding_package = case.get("bindingPackage")
-packages = case.get("packages", [])
+if not selected_cases:
+    raise SystemExit("Runtime drift manifest does not contain any cases.")
 
-if not method or not binding_package or packages is None:
-    raise SystemExit(f"Runtime drift case '{case_id}' is missing required manifest fields.")
+package_versions = {}
+required_package_ids = set()
 
-symbol = "ENABLE_RUNTIME_DRIFT_CASE_" + re.sub(r"[^A-Za-z0-9]+", "_", case_id).strip("_").upper()
+def add_package(package):
+    package_id = package.get("id")
+    version = package.get("version")
+    if not package_id or not version:
+        raise SystemExit("Runtime drift package entries must include id and version.")
+
+    existing = package_versions.get(package_id)
+    if existing is not None and existing != version:
+        raise SystemExit(
+            f"Runtime drift manifest contains conflicting versions for '{package_id}': '{existing}' and '{version}'."
+        )
+
+    package_versions[package_id] = version
+    required_package_ids.add(package_id)
+
+case_entries = []
+symbols = []
+binding_packages = []
+
+for selected_case in selected_cases:
+    selected_case_id = selected_case.get("id")
+    method = selected_case.get("method")
+    binding_package = selected_case.get("bindingPackage")
+    packages = selected_case.get("packages", [])
+
+    if not selected_case_id or not method or not binding_package or packages is None:
+        raise SystemExit(f"Runtime drift case '{selected_case_id or '<missing>'}' is missing required manifest fields.")
+
+    binding_packages.append(binding_package)
+    required_package_ids.add(binding_package)
+    case_entries.append(f"{selected_case_id}={method}")
+    symbols.append("ENABLE_RUNTIME_DRIFT_CASE_" + re.sub(r"[^A-Za-z0-9]+", "_", selected_case_id).strip("_").upper())
+
+    for package in packages:
+        add_package(package)
+
+runtime_cases = ",".join(case_entries)
+define_constants = "$(DefineConstants);ENABLE_RUNTIME_DRIFT_CASE;" + ";".join(symbols)
+single_method = selected_cases[0].get("method") if len(selected_cases) == 1 else ""
 props_path.write_text(
     "<Project>\n"
     "  <PropertyGroup>\n"
     f"    <RuntimeDriftCase>{escape(case_id)}</RuntimeDriftCase>\n"
-    f"    <RuntimeDriftCaseMethod>{escape(method)}</RuntimeDriftCaseMethod>\n"
-    f"    <DefineConstants>$(DefineConstants);ENABLE_RUNTIME_DRIFT_CASE;{escape(symbol)}</DefineConstants>\n"
+    f"    <RuntimeDriftCaseMethod>{escape(single_method)}</RuntimeDriftCaseMethod>\n"
+    f"    <RuntimeDriftCases>{escape(runtime_cases)}</RuntimeDriftCases>\n"
+    f"    <DefineConstants>{escape(define_constants)}</DefineConstants>\n"
     "  </PropertyGroup>\n"
     "  <ItemGroup>\n"
     + "".join(
-        f"    <PackageReference Include=\"{escape(package['id'])}\" Version=\"{escape(package['version'])}\" />\n"
-        for package in packages
+        f"    <PackageReference Include=\"{escape(package_id)}\" Version=\"{escape(package_versions[package_id])}\" />\n"
+        for package_id in sorted(package_versions)
     )
     + "  </ItemGroup>\n"
     "</Project>\n"
 )
 
-print(method)
-print(binding_package)
-for package in packages:
-    print(package["id"])
+print(f"case-count|{len(selected_cases)}")
+if len(selected_cases) == 1:
+    print(f"method|{selected_cases[0]['method']}")
+for selected_case in selected_cases:
+    print(f"case|{selected_case['id']}")
+for binding_package in sorted(set(binding_packages)):
+    print(f"binding-package|{binding_package}")
+for package_id in sorted(required_package_ids):
+    print(f"package|{package_id}")
 PY
 
   runtime_drift_details=("${(@f)$(<"$runtime_drift_info")}")
-  runtime_drift_method="${runtime_drift_details[1]}"
-  runtime_drift_binding_package="${runtime_drift_details[2]}"
-  required_packages+=("$runtime_drift_binding_package")
-  for (( i = 3; i <= ${#runtime_drift_details[@]}; i++ )); do
-    required_packages+=("${runtime_drift_details[$i]}")
+  for runtime_drift_detail in "${runtime_drift_details[@]}"; do
+    runtime_drift_key="${runtime_drift_detail%%|*}"
+    runtime_drift_value="${runtime_drift_detail#*|}"
+    case "$runtime_drift_key" in
+      case-count)
+        runtime_drift_case_count="$runtime_drift_value"
+        ;;
+      method)
+        runtime_drift_method="$runtime_drift_value"
+        ;;
+      binding-package)
+        if [[ -z "$runtime_drift_binding_package" ]]; then
+          runtime_drift_binding_package="$runtime_drift_value"
+        else
+          runtime_drift_binding_package="$runtime_drift_binding_package,$runtime_drift_value"
+        fi
+        required_packages+=("$runtime_drift_value")
+        ;;
+      package)
+        required_packages+=("$runtime_drift_value")
+        ;;
+    esac
   done
 
   msbuild_args+=(
@@ -178,7 +244,11 @@ PY
   )
   restore_args+=("--force-evaluate")
 
-  echo "Runtime drift case: $runtime_drift_case ($runtime_drift_binding_package)"
+  if [[ "$runtime_drift_case" == "all" ]]; then
+    echo "Runtime drift cases: all ($runtime_drift_case_count cases)"
+  else
+    echo "Runtime drift case: $runtime_drift_case ($runtime_drift_binding_package)"
+  fi
 fi
 
 if [[ -n "$binding_surface_target" ]]; then
@@ -332,7 +402,13 @@ xcrun simctl launch --terminate-running-process "$simulator_udid" "$bundle_id" >
 data_container="$(xcrun simctl get_app_container "$simulator_udid" "$bundle_id" data)"
 container_result_file="$data_container/Library/Caches/firebase-foundation-e2e-result.json"
 
-timeout_seconds="${E2E_TIMEOUT_SECONDS:-90}"
+default_timeout_seconds=90
+timeout_seconds="${E2E_TIMEOUT_SECONDS:-$default_timeout_seconds}"
+if [[ -z "${E2E_TIMEOUT_SECONDS:-}" && "$runtime_drift_case" == "all" && "$runtime_drift_case_count" == <-> ]]; then
+  timeout_seconds=$((default_timeout_seconds + runtime_drift_case_count * 10))
+fi
+echo "Waiting up to $timeout_seconds seconds for E2E result"
+
 elapsed=0
 while [[ ! -f "$container_result_file" ]]; do
   if (( elapsed >= timeout_seconds )); then
