@@ -51,7 +51,25 @@ There is no separate `Crashlytics.Configure()` call in the current binding surfa
 
 Runtime collection controls are exposed through `Crashlytics.SharedInstance.SetCrashlyticsCollectionEnabled(...)`, `IsCrashlyticsCollectionEnabled`, `CheckForUnsentReports(...)`, `SendUnsentReports()`, and `DeleteUnsentReports()`. Use the native Crashlytics docs as the source of truth for the matching plist keys and consent behavior.
 
-The NuGet package also ships MSBuild targets for Firebase dSYM symbol upload. Release app builds enable symbol upload by default; set `FirebaseCrashlyticsUploadSymbolsEnabled=false` to disable it, and set `FirebaseCrashlyticsUploadSymbolsContinueOnError=false` when symbol-upload failures should fail the build. The upload target expects the app bundle to contain `GoogleService-Info.plist`.
+The NuGet package also ships MSBuild targets for Firebase dSYM symbol upload. Release app builds enable symbol upload by default. Set these properties in the consuming app project file, or in `Directory.Build.targets` for a shared repo policy.
+
+To disable symbol upload:
+
+```xml
+<PropertyGroup>
+  <FirebaseCrashlyticsUploadSymbolsEnabled>false</FirebaseCrashlyticsUploadSymbolsEnabled>
+</PropertyGroup>
+```
+
+To keep upload enabled but fail the build if upload fails:
+
+```xml
+<PropertyGroup>
+  <FirebaseCrashlyticsUploadSymbolsContinueOnError>false</FirebaseCrashlyticsUploadSymbolsContinueOnError>
+</PropertyGroup>
+```
+
+For one-off builds, pass the same values as command-line MSBuild properties, such as `dotnet build -c Release /p:FirebaseCrashlyticsUploadSymbolsEnabled=false`. Prefer the app `.csproj`, `Directory.Build.targets`, or command-line properties over `Directory.Build.props` so the value is applied after NuGet package props set their defaults. The upload target expects the app bundle to contain `GoogleService-Info.plist`.
 
 ## Version Alignment
 
