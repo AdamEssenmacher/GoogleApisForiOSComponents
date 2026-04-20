@@ -47,6 +47,12 @@ Most Firebase feature packages require `AdamE.Firebase.iOS.Core` and app startup
 
 Crashlytics is native crash reporting, not a complete managed .NET exception-reporting replacement. On .NET 8 iOS projects, the top-level README includes an `_ExportSymbolsExplicitly` workaround for missing symbol/export issues.
 
+There is no separate `Crashlytics.Configure()` call in the current binding surface. After Firebase is configured, use `Firebase.Crashlytics.Crashlytics.SharedInstance` for Crashlytics APIs such as `Log(...)`, `SetCustomValue(...)`, `SetUserId(...)`, `RecordError(...)`, and `RecordExceptionModel(...)`.
+
+Runtime collection controls are exposed through `Crashlytics.SharedInstance.SetCrashlyticsCollectionEnabled(...)`, `IsCrashlyticsCollectionEnabled`, `CheckForUnsentReports(...)`, `SendUnsentReports()`, and `DeleteUnsentReports()`. Use the native Crashlytics docs as the source of truth for the matching plist keys and consent behavior.
+
+The NuGet package also ships MSBuild targets for Firebase dSYM symbol upload. Release app builds enable symbol upload by default; set `FirebaseCrashlyticsUploadSymbolsEnabled=false` to disable it, and set `FirebaseCrashlyticsUploadSymbolsContinueOnError=false` when symbol-upload failures should fail the build. The upload target expects the app bundle to contain `GoogleService-Info.plist`.
+
 ## Version Alignment
 
 Firebase Apple SDKs are packaged as native xcframeworks. Applications should pin package versions intentionally and keep all `AdamE.Firebase.iOS.*` packages on the same major/minor Firebase line.
