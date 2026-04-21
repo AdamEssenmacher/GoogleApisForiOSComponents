@@ -624,7 +624,7 @@ void BuildXcodeXcframework (FilePath xcodeProject, PodSpec [] podSpecs, Platform
 		}
 
 		Information ($"Building {podSpec.FrameworkName} xcframework...");
-		StartProcess("xcodebuild", new ProcessSettings { Arguments = xcodeBuildArgs });
+		ThrowIfProcessFailed ("xcodebuild -create-xcframework", StartProcess ("xcodebuild", new ProcessSettings { Arguments = xcodeBuildArgs }));
 	}
 }
 
