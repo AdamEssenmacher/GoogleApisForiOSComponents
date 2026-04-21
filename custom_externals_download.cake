@@ -20,8 +20,8 @@ class ExternalDownloadSource
 // FirebaseAnalytics: https://github.com/CocoaPods/Specs/tree/master/Specs/e/2/1/FirebaseAnalytics
 // GoogleAppMeasurement: https://github.com/CocoaPods/Specs/tree/master/Specs/e/3/b/GoogleAppMeasurement
 var ExternalDownloads = new Dictionary<string, ExternalDownloadSource> {
-	{ "FirebaseAnalytics", new ExternalDownloadSource ("FirebaseAnalytics", "12.8.0", "3b57be475bd21097") },
-	{ "GoogleAppMeasurement", new ExternalDownloadSource ("GoogleAppMeasurement", "12.8.0", "48879432478c47b8") },
+	{ "FirebaseAnalytics", new ExternalDownloadSource ("FirebaseAnalytics", "12.10.0", "3c185b45848d98d8") },
+	{ "GoogleAppMeasurement", new ExternalDownloadSource ("GoogleAppMeasurement", "12.10.0", "5f5e4d8cb469941e") },
 };
 
 FilePath GetArchivePath (ExternalDownloadSource source, DirectoryPath externalsPath) =>

@@ -143,7 +143,7 @@ If your project targets multiple platforms, keep these packages inside Apple-onl
 
 ```xml
 <ItemGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">
-  <PackageReference Include="AdamE.Firebase.iOS.Core" Version="12.9.0" />
+  <PackageReference Include="AdamE.Firebase.iOS.Core" Version="12.10.0" />
 </ItemGroup>
 ```
 
@@ -167,7 +167,7 @@ Archiving can still be more reliable on macOS or from the command line.
 
 The lists below reflect what is currently published on [nuget.org](https://www.nuget.org/profiles/adamessenmacher) under the `adamessenmacher` owner profile. That is intentionally different from the repo state in [`components.cake`](components.cake): the repo can contain projects or version bumps that have not been published yet.
 
-Firebase `12.9.0` is the current published Firebase package line.
+Firebase `12.10.0` is the current published Firebase package line.
 
 ### Currently published on nuget.org
 
@@ -175,22 +175,22 @@ Firebase `12.9.0` is the current published Firebase package line.
 
 | Package | Version |
 | --- | --- |
-| `ABTesting` | `12.9.0` |
-| `Analytics` | `12.9.0` |
-| `AppCheck` | `12.9.0` |
-| `AppDistribution` | `12.9.0` |
-| `Auth` | `12.9.0` |
-| `CloudFirestore` | `12.9.0` |
-| `CloudFunctions` | `12.9.0` |
-| `CloudMessaging` | `12.9.0` |
-| `Core` | `12.9.0` |
-| `Crashlytics` | `12.9.0` |
-| `Database` | `12.9.0` |
-| `InAppMessaging` | `12.9.0` |
-| `Installations` | `12.9.0` |
-| `PerformanceMonitoring` | `12.9.0` |
-| `RemoteConfig` | `12.9.0` |
-| `Storage` | `12.9.0` |
+| `ABTesting` | `12.10.0` |
+| `Analytics` | `12.10.0` |
+| `AppCheck` | `12.10.0` |
+| `AppDistribution` | `12.10.0` |
+| `Auth` | `12.10.0` |
+| `CloudFirestore` | `12.10.0` |
+| `CloudFunctions` | `12.10.0` |
+| `CloudMessaging` | `12.10.0` |
+| `Core` | `12.10.0` |
+| `Crashlytics` | `12.10.0` |
+| `Database` | `12.10.0` |
+| `InAppMessaging` | `12.10.0` |
+| `Installations` | `12.10.0` |
+| `PerformanceMonitoring` | `12.10.0` |
+| `RemoteConfig` | `12.10.0` |
+| `Storage` | `12.10.0` |
 
 #### Google packages (`AdamE.Google.iOS.*`)
 
@@ -207,7 +207,7 @@ These packages are usually consumed transitively rather than referenced directly
 | Package | Version |
 | --- | --- |
 | `AppCheckCore` | `11.2.0` |
-| `GoogleAppMeasurement` | `12.9.0` |
+| `GoogleAppMeasurement` | `12.10.0` |
 | `GoogleDataTransport` | `10.1.0.5` |
 | `GoogleUtilities` | `8.1.0.3` |
 | `Nanopb` | `3.30910.0.5` |
