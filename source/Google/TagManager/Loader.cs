@@ -9,7 +9,6 @@ namespace Google.TagManager
 			Firebase.Core.Loader.ForceLoad ();
 			Firebase.Installations.Loader.ForceLoad ();
 			Firebase.Analytics.Loader.ForceLoad ();
-			Google.Analytics.Loader.ForceLoad ();
 		}
 
 		public static void ForceLoad ()

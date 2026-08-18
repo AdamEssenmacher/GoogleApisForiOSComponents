@@ -24,7 +24,7 @@ Artifact GOOGLE_UMP_ARTIFACT                       = new Artifact ("Google.UserM
 Artifact GOOGLE_PLACES_ARTIFACT                    = new Artifact ("Google.Places",                   "7.4.0.2",   "15.0", ComponentGroup.Google, csprojName: "Places");
 Artifact GOOGLE_APP_CHECK_CORE_ARTIFACT            = new Artifact ("Google.AppCheckCore",             "11.2.0.0",  "15.0", ComponentGroup.Google, csprojName: "AppCheckCore");
 Artifact GOOGLE_SIGN_IN_ARTIFACT                   = new Artifact ("Google.SignIn",                   "9.0.0.0",   "15.0", ComponentGroup.Google, csprojName: "SignIn");
-Artifact GOOGLE_TAG_MANAGER_ARTIFACT               = new Artifact ("Google.TagManager",               "7.4.0.2",   "15.0", ComponentGroup.Google, csprojName: "TagManager");
+Artifact GOOGLE_TAG_MANAGER_ARTIFACT               = new Artifact ("Google.TagManager",               "9.2.0.0",   "15.0", ComponentGroup.Google, csprojName: "TagManager");
 
 Artifact GOOGLE_GOOGLE_APP_MEASUREMENT_ARTIFACT    = new Artifact ("Google.AppMeasurement",           "12.10.0",      "15.0", ComponentGroup.Google, csprojName: "GoogleAppMeasurement");
 Artifact GOOGLE_PROMISES_OBJC_ARTIFACT             = new Artifact ("Google.PromisesObjC",             "2.4.0.5",     "15.0", ComponentGroup.Google, csprojName: "PromisesObjC");
@@ -237,7 +237,7 @@ void SetArtifactsPodSpecs ()
 		PodSpec.Create ("AppCheckCore", "11.2.0", frameworkSource: FrameworkSource.Pods),
 	};
 	GOOGLE_TAG_MANAGER_ARTIFACT.PodSpecs = new [] {
-		PodSpec.Create ("GoogleTagManager", "7.4.0")
+		PodSpec.Create ("GoogleTagManager", "9.2.0")
 	};
     GOOGLE_GOOGLE_APP_MEASUREMENT_ARTIFACT.PodSpecs = new [] {
         PodSpec.Create ("GoogleAppMeasurement", "12.10.0")
