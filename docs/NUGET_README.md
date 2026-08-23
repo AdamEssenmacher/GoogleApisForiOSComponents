@@ -12,9 +12,7 @@ This package README covers only binding and NuGet concerns.
 
 These packages are intended for iOS and Mac Catalyst TFMs, for example:
 
-- `net9.0-ios`
 - `net10.0-ios`
-- `net9.0-maccatalyst`
 - `net10.0-maccatalyst`
 
 When multi-targeting, condition the reference so it restores only for Apple targets:

@@ -119,7 +119,7 @@ dotnet tool run dotnet-cake -- --target=nuget --names=Google.SignIn
 
 ## Installation and usage notes
 
-These packages are intended for Apple TFMs such as `net9.0-ios`, `net10.0-ios`, and their Mac Catalyst equivalents.
+These packages target `net10.0-ios` and `net10.0-maccatalyst`. .NET 9 is no longer supported.
 
 ### `Firebase.Installations` may need an explicit reference
 
@@ -222,7 +222,7 @@ These packages are usually consumed transitively rather than referenced directly
 
 ### Published on nuget.org, but older / legacy package lines
 
-These packages are still published on nuget.org, but they are not part of the current .NET 9 / .NET 10 publishing wave:
+These packages are still published on nuget.org, but they are not part of the current .NET 10 publishing wave:
 
 - `AdamE.Firebase.iOS.DynamicLinks` `11.15.0`
 - `AdamE.Google.iOS.GTMSessionFetcher` `4.3.0`
