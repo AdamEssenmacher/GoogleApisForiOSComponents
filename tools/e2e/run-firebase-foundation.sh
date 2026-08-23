@@ -340,7 +340,7 @@ dotnet restore "$project_file" --configfile "$restore_config" --packages "$packa
 echo "Cleaning FirebaseFoundationE2E for iOS simulator"
 dotnet clean "$project_file" \
   --configuration "$configuration" \
-  --framework net9.0-ios \
+  --framework net10.0-ios \
   -p:Platform=iPhoneSimulator \
   -p:RuntimeIdentifier=iossimulator-arm64 \
   "${msbuild_args[@]}"
@@ -348,13 +348,13 @@ dotnet clean "$project_file" \
 echo "Building FirebaseFoundationE2E for iOS simulator"
 dotnet build "$project_file" \
   --configuration "$configuration" \
-  --framework net9.0-ios \
+  --framework net10.0-ios \
   --no-restore \
   -p:Platform=iPhoneSimulator \
   -p:RuntimeIdentifier=iossimulator-arm64 \
   "${msbuild_args[@]}"
 
-app_path="$(find "$project_dir/bin" -path "*iPhoneSimulator/$configuration/net9.0-ios/iossimulator-arm64/FirebaseFoundationE2E.app" -print -quit)"
+app_path="$(find "$project_dir/bin" -path "*iPhoneSimulator/$configuration/net10.0-ios/iossimulator-arm64/FirebaseFoundationE2E.app" -print -quit)"
 if [[ ! -d "$app_path" ]]; then
   echo "Built app not found: $app_path" >&2
   exit 1

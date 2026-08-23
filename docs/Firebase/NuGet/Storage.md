@@ -20,9 +20,7 @@ These packages are thin bindings over the native Firebase Apple SDK. The native 
 
 Supported target frameworks include:
 
-- `net9.0-ios`
 - `net10.0-ios`
-- `net9.0-maccatalyst`
 - `net10.0-maccatalyst`
 
 When multi-targeting, condition package references so they restore only for Apple targets:
