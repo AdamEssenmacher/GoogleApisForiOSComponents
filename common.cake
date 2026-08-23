@@ -563,9 +563,10 @@ void BuildXcodeXcframework (FilePath xcodeProject, PodSpec [] podSpecs, Platform
 
 		var target = podSpec.TargetName;
 		var buildDirectory = workingDirectory.Combine (podSpec.FrameworkName);
+		var xcframeworkPath = workingDirectory.Combine ($"{podSpec.FrameworkName}.xcframework");
 		var xcodeBuildArgs = new ProcessArgumentBuilder();
 		xcodeBuildArgs.Append ("-create-xcframework");
-		xcodeBuildArgs.Append($"-output {workingDirectory}/{podSpec.FrameworkName}.xcframework");
+		xcodeBuildArgs.Append($"-output {xcframeworkPath}");
 		
 		foreach (var platform in platforms) {
 			Information ($"Building {podSpec.FrameworkName} framework with {platform.Sdk} platform SDK...");
@@ -624,6 +625,12 @@ void BuildXcodeXcframework (FilePath xcodeProject, PodSpec [] podSpecs, Platform
 		}
 
 		Information ($"Building {podSpec.FrameworkName} xcframework...");
+
+		// xcodebuild -create-xcframework fails when its output path already exists,
+		// so drop the xcframework left behind by any previous run.
+		if (DirectoryExists (xcframeworkPath))
+			DeleteDirectory (xcframeworkPath, new DeleteDirectorySettings { Recursive = true, Force = true });
+
 		ThrowIfProcessFailed ("xcodebuild -create-xcframework", StartProcess ("xcodebuild", new ProcessSettings { Arguments = xcodeBuildArgs }));
 	}
 }
