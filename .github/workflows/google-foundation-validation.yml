@@ -73,30 +73,11 @@ jobs:
       - name: Pack Google.Places
         run: dotnet tool run dotnet-cake -- --target=nuget --names=Google.Places
 
-      - name: Resolve packed package version
-        id: package
-        shell: zsh
-        run: |
-          matches=(output/AdamE.Google.iOS.Places.*.nupkg(N))
-          packages=()
-          for package in "${matches[@]}"; do
-            [[ "$package" == *.symbols.nupkg ]] || packages+=("$package")
-          done
-          if (( ${#packages[@]} != 1 )); then
-            print -u2 -- "Expected exactly one packed Google.Places package; found ${#packages[@]}."
-            printf '  %s\n' "${packages[@]}" >&2
-            exit 1
-          fi
-          package_name="${packages[1]:t}"
-          package_version="${${package_name#AdamE.Google.iOS.Places.}%.nupkg}"
-          print -r -- "version=$package_version" >> "$GITHUB_OUTPUT"
-
       - name: Direct and transitive consumer checks
         run: >-
           tools/e2e/check-consumer-shapes.sh
           --target Places
           --package-dir output
-          --package-version "${{ steps.package.outputs.version }}"
 
       - name: Simulator E2E
         run: >-
@@ -104,7 +85,6 @@ jobs:
           --target Places
           --package-dir output
           --configuration Debug
-          --package-version "${{ steps.package.outputs.version }}"
 
       - name: Upload diagnostics
         if: failure()
