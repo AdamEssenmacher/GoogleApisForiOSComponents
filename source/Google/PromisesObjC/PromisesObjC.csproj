@@ -32,8 +32,6 @@
     <Compile Include="..\..\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>    
-    <None Include="PromisesObjC.targets" Pack="True" PackagePath="build/AdamE.Google.iOS.PromisesObjC.targets" />
-    <None Include="PromisesObjC.targets" Pack="True" PackagePath="buildTransitive/AdamE.Google.iOS.PromisesObjC.targets" />
     <None Include="License.md" Pack="True" PackagePath="License.md" />
     <None Include="../../../docs/NUGET_README.md" Pack="True" PackagePath="NUGET_README.md" />
   </ItemGroup>

@@ -31,8 +31,6 @@
     <Compile Include="..\..\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>    
-    <None Include="Nanopb.targets" Pack="True" PackagePath="build/AdamE.Google.iOS.Nanopb.targets" />
-    <None Include="Nanopb.targets" Pack="True" PackagePath="buildTransitive/AdamE.Google.iOS.Nanopb.targets" />
     <None Include="License.md" Pack="True" PackagePath="License.md" />
   </ItemGroup>
   <ItemGroup>

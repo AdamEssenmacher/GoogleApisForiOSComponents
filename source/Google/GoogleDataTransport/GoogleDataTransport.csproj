@@ -31,8 +31,6 @@
     <Compile Include="..\..\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>    
-    <None Include="GoogleDataTransport.targets" Pack="True" PackagePath="build/AdamE.Google.iOS.GoogleDataTransport.targets" />
-    <None Include="GoogleDataTransport.targets" Pack="True" PackagePath="buildTransitive/AdamE.Google.iOS.GoogleDataTransport.targets" />
     <None Include="License.md" Pack="True" PackagePath="License.md" />
   </ItemGroup>
   <ItemGroup>

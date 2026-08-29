@@ -37,8 +37,6 @@
     <Folder Include="Resources\" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Analytics.targets" Pack="True" PackagePath="build/AdamE.Firebase.iOS.Analytics.targets" />
-    <None Include="Analytics.targets" Pack="True" PackagePath="buildTransitive/AdamE.Firebase.iOS.Analytics.targets" />
     <None Include="License.md" Pack="True" PackagePath="License.md" />
     <None Include="../../../docs/Firebase/NuGet/Analytics.md" Pack="True" PackagePath="NUGET_README.md" />
     <None Include="../../../icons/firebaseiosanalytics_128x128.png" Pack="True" PackagePath="firebaseiosanalytics_128x128.png" />

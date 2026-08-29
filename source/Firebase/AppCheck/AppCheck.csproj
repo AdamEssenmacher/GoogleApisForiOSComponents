@@ -36,8 +36,6 @@
     <Folder Include="Resources\" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="AppCheck.targets" Pack="True" PackagePath="build/AdamE.Firebase.iOS.AppCheck.targets" />
-    <None Include="AppCheck.targets" Pack="True" PackagePath="buildTransitive/AdamE.Firebase.iOS.AppCheck.targets" />
     <None Include="License.md" Pack="True" PackagePath="License.md" />
     <None Include="../../../docs/Firebase/NuGet/AppCheck.md" Pack="True" PackagePath="NUGET_README.md" />
     <None Include="../../../icons/firebaseiosappcheck_128x128.png" Pack="True" PackagePath="firebaseiosappcheck_128x128.png" />
