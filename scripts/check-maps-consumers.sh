@@ -66,6 +66,9 @@ xbd_dir="$work/xbd/"
 packages_dir="$work/packages"
 artifacts_dir="$repo_root/artifacts/maps-resource-integrity"
 mkdir -p "$xbd_dir" "$packages_dir"
+# Keep the generated projects on the same pinned SDK/workload set as the repository. The
+# .NET SDK resolves global.json from the project tree, not from this script's working directory.
+cp "$repo_root/global.json" "$work/global.json"
 
 failures=0
 completed="false"
