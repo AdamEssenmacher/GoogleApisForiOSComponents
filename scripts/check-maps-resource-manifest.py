@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate Google Maps BundleResource declarations against the pinned SDK archive."""
+"""Validate Google Maps resources against the pinned SDK archive."""
 
 from __future__ import annotations
 
@@ -20,11 +20,12 @@ import xml.etree.ElementTree as ET
 EXPECTED_ARCHIVE_SHA256 = (
     "81bbd92c2d627087ae222ae955e5f746590812d7389b9d800add15e4004b6431"
 )
+ARCHIVE_URL = "https://dl.google.com/dl/cpdc/33a7ac549361ab23/GoogleMaps-9.2.0.tar.gz"
+ARCHIVE_RESOURCE_ROOT = "Maps/Resources/GoogleMapsResources/GoogleMaps.bundle"
+EXPECTED_RESOURCE_FILE_COUNT = 190
 RESOURCE_PROPERTY = "_GoogleMapsResourcesBaseFolder"
 RESOURCE_TOKEN = f"$({RESOURCE_PROPERTY})"
 LOGICAL_ROOT = "GoogleMaps.bundle"
-RESTORE_TARGET = "_GMpsDownloadedItems"
-EXPECTED_APP_ITEM_CONDITION = "('$(OutputType)'!='Library' OR '$(IsAppExtension)'=='True')"
 
 
 def repository_root() -> Path:
@@ -42,7 +43,16 @@ def parse_arguments() -> argparse.Namespace:
     parser.add_argument(
         "--archive",
         type=Path,
-        help="Use an existing Google Maps .tar.gz instead of downloading the declared URL",
+        help="Use an existing Google Maps .tar.gz instead of downloading the pinned URL",
+    )
+    parser.add_argument(
+        "--copy-bundle-to",
+        type=Path,
+        metavar="DIRECTORY",
+        help=(
+            "After all checks pass, copy the verified bundle to "
+            "DIRECTORY/GoogleMaps.bundle; the destination must not already exist"
+        ),
     )
     return parser.parse_args()
 
@@ -51,118 +61,31 @@ def elements(parent: ET.Element, name: str) -> list[ET.Element]:
     return [element for element in parent.iter() if element.tag.rsplit("}", 1)[-1] == name]
 
 
-def direct_children(parent: ET.Element, name: str) -> list[ET.Element]:
-    return [child for child in list(parent) if child.tag.rsplit("}", 1)[-1] == name]
-
-
 def normalize_relative_path(value: str, label: str, errors: list[str]) -> str:
     normalized = value.replace("\\", "/")
     path = PurePosixPath(normalized)
-    if not normalized or normalized.startswith("/") or any(part in ("", ".", "..") for part in path.parts):
+    if (
+        not normalized
+        or normalized.startswith("/")
+        or path.as_posix() != normalized
+        or any(part in ("", ".", "..") for part in path.parts)
+    ):
         errors.append(f"{label} is not a normalized relative path: {value!r}")
     return normalized
 
 
-def one_text(parent: ET.Element, name: str, errors: list[str]) -> str:
-    matches = elements(parent, name)
-    if len(matches) != 1 or not (matches[0].text or "").strip():
-        errors.append(f"expected exactly one non-empty {name}, found {len(matches)}")
-        return ""
-    return (matches[0].text or "").strip()
-
-
-def parse_targets(targets_path: Path) -> tuple[str, str, list[str], list[str], list[str]]:
+def parse_targets(targets_path: Path) -> tuple[list[str], list[str], list[str]]:
     errors: list[str] = []
     try:
         root = ET.parse(targets_path).getroot()
     except (OSError, ET.ParseError) as exc:
         raise RuntimeError(f"could not parse {targets_path}: {exc}") from exc
 
-    downloads = elements(root, "XamarinBuildDownload")
-    if len(downloads) != 1:
-        errors.append(f"expected exactly one XamarinBuildDownload item, found {len(downloads)}")
-    download = downloads[0] if downloads else root
-    archive_url = one_text(download, "Url", errors)
-    archive_kind = one_text(download, "Kind", errors)
-    if archive_kind and archive_kind.lower() != "tgz":
-        errors.append(f"XamarinBuildDownload Kind is {archive_kind!r}, expected 'Tgz'")
-    if archive_url and not archive_url.startswith("https://"):
-        errors.append(f"archive URL must use HTTPS: {archive_url}")
-
-    properties = elements(root, RESOURCE_PROPERTY)
-    if len(properties) != 1 or not (properties[0].text or "").strip():
-        errors.append(f"expected exactly one non-empty {RESOURCE_PROPERTY}, found {len(properties)}")
-        archive_resource_root = ""
-    else:
-        resource_base = (properties[0].text or "").strip().replace("\\", "/")
-        prefix = "$(XamarinBuildDownloadDir)$(_GoogleMapsItemsFolder)/"
-        if not resource_base.startswith(prefix):
-            errors.append(f"{RESOURCE_PROPERTY} must start with {prefix!r}: {resource_base}")
-            archive_resource_root = ""
-        else:
-            archive_resource_root = resource_base[len(prefix) :].rstrip("/")
-            if not archive_resource_root.endswith(f"/{LOGICAL_ROOT}"):
-                errors.append(
-                    f"{RESOURCE_PROPERTY} must resolve to {LOGICAL_ROOT}: {archive_resource_root}"
-                )
-
-    restore_targets = [
-        target for target in direct_children(root, "Target") if target.get("Name") == RESTORE_TARGET
-    ]
-    if len(restore_targets) != 1:
-        errors.append(
-            f"expected exactly one project-level Target named {RESTORE_TARGET}, "
-            f"found {len(restore_targets)}"
-        )
-    restore_target = restore_targets[0] if restore_targets else root
-    if restore_targets and restore_target.get("Condition", "").strip():
-        errors.append(f"Target {RESTORE_TARGET} must not have a Condition")
-
-    all_restore_hooks = [
-        item
-        for item in elements(root, "XamarinBuildRestoreResources")
-        if item.get("Include") == RESTORE_TARGET
-    ]
-    if len(all_restore_hooks) != 1:
-        errors.append(
-            f"expected exactly one XamarinBuildRestoreResources hook for {RESTORE_TARGET}, "
-            f"found {len(all_restore_hooks)}"
-        )
-
-    hook_groups: list[tuple[ET.Element, ET.Element]] = []
-    for item_group in direct_children(root, "ItemGroup"):
-        for item in direct_children(item_group, "XamarinBuildRestoreResources"):
-            if item.get("Include") == RESTORE_TARGET:
-                hook_groups.append((item_group, item))
-
-    if len(hook_groups) != 1:
-        errors.append(
-            f"expected one project-level ItemGroup to schedule {RESTORE_TARGET}, "
-            f"found {len(hook_groups)}"
-        )
-    else:
-        hook_group, restore_hook = hook_groups[0]
-        if hook_group.get("Condition", "").strip() != EXPECTED_APP_ITEM_CONDITION:
-            errors.append(
-                f"{RESTORE_TARGET} ItemGroup Condition is {hook_group.get('Condition', '')!r}; "
-                f"expected {EXPECTED_APP_ITEM_CONDITION!r}"
-            )
-        if restore_hook.get("Condition", "").strip():
-            errors.append(f"XamarinBuildRestoreResources hook for {RESTORE_TARGET} must not have a Condition")
-        if downloads and download not in list(hook_group):
-            errors.append("XamarinBuildDownload and its restore hook must share the same ItemGroup")
-
     includes: list[str] = []
     logical_names: list[str] = []
-    bundle_resources = elements(restore_target, "BundleResource")
-    all_bundle_resources = elements(root, "BundleResource")
-    if len(bundle_resources) != len(all_bundle_resources):
-        errors.append(
-            f"all BundleResource items must be declared by {RESTORE_TARGET}; "
-            f"found {len(all_bundle_resources) - len(bundle_resources)} elsewhere"
-        )
+    bundle_resources = elements(root, "BundleResource")
     if not bundle_resources:
-        errors.append(f"Target {RESTORE_TARGET} declares no BundleResource items")
+        errors.append("Maps.targets declares no BundleResource items")
 
     for index, resource in enumerate(bundle_resources, start=1):
         include = resource.get("Include", "")
@@ -204,7 +127,7 @@ def parse_targets(targets_path: Path) -> tuple[str, str, list[str], list[str], l
                 f"expected {expected_logical_name!r}"
             )
 
-    return archive_url, archive_resource_root, includes, logical_names, errors
+    return includes, logical_names, errors
 
 
 def download_archive(url: str, destination: Path) -> None:
@@ -277,20 +200,94 @@ def compare_sets(actual: set[str], expected: set[str], actual_label: str) -> lis
     return errors
 
 
+def copy_verified_bundle(
+    archive_path: Path,
+    resource_root: str,
+    relative_files: list[str],
+    destination_parent: Path,
+) -> Path:
+    """Copy regular bundle files from a verified archive without trusting tar paths."""
+
+    destination_parent = destination_parent.expanduser().resolve()
+    if destination_parent.exists() and not destination_parent.is_dir():
+        raise RuntimeError(f"bundle destination parent is not a directory: {destination_parent}")
+    destination_parent.mkdir(parents=True, exist_ok=True)
+
+    destination_bundle = destination_parent / LOGICAL_ROOT
+    if destination_bundle.exists() or destination_bundle.is_symlink():
+        raise RuntimeError(f"bundle destination already exists: {destination_bundle}")
+
+    normalized_root = resource_root.strip("/")
+    prefix = f"{normalized_root}/"
+    expected_files = sorted(relative_files)
+
+    try:
+        with tempfile.TemporaryDirectory(
+            prefix=".googlemaps-bundle-", dir=destination_parent
+        ) as staging_directory, tarfile.open(archive_path, "r:gz") as archive:
+            staging_bundle = Path(staging_directory) / LOGICAL_ROOT
+
+            for member in archive.getmembers():
+                member_name = member.name
+                while member_name.startswith("./"):
+                    member_name = member_name[2:]
+                if not member_name.startswith(prefix):
+                    continue
+
+                relative_name = member_name[len(prefix) :]
+                if not relative_name:
+                    continue
+                if member.isdir():
+                    relative_name = relative_name.rstrip("/")
+                relative_path = PurePosixPath(relative_name)
+                if (
+                    relative_path.is_absolute()
+                    or relative_path.as_posix() != relative_name
+                    or any(part in ("", ".", "..") for part in relative_path.parts)
+                ):
+                    raise RuntimeError(f"unsafe archive resource path: {member.name!r}")
+
+                output_path = staging_bundle.joinpath(*relative_path.parts)
+                if member.isdir():
+                    output_path.mkdir(parents=True, exist_ok=True)
+                    continue
+                if not member.isfile():
+                    raise RuntimeError(f"archive resource is not a regular file: {member.name}")
+
+                output_path.parent.mkdir(parents=True, exist_ok=True)
+                source = archive.extractfile(member)
+                if source is None:
+                    raise RuntimeError(f"could not read archive resource: {member.name}")
+                with source, output_path.open("xb") as destination:
+                    shutil.copyfileobj(source, destination)
+
+            copied_files = sorted(
+                path.relative_to(staging_bundle).as_posix()
+                for path in staging_bundle.rglob("*")
+                if path.is_file()
+            )
+            if copied_files != expected_files:
+                raise RuntimeError("copied bundle file set differs from the verified archive manifest")
+
+            staging_bundle.rename(destination_bundle)
+    except (OSError, tarfile.TarError) as exc:
+        raise RuntimeError(f"could not copy verified Google Maps resources: {exc}") from exc
+
+    return destination_bundle
+
+
 def main() -> int:
     args = parse_arguments()
     targets_path = args.targets.resolve()
 
     try:
-        archive_url, resource_root, includes, logical_names, errors = parse_targets(targets_path)
+        includes, logical_names, errors = parse_targets(targets_path)
         with tempfile.TemporaryDirectory(prefix="maps-resource-manifest-") as temp_dir:
             if args.archive:
                 archive_path = args.archive.resolve()
             else:
-                if not archive_url:
-                    raise RuntimeError("cannot download archive because Maps.targets has no valid URL")
                 archive_path = Path(temp_dir) / "GoogleMaps.tar.gz"
-                download_archive(archive_url, archive_path)
+                download_archive(ARCHIVE_URL, archive_path)
 
             actual_sha256 = sha256(archive_path)
             if actual_sha256 != EXPECTED_ARCHIVE_SHA256:
@@ -298,40 +295,73 @@ def main() -> int:
                     f"archive SHA-256 is {actual_sha256}, expected {EXPECTED_ARCHIVE_SHA256}"
                 )
 
-            archive_files, archive_errors = archive_resource_files(archive_path, resource_root)
+            archive_files, archive_errors = archive_resource_files(
+                archive_path, ARCHIVE_RESOURCE_ROOT
+            )
             errors.extend(archive_errors)
+
+            errors.extend(duplicate_messages(includes, "BundleResource Include"))
+            errors.extend(duplicate_messages(logical_names, "LogicalName"))
+            errors.extend(duplicate_messages(archive_files, "archive resource path"))
+
+            include_set = set(includes)
+            archive_set = set(archive_files)
+            errors.extend(compare_sets(include_set, archive_set, "BundleResource Include"))
+            expected_logical_names = {f"{LOGICAL_ROOT}/{path}" for path in archive_set}
+            errors.extend(
+                compare_sets(set(logical_names), expected_logical_names, "LogicalName")
+            )
+
+            if len(includes) != EXPECTED_RESOURCE_FILE_COUNT:
+                errors.append(
+                    f"expected {EXPECTED_RESOURCE_FILE_COUNT} BundleResource declarations, "
+                    f"found {len(includes)}"
+                )
+            if len(include_set) != EXPECTED_RESOURCE_FILE_COUNT:
+                errors.append(
+                    f"expected {EXPECTED_RESOURCE_FILE_COUNT} unique target paths, "
+                    f"found {len(include_set)}"
+                )
+            if len(archive_files) != EXPECTED_RESOURCE_FILE_COUNT:
+                errors.append(
+                    f"expected {EXPECTED_RESOURCE_FILE_COUNT} archive files, "
+                    f"found {len(archive_files)}"
+                )
+
+            print(f"Targets: {targets_path}")
+            print(f"Archive URL: {ARCHIVE_URL}")
+            print(f"Archive resource root: {ARCHIVE_RESOURCE_ROOT}")
+            print(f"SHA-256: {actual_sha256}")
+            print(
+                f"Resources: {len(includes)} declarations, {len(include_set)} unique target paths, "
+                f"{len(archive_files)} archive files"
+            )
+
+            if errors:
+                print(
+                    f"Maps resource manifest check failed with {len(errors)} error(s):",
+                    file=sys.stderr,
+                )
+                for error in errors:
+                    print(f"  - {error}", file=sys.stderr)
+                return 1
+
+            copied_bundle = None
+            if args.copy_bundle_to:
+                copied_bundle = copy_verified_bundle(
+                    archive_path,
+                    ARCHIVE_RESOURCE_ROOT,
+                    archive_files,
+                    args.copy_bundle_to,
+                )
+
+            print("Maps resource manifest check passed.")
+            if copied_bundle:
+                print(f"Verified bundle: {copied_bundle}")
+            return 0
     except (OSError, RuntimeError) as exc:
         print(f"Maps resource manifest check failed: {exc}", file=sys.stderr)
         return 1
-
-    errors.extend(duplicate_messages(includes, "BundleResource Include"))
-    errors.extend(duplicate_messages(logical_names, "LogicalName"))
-    errors.extend(duplicate_messages(archive_files, "archive resource path"))
-
-    include_set = set(includes)
-    archive_set = set(archive_files)
-    errors.extend(compare_sets(include_set, archive_set, "BundleResource Include"))
-    expected_logical_names = {f"{LOGICAL_ROOT}/{path}" for path in archive_set}
-    errors.extend(
-        compare_sets(set(logical_names), expected_logical_names, "LogicalName")
-    )
-
-    print(f"Targets: {targets_path}")
-    print(f"Archive: {archive_url}")
-    print(f"SHA-256: {actual_sha256}")
-    print(
-        f"Resources: {len(includes)} declarations, {len(include_set)} unique target paths, "
-        f"{len(archive_files)} archive files"
-    )
-
-    if errors:
-        print(f"Maps resource manifest check failed with {len(errors)} error(s):", file=sys.stderr)
-        for error in errors:
-            print(f"  - {error}", file=sys.stderr)
-        return 1
-
-    print("Maps resource manifest check passed.")
-    return 0
 
 
 if __name__ == "__main__":

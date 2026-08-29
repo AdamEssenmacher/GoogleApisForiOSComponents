@@ -3,7 +3,7 @@ set -euo pipefail
 
 usage() {
   cat <<'EOF'
-Usage: tools/e2e/check-consumer-shapes.sh --target <Places|SignIn> [options]
+Usage: tools/e2e/check-consumer-shapes.sh --target <Maps|Places|SignIn> [options]
 
   --package-dir <dir>        Local NuGet feed (default: output)
   --package-version <ver>    Exact package version (required when the feed contains multiple)
@@ -21,6 +21,7 @@ A binding package's .targets historically gated its items on OutputType != 'Libr
 library shape is where transitive delivery quietly breaks.
 
 Targets differ in how the native payload arrives, and the assertions follow that:
+  Maps    static xcframework  -- verified upstream bundle at app root, symbol linked into app
   Places  static xcframework  -- bundle unpacked to the app root, symbol linked into the app binary
   SignIn  dynamic xcframework -- .framework copied to App.app/Frameworks with its bundle inside
 EOF
@@ -46,16 +47,38 @@ done
 [[ "$package_dir" != /* ]] && package_dir="$repo_root/$package_dir"
 
 case "$target" in
+  Maps)
+    package_id="AdamE.Google.iOS.Maps"
+    # GoogleMaps.xcframework is static. Its resource bundle is distributed beside the framework in
+    # the upstream archive and must arrive exactly once at the app root.
+    delivery="static"
+    resource_bundle="GoogleMaps.bundle"
+    managed_probe_expression='Google.Maps.GeometryUtils.Distance(new CoreLocation.CLLocationCoordinate2D(0, 0), new CoreLocation.CLLocationCoordinate2D(1, 1))'
+    lib_project="MapsLib"
+    probe_symbol="GMSGeometryDistance"
+    probe_symbol_exact="_GMSGeometryDistance"
+    expected_resource_file_count=190
+    compare_expected_bundle="true"
+    forbidden_dynamic_framework="GoogleMaps.framework"
+    source_targets="$repo_root/source/Google/Maps/Maps.targets"
+    # Calling the managed binding above creates the native reference; no extra DllImport is needed.
+    native_probe_decl=""
+    native_probe_call=""
+    ;;
   Places)
     package_id="AdamE.Google.iOS.Places"
     # GooglePlaces.xcframework is a static framework: the SDK links it into the app binary and
     # does not copy any .framework directory, so the package has to place the bundle at the app root.
     delivery="static"
     resource_bundle="GooglePlaces.bundle"
-    managed_probe_type="Google.Places.AutocompleteFilter"
+    managed_probe_expression="typeof(Google.Places.AutocompleteFilter).FullName!"
     lib_project="PlacesLib"
     probe_symbol="GMSPlaceRectangularLocationOption"
+    probe_symbol_exact=""
     expected_resource_file_count=59
+    compare_expected_bundle="false"
+    forbidden_dynamic_framework=""
+    source_targets=""
     # A trivial app that never reaches a native entry point lets the linker drop the static
     # library, which is correct behaviour and not a delivery failure. Call into the native SDK so
     # the symbol assertion below actually measures whether the package delivered it.
@@ -73,7 +96,7 @@ case "$target" in
     framework_dir="GoogleSignIn.framework"
     framework_binary="GoogleSignIn"
     resource_bundle="GoogleSignIn.bundle"
-    managed_probe_type="Google.SignIn.SignIn"
+    managed_probe_expression="typeof(Google.SignIn.SignIn).FullName!"
     lib_project="SignInLib"
     # Touching the managed type is enough here: the framework is a native reference, so the SDK
     # copies it whenever the binding assembly survives the linker. There is no DllImport probe
@@ -81,6 +104,11 @@ case "$target" in
     native_probe_decl=""
     native_probe_call=""
     expected_resource_file_count=""
+    probe_symbol=""
+    probe_symbol_exact=""
+    compare_expected_bundle="false"
+    forbidden_dynamic_framework=""
+    source_targets=""
     ;;
   *) echo "Unknown target: $target" >&2; exit 1 ;;
 esac
@@ -118,10 +146,8 @@ else
 fi
 echo "Testing $package_id $package_version from $nupkg"
 
-msbuild_args=()
-[[ "$allow_xcode_mismatch" == "true" ]] && msbuild_args+=("-p:ValidateXcodeVersion=false")
-
 failures=0
+completed="false"
 pass() { print -r -- "  PASS  $1"; }
 fail() { print -r -- "  FAIL  $1" >&2; failures=$((failures + 1)); }
 
@@ -132,21 +158,74 @@ work="$(cd "$(mktemp -d)" && pwd -P)"
 # Keep the selected local package isolated from any same-version copy in the user's global cache.
 # This makes the check prove the nupkg named above rather than whichever copy NuGet restored first.
 export NUGET_PACKAGES="$work/packages"
-mkdir -p "$NUGET_PACKAGES"
+# XBD-delivered packages use this fresh directory; embedded packages safely ignore the property.
+# The trailing slash is required by legacy targets that concatenate the property with a folder name.
+xbd_dir="$work/xbd/"
+mkdir -p "$NUGET_PACKAGES" "$xbd_dir"
+msbuild_args=("-p:XamarinBuildDownloadDir=$xbd_dir")
+[[ "$allow_xcode_mismatch" == "true" ]] && msbuild_args+=("-p:ValidateXcodeVersion=false")
 # The scaffold lives outside the repository tree, so give its projects the same pinned SDK and
 # workload set that packed the selected artifact. Without this, a fresh CI host can install the
 # pinned iOS workload successfully and then resolve the consumer against a different workload set.
 cp "$repo_root/global.json" "$work/global.json"
+diagnostics_dir="$repo_root/tests/E2E/Google.Foundation/artifacts/consumer-shapes-$target"
 # Keep the scaffold when something fails -- these are throwaway projects, but a failure is not
 # diagnosable without the build logs and the produced .app.
 cleanup() {
-  if (( failures > 0 )); then
+  local exit_status=$?
+
+  if [[ "$completed" != "true" ]]; then
+    mkdir -p "$diagnostics_dir"
+    cp "$work"/*.log(N) "$work"/*.diff(N) "$work"/*.txt(N) "$diagnostics_dir/" 2>/dev/null || true
+    print -r -- "Diagnostics copied to $diagnostics_dir" >&2
     print -r -- "Scaffold kept for inspection: $work" >&2
   else
     rm -rf "$work"
   fi
+
+  return "$exit_status"
 }
 trap cleanup EXIT
+
+expected_bundle=""
+if [[ "$compare_expected_bundle" == "true" ]]; then
+  expected_bundle_parent="$work/verified-upstream"
+  if python3 "$repo_root/scripts/check-maps-resource-manifest.py" \
+      --copy-bundle-to "$expected_bundle_parent" > "$work/maps-resource-manifest.log" 2>&1; then
+    expected_bundle="$expected_bundle_parent/$resource_bundle"
+    if [[ -d "$expected_bundle" ]]; then
+      pass "verified upstream $resource_bundle materialized"
+    else
+      fail "verified upstream checker did not materialize $expected_bundle"
+      exit 1
+    fi
+  else
+    fail "could not validate and materialize the upstream $resource_bundle"
+    tail -25 "$work/maps-resource-manifest.log" >&2
+    exit 1
+  fi
+fi
+
+if [[ -n "$source_targets" ]]; then
+  echo
+  echo "Packaged MSBuild integration"
+  for folder in build buildTransitive; do
+    packaged_targets="$work/$folder.targets"
+    if unzip -p "$nupkg" "$folder/$package_id.targets" > "$packaged_targets" 2>/dev/null; then
+      if diff -u "$source_targets" "$packaged_targets" > "$work/$folder-targets.diff"; then
+        pass "$folder/$package_id.targets matches source"
+      else
+        fail "$folder/$package_id.targets differs from $source_targets (see $work/$folder-targets.diff)"
+      fi
+    else
+      fail "$folder/$package_id.targets is missing from the selected package"
+    fi
+  done
+
+  if (( failures > 0 )); then
+    exit 1
+  fi
+fi
 
 cat > "$work/NuGet.config" <<EOF
 <?xml version="1.0" encoding="utf-8"?>
@@ -225,6 +304,24 @@ EOF
 EOF
 }
 
+write_file_manifest() {
+  local root="$1" destination="$2"
+  (cd "$root" && find . -type f -print | sed 's|^\./||' | LC_ALL=C sort) > "$destination"
+}
+
+assert_restored_package() {
+  local shape="$1" package_id_lower="${package_id:l}"
+  local restored_nupkg="$NUGET_PACKAGES/$package_id_lower/$package_version/$package_id_lower.$package_version.nupkg"
+
+  if [[ ! -f "$restored_nupkg" ]]; then
+    fail "$shape: restored package is missing at $restored_nupkg"
+  elif cmp -s "$nupkg" "$restored_nupkg"; then
+    pass "$shape: restore consumed the selected local package"
+  else
+    fail "$shape: restored package differs from $nupkg"
+  fi
+}
+
 # Reports a check that is expected to fail today because of a defect that predates this harness.
 # Visible in the output, but does not fail the run -- otherwise the only way to keep CI green would
 # be to delete the check, and the gap would stop being visible at all.
@@ -296,9 +393,56 @@ assert_app() {
     return
   fi
 
-  if [[ -d "$app_path/$resource_bundle" ]]; then
+  local app_resource_bundle="$app_path/$resource_bundle"
+  if [[ "$compare_expected_bundle" == "true" ]]; then
+    local bundle_matches bundle_count actual_manifest expected_manifest content_mismatches relative_file
+    bundle_matches="$(find "$app_path" -type d -name "$resource_bundle" -print)"
+    bundle_count="$(print -r -- "$bundle_matches" | sed '/^$/d' | wc -l | tr -d ' ')"
+    if [[ "$bundle_count" != "1" ]]; then
+      $report "$shape: expected exactly one $resource_bundle, found $bundle_count"
+      return
+    fi
+
+    app_resource_bundle="$(print -r -- "$bundle_matches" | sed -n '1p')"
+    if [[ "$app_resource_bundle" == "$app_path/$resource_bundle" ]]; then
+      pass "$shape: exactly one root $resource_bundle is present"
+    else
+      $report "$shape: $resource_bundle is not at the app root ($app_resource_bundle)"
+    fi
+
+    expected_manifest="$work/expected-bundle-files.txt"
+    actual_manifest="$work/$shape-bundle-files.txt"
+    [[ -s "$expected_manifest" ]] || write_file_manifest "$expected_bundle" "$expected_manifest"
+    write_file_manifest "$app_resource_bundle" "$actual_manifest"
+
+    if diff -u "$expected_manifest" "$actual_manifest" > "$work/$shape-bundle.diff"; then
+      local actual_count
+      actual_count="$(wc -l < "$actual_manifest" | tr -d ' ')"
+      if [[ -n "$expected_resource_file_count" && "$actual_count" -ne "$expected_resource_file_count" ]]; then
+        $report "$shape: $resource_bundle contains $actual_count files; expected $expected_resource_file_count"
+      else
+        pass "$shape: bundle file set matches verified upstream ($actual_count files)"
+      fi
+
+      content_mismatches="$work/$shape-content-mismatches.txt"
+      : > "$content_mismatches"
+      while IFS= read -r relative_file; do
+        if ! cmp -s "$expected_bundle/$relative_file" "$app_resource_bundle/$relative_file"; then
+          print -r -- "$relative_file" >> "$content_mismatches"
+        fi
+      done < "$expected_manifest"
+
+      if [[ -s "$content_mismatches" ]]; then
+        $report "$shape: bundle contents differ from verified upstream (see $content_mismatches)"
+      else
+        pass "$shape: bundle contents are byte-for-byte identical to verified upstream"
+      fi
+    else
+      $report "$shape: bundle file set differs from verified upstream (see $work/$shape-bundle.diff)"
+    fi
+  elif [[ -d "$app_resource_bundle" ]]; then
     local count
-    count="$(find "$app_path/$resource_bundle" -type f | wc -l | tr -d ' ')"
+    count="$(find "$app_resource_bundle" -type f | wc -l | tr -d ' ')"
     if [[ -n "$expected_resource_file_count" && "$count" -ne "$expected_resource_file_count" ]]; then
       $report "$shape: $resource_bundle contains $count files; expected $expected_resource_file_count"
     else
@@ -311,12 +455,31 @@ assert_app() {
   # Do not use `grep -q` here: it exits on the first match, nm takes SIGPIPE, and with pipefail the
   # successful match is reported as a failed pipeline. grep -c consumes all input, so no SIGPIPE.
   local symbol_count
-  symbol_count="$(nm "$binary" 2>/dev/null | grep -c "$probe_symbol" || true)"
+  if [[ -n "$probe_symbol_exact" ]]; then
+    symbol_count="$(nm -U "$binary" 2>/dev/null \
+      | awk -v expected="$probe_symbol_exact" '$NF == expected { count++ } END { print count + 0 }')"
+  else
+    symbol_count="$(nm "$binary" 2>/dev/null | grep -c "$probe_symbol" || true)"
+  fi
 
   if [[ "${symbol_count:-0}" -gt 0 ]]; then
     pass "$shape: $probe_symbol linked into the app binary ($symbol_count symbol(s))"
   else
     $report "$shape: $probe_symbol not found in $exe_name"
+  fi
+
+  if [[ -n "$forbidden_dynamic_framework" ]]; then
+    local framework_count
+    framework_count=0
+    if [[ -d "$app_path/Frameworks" ]]; then
+      framework_count="$(find "$app_path/Frameworks" -type d -name "$forbidden_dynamic_framework" \
+        -print | wc -l | tr -d ' ')"
+    fi
+    if [[ "$framework_count" == "0" ]]; then
+      pass "$shape: no dynamic $forbidden_dynamic_framework copy is present"
+    else
+      $report "$shape: static framework was unexpectedly copied to App.app/Frameworks/$forbidden_dynamic_framework"
+    fi
   fi
 }
 
@@ -324,7 +487,7 @@ assert_app() {
 echo
 echo "Shape: direct (app -> package)"
 direct="$work/direct"
-write_app_sources "$direct" "typeof($managed_probe_type).FullName!"
+write_app_sources "$direct" "$managed_probe_expression"
 cat > "$direct/DirectApp.csproj" <<EOF
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>$app_props
@@ -338,6 +501,9 @@ cat > "$direct/DirectApp.csproj" <<EOF
 EOF
 
 if dotnet build "$direct/DirectApp.csproj" -c Debug "${msbuild_args[@]}" > "$work/direct.log" 2>&1; then
+  if [[ "$target" == "Maps" ]]; then
+    assert_restored_package "direct"
+  fi
   assert_app "direct" "$(find "$direct/bin" -name "DirectApp.app" -print -quit)"
 else
   fail "direct: build failed (see $work/direct.log)"
@@ -368,7 +534,7 @@ namespace ShapeProbe.Lib;
 
 public static class Probe
 {
-    public static string Describe() => typeof($managed_probe_type).FullName!;
+    public static object Describe() => $managed_probe_expression;
 }
 EOF
 
@@ -389,9 +555,12 @@ EOF
 # integration could not reach an app consuming it through a ProjectReference. That was an artefact
 # of the scaffold rather than a packaging defect: mktemp -d handed back a symlinked /var path, NuGet
 # dropped the ProjectReference edge, and the app silently never referenced the package at all. With
-# the scaffold path canonicalised above, Places and SignIn both deliver correctly through a class
+# the scaffold path canonicalised above, Maps, Places and SignIn all deliver correctly through a class
 # library, so this is a strict check.
 if dotnet build "$lib_root/App/LibraryApp.csproj" -c Debug "${msbuild_args[@]}" > "$work/library.log" 2>&1; then
+  if [[ "$target" == "Maps" ]]; then
+    assert_restored_package "library"
+  fi
   assert_app "library" "$(find "$lib_root/App/bin" -name "LibraryApp.app" -print -quit)"
 else
   fail "library: build failed (see $work/library.log)"
@@ -401,12 +570,10 @@ fi
 echo
 if (( failures > 0 )); then
   echo "$failures consumer-shape check(s) failed." >&2
-  diagnostics_dir="$repo_root/tests/E2E/Google.Foundation/artifacts/consumer-shapes-$target"
-  mkdir -p "$diagnostics_dir"
-  cp "$work"/*.log "$diagnostics_dir/" 2>/dev/null || true
   exit 1
 fi
 
+completed="true"
 if (( known_gaps > 0 )); then
   echo "Consumer-shape checks passed, with $known_gaps known gap(s) reported above."
 else
