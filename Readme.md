@@ -197,7 +197,7 @@ Firebase `12.10.0` is the current published Firebase package line.
 | Package | Version |
 | --- | --- |
 | `Maps` | `9.2.0.8` |
-| `Places` | `7.4.0.2` |
+| `Places` | `7.4.0.3` |
 | `SignIn` | `9.0.0` |
 
 #### Google support packages (`AdamE.Google.iOS.*`)

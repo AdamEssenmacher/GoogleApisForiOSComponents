@@ -1,27 +1,35 @@
 class ExternalDownloadSource
 {
+	// Most of these archives live under the Firebase analytics path, but Google publishes
+	// other SDKs under different hosts/paths, so the prefix is overridable.
+	const string DefaultUrlPrefix = "https://dl.google.com/firebase/ios/analytics";
+
 	public string Id { get; }
 	public string Version { get; }
 	public string ArchiveKey { get; }
+	public string UrlPrefix { get; }
 
-	public ExternalDownloadSource (string id, string version, string archiveKey)
+	public ExternalDownloadSource (string id, string version, string archiveKey, string urlPrefix = DefaultUrlPrefix)
 	{
 		Id = id;
 		Version = version;
 		ArchiveKey = archiveKey;
+		UrlPrefix = urlPrefix;
 	}
 
 	public string ArchiveFileName => $"{Id}-{Version}.tar.gz";
 	public string ExtractionRootName => $"{Id}-{Version}";
-	public string Url => $"https://dl.google.com/firebase/ios/analytics/{ArchiveKey}/{ArchiveFileName}";
+	public string Url => $"{UrlPrefix}/{ArchiveKey}/{ArchiveFileName}";
 }
 
 // *.tar.gz URLs can be found in the podspecs (e.g., CocoaPods Specs repo paths), such as:
 // FirebaseAnalytics: https://github.com/CocoaPods/Specs/tree/master/Specs/e/2/1/FirebaseAnalytics
 // GoogleAppMeasurement: https://github.com/CocoaPods/Specs/tree/master/Specs/e/3/b/GoogleAppMeasurement
+// GooglePlaces: https://github.com/CocoaPods/Specs/tree/master/Specs/c/3/2/GooglePlaces
 var ExternalDownloads = new Dictionary<string, ExternalDownloadSource> {
 	{ "FirebaseAnalytics", new ExternalDownloadSource ("FirebaseAnalytics", "12.10.0", "3c185b45848d98d8") },
 	{ "GoogleAppMeasurement", new ExternalDownloadSource ("GoogleAppMeasurement", "12.10.0", "5f5e4d8cb469941e") },
+	{ "GooglePlaces", new ExternalDownloadSource ("GooglePlaces", "7.4.0", "3e8dc2602895d53405d075ff4eb569bff93ff1af97e69915d1e657c07ef28dd8", "https://dl.google.com/dl/geosdk") },
 };
 
 FilePath GetArchivePath (ExternalDownloadSource source, DirectoryPath externalsPath) =>
@@ -89,6 +97,27 @@ void FirebaseAnalyticsDownload ()
 
 			if (!DirectoryExists (frameworkSource))
 				throw new Exception ($"Expected FirebaseAnalytics.xcframework at {frameworkSource} after extraction.");
+
+			if (DirectoryExists (frameworkDestination))
+				DeleteDirectory (frameworkDestination, deleteSettings);
+
+			CopyDirectory (frameworkSource, frameworkDestination);
+		});
+}
+
+void GooglePlacesDownload ()
+{
+	var source = ExternalDownloads["GooglePlaces"];
+
+	DownloadAndExtract (
+		source,
+		() => DirectoryExists (new DirectoryPath ("./externals/GooglePlaces.xcframework")),
+		(extractionRoot, externalsPath, deleteSettings) => {
+			var frameworkSource = extractionRoot.Combine ("Frameworks").Combine ("GooglePlaces.xcframework");
+			var frameworkDestination = externalsPath.Combine ("GooglePlaces.xcframework");
+
+			if (!DirectoryExists (frameworkSource))
+				throw new Exception ($"Expected GooglePlaces.xcframework at {frameworkSource} after extraction.");
 
 			if (DirectoryExists (frameworkDestination))
 				DeleteDirectory (frameworkDestination, deleteSettings);

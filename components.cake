@@ -21,7 +21,7 @@ Artifact GOOGLE_ANALYTICS_ARTIFACT                 = new Artifact ("Google.Analy
 Artifact GOOGLE_CAST_ARTIFACT                      = new Artifact ("Google.Cast",                     "4.7.0.1",   "15.0", ComponentGroup.Google, csprojName: "Cast");
 Artifact GOOGLE_MAPS_ARTIFACT                      = new Artifact ("Google.Maps",                     "9.2.0.8",   "15.0", ComponentGroup.Google, csprojName: "Maps");
 Artifact GOOGLE_UMP_ARTIFACT                       = new Artifact ("Google.UserMessagingPlatform",    "1.1.0.1",   "15.0", ComponentGroup.Google, csprojName: "UserMessagingPlatform");
-Artifact GOOGLE_PLACES_ARTIFACT                    = new Artifact ("Google.Places",                   "7.4.0.2",   "15.0", ComponentGroup.Google, csprojName: "Places");
+Artifact GOOGLE_PLACES_ARTIFACT                    = new Artifact ("Google.Places",                   "7.4.0.3",   "15.0", ComponentGroup.Google, csprojName: "Places");
 Artifact GOOGLE_APP_CHECK_CORE_ARTIFACT            = new Artifact ("Google.AppCheckCore",             "11.2.0.0",  "15.0", ComponentGroup.Google, csprojName: "AppCheckCore");
 Artifact GOOGLE_SIGN_IN_ARTIFACT                   = new Artifact ("Google.SignIn",                   "9.0.0.0",   "15.0", ComponentGroup.Google, csprojName: "SignIn");
 Artifact GOOGLE_TAG_MANAGER_ARTIFACT               = new Artifact ("Google.TagManager",               "9.2.0.0",   "15.0", ComponentGroup.Google, csprojName: "TagManager");
@@ -225,8 +225,10 @@ void SetArtifactsPodSpecs ()
 	GOOGLE_UMP_ARTIFACT.PodSpecs = new [] {
 		PodSpec.Create ("GoogleUserMessagingPlatform", "1.1.0")
 	};
+	// The xcframework is fetched by GooglePlacesDownload() in custom_externals_download.cake
+	// rather than by a XamarinBuildDownload item in the .targets file.
 	GOOGLE_PLACES_ARTIFACT.PodSpecs = new [] {
-		PodSpec.Create ("GooglePlaces", "7.4.0")
+		PodSpec.Create ("GooglePlaces", "7.4.0", frameworkSource: FrameworkSource.Custom)
 	};
 	GOOGLE_SIGN_IN_ARTIFACT.PodSpecs = new [] {
 		PodSpec.Create ("GoogleSignIn", "9.0.0", frameworkSource: FrameworkSource.Pods),

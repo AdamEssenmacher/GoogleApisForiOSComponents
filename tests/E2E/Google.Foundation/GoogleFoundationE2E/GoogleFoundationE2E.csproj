@@ -22,7 +22,7 @@
   -->
   <PropertyGroup>
     <GoogleE2ETarget Condition="'$(GoogleE2ETarget)' == ''">Places</GoogleE2ETarget>
-    <PlacesPackageVersion Condition="'$(PlacesPackageVersion)' == ''">7.4.0.2</PlacesPackageVersion>
+    <PlacesPackageVersion Condition="'$(PlacesPackageVersion)' == ''">7.4.0.3</PlacesPackageVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(TargetFramework)' == 'net10.0-ios' and '$(Platform)' == ''">
@@ -51,10 +51,8 @@
       <_Parameter2>$(GoogleE2ETarget)</_Parameter2>
     </AssemblyAttribute>
     <!--
-      Record which package version the run was asked to restore. The binding's AssemblyVersion does
-      not track the NuGet version (the cake build only pokes FileVersion/PackageVersion), so reading
-      the assembly version would report the same value for two different packages and make an A/B
-      comparison look valid when it is not.
+      Record which package version the run was asked to restore instead of inferring it from assembly
+      metadata. This keeps the result explicit if the package's versioning policy changes later.
     -->
     <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute" Condition="'$(GoogleE2ETarget)' == 'Places'">
       <_Parameter1>TargetPackageVersion</_Parameter1>

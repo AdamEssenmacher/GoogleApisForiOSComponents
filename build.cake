@@ -171,6 +171,8 @@ Task ("externals")
 		FirebaseAnalyticsDownload ();
 	if (ARTIFACTS_TO_BUILD.Contains (GOOGLE_GOOGLE_APP_MEASUREMENT_ARTIFACT))
 		GoogleAppMeasurementDownload ();
+	if (ARTIFACTS_TO_BUILD.Contains (GOOGLE_PLACES_ARTIFACT))
+		GooglePlacesDownload ();
 });
 
 Task ("ci-setup")
