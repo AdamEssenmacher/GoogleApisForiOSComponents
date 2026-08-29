@@ -304,11 +304,7 @@ FilePath GetArtifactProjectPath (Artifact artifact)
 
 IEnumerable<FilePath> GetFirebaseReleaseTargetsFiles ()
 {
-	yield return new FilePath ("source/Firebase/Analytics/Analytics.targets");
-	yield return new FilePath ("source/Firebase/AppCheck/AppCheck.targets");
-	yield return new FilePath ("source/Firebase/Core/Core.targets");
 	yield return new FilePath ("source/Firebase/Crashlytics/Crashlytics.targets");
-	yield return new FilePath ("source/Google/GoogleAppMeasurement/GoogleAppMeasurement.targets");
 }
 
 FirebaseReleaseFileUpdate CreateFirebaseReleaseFileUpdate (string relativePath, Func<string, string> update)
