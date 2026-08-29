@@ -35,8 +35,6 @@
     <Folder Include="Resources\" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="SignIn.targets" Pack="True" PackagePath="build/AdamE.Google.iOS.SignIn.targets" />
-    <None Include="SignIn.targets" Pack="True" PackagePath="buildTransitive/AdamE.Google.iOS.SignIn.targets" />
     <None Include="External-Dependency-Info.txt" Pack="True" PackagePath="THIRD-PARTY-NOTICES.txt" />
     <None Include="License.md" Pack="True" PackagePath="License.md" />
     <None Include="../../../docs/NUGET_README.md" Pack="True" PackagePath="NUGET_README.md" />
