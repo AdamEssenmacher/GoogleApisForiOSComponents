@@ -20,7 +20,7 @@
   <PropertyGroup>
     <GoogleE2ETarget Condition="'$(GoogleE2ETarget)' == ''">Places</GoogleE2ETarget>
     <PlacesPackageVersion Condition="'$(PlacesPackageVersion)' == ''">7.4.0.3</PlacesPackageVersion>
-    <MapsPackageVersion Condition="'$(MapsPackageVersion)' == ''">9.2.0.8</MapsPackageVersion>
+    <MapsPackageVersion Condition="'$(MapsPackageVersion)' == ''">9.2.0.9</MapsPackageVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(TargetFramework)' == 'net10.0-ios' and '$(Platform)' == ''">

@@ -3,7 +3,7 @@ set -euo pipefail
 
 usage() {
   cat <<'EOF'
-Usage: tools/e2e/check-offline-build.sh --target Places [options]
+Usage: tools/e2e/check-offline-build.sh --target <Maps|Places> [options]
 
   --package-dir <dir>        Local NuGet feed (default: output)
   --package-version <ver>    Exact package version (required when the feed contains multiple)
@@ -45,6 +45,10 @@ done
 [[ "$package_dir" != /* ]] && package_dir="$repo_root/$package_dir"
 
 case "$target" in
+  Maps)
+    package_id="AdamE.Google.iOS.Maps"
+    probe_expr="typeof(Google.Maps.MapView).FullName!"
+    ;;
   Places)
     package_id="AdamE.Google.iOS.Places"
     probe_expr="typeof(Google.Places.AutocompleteFilter).FullName!"
