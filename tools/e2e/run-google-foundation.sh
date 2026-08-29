@@ -62,9 +62,13 @@ mkdir -p "$artifacts_dir"
 rm -rf "$packages_cache_dir"
 mkdir -p "$packages_cache_dir"
 
-# Map the runtime adapter to its package and version property. Places is intentionally the only
-# implemented adapter; adding another target requires an explicit package-specific runtime case.
+# Map each runtime adapter to its package and version property. Every supported target must have
+# explicit package-specific runtime cases in the harness.
 case "$target" in
+  Maps)
+    package_id="AdamE.Google.iOS.Maps"
+    package_version_property="MapsPackageVersion"
+    ;;
   Places)
     package_id="AdamE.Google.iOS.Places"
     package_version_property="PlacesPackageVersion"

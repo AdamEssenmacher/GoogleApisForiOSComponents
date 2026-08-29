@@ -10,8 +10,11 @@ on:
       - "global.json"
       - "Xamarin.Google.sln"
       - "*.cake"
+      - "icons/googleiosmaps_128x128.png"
       - "icons/googleiosplaces_128x128.png"
+      - "scripts/check-maps-resource-manifest.py"
       - "source/AssemblyInfo.cs"
+      - "source/Google/Maps/**"
       - "source/Google/Places/**"
       - "tests/E2E/Google.Foundation/**"
       - "tools/e2e/check-consumer-shapes.sh"
@@ -29,8 +32,11 @@ on:
       - "global.json"
       - "Xamarin.Google.sln"
       - "*.cake"
+      - "icons/googleiosmaps_128x128.png"
       - "icons/googleiosplaces_128x128.png"
+      - "scripts/check-maps-resource-manifest.py"
       - "source/AssemblyInfo.cs"
+      - "source/Google/Maps/**"
       - "source/Google/Places/**"
       - "tests/E2E/Google.Foundation/**"
       - "tools/e2e/check-consumer-shapes.sh"
@@ -108,6 +114,66 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: google-foundation-validation-diagnostics
+          name: google-foundation-places-diagnostics
+          path: tests/E2E/Google.Foundation/artifacts/
+          if-no-files-found: ignore
+
+  maps:
+    runs-on: macos-26
+    timeout-minutes: 60
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Select Xcode 26.6
+        run: |
+          sudo xcode-select --switch /Applications/Xcode_26.6.app/Contents/Developer
+          xcodebuild -version
+          xcode-select -p
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      - name: Install .NET iOS workload
+        run: |
+          dotnet workload install ios
+          dotnet workload list
+
+      - name: Install CocoaPods
+        run: |
+          if ! command -v pod >/dev/null 2>&1; then
+            sudo gem install cocoapods
+          fi
+          pod --version
+
+      - name: Restore tools
+        run: dotnet tool restore
+
+      - name: Pack Google.Maps
+        run: dotnet tool run dotnet-cake -- --target=nuget --names=Google.Maps
+
+      - name: Maps resource manifest check
+        run: python3 scripts/check-maps-resource-manifest.py
+
+      - name: Direct and transitive consumer checks
+        run: >-
+          tools/e2e/check-consumer-shapes.sh
+          --target Maps
+          --package-dir output
+
+      - name: Simulator E2E
+        run: >-
+          tools/e2e/run-google-foundation.sh
+          --target Maps
+          --package-dir output
+          --configuration Debug
+
+      - name: Upload diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: google-foundation-maps-diagnostics
           path: tests/E2E/Google.Foundation/artifacts/
           if-no-files-found: ignore

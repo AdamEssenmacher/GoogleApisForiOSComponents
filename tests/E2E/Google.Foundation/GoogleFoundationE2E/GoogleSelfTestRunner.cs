@@ -44,6 +44,11 @@ public static class GoogleSelfTestRunner
                     await PlacesCases.RunAsync(result, statusViewController, ExecuteCaseAsync);
                     break;
 #endif
+#if ENABLE_TARGET_MAPS
+                case "Maps":
+                    await MapsCases.RunAsync(result, statusViewController, ExecuteCaseAsync);
+                    break;
+#endif
                 default:
                     throw new NotSupportedException(
                         $"No E2E cases are compiled in for target '{target}'. " +
