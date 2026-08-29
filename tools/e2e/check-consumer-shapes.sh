@@ -133,6 +133,10 @@ work="$(cd "$(mktemp -d)" && pwd -P)"
 # This makes the check prove the nupkg named above rather than whichever copy NuGet restored first.
 export NUGET_PACKAGES="$work/packages"
 mkdir -p "$NUGET_PACKAGES"
+# The scaffold lives outside the repository tree, so give its projects the same pinned SDK and
+# workload set that packed the selected artifact. Without this, a fresh CI host can install the
+# pinned iOS workload successfully and then resolve the consumer against a different workload set.
+cp "$repo_root/global.json" "$work/global.json"
 # Keep the scaffold when something fails -- these are throwaway projects, but a failure is not
 # diagnosable without the build logs and the produced .app.
 cleanup() {
