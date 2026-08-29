@@ -5,7 +5,7 @@
     This value defines if we should upload the dSYM of your app to Firebase console.
     The default value is to upload symbols only when building on Release.
     -->
-    <FirebaseCrashlyticsUploadSymbolsEnabled Condition="'$(FirebaseCrashlyticsUploadSymbolsEnabledEnabled)'=='' AND '$(Configuration)'=='Release'">True</FirebaseCrashlyticsUploadSymbolsEnabled>
+    <FirebaseCrashlyticsUploadSymbolsEnabled Condition="'$(FirebaseCrashlyticsUploadSymbolsEnabled)'=='' AND '$(Configuration)'=='Release'">True</FirebaseCrashlyticsUploadSymbolsEnabled>
     
     <!--
     This value defines if the build should continue if the dSYM upload fails.
