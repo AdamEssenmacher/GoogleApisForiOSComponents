@@ -31,8 +31,6 @@
     <Compile Include="..\..\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="GoogleAppMeasurement.targets" Pack="True" PackagePath="build/AdamE.Google.iOS.GoogleAppMeasurement.targets" />
-    <None Include="GoogleAppMeasurement.targets" Pack="True" PackagePath="buildTransitive/AdamE.Google.iOS.GoogleAppMeasurement.targets" />
     <None Include="License.md" Pack="True" PackagePath="License.md" />
   </ItemGroup>
   <ItemGroup>

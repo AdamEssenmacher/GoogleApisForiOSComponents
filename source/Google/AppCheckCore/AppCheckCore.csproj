@@ -32,8 +32,6 @@
     <Compile Include="..\..\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="AppCheckCore.targets" Pack="True" PackagePath="build/AdamE.Google.iOS.AppCheckCore.targets" />
-    <None Include="AppCheckCore.targets" Pack="True" PackagePath="buildTransitive/AdamE.Google.iOS.AppCheckCore.targets" />
     <None Include="License.md" Pack="True" PackagePath="License.md" />
   </ItemGroup>
   <ItemGroup>

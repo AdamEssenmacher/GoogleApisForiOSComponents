@@ -36,8 +36,6 @@
     <Folder Include="Resources\" />
   </ItemGroup>
   <ItemGroup>    
-    <None Include="Core.targets" Pack="True" PackagePath="build/AdamE.Firebase.iOS.Core.targets" />
-    <None Include="Core.targets" Pack="True" PackagePath="buildTransitive/AdamE.Firebase.iOS.Core.targets" />
     <None Include="External-Dependency-Info.txt" Pack="True" PackagePath="THIRD-PARTY-NOTICES.txt" />
     <None Include="License.md" Pack="True" PackagePath="License.md" />
     <None Include="../../../docs/Firebase/NuGet/Core.md" Pack="True" PackagePath="NUGET_README.md" />
