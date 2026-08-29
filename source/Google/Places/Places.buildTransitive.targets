@@ -1,0 +1,8 @@
+<Project>
+  <!--
+    Transitive consumers get exactly the same logic as direct ones. Importing the build/ copy keeps
+    $(MSBuildThisFileDirectory) resolving to build/, which is where GooglePlaces.bundle is packed,
+    so the bundle only has to ship once.
+  -->
+  <Import Project="$(MSBuildThisFileDirectory)../build/AdamE.Google.iOS.Places.targets" />
+</Project>
