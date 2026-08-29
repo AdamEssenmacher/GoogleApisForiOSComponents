@@ -10,12 +10,11 @@ binding-layer failures such as `EntryPointNotFoundException`, `DllNotFoundExcept
 
 ## Current scope and baseline
 
-The sole runtime adapter is `AdamE.Google.iOS.Places` 7.4.0.2.
+The sole runtime adapter is `AdamE.Google.iOS.Places` 7.4.0.3.
 
-That package is the pre-migration behavioral baseline: it uses `Xamarin.Build.Download` to fetch the
-Google Places SDK during the consumer build. The harness deliberately does not assert how the native
-SDK arrives. It asserts the resulting consumer behavior, so the same checks can be run unchanged
-before and after a package-delivery refactor.
+The behavioral expectations were established against the 7.4.0.2 pre-migration package, which used
+`Xamarin.Build.Download` to fetch the Google Places SDK during the consumer build. The harness does
+not assert how the native SDK arrives, so the same checks validate the self-contained package.
 
 The Places adapter verifies:
 
@@ -26,9 +25,9 @@ The Places adapter verifies:
 - The bundle contains the baseline's 59 files, including representative data, localized string, and
   image files.
 
-This harness does not inspect the `.nupkg`, prove offline builds, compare stored baselines, exercise a
-physical device, or test the Places backend. Those concerns belong in separate package-delivery
-checks when the package format changes.
+The companion `check-package-structure.sh` and `check-offline-build.sh` scripts inspect the package
+and prove the consumer build no longer downloads native content. The harness does not compare stored
+baselines, exercise a physical device, or test the Places backend.
 
 ## Run it
 
@@ -50,7 +49,7 @@ When the directory contains multiple versions, select one explicitly:
 tools/e2e/run-google-foundation.sh \
   --target Places \
   --package-dir output \
-  --package-version 7.4.0.2
+  --package-version 7.4.0.3
 ```
 
 `NuGet.config` maps `AdamE.*` packages to the repository's local `output/` feed. For another package
@@ -78,6 +77,9 @@ The same ignored directory contains the simulator log and target-neutral build d
 - `manifest-iossimulator-arm64/llvm-segment-count.txt`
 
 These files aid failure investigation; they are not golden baselines.
+
+Failed structure and offline checks copy their diagnostics to `package-structure-Places/` and
+`offline-Places/` beneath the same artifacts directory.
 
 ## Adding another Google package
 

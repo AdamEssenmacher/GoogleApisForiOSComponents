@@ -15,6 +15,8 @@ on:
       - "source/Google/Places/**"
       - "tests/E2E/Google.Foundation/**"
       - "tools/e2e/check-consumer-shapes.sh"
+      - "tools/e2e/check-package-structure.sh"
+      - "tools/e2e/check-offline-build.sh"
       - "tools/e2e/run-google-foundation.sh"
   push:
     branches:
@@ -32,6 +34,8 @@ on:
       - "source/Google/Places/**"
       - "tests/E2E/Google.Foundation/**"
       - "tools/e2e/check-consumer-shapes.sh"
+      - "tools/e2e/check-package-structure.sh"
+      - "tools/e2e/check-offline-build.sh"
       - "tools/e2e/run-google-foundation.sh"
   workflow_dispatch:
 
@@ -75,9 +79,21 @@ jobs:
       - name: Pack Google.Places
         run: dotnet tool run dotnet-cake -- --target=nuget --names=Google.Places
 
+      - name: Package structure checks
+        run: >-
+          tools/e2e/check-package-structure.sh
+          --target Places
+          --package-dir output
+
       - name: Direct and transitive consumer checks
         run: >-
           tools/e2e/check-consumer-shapes.sh
+          --target Places
+          --package-dir output
+
+      - name: Offline build proof
+        run: >-
+          tools/e2e/check-offline-build.sh
           --target Places
           --package-dir output
 

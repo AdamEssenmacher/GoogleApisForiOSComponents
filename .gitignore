@@ -10,6 +10,8 @@ tools/e2e/*
 !tools/e2e/run-firebase-foundation.sh
 !tools/e2e/run-google-foundation.sh
 !tools/e2e/check-consumer-shapes.sh
+!tools/e2e/check-package-structure.sh
+!tools/e2e/check-offline-build.sh
 tmp-nugets
 *.userprefs
 *.DS_Store
