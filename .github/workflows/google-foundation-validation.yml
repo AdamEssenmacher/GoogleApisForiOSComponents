@@ -57,8 +57,10 @@ jobs:
         with:
           global-json-file: global.json
 
-      - name: Restore .NET workload
-        run: dotnet workload restore source/Google/Places/Places.csproj
+      - name: Install .NET iOS workload
+        run: |
+          dotnet workload install ios --skip-manifest-update
+          dotnet workload list
 
       - name: Install CocoaPods
         run: |
