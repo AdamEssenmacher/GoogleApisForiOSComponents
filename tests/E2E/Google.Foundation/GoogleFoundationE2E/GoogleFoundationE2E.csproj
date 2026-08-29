@@ -1,0 +1,64 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <!-- Matches the packages: the repo targets net10 only. See README for the Xcode pairing. -->
+    <TargetFramework>net10.0-ios</TargetFramework>
+    <RuntimeIdentifiers Condition="!Exists('$(ProjectAssetsFile)')">iossimulator-arm64</RuntimeIdentifiers>
+    <RuntimeIdentifiers Condition="Exists('$(ProjectAssetsFile)')"></RuntimeIdentifiers>
+    <OutputType>Exe</OutputType>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>true</ImplicitUsings>
+    <SupportedOSPlatformVersion>15.0</SupportedOSPlatformVersion>
+    <RootNamespace>GoogleFoundationE2E</RootNamespace>
+    <AssemblyName>GoogleFoundationE2E</AssemblyName>
+    <IPhoneResourcePrefix>Resources</IPhoneResourcePrefix>
+    <Platforms>AnyCPU;iPhoneSimulator</Platforms>
+    <Configurations>Debug;Release</Configurations>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <!--
+    Which binding package this run exercises. Places is the only implemented target today; the
+    remaining Google packages slot in by adding a target block below plus a case class.
+  -->
+  <PropertyGroup>
+    <GoogleE2ETarget Condition="'$(GoogleE2ETarget)' == ''">Places</GoogleE2ETarget>
+    <PlacesPackageVersion Condition="'$(PlacesPackageVersion)' == ''">7.4.0.2</PlacesPackageVersion>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net10.0-ios' and '$(Platform)' == ''">
+    <Platform>iPhoneSimulator</Platform>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net10.0-ios' and '$(RuntimeIdentifier)' == ''">
+    <RuntimeIdentifier>iossimulator-arm64</RuntimeIdentifier>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <MtouchLink>None</MtouchLink>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(GoogleE2ETarget)' == 'Places'">
+    <DefineConstants>$(DefineConstants);ENABLE_TARGET_PLACES</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(GoogleE2ETarget)' == 'Places'">
+    <PackageReference Include="AdamE.Google.iOS.Places" Version="$(PlacesPackageVersion)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+      <_Parameter1>GoogleE2ETarget</_Parameter1>
+      <_Parameter2>$(GoogleE2ETarget)</_Parameter2>
+    </AssemblyAttribute>
+    <!--
+      Record which package version the run was asked to restore. The binding's AssemblyVersion does
+      not track the NuGet version (the cake build only pokes FileVersion/PackageVersion), so reading
+      the assembly version would report the same value for two different packages and make an A/B
+      comparison look valid when it is not.
+    -->
+    <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute" Condition="'$(GoogleE2ETarget)' == 'Places'">
+      <_Parameter1>TargetPackageVersion</_Parameter1>
+      <_Parameter2>$(PlacesPackageVersion)</_Parameter2>
+    </AssemblyAttribute>
+  </ItemGroup>
+</Project>
