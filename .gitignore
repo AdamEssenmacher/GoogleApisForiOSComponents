@@ -8,6 +8,8 @@ tools/*
 !tools/e2e/
 tools/e2e/*
 !tools/e2e/run-firebase-foundation.sh
+!tools/e2e/run-google-foundation.sh
+!tools/e2e/check-consumer-shapes.sh
 tmp-nugets
 *.userprefs
 *.DS_Store

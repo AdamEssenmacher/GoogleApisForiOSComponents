@@ -1,0 +1,97 @@
+name: Google Foundation Validation
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/google-foundation-validation.yml"
+      - ".config/dotnet-tools.json"
+      - ".gitignore"
+      - "Directory.Build.props"
+      - "global.json"
+      - "Xamarin.Google.sln"
+      - "*.cake"
+      - "icons/googleiosplaces_128x128.png"
+      - "source/AssemblyInfo.cs"
+      - "source/Google/Places/**"
+      - "tests/E2E/Google.Foundation/**"
+      - "tools/e2e/check-consumer-shapes.sh"
+      - "tools/e2e/run-google-foundation.sh"
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/google-foundation-validation.yml"
+      - ".config/dotnet-tools.json"
+      - ".gitignore"
+      - "Directory.Build.props"
+      - "global.json"
+      - "Xamarin.Google.sln"
+      - "*.cake"
+      - "icons/googleiosplaces_128x128.png"
+      - "source/AssemblyInfo.cs"
+      - "source/Google/Places/**"
+      - "tests/E2E/Google.Foundation/**"
+      - "tools/e2e/check-consumer-shapes.sh"
+      - "tools/e2e/run-google-foundation.sh"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  places:
+    runs-on: macos-26
+    timeout-minutes: 60
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Select Xcode 26.6
+        run: |
+          sudo xcode-select --switch /Applications/Xcode_26.6.app/Contents/Developer
+          xcodebuild -version
+          xcode-select -p
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      - name: Install .NET iOS workload
+        run: |
+          dotnet workload install ios
+          dotnet workload list
+
+      - name: Install CocoaPods
+        run: |
+          if ! command -v pod >/dev/null 2>&1; then
+            sudo gem install cocoapods
+          fi
+          pod --version
+
+      - name: Restore tools
+        run: dotnet tool restore
+
+      - name: Pack Google.Places
+        run: dotnet tool run dotnet-cake -- --target=nuget --names=Google.Places
+
+      - name: Direct and transitive consumer checks
+        run: >-
+          tools/e2e/check-consumer-shapes.sh
+          --target Places
+          --package-dir output
+
+      - name: Simulator E2E
+        run: >-
+          tools/e2e/run-google-foundation.sh
+          --target Places
+          --package-dir output
+          --configuration Debug
+
+      - name: Upload diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: google-foundation-validation-diagnostics
+          path: tests/E2E/Google.Foundation/artifacts/
+          if-no-files-found: ignore
