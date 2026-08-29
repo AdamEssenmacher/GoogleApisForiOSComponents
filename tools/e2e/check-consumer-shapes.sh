@@ -61,6 +61,7 @@ case "$target" in
     compare_expected_bundle="true"
     forbidden_dynamic_framework="GoogleMaps.framework"
     source_targets="$repo_root/source/Google/Maps/Maps.targets"
+    source_transitive_targets="$repo_root/source/Google/Maps/Maps.buildTransitive.targets"
     # Calling the managed binding above creates the native reference; no extra DllImport is needed.
     native_probe_decl=""
     native_probe_call=""
@@ -79,6 +80,7 @@ case "$target" in
     compare_expected_bundle="false"
     forbidden_dynamic_framework=""
     source_targets=""
+    source_transitive_targets=""
     # A trivial app that never reaches a native entry point lets the linker drop the static
     # library, which is correct behaviour and not a delivery failure. Call into the native SDK so
     # the symbol assertion below actually measures whether the package delivered it.
@@ -109,6 +111,7 @@ case "$target" in
     compare_expected_bundle="false"
     forbidden_dynamic_framework=""
     source_targets=""
+    source_transitive_targets=""
     ;;
   *) echo "Unknown target: $target" >&2; exit 1 ;;
 esac
@@ -189,19 +192,17 @@ trap cleanup EXIT
 
 expected_bundle=""
 if [[ "$compare_expected_bundle" == "true" ]]; then
-  expected_bundle_parent="$work/verified-upstream"
-  if python3 "$repo_root/scripts/check-maps-resource-manifest.py" \
-      --copy-bundle-to "$expected_bundle_parent" > "$work/maps-resource-manifest.log" 2>&1; then
-    expected_bundle="$expected_bundle_parent/$resource_bundle"
-    if [[ -d "$expected_bundle" ]]; then
-      pass "verified upstream $resource_bundle materialized"
+  expected_bundle="$repo_root/externals/$resource_bundle"
+  if [[ -d "$expected_bundle" ]]; then
+    expected_count="$(find "$expected_bundle" -type f | wc -l | tr -d ' ')"
+    if [[ "$expected_count" == "$expected_resource_file_count" ]]; then
+      pass "verified upstream $resource_bundle is present ($expected_count files)"
     else
-      fail "verified upstream checker did not materialize $expected_bundle"
+      fail "verified upstream $resource_bundle contains $expected_count files; expected $expected_resource_file_count"
       exit 1
     fi
   else
-    fail "could not validate and materialize the upstream $resource_bundle"
-    tail -25 "$work/maps-resource-manifest.log" >&2
+    fail "verified upstream $resource_bundle is missing from externals"
     exit 1
   fi
 fi
@@ -211,11 +212,13 @@ if [[ -n "$source_targets" ]]; then
   echo "Packaged MSBuild integration"
   for folder in build buildTransitive; do
     packaged_targets="$work/$folder.targets"
+    expected_source="$source_targets"
+    [[ "$folder" == "buildTransitive" && -n "$source_transitive_targets" ]] && expected_source="$source_transitive_targets"
     if unzip -p "$nupkg" "$folder/$package_id.targets" > "$packaged_targets" 2>/dev/null; then
-      if diff -u "$source_targets" "$packaged_targets" > "$work/$folder-targets.diff"; then
+      if diff -u "$expected_source" "$packaged_targets" > "$work/$folder-targets.diff"; then
         pass "$folder/$package_id.targets matches source"
       else
-        fail "$folder/$package_id.targets differs from $source_targets (see $work/$folder-targets.diff)"
+        fail "$folder/$package_id.targets differs from $expected_source (see $work/$folder-targets.diff)"
       fi
     else
       fail "$folder/$package_id.targets is missing from the selected package"

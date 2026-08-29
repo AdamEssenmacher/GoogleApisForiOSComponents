@@ -1,0 +1,4 @@
+<Project>
+  <!-- Keep transitive consumers on the same package-local build target as direct consumers. -->
+  <Import Project="$(MSBuildThisFileDirectory)../build/AdamE.Google.iOS.Maps.targets" />
+</Project>

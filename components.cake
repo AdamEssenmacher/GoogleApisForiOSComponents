@@ -19,7 +19,7 @@ Artifact FIREBASE_APP_CHECK_ARTIFACT               = new Artifact ("Firebase.App
 // Google artifacts available to be built. These artifacts generate NuGets.
 Artifact GOOGLE_ANALYTICS_ARTIFACT                 = new Artifact ("Google.Analytics",                "3.20.0.2",  "15.0", ComponentGroup.Google, csprojName: "Analytics");
 Artifact GOOGLE_CAST_ARTIFACT                      = new Artifact ("Google.Cast",                     "4.7.0.1",   "15.0", ComponentGroup.Google, csprojName: "Cast");
-Artifact GOOGLE_MAPS_ARTIFACT                      = new Artifact ("Google.Maps",                     "9.2.0.8",   "15.0", ComponentGroup.Google, csprojName: "Maps");
+Artifact GOOGLE_MAPS_ARTIFACT                      = new Artifact ("Google.Maps",                     "9.2.0.9",   "15.0", ComponentGroup.Google, csprojName: "Maps");
 Artifact GOOGLE_UMP_ARTIFACT                       = new Artifact ("Google.UserMessagingPlatform",    "1.1.0.1",   "15.0", ComponentGroup.Google, csprojName: "UserMessagingPlatform");
 Artifact GOOGLE_PLACES_ARTIFACT                    = new Artifact ("Google.Places",                   "7.4.0.3",   "15.0", ComponentGroup.Google, csprojName: "Places");
 Artifact GOOGLE_APP_CHECK_CORE_ARTIFACT            = new Artifact ("Google.AppCheckCore",             "11.2.0.0",  "15.0", ComponentGroup.Google, csprojName: "AppCheckCore");
@@ -220,7 +220,7 @@ void SetArtifactsPodSpecs ()
 		PodSpec.Create ("google-cast-sdk", "4.7.0")
 	};
 	GOOGLE_MAPS_ARTIFACT.PodSpecs = new [] {
-		PodSpec.Create ("GoogleMaps", "9.2.0")
+		PodSpec.Create ("GoogleMaps", "9.2.0", frameworkSource: FrameworkSource.Custom)
 	};
 	GOOGLE_UMP_ARTIFACT.PodSpecs = new [] {
 		PodSpec.Create ("GoogleUserMessagingPlatform", "1.1.0")

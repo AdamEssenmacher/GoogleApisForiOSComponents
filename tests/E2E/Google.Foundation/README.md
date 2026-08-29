@@ -11,7 +11,7 @@ binding-layer failures such as `EntryPointNotFoundException`, `DllNotFoundExcept
 ## Current scope and baseline
 
 Runtime adapters currently cover `AdamE.Google.iOS.Places` 7.4.0.3 and
-`AdamE.Google.iOS.Maps` 9.2.0.8.
+`AdamE.Google.iOS.Maps` 9.2.0.9.
 
 The behavioral expectations were established against the 7.4.0.2 pre-migration package, which used
 `Xamarin.Build.Download` to fetch the Google Places SDK during the consumer build. The harness does
@@ -26,8 +26,9 @@ The Places adapter verifies:
 - The bundle contains the baseline's 59 files, including representative data, localized string, and
   image files.
 
-The Maps expectations are established against the 9.2.0.8 package while it still uses
-`Xamarin.Build.Download`. Like the Places adapter, its checks are independent of how the SDK arrives.
+The Maps expectations were established against the 9.2.0.8 package while it used
+`Xamarin.Build.Download`; the current package is 9.2.0.9 and carries the SDK itself. Like the Places
+adapter, its checks are independent of how the SDK arrives.
 The Maps adapter verifies:
 
 - `Google.Maps.MapView` loads from the restored binding assembly.

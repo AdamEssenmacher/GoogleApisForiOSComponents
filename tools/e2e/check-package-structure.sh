@@ -3,7 +3,7 @@ set -euo pipefail
 
 usage() {
   cat <<'EOF'
-Usage: tools/e2e/check-package-structure.sh --target Places [options]
+Usage: tools/e2e/check-package-structure.sh --target <Maps|Places> [options]
 
   --package-dir <dir>        Local NuGet feed (default: output)
   --package-version <ver>    Exact package version (required when the feed contains multiple)
@@ -42,6 +42,34 @@ done
 
 typeset -A expected_slice_archs
 case "$target" in
+  Maps)
+    package_id="AdamE.Google.iOS.Maps"
+    assembly_name="Google.Maps"
+    xcframework="GoogleMaps.xcframework"
+    framework_binary="GoogleMaps"
+    expected_slices=("ios-arm64" "ios-arm64_x86_64-simulator")
+    expected_slice_archs=(
+      "ios-arm64" "arm64"
+      "ios-arm64_x86_64-simulator" "arm64 x86_64"
+    )
+    resource_bundle="GoogleMaps.bundle"
+    expected_bundle_files=190
+    expected_resource_mappings=190
+    source_project="$repo_root/source/Google/Maps/Maps.csproj"
+    source_build_targets="$repo_root/source/Google/Maps/Maps.targets"
+    source_transitive_targets="$repo_root/source/Google/Maps/Maps.buildTransitive.targets"
+    source_files=(
+      "$source_project"
+      "$source_build_targets"
+      "$source_transitive_targets"
+    )
+    expected_kind="Framework"
+    expected_smartlink="True"
+    expected_forceload="True"
+    expected_frameworks="Accelerate Contacts CoreData CoreGraphics CoreImage CoreLocation CoreTelephony CoreText GLKit ImageIO Metal OpenGLES QuartzCore Security SystemConfiguration UIKit"
+    expected_linkerflags="-ObjC -lc++ -lz"
+    upstream_bundle="$repo_root/externals/GoogleMaps.bundle"
+    ;;
   Places)
     package_id="AdamE.Google.iOS.Places"
     assembly_name="Google.Places"
@@ -54,6 +82,7 @@ case "$target" in
     )
     resource_bundle="GooglePlaces.bundle"
     expected_bundle_files=59
+    expected_resource_mappings=""
     source_project="$repo_root/source/Google/Places/Places.csproj"
     source_build_targets="$repo_root/source/Google/Places/Places.targets"
     source_transitive_targets="$repo_root/source/Google/Places/Places.buildTransitive.targets"
@@ -237,6 +266,30 @@ for version_field in AssemblyVersion FileVersion PackageVersion; do
   fi
 done
 
+if [[ "$target" == "Maps" ]]; then
+  if grep -Eq "Artifact GOOGLE_MAPS_ARTIFACT[[:space:]]*=.*\"$package_version\"" "$repo_root/components.cake"; then
+    pass "components.cake Maps artifact version = $package_version"
+  else
+    fail "components.cake Maps artifact version does not match $package_version"
+  fi
+  if grep -Fq "| \`Maps\` | \`$package_version\` |" "$repo_root/Readme.md"; then
+    pass "README Maps version = $package_version"
+  else
+    fail "README Maps version does not match $package_version"
+  fi
+fi
+
+if [[ -n "$expected_resource_mappings" ]]; then
+  include_count="$(grep -c '<BundleResource Include=' "$source_build_targets" || true)"
+  logical_count="$(grep -c '<LogicalName>' "$source_build_targets" || true)"
+  duplicate_count="$(grep -oE '<LogicalName>[^<]+' "$source_build_targets" | sed 's/<LogicalName>//' | LC_ALL=C sort | uniq -d | wc -l | tr -d ' ')"
+  if [[ "$include_count" == "$expected_resource_mappings" && "$logical_count" == "$expected_resource_mappings" && "$duplicate_count" == "0" ]]; then
+    pass "Maps targets contain $expected_resource_mappings unique resource mappings"
+  else
+    fail "Maps targets contain Include=$include_count LogicalName=$logical_count duplicate=$duplicate_count; expected $expected_resource_mappings unique mappings"
+  fi
+fi
+
 echo
 echo "Native payload per TFM"
 lib_dirs=("$work/pkg"/lib/*(/N))
@@ -341,10 +394,14 @@ for lib_dir in "${lib_dirs[@]}"; do
     fail "$tfm: native reference manifest is missing"
   fi
 
-  upstream_bundle="$framework_root/ios-arm64/GooglePlaces.framework/Resources/$resource_bundle"
+  if [[ "$target" == "Maps" ]]; then
+    upstream_bundle="$repo_root/externals/GoogleMaps.bundle"
+  else
+    upstream_bundle="$framework_root/ios-arm64/GooglePlaces.framework/Resources/$resource_bundle"
+  fi
   packaged_bundle="$work/pkg/build/$resource_bundle"
   if [[ ! -d "$upstream_bundle" || ! -d "$packaged_bundle" ]]; then
-    [[ -d "$upstream_bundle" ]] || fail "$tfm: upstream $resource_bundle is missing from the device slice"
+    [[ -d "$upstream_bundle" ]] || fail "$tfm: verified upstream $resource_bundle is missing"
     [[ -d "$packaged_bundle" ]] || fail "build/$resource_bundle is missing from the package"
     continue
   fi
@@ -414,7 +471,7 @@ check_packaged_targets build "$source_build_targets"
 check_packaged_targets buildTransitive "$source_transitive_targets"
 
 transitive_targets="$work/pkg/buildTransitive/$package_id.targets"
-expected_import='<Import Project="$(MSBuildThisFileDirectory)../build/AdamE.Google.iOS.Places.targets" />'
+expected_import="<Import Project=\"\$(MSBuildThisFileDirectory)../build/AdamE.Google.iOS.$target.targets\" />"
 if [[ -f "$transitive_targets" ]] && grep -Fq "$expected_import" "$transitive_targets"; then
   pass "buildTransitive imports the primary build target"
 else

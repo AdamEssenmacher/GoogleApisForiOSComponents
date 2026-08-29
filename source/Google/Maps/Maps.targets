@@ -1,27 +1,8 @@
 <Project>
   <PropertyGroup>
-    <_GoogleMapsAssemblyName>Google.Maps, Version=9.2.0.7, Culture=neutral, PublicKeyToken=null</_GoogleMapsAssemblyName>
-    <_GoogleMapsItemsFolder>GMps-9.2.0</_GoogleMapsItemsFolder>
-    <_GoogleMapsSDKBaseFolder>$(XamarinBuildDownloadDir)$(_GoogleMapsItemsFolder)\Maps\Frameworks\</_GoogleMapsSDKBaseFolder>
-    <_GoogleMapsResourcesBaseFolder>$(XamarinBuildDownloadDir)$(_GoogleMapsItemsFolder)\Maps\Resources\GoogleMapsResources\GoogleMaps.bundle\</_GoogleMapsResourcesBaseFolder>
+    <_GoogleMapsResourcesBaseFolder>$(MSBuildThisFileDirectory)GoogleMaps.bundle\</_GoogleMapsResourcesBaseFolder>
   </PropertyGroup>
   <ItemGroup Condition="('$(OutputType)'!='Library' OR '$(IsAppExtension)'=='True')">
-    <XamarinBuildDownload Include="$(_GoogleMapsItemsFolder)">
-      <!-- From pod at https://github.com/CocoaPods/Specs/tree/master/Specs/a/d/d/GoogleMaps-->
-      <Url>https://dl.google.com/dl/cpdc/33a7ac549361ab23/GoogleMaps-9.2.0.tar.gz</Url>
-      <Kind>Tgz</Kind>
-    </XamarinBuildDownload>
-    <NativeReference Include="$(_GoogleMapsSDKBaseFolder)GoogleMaps.xcframework">
-      <Kind>Framework</Kind>
-      <SmartLink>True</SmartLink>
-      <ForceLoad>True</ForceLoad>
-      <LinkerFlags>-ObjC -lc++ -lz</LinkerFlags>
-      <Frameworks>Accelerate Contacts CoreData CoreGraphics CoreImage CoreLocation CoreTelephony CoreText GLKit ImageIO Metal OpenGLES QuartzCore Security SystemConfiguration UIKit</Frameworks>
-    </NativeReference>
-    <XamarinBuildRestoreResources Include="_GMpsDownloadedItems" />
-  </ItemGroup>
-  <Target Name="_GMpsDownloadedItems">
-    <ItemGroup>
       <BundleResource Include="$(_GoogleMapsResourcesBaseFolder)Assets.car" Visible="False">
         <LogicalName>GoogleMaps.bundle\Assets.car</LogicalName>
         <Optimize>False</Optimize>
@@ -678,6 +659,5 @@
       <BundleResource Include="$(_GoogleMapsResourcesBaseFolder)GMSCoreResources.bundle\zh_TW.lproj\GMSCore.strings" Visible="False">
         <LogicalName>GoogleMaps.bundle\GMSCoreResources.bundle\zh_TW.lproj\GMSCore.strings</LogicalName>
       </BundleResource>
-    </ItemGroup>
-  </Target>
+  </ItemGroup>
 </Project>

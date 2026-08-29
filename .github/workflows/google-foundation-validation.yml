@@ -12,7 +12,6 @@ on:
       - "*.cake"
       - "icons/googleiosmaps_128x128.png"
       - "icons/googleiosplaces_128x128.png"
-      - "scripts/check-maps-resource-manifest.py"
       - "source/AssemblyInfo.cs"
       - "source/Google/Maps/**"
       - "source/Google/Places/**"
@@ -34,7 +33,6 @@ on:
       - "*.cake"
       - "icons/googleiosmaps_128x128.png"
       - "icons/googleiosplaces_128x128.png"
-      - "scripts/check-maps-resource-manifest.py"
       - "source/AssemblyInfo.cs"
       - "source/Google/Maps/**"
       - "source/Google/Places/**"
@@ -154,12 +152,21 @@ jobs:
       - name: Pack Google.Maps
         run: dotnet tool run dotnet-cake -- --target=nuget --names=Google.Maps
 
-      - name: Maps resource manifest check
-        run: python3 scripts/check-maps-resource-manifest.py
+      - name: Package structure checks
+        run: >-
+          tools/e2e/check-package-structure.sh
+          --target Maps
+          --package-dir output
 
       - name: Direct and transitive consumer checks
         run: >-
           tools/e2e/check-consumer-shapes.sh
+          --target Maps
+          --package-dir output
+
+      - name: Offline build proof
+        run: >-
+          tools/e2e/check-offline-build.sh
           --target Maps
           --package-dir output
 
