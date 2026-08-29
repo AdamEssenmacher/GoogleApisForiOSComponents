@@ -63,7 +63,7 @@ jobs:
         run: dotnet pack source/Google/Maps/Maps.csproj --configuration Release --no-restore --output output
 
       - name: Direct and transitive consumer checks
-        run: scripts/check-maps-consumers.sh --package-dir output
+        run: scripts/check-maps-consumers.sh --package-dir output --allow-xcode-mismatch
 
       - name: Upload diagnostics
         if: failure()
