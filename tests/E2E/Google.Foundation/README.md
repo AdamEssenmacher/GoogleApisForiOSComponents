@@ -10,7 +10,8 @@ binding-layer failures such as `EntryPointNotFoundException`, `DllNotFoundExcept
 
 ## Current scope and baseline
 
-The sole runtime adapter is `AdamE.Google.iOS.Places` 7.4.0.3.
+Runtime adapters currently cover `AdamE.Google.iOS.Places` 7.4.0.3 and
+`AdamE.Google.iOS.Maps` 9.2.0.8.
 
 The behavioral expectations were established against the 7.4.0.2 pre-migration package, which used
 `Xamarin.Build.Download` to fetch the Google Places SDK during the consumer build. The harness does
@@ -25,13 +26,24 @@ The Places adapter verifies:
 - The bundle contains the baseline's 59 files, including representative data, localized string, and
   image files.
 
-The companion `check-package-structure.sh` and `check-offline-build.sh` scripts inspect the package
-and prove the consumer build no longer downloads native content. The harness does not compare stored
-baselines, exercise a physical device, or test the Places backend.
+The Maps expectations are established against the 9.2.0.8 package while it still uses
+`Xamarin.Build.Download`. Like the Places adapter, its checks are independent of how the SDK arrives.
+The Maps adapter verifies:
+
+- `Google.Maps.MapView` loads from the restored binding assembly.
+- `GMSGeometryDistance` resolves and returns a finite, positive distance.
+- `GMSMapView`, `GMSCameraPosition`, and `GMSMarker` are present in the Objective-C runtime.
+- Exactly one `GoogleMaps.bundle` is present at the app root.
+- The bundle contains the upstream SDK's 190 files, including representative privacy, asset, model,
+  and nested resource files.
+
+For self-contained targets, the companion `check-package-structure.sh` and `check-offline-build.sh`
+scripts inspect the package and prove the consumer build no longer downloads native content. The
+harness does not compare stored baselines, exercise a physical device, or test Google backends.
 
 ## Run it
 
-Pack Places, then launch the runtime checks on an available iPhone simulator:
+Pack a target, then launch its runtime checks on an available iPhone simulator:
 
 ```sh
 dotnet tool restore
@@ -39,8 +51,10 @@ dotnet tool run dotnet-cake -- --target=nuget --names=Google.Places
 tools/e2e/run-google-foundation.sh --target Places --package-dir output
 ```
 
-If the package directory contains exactly one `AdamE.Google.iOS.Places.*.nupkg`, the runner derives
-and records its version. Zero or multiple matching packages are rejected so a run cannot silently
+For the Maps baseline, replace `Google.Places` and `Places` with `Google.Maps` and `Maps`.
+
+If the package directory contains exactly one matching nonsymbol package, the runner derives and
+records its version. Zero or multiple matching packages are rejected so a run cannot silently
 exercise the wrong artifact.
 
 When the directory contains multiple versions, select one explicitly:

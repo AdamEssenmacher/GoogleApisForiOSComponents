@@ -16,13 +16,11 @@
     <IsPackable>false</IsPackable>
   </PropertyGroup>
 
-  <!--
-    Which binding package this run exercises. Places is the only implemented target today; the
-    remaining Google packages slot in by adding a target block below plus a case class.
-  -->
+  <!-- Which binding package this run exercises. -->
   <PropertyGroup>
     <GoogleE2ETarget Condition="'$(GoogleE2ETarget)' == ''">Places</GoogleE2ETarget>
     <PlacesPackageVersion Condition="'$(PlacesPackageVersion)' == ''">7.4.0.3</PlacesPackageVersion>
+    <MapsPackageVersion Condition="'$(MapsPackageVersion)' == ''">9.2.0.8</MapsPackageVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(TargetFramework)' == 'net10.0-ios' and '$(Platform)' == ''">
@@ -41,8 +39,16 @@
     <DefineConstants>$(DefineConstants);ENABLE_TARGET_PLACES</DefineConstants>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(GoogleE2ETarget)' == 'Maps'">
+    <DefineConstants>$(DefineConstants);ENABLE_TARGET_MAPS</DefineConstants>
+  </PropertyGroup>
+
   <ItemGroup Condition="'$(GoogleE2ETarget)' == 'Places'">
     <PackageReference Include="AdamE.Google.iOS.Places" Version="$(PlacesPackageVersion)" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(GoogleE2ETarget)' == 'Maps'">
+    <PackageReference Include="AdamE.Google.iOS.Maps" Version="$(MapsPackageVersion)" />
   </ItemGroup>
 
   <ItemGroup>
@@ -57,6 +63,10 @@
     <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute" Condition="'$(GoogleE2ETarget)' == 'Places'">
       <_Parameter1>TargetPackageVersion</_Parameter1>
       <_Parameter2>$(PlacesPackageVersion)</_Parameter2>
+    </AssemblyAttribute>
+    <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute" Condition="'$(GoogleE2ETarget)' == 'Maps'">
+      <_Parameter1>TargetPackageVersion</_Parameter1>
+      <_Parameter2>$(MapsPackageVersion)</_Parameter2>
     </AssemblyAttribute>
   </ItemGroup>
 </Project>
