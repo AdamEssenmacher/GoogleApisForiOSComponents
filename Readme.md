@@ -143,7 +143,7 @@ If your project targets multiple platforms, keep these packages inside Apple-onl
 
 ```xml
 <ItemGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">
-  <PackageReference Include="AdamE.Firebase.iOS.Core" Version="12.10.0" />
+  <PackageReference Include="AdamE.Firebase.iOS.Core" Version="12.11.0" />
 </ItemGroup>
 ```
 
@@ -165,32 +165,32 @@ Archiving can still be more reliable on macOS or from the command line.
 
 ## Package status
 
-The lists below reflect what is currently published on [nuget.org](https://www.nuget.org/profiles/adamessenmacher) under the `adamessenmacher` owner profile. That is intentionally different from the repo state in [`components.cake`](components.cake): the repo can contain projects or version bumps that have not been published yet.
+The lists below record the published baseline on [nuget.org](https://www.nuget.org/profiles/adamessenmacher) under the `adamessenmacher` owner profile, alongside prepared Firebase versions. The repo state in [`components.cake`](components.cake) can contain version bumps that have not been published yet.
 
-Firebase `12.10.0` is the current published Firebase package line.
+This checkout prepares Firebase and GoogleAppMeasurement `12.11.0`. Publication of `12.11.0` has not been confirmed; the published-version baseline recorded below remains `12.10.0`. See the [12.11 native review and validation notes](docs/firebase-12.11-update.md).
 
-### Currently published on nuget.org
+### Published baseline and prepared versions
 
 #### Firebase packages (`AdamE.Firebase.iOS.*`)
 
-| Package | Version |
-| --- | --- |
-| `ABTesting` | `12.10.0` |
-| `Analytics` | `12.10.0` |
-| `AppCheck` | `12.10.0` |
-| `AppDistribution` | `12.10.0` |
-| `Auth` | `12.10.0` |
-| `CloudFirestore` | `12.10.0` |
-| `CloudFunctions` | `12.10.0` |
-| `CloudMessaging` | `12.10.0` |
-| `Core` | `12.10.0` |
-| `Crashlytics` | `12.10.0` |
-| `Database` | `12.10.0` |
-| `InAppMessaging` | `12.10.0` |
-| `Installations` | `12.10.0` |
-| `PerformanceMonitoring` | `12.10.0` |
-| `RemoteConfig` | `12.10.0` |
-| `Storage` | `12.10.0` |
+| Package | Published baseline | Prepared version |
+| --- | --- | --- |
+| `ABTesting` | `12.10.0` | `12.11.0` |
+| `Analytics` | `12.10.0` | `12.11.0` |
+| `AppCheck` | `12.10.0` | `12.11.0` |
+| `AppDistribution` | `12.10.0` | `12.11.0` |
+| `Auth` | `12.10.0` | `12.11.0` |
+| `CloudFirestore` | `12.10.0` | `12.11.0` |
+| `CloudFunctions` | `12.10.0` | `12.11.0` |
+| `CloudMessaging` | `12.10.0` | `12.11.0` |
+| `Core` | `12.10.0` | `12.11.0` |
+| `Crashlytics` | `12.10.0` | `12.11.0` |
+| `Database` | `12.10.0` | `12.11.0` |
+| `InAppMessaging` | `12.10.0` | `12.11.0` |
+| `Installations` | `12.10.0` | `12.11.0` |
+| `PerformanceMonitoring` | `12.10.0` | `12.11.0` |
+| `RemoteConfig` | `12.10.0` | `12.11.0` |
+| `Storage` | `12.10.0` | `12.11.0` |
 
 #### Google packages (`AdamE.Google.iOS.*`)
 
@@ -202,7 +202,7 @@ Firebase `12.10.0` is the current published Firebase package line.
 
 #### Google support packages (`AdamE.Google.iOS.*`)
 
-These packages are usually consumed transitively rather than referenced directly:
+These packages are usually consumed transitively rather than referenced directly. GoogleAppMeasurement `12.11.0` is prepared in this checkout; its published baseline below is unchanged:
 
 | Package | Version |
 | --- | --- |
