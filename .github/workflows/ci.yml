@@ -24,6 +24,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Consumer emulator runner regressions
+        run: python3 -m unittest discover -s tests/E2E/Firebase.Foundation -p 'test_*.py'
+
       - name: Toolchain versions
         run: |
           xcodebuild -version

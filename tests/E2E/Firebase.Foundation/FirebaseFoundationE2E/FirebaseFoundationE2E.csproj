@@ -58,7 +58,7 @@
 
   <ItemGroup>
     <None Remove="GoogleService-Info.plist" Condition="Exists('GoogleService-Info.plist')" />
-    <BundleResource Include="GoogleService-Info.plist" Condition="Exists('GoogleService-Info.plist')" />
+    <BundleResource Include="GoogleService-Info.plist" Condition="'$(EnableFirestoreEmulator)' != 'true' and Exists('GoogleService-Info.plist')" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(RuntimeDriftCase)' != ''">
@@ -94,7 +94,8 @@
     <PackageReference Include="AdamE.Google.iOS.PromisesObjC" Version="2.4.0.5" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(EnableNullabilityValidation)' == 'true'">
+  <ItemGroup Condition="'$(EnableNullabilityValidation)' == 'true' or '$(EnableFirestoreEmulator)' == 'true'">
+    <PackageReference Remove="AdamE.Firebase.iOS.CloudFirestore" />
     <PackageReference Include="AdamE.Firebase.iOS.CloudFirestore" Version="$(FirebasePackageVersion)" />
   </ItemGroup>
 
