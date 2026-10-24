@@ -94,6 +94,9 @@ var FIREBASE_RELEASE_RESOLUTION_PODS = new [] {
 };
 
 var FIREBASE_RELEASE_MANUAL_POD_PINS = new Dictionary<string, string> {
+	{ "AppCheckCore", "11.2.0" },
+	{ "GTMSessionFetcher", "3.5.0" },
+	{ "PromisesObjC", "2.4.0" },
 	{ "RecaptchaInterop", "101.0.0" },
 	{ "BoringSSL-GRPC", "0.0.37" },
 	{ "gRPC-Core", "1.69.0" },
@@ -247,8 +250,11 @@ FirebaseReleaseContext CreateFirebaseReleaseContext ()
 
 	var externalDownloads = ResolveFirebaseReleaseExternalDownloads (FIREBASE_RELEASE_VERSION);
 	var podResolution = ResolveFirebaseReleasePodfile (FIREBASE_RELEASE_VERSION);
-	ValidateFirebaseReleaseResolvedPods (podResolution);
 	ValidateFirebaseReleaseResolvedPodSet (podResolution);
+	// Check upstream membership before adding pins, so pins cannot hide removed dependencies.
+	var pinnedPodResolution = ResolveFirebaseReleasePodfile (FIREBASE_RELEASE_VERSION, useRepositoryPins: true);
+	ValidateFirebaseReleaseResolvedPods (pinnedPodResolution);
+	ValidateFirebaseReleaseResolvedPodSet (pinnedPodResolution);
 	var targetNativeMetadata = ResolveFirebaseReleaseNativeMetadata (FIREBASE_RELEASE_VERSION);
 	var fromNativeMetadata = string.Equals (fromVersion, FIREBASE_RELEASE_VERSION, StringComparison.Ordinal)
 		? targetNativeMetadata
@@ -868,7 +874,7 @@ void ValidateFirebaseReleaseResolvedPods (FirebaseReleasePodResolution podResolu
 			continue;
 
 		if (podResolution.Versions [pair.Key] != pair.Value)
-			mismatches.Add ($"{pair.Key}: components.cake pins {pair.Value}, upstream resolves {podResolution.Versions [pair.Key]}");
+			mismatches.Add ($"{pair.Key}: components.cake pins {pair.Value}, release graph resolves {podResolution.Versions [pair.Key]}");
 	}
 
 	if (mismatches.Count > 0)
@@ -893,9 +899,9 @@ void ValidateFirebaseReleaseResolvedPodSet (FirebaseReleasePodResolution podReso
 	throw new Exception ("Firebase dependency graph drift detected. Manual dependency mapping review required.\n" + string.Join ("\n", messages));
 }
 
-FirebaseReleasePodResolution ResolveFirebaseReleasePodfile (string version)
+FirebaseReleasePodResolution ResolveFirebaseReleasePodfile (string version, bool useRepositoryPins = false)
 {
-	var checkDirectory = new DirectoryPath ("output/firebase-release-check");
+	var checkDirectory = new DirectoryPath ("output/firebase-release-check").Combine (useRepositoryPins ? "pinned" : "upstream");
 	if (DirectoryExists (checkDirectory))
 		DeleteDirectory (checkDirectory, new DeleteDirectorySettings { Recursive = true, Force = true });
 
@@ -910,6 +916,10 @@ FirebaseReleasePodResolution ResolveFirebaseReleasePodfile (string version)
 
 	foreach (var pod in FIREBASE_RELEASE_RESOLUTION_PODS)
 		podfileLines.Add ($"\tpod '{pod}', '{version}'");
+
+	if (useRepositoryPins)
+		foreach (var pin in FIREBASE_RELEASE_MANUAL_POD_PINS.OrderBy (pair => pair.Key, StringComparer.Ordinal))
+			podfileLines.Add ($"\tpod '{pin.Key}', '{pin.Value}'");
 
 	podfileLines.Add ("end");
 
