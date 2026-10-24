@@ -94,6 +94,21 @@ tools/e2e/run-firebase-foundation.sh --package-dir output --configuration Debug 
 tools/e2e/run-firebase-foundation.sh --package-dir output --configuration Debug --runtime-drift-case all
 ```
 
+### Local Firestore emulator
+
+The aggregate-query and query-filter cases write seed documents and assert successful server query results. Run these cases against a disposable local Firestore emulator to avoid depending on hosted test-project permissions:
+
+```sh
+tools/e2e/run-firebase-foundation.sh --package-dir output --configuration Debug --runtime-drift-case cloudfirestore-aggregate-query --firestore-emulator
+tools/e2e/run-firebase-foundation.sh --package-dir output --configuration Debug --runtime-drift-case cloudfirestore-query-filters --firestore-emulator
+```
+
+Install the Firebase CLI (`firebase-tools`) and Java 21 or newer first. The CLI downloads the emulator on its first run. Each invocation starts a fresh Standard-edition Firestore emulator on `127.0.0.1:18080` using the demo project `demo-firebase-bindings`, runs the consumer, and shuts the emulator down. The checked-in `emulator/firebase.json` also reserves hub port `18081`, logging port `18082`, and Firestore websocket port `18083`, all on loopback; these ports must be available. Edit that file to choose different ports: the CLI supplies the actual Firestore endpoint to the app, which requires `127.0.0.1` and a valid port. Run harness invocations sequentially because they share build outputs, package caches, result files, and the test app installation. The flag supports only the two cases above; extending the allow-list requires auditing plist-derived options and every service a new case uses.
+
+The app uses synthetic Firebase options for the demo project and explicitly connects the native Firestore SDK before its first operation, with an in-memory client cache. The `ConfigureApp` result records the demo project, and a separate `ConnectFirestoreEmulator` result records the endpoint and cache/TLS configuration. Emulator mode does not require or bundle the hosted `GoogleService-Info.plist`; ordinary lanes continue to load it and compare static default options with configured app options. Local rules permit only top-level documents in the fixture collection names used by these tests; subcollections are deliberately denied; do not deploy these rules to a hosted project.
+
+CLI state, the downloaded emulator, and logs are kept under `artifacts/firestore-emulator/`. The normal simulator JSON result and log remain under `artifacts/`. The nested consumer build retains the caller's original `XDG_CONFIG_HOME` and `FIREBASE_EMULATORS_PATH` values; CLI isolation does not change the build environment. Emulator runs validate binding calls, native callbacks, and returned query results. They do not validate hosted security rules or production index requirements; see the [Firestore emulator documentation](https://firebase.google.com/docs/emulator-suite/connect_firestore).
+
 ## Binding surface coverage mode
 
 The opt-in binding surface coverage lane accounts for the active Firebase `12.10.0` bindings tracked by the audit config. It generates a source-derived coverage inventory from [`binding-surface-coverage.json`](./binding-surface-coverage.json), restores the selected target package set from the local feed, and runs `ConfigureApp` plus the generated surface coverage case.

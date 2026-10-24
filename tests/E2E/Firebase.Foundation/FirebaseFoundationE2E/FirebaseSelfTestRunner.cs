@@ -43,18 +43,73 @@ public static class FirebaseSelfTestRunner
         {
             await ExecuteCaseAsync(result, statusViewController, "ConfigureApp", async () =>
             {
+                EnsureBundleId();
+#if ENABLE_FIRESTORE_EMULATOR
+                const string emulatorProjectId = "demo-firebase-bindings";
+                var emulatorOptions = new Options("1:1234567890:ios:0123456789abcdef", "1234567890")
+                {
+                    ProjectId = emulatorProjectId,
+                    BundleId = ExpectedBundleId,
+                    // Analytics initializes Installations, which requires an API-key-shaped value.
+                    // This synthetic demo key does not authorize any hosted Firebase service.
+                    ApiKey = "AIzaSy000000000000000000000000000000000",
+                };
+                App.Configure(emulatorOptions);
+#else
                 EnsureConfigFileIsBundled();
                 App.Configure();
+#endif
 
                 var defaultApp = App.DefaultInstance ?? throw new InvalidOperationException("Firebase.Core.App.DefaultInstance returned null after App.Configure().");
-                var options = Options.DefaultInstance;
+                var options = defaultApp.Options ?? throw new InvalidOperationException("Configured app options were null.");
+#if !ENABLE_FIRESTORE_EMULATOR
+                var plistOptions = Options.DefaultInstance ?? throw new InvalidOperationException("Options.DefaultInstance returned null for the bundled plist.");
+                if (string.IsNullOrWhiteSpace(plistOptions.GoogleAppId) || string.IsNullOrWhiteSpace(plistOptions.ProjectId)
+                    || plistOptions.GoogleAppId != options.GoogleAppId || plistOptions.ProjectId != options.ProjectId
+                    || plistOptions.BundleId != options.BundleId)
+                {
+                    throw new InvalidOperationException("Options.DefaultInstance did not match the configured app options.");
+                }
+#endif
 
                 result.DefaultAppName = defaultApp.Name;
-                result.GoogleAppId = options?.GoogleAppId;
-                result.ProjectId = options?.ProjectId;
+                result.GoogleAppId = options.GoogleAppId;
+                result.ProjectId = options.ProjectId;
 
+#if ENABLE_FIRESTORE_EMULATOR
+                return $"Configured app '{defaultApp.Name}'; demo project {emulatorProjectId}.";
+#else
                 return $"Configured app '{defaultApp.Name}'.";
+#endif
             });
+
+#if ENABLE_FIRESTORE_EMULATOR
+            await ExecuteCaseAsync(result, statusViewController, "ConnectFirestoreEmulator", async () =>
+            {
+                var emulatorHost = Environment.GetEnvironmentVariable("E2E_FIRESTORE_EMULATOR_HOST");
+                if (!System.Net.IPEndPoint.TryParse(emulatorHost, out var endpoint)
+                    || !endpoint.Address.Equals(System.Net.IPAddress.Loopback) || endpoint.Port < 1)
+                {
+                    throw new InvalidOperationException("Firestore emulator mode requires 127.0.0.1:<port> with a valid port.");
+                }
+
+                var firestore = Firebase.CloudFirestore.Firestore.SharedInstance;
+                firestore.UseEmulatorWithHost(endpoint.Address.ToString(), endpoint.Port);
+                var settings = firestore.Settings;
+                // The native useEmulator helper changes the host only; TLS must be disabled
+                // explicitly, as in Firebase's Apple emulator connection guide.
+                settings.SslEnabled = false;
+                settings.CacheSettings = new Firebase.CloudFirestore.MemoryCacheSettings();
+                firestore.Settings = settings;
+                var connectedSettings = firestore.Settings;
+                if (connectedSettings.Host != endpoint.ToString() || connectedSettings.SslEnabled)
+                {
+                    throw new InvalidOperationException("Native Firestore emulator settings did not retain the requested host and disabled TLS.");
+                }
+
+                return $"Firestore emulator {endpoint}; project {result.ProjectId}; memory cache; TLS disabled.";
+            });
+#endif
 
             if (runtimeDriftCases.Count > 0)
             {
@@ -217,7 +272,10 @@ public static class FirebaseSelfTestRunner
         {
             throw new InvalidOperationException("GoogleService-Info.plist was not found in the app bundle.");
         }
+    }
 
+    static void EnsureBundleId()
+    {
         if (!string.Equals(NSBundle.MainBundle.BundleIdentifier, ExpectedBundleId, StringComparison.Ordinal))
         {
             throw new InvalidOperationException($"Unexpected bundle id '{NSBundle.MainBundle.BundleIdentifier}'. Expected '{ExpectedBundleId}'.");
