@@ -95,6 +95,9 @@
       "id": "CloudFirestore",
       "packageId": "Firebase.CloudFirestore",
       "xcframework": "FirebaseFirestore",
+      "sharpieFrameworkDependencies": [
+        "FirebaseFirestoreInternal"
+      ],
       "baselineDirectory": "source/Firebase/CloudFirestore",
       "baselineFiles": [
         "ApiDefinition.cs",

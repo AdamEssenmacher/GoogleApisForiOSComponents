@@ -259,14 +259,11 @@ internal sealed class AuditRunner
                     if (primaryComparableSurfaceEmpty)
                     {
                         diagnosticFindings.Add(BuildPrimaryGenerationFinding(
-                            category: "generation-warning",
-                            severity: "info",
+                            category: "generation-failure",
+                            severity: "failure",
                             target.PackageId,
                             $"Fresh output for {target.Id} contained zero comparable bound types, delegates, or enums."));
-                        if (!string.Equals(generationStatus, "failed", StringComparison.Ordinal))
-                        {
-                            generationStatus = "succeeded_with_warnings";
-                        }
+                        generationStatus = "inconclusive";
                     }
 
                     primaryComparison = comparer.Compare(baselineSnapshot, generatedSnapshot, sharedAliases);
@@ -410,7 +407,7 @@ internal sealed class AuditRunner
 
         return selectedTargets
             .Where(target => !string.Equals(target.EffectiveSharpieMode(sharpieConfiguration), "off", StringComparison.OrdinalIgnoreCase))
-            .Select(static target => target.Xcframework)
+            .SelectMany(static target => new[] { target.Xcframework }.Concat(target.SharpieFrameworkDependencies))
             .Where(static xcframework => !string.IsNullOrWhiteSpace(xcframework))
             .Distinct(StringComparer.Ordinal)
             .ToList();

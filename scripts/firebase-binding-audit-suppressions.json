@@ -3753,6 +3753,32 @@
       "evidence": [
         "externals/FirebaseAuth.xcframework/ios-arm64/FirebaseAuth.framework/Headers/FirebaseAuth-Swift.h#L1099-L1301"
       ]
+    },
+    {
+      "id": "cloudfirestore-cache-settings-sharpie-protocol-composition",
+      "target": "CloudFirestore",
+      "category": "signature-drift",
+      "comparisonTypeKey": "FIRFirestoreSettings",
+      "comparisonMemberKey": "export|cacheSettings",
+      "reason": "The native header declares id<FIRLocalCacheSettings, NSObject>. The managed ILocalCacheSettings protocol interface preserves this contract; Sharpie emits an NSObject<FIRLocalCacheSettings, NSObject> spelling that is not a distinct native type.",
+      "evidence": [
+        "externals/FirebaseFirestoreInternal.xcframework/ios-arm64/FirebaseFirestoreInternal.framework/Headers/FIRFirestoreSettings.h#L72-L82",
+        "source/Firebase/CloudFirestore/ApiDefinition.cs#L1270-L1280",
+        "tests/E2E/Firebase.Foundation/FirebaseFoundationE2E/FirebaseRuntimeDriftCases.cs#L2414-L2478"
+      ]
+    },
+    {
+      "id": "cloudfirestore-memory-gc-settings-sharpie-protocol-composition",
+      "target": "CloudFirestore",
+      "category": "signature-drift",
+      "comparisonTypeKey": "FIRMemoryCacheSettings",
+      "comparisonMemberKey": "export|initWithGarbageCollectorSettings:",
+      "reason": "The native initializer accepts id<FIRMemoryGarbageCollectorSettings, NSObject>. IMemoryGarbageCollectorSettings is the corresponding managed protocol interface; Sharpie represents the same Objective-C protocol composition as NSObject<FIRMemoryGarbageCollectorSettings, NSObject>.",
+      "evidence": [
+        "externals/FirebaseFirestoreInternal.xcframework/ios-arm64/FirebaseFirestoreInternal.framework/Headers/FIRLocalCacheSettings.h#L128-L138",
+        "source/Firebase/CloudFirestore/ApiDefinition.cs#L1288-L1321",
+        "tests/E2E/Firebase.Foundation/FirebaseFoundationE2E/FirebaseRuntimeDriftCases.cs#L2414-L2478"
+      ]
     }
   ]
 }
