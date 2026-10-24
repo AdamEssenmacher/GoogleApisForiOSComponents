@@ -4,6 +4,38 @@ namespace FirebaseBindingAudit.Tests;
 
 public sealed class AuditRunnerTests
 {
+    [Theory]
+    [InlineData("failed", true, false)]
+    [InlineData("inconclusive", false, false)]
+    [InlineData("succeeded", false, false)]
+    [InlineData("succeeded", true, true)]
+    public void ShouldUseSharpieComparisonFallback_EmptyPrimaryRequiresSuccessfulComparison(
+        string status, bool hasComparison, bool expected)
+    {
+        var target = new AuditTargetDefinition { UseSharpieComparisonFallback = true };
+        var sharpieRun = new SharpieRunResult(
+            Status: status,
+            FrameworkPath: null,
+            ProcessResult: null,
+            Comparison: hasComparison ? new TargetComparisonResult([], []) : null,
+            Snapshot: null,
+            GeneratedFiles: [],
+            WarningFindings: [],
+            Message: null);
+
+        Assert.Equal(expected, AuditRunner.ShouldUseSharpieComparisonFallback(
+            target, "auto", primaryFailed: false, primaryComparableSurfaceEmpty: true, sharpieRun));
+    }
+
+    [Fact]
+    public void ShouldUseSharpieComparisonFallback_EmptyPrimaryCannotUseUnavailableFallback()
+    {
+        var target = new AuditTargetDefinition { UseSharpieComparisonFallback = true };
+
+        Assert.False(AuditRunner.ShouldUseSharpieComparisonFallback(
+            target, "forceFallback", primaryFailed: false, primaryComparableSurfaceEmpty: true, sharpieRun: null));
+    }
+
     [Fact]
     public void ShouldUseSharpieComparisonFallback_UsesForceFallbackWhenPrimaryComparisonSucceeded()
     {
@@ -117,6 +149,19 @@ public sealed class AuditRunnerTests
 
         Assert.Equal(["FirebaseAuth"], stagedXcframeworks);
         Assert.DoesNotContain("UnsupportedUnselectedFramework", stagedXcframeworks);
+    }
+
+    [Fact]
+    public void GetSharpieFrameworkSliceStageXcframeworks_IncludesCompanionDependenciesOnce()
+    {
+        var firestore = CreateTarget("CloudFirestore", "FirebaseFirestore", sharpieMode: "forceFallback");
+        firestore.SharpieFrameworkDependencies = ["FirebaseFirestoreInternal", "FirebaseCore"];
+        var selectedTargets = new[] { firestore, CreateTarget("Core", "FirebaseCore") };
+
+        var stagedXcframeworks = AuditRunner.GetSharpieFrameworkSliceStageXcframeworks(
+            CreateAuditOptions(disableSharpie: false), selectedTargets, CreateSharpieConfiguration());
+
+        Assert.Equal(["FirebaseFirestore", "FirebaseFirestoreInternal", "FirebaseCore"], stagedXcframeworks);
     }
 
     [Fact]

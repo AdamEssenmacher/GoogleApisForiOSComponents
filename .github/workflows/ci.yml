@@ -41,6 +41,9 @@ jobs:
       - name: Restore .NET workloads
         run: dotnet workload restore Xamarin.Google.sln
 
+      - name: Firebase binding audit unit tests
+        run: dotnet test scripts/FirebaseBindingAudit.Tests/FirebaseBindingAudit.Tests.csproj --nologo
+
       - name: Install CocoaPods
         run: |
           if ! command -v pod >/dev/null 2>&1; then
