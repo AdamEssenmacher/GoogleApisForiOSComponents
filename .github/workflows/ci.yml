@@ -38,11 +38,11 @@ jobs:
         with:
           global-json-file: global.json
 
-      - name: Firebase binding audit unit tests
-        run: dotnet test scripts/FirebaseBindingAudit.Tests/FirebaseBindingAudit.Tests.csproj --nologo
-
       - name: Restore .NET workloads
         run: dotnet workload restore Xamarin.Google.sln
+
+      - name: Firebase binding audit unit tests
+        run: dotnet test scripts/FirebaseBindingAudit.Tests/FirebaseBindingAudit.Tests.csproj --nologo
 
       - name: Install CocoaPods
         run: |
