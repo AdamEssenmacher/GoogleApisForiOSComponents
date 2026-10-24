@@ -1,0 +1,10 @@
+// Local emulator fixtures only. Do not deploy these rules to a hosted project.
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{collection}/{document} {
+      allow read, write: if collection == 'codex-aggregate-e2e'
+                         || collection.matches('codex-query-filter-e2e-.*');
+    }
+  }
+}

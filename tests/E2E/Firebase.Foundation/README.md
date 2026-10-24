@@ -94,6 +94,21 @@ tools/e2e/run-firebase-foundation.sh --package-dir output --configuration Debug 
 tools/e2e/run-firebase-foundation.sh --package-dir output --configuration Debug --runtime-drift-case all
 ```
 
+### Local Firestore emulator
+
+The aggregate-query and query-filter cases write seed documents and assert successful server query results. Run these cases against a disposable local Firestore emulator to avoid depending on hosted test-project permissions:
+
+```sh
+tools/e2e/run-firebase-foundation.sh --package-dir output --configuration Debug --runtime-drift-case cloudfirestore-aggregate-query --firestore-emulator
+tools/e2e/run-firebase-foundation.sh --package-dir output --configuration Debug --runtime-drift-case cloudfirestore-query-filters --firestore-emulator
+```
+
+Install the Firebase CLI (`firebase-tools`) and Java 21 or newer first. The CLI downloads the emulator on its first run. Each invocation starts a fresh Standard-edition Firestore emulator on `127.0.0.1:18080` using the demo project `demo-firebase-bindings`, runs the consumer, and shuts the emulator down. The port must be available. The flag currently supports only the two cases above; other lanes keep their existing configuration.
+
+The app uses synthetic Firebase options for the demo project and explicitly connects the native Firestore SDK before its first operation, with an in-memory client cache. The `ConfigureApp` result records the endpoint and project. The checked-in disposable app configuration is unchanged. Local rules permit only the fixture collection names used by these tests; do not deploy these rules to a hosted project.
+
+CLI state, the downloaded emulator, its generated runner, and logs are kept under `artifacts/firestore-emulator/`. The normal simulator JSON result and log remain under `artifacts/`. Emulator runs validate binding calls, native callbacks, and returned query results. They do not validate hosted security rules or production index requirements; see the [Firestore emulator documentation](https://firebase.google.com/docs/emulator-suite/connect_firestore).
+
 ## Binding surface coverage mode
 
 The opt-in binding surface coverage lane accounts for the active Firebase `12.10.0` bindings tracked by the audit config. It generates a source-derived coverage inventory from [`binding-surface-coverage.json`](./binding-surface-coverage.json), restores the selected target package set from the local feed, and runs `ConfigureApp` plus the generated surface coverage case.

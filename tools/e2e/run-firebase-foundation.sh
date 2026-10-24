@@ -3,7 +3,10 @@ set -euo pipefail
 
 usage() {
   cat <<'EOF'
-Usage: tools/e2e/run-firebase-foundation.sh [--package-dir output] [--configuration Release] [--enable-nullability-validation] [--runtime-drift-case <id|all>] [--binding-surface-target <target|all>]
+Usage: tools/e2e/run-firebase-foundation.sh [--package-dir output] [--configuration Release] [--enable-nullability-validation] [--runtime-drift-case <id|all>] [--binding-surface-target <target|all>] [--firestore-emulator]
+
+--firestore-emulator starts a disposable local Firestore for cloudfirestore-aggregate-query
+or cloudfirestore-query-filters. Requires firebase-tools and Java 21 or newer.
 EOF
 }
 
@@ -12,6 +15,8 @@ project_dir="$repo_root/tests/E2E/Firebase.Foundation/FirebaseFoundationE2E"
 project_file="$project_dir/FirebaseFoundationE2E.csproj"
 bundle_id="com.googleapisforioscomponents.tests.firebase.e2e"
 configuration="Release"
+original_args=("$@")
+firestore_emulator="false"
 enable_nullability_validation="false"
 runtime_drift_case=""
 binding_surface_target=""
@@ -55,6 +60,10 @@ while [[ $# -gt 0 ]]; do
       binding_surface_target="$2"
       shift 2
       ;;
+    --firestore-emulator)
+      firestore_emulator="true"
+      shift
+      ;;
     --help|-h)
       usage
       exit 0
@@ -66,6 +75,45 @@ while [[ $# -gt 0 ]]; do
       ;;
   esac
 done
+
+if [[ "$firestore_emulator" == "true" ]]; then
+  case "$runtime_drift_case" in
+    cloudfirestore-aggregate-query|cloudfirestore-query-filters) ;;
+    *)
+      echo "--firestore-emulator requires --runtime-drift-case cloudfirestore-aggregate-query or cloudfirestore-query-filters." >&2
+      exit 1
+      ;;
+  esac
+
+  if [[ "${E2E_FIRESTORE_EMULATOR_ACTIVE:-}" != "true" ]]; then
+    command -v firebase >/dev/null || { echo "Install firebase-tools to use --firestore-emulator." >&2; exit 1; }
+    command -v java >/dev/null || { echo "Java 21 or newer is required for the Firestore emulator." >&2; exit 1; }
+    emulator_dir="$artifacts_dir/firestore-emulator"
+    mkdir -p "$emulator_dir"
+    emulator_runner="$emulator_dir/run-consumer.sh"
+    python3 - "$emulator_runner" "$repo_root/tools/e2e/run-firebase-foundation.sh" "${original_args[@]}" <<'PY'
+import pathlib
+import shlex
+import sys
+
+pathlib.Path(sys.argv[1]).write_text("#!/bin/sh\nexec " + shlex.join(["/bin/zsh", *sys.argv[2:]]) + "\n")
+PY
+    # Keep CLI state, downloaded emulators, and logs in ignored harness artifacts.
+    cd "$emulator_dir"
+    export XDG_CONFIG_HOME="$emulator_dir/config"
+    export FIREBASE_EMULATORS_PATH="$emulator_dir/cache"
+    export E2E_FIRESTORE_EMULATOR_ACTIVE=true
+    exec firebase emulators:exec --only firestore --project demo-firebase-bindings \
+      --config "$repo_root/tests/E2E/Firebase.Foundation/emulator/firebase.json" \
+      --non-interactive "sh ${(q)emulator_runner}"
+  fi
+
+  if [[ "${FIRESTORE_EMULATOR_HOST:-}" != "127.0.0.1:18080" ]]; then
+    echo "Expected the managed Firestore emulator at 127.0.0.1:18080; refusing to fall back to a hosted backend." >&2
+    exit 1
+  fi
+  cd "$repo_root"
+fi
 
 if [[ "$package_dir" != /* ]]; then
   package_dir="$repo_root/$package_dir"
@@ -99,6 +147,9 @@ required_packages=(
 
 msbuild_args=()
 restore_args=()
+if [[ "$firestore_emulator" == "true" ]]; then
+  msbuild_args+=("-p:EnableFirestoreEmulator=true")
+fi
 if [[ "$enable_nullability_validation" == "true" ]]; then
   required_packages+=(
     "AdamE.Firebase.iOS.AppCheck"
@@ -397,6 +448,9 @@ xcrun simctl uninstall "$simulator_udid" "$bundle_id" >/dev/null 2>&1 || true
 xcrun simctl install "$simulator_udid" "$app_path"
 
 echo "Launching app"
+if [[ "$firestore_emulator" == "true" ]]; then
+  export SIMCTL_CHILD_E2E_FIRESTORE_EMULATOR_HOST="$FIRESTORE_EMULATOR_HOST"
+fi
 xcrun simctl launch --terminate-running-process "$simulator_udid" "$bundle_id" >> "$log_file" 2>&1
 
 data_container="$(xcrun simctl get_app_container "$simulator_udid" "$bundle_id" data)"

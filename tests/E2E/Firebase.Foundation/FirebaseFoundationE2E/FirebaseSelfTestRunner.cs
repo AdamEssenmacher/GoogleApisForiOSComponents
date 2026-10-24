@@ -44,16 +44,45 @@ public static class FirebaseSelfTestRunner
             await ExecuteCaseAsync(result, statusViewController, "ConfigureApp", async () =>
             {
                 EnsureConfigFileIsBundled();
+#if ENABLE_FIRESTORE_EMULATOR
+                const string emulatorProjectId = "demo-firebase-bindings";
+                var emulatorHost = Environment.GetEnvironmentVariable("E2E_FIRESTORE_EMULATOR_HOST");
+                if (emulatorHost != "127.0.0.1:18080")
+                {
+                    throw new InvalidOperationException("Firestore emulator mode requires the local endpoint 127.0.0.1:18080.");
+                }
+
+                var emulatorOptions = new Options("1:1234567890:ios:0123456789abcdef", "1234567890")
+                {
+                    ProjectId = emulatorProjectId,
+                    BundleId = ExpectedBundleId,
+                    // Analytics initializes Installations, which requires an API-key-shaped value.
+                    // This synthetic demo key does not authorize any hosted Firebase service.
+                    ApiKey = "AIzaSy000000000000000000000000000000000",
+                };
+                App.Configure(emulatorOptions);
+                var firestore = Firebase.CloudFirestore.Firestore.SharedInstance;
+                var settings = firestore.Settings;
+                settings.Host = emulatorHost;
+                settings.SslEnabled = false;
+                settings.CacheSettings = new Firebase.CloudFirestore.MemoryCacheSettings();
+                firestore.Settings = settings;
+#else
                 App.Configure();
+#endif
 
                 var defaultApp = App.DefaultInstance ?? throw new InvalidOperationException("Firebase.Core.App.DefaultInstance returned null after App.Configure().");
-                var options = Options.DefaultInstance;
+                var options = defaultApp.Options;
 
                 result.DefaultAppName = defaultApp.Name;
                 result.GoogleAppId = options?.GoogleAppId;
                 result.ProjectId = options?.ProjectId;
 
+#if ENABLE_FIRESTORE_EMULATOR
+                return $"Configured app '{defaultApp.Name}'; Firestore emulator {emulatorHost}; project {emulatorProjectId}; memory cache.";
+#else
                 return $"Configured app '{defaultApp.Name}'.";
+#endif
             });
 
             if (runtimeDriftCases.Count > 0)
