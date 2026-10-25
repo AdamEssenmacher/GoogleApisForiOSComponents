@@ -1,15 +1,19 @@
 # Publishing to GitHub Packages
 
-This repository can publish `.nupkg` files to GitHub Packages through GitHub Actions.
+This repository publishes Firebase `.nupkg` files and their repository-owned dependencies
+to GitHub Packages and NuGet.org through the approved [Firebase release workflow](FIREBASE_RELEASES.md).
 
 ## How Publishing Works
 
-- A tag push triggers the publish workflow.
-- The workflow builds and packs NuGet packages.
-- The workflow can also be run manually with `workflow_dispatch` and a custom Cake `--names` value.
+- A version-update PR passes CI and is merged to main.
+- CI builds and validates the exact merged commit, then waits for deployment approval.
+- The approved artifacts are published to both feeds, followed by an automatic tag and release.
+- The workflow can be run manually on main to rebuild and validate an incomplete release.
 - Packages are pushed to `https://nuget.pkg.github.com/<OWNER>/index.json`.
 
-The publish workflow uses the built-in `GITHUB_TOKEN`; no app-specific publishing secret is required.
+GitHub publishing uses the built-in `GITHUB_TOKEN`; NuGet.org uses Trusted Publishing.
+No app-specific publishing secret is required. Tag pushes and arbitrary component names
+no longer trigger publication. See the Firebase release guide for scope and recovery details.
 
 ## Consuming Packages
 

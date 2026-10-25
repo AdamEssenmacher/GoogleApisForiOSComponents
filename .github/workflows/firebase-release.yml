@@ -1,0 +1,207 @@
+name: Firebase CI and release
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      relevant: ${{ steps.plan.outputs.relevant }}
+      eligible: ${{ steps.plan.outputs.eligible }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+      - run: dotnet tool restore
+      - name: Export Firebase dependency closure
+        run: dotnet tool run dotnet-cake -- --target=firebase-publish-metadata
+      - name: Release tooling tests
+        run: python3 -m unittest discover -s tests/firebase-release -v
+      - name: Plan validation and release
+        id: plan
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+          EVENT_NAME: ${{ github.event_name }}
+        shell: bash
+        run: |
+          args=(--online)
+          if [[ "$EVENT_NAME" == workflow_dispatch ]]; then
+            args+=(--manual)
+          elif [[ -n "$BASE_SHA" && "$BASE_SHA" != 0000000000000000000000000000000000000000 ]]; then
+            args+=(--base "$BASE_SHA")
+          fi
+          python3 scripts/firebase-release/release.py plan "${args[@]}"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: firebase-plan
+          path: |
+            output/firebase-plan.json
+            output/firebase-metadata.json
+          if-no-files-found: error
+          retention-days: 90
+
+  validate:
+    needs: plan
+    if: needs.plan.outputs.relevant == 'true'
+    runs-on: macos-26
+    timeout-minutes: 360
+    permissions:
+      contents: read
+      packages: read
+    env:
+      BUILD_COMMIT: ${{ github.sha }}
+      BUILD_NUMBER: ${{ github.run_number }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: firebase-plan
+          path: output
+      - name: Select Xcode 26.6
+        run: |
+          sudo xcode-select --switch /Applications/Xcode_26.6.app/Contents/Developer
+          xcodebuild -version
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Install build and emulator tools
+        run: |
+          dotnet tool restore
+          dotnet workload install ios maccatalyst
+          if ! command -v pod >/dev/null 2>&1; then
+            sudo gem install cocoapods
+          fi
+          npm install --global firebase-tools@15.28.2
+      - name: Unit tests
+        run: |
+          dotnet test scripts/FirebaseBindingAudit.Tests/FirebaseBindingAudit.Tests.csproj --nologo
+          python3 -m unittest discover -s tests/E2E/Firebase.Foundation -p 'test_*.py'
+      - name: Build and pack the complete Firebase closure
+        shell: bash
+        run: |
+          names=$(python3 -c 'import json; print(",".join(p["key"] for p in json.load(open("output/firebase-metadata.json")) if p["firebase"]))')
+          dotnet tool run dotnet-cake -- --target=nuget --names="$names"
+      - name: Inspect and stage the effective package set
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/firebase-release/release.py prepare --online
+      - name: Sequential consumer and emulator validation
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p output/firebase-results
+          lane() {
+            name="$1"; shift
+            tools/e2e/run-firebase-foundation.sh --package-dir output/firebase-candidate --configuration Debug "$@"
+            cp tests/E2E/Firebase.Foundation/artifacts/firebase-foundation-result.json "output/firebase-results/$name.json"
+            cp tests/E2E/Firebase.Foundation/artifacts/firebase-foundation-sim.log "output/firebase-results/$name.log"
+          }
+          lane smoke
+          lane surface --binding-surface-target all
+          lane nullability --enable-nullability-validation
+          lane firestore-aggregate --runtime-drift-case cloudfirestore-aggregate-query --firestore-emulator
+          lane firestore-filters --runtime-drift-case cloudfirestore-query-filters --firestore-emulator
+          python3 - <<'PY'
+          import json
+          names = ['unit-tests', 'package-structure', 'smoke', 'surface', 'nullability', 'firestore-aggregate', 'firestore-filters']
+          with open('output/firebase-results/validation.json', 'w') as output:
+              json.dump(dict.fromkeys(names, 'passed'), output)
+          PY
+      - name: Seal candidate and write approval summary
+        run: python3 scripts/firebase-release/release.py finalize --results output/firebase-results/validation.json
+      - name: Upload validated candidate
+        uses: actions/upload-artifact@v4
+        with:
+          name: firebase-candidate
+          path: output/firebase-candidate
+          if-no-files-found: error
+          retention-days: 90
+      - name: Upload diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: firebase-validation-results
+          path: |
+            output/firebase-results
+            tests/E2E/Firebase.Foundation/artifacts/*.log
+            tests/E2E/Firebase.Foundation/artifacts/*.json
+            tests/E2E/Firebase.Foundation/artifacts/firestore-emulator/**/*.log
+          retention-days: 90
+
+  validation:
+    name: Firebase validation
+    if: always()
+    needs: [plan, validate]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require all applicable checks
+        env:
+          PLAN_RESULT: ${{ needs.plan.result }}
+          RELEVANT: ${{ needs.plan.outputs.relevant }}
+          VALIDATE_RESULT: ${{ needs.validate.result }}
+        run: |
+          test "$PLAN_RESULT" = success
+          if [ "$RELEVANT" = true ]; then
+            test "$VALIDATE_RESULT" = success
+          else
+            test "$VALIDATE_RESULT" = skipped
+            echo 'No Firebase package or validation inputs changed.'
+          fi
+
+  publish:
+    needs: [plan, validation]
+    if: >-
+      github.ref == 'refs/heads/main' &&
+      (github.event_name == 'push' || github.event_name == 'workflow_dispatch') &&
+      needs.plan.outputs.eligible == 'true' && needs.validation.result == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    environment: firebase-release
+    concurrency:
+      group: firebase-release-publication
+      cancel-in-progress: false
+    permissions:
+      contents: write
+      packages: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+      - uses: actions/download-artifact@v4
+        with:
+          name: firebase-candidate
+          path: output/firebase-candidate
+      - name: Re-export allowed package scope
+        run: |
+          dotnet tool restore
+          dotnet tool run dotnet-cake -- --target=firebase-publish-metadata
+      - name: NuGet trusted publishing login
+        uses: NuGet/login@v1
+        id: nuget
+        with:
+          user: ${{ vars.NUGET_USER }}
+      - name: Publish approved packages and create release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          NUGET_API_KEY: ${{ steps.nuget.outputs.NUGET_API_KEY }}
+        run: python3 scripts/firebase-release/release.py publish
