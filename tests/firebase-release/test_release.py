@@ -21,15 +21,17 @@ spec.loader.exec_module(release)
 def package(package_id='AdamE.Firebase.iOS.Core', value='12.12.0', dependency='', commit='abc', extra=None):
     buffer = io.BytesIO()
     resource = io.BytesIO()
+    def put(archive, name, data):
+        archive.writestr(zipfile.ZipInfo(name), data)
     with zipfile.ZipFile(resource, 'w') as native:
-        native.writestr('manifest', '<BindingAssembly><NativeReference Name="Core.xcframework"><Kind>Framework</Kind></NativeReference></BindingAssembly>')
+        put(native, 'manifest', '<BindingAssembly><NativeReference Name="Core.xcframework"><Kind>Framework</Kind></NativeReference></BindingAssembly>')
         libraries = []
         for variant in ('', 'simulator', 'maccatalyst'):
             identifier = 'ios-arm64' + ('-' + variant if variant else '')
             libraries.append({'LibraryIdentifier': identifier, 'LibraryPath': 'Core.framework',
                               'SupportedPlatform': 'ios', 'SupportedPlatformVariant': variant})
-            native.writestr(f'Core.xcframework/{identifier}/Core.framework/Core', 'binary')
-        native.writestr('Core.xcframework/Info.plist', plistlib.dumps({'AvailableLibraries': libraries}))
+            put(native, f'Core.xcframework/{identifier}/Core.framework/Core', 'binary')
+        put(native, 'Core.xcframework/Info.plist', plistlib.dumps({'AvailableLibraries': libraries}))
     with zipfile.ZipFile(buffer, 'w') as archive:
         archive.writestr('package.nuspec', f'<package><metadata><id>{package_id}</id><version>{value}</version>'
                          f'<repository commit="{commit}"/><dependencies>{dependency}</dependencies></metadata></package>')
