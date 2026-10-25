@@ -443,10 +443,12 @@ def publish(args):
         return
     assets = [str(folder / p['file']) for p in manifest['packages']]
     assets += [str(folder / n) for n in ('manifest.json', 'SHA256SUMS')]
-    existing = subprocess.run(['gh', 'release', 'view', tag, '--repo', REPO, '--json', 'isDraft'],
+    existing = subprocess.run(['gh', 'release', 'view', tag, '--repo', REPO, '--json', 'isDraft,targetCommitish'],
                               text=True, capture_output=True)
     if existing.returncode == 0:
-        require(json.loads(existing.stdout)['isDraft'], 'An unexpected published release already exists')
+        draft = json.loads(existing.stdout)
+        require(draft['isDraft'], 'An unexpected published release already exists')
+        require(draft['targetCommitish'] == manifest['sourceCommit'], 'Existing draft targets another commit')
     else:
         run('gh', 'release', 'create', tag, '--repo', REPO, '--target', manifest['sourceCommit'], '--draft',
             '--title', 'Firebase ' + manifest['releaseVersion'], '--generate-notes', '--notes-file', str(folder / 'release-notes.md'))

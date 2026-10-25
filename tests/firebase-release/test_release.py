@@ -191,13 +191,15 @@ class ReleaseTests(unittest.TestCase):
             state = {'nuget': None, 'github': data}
             registries = [types.SimpleNamespace(name=name, source=name, fetch=lambda p, n=name: state[n]) for name in state]
             pushes = []
+            existing_draft = None
             def execute(args, **kwargs):
                 if args[:3] == ['dotnet', 'nuget', 'push']:
                     feed = args[args.index('--source') + 1]
                     pushes.append(feed)
                     state[feed] = data
                     return types.SimpleNamespace(returncode=0)
-                return types.SimpleNamespace(returncode=1, stdout='')
+                return types.SimpleNamespace(returncode=0 if existing_draft else 1,
+                                             stdout=json.dumps(existing_draft) if existing_draft else '')
             env = {'GITHUB_REF': 'refs/heads/main', 'GITHUB_EVENT_NAME': 'push', 'GITHUB_SHA': 'abc',
                    'GH_TOKEN': 'test', 'NUGET_API_KEY': 'test'}
             with patch.dict(os.environ, env), patch.object(release, 'feeds', return_value=registries), \
@@ -207,6 +209,9 @@ class ReleaseTests(unittest.TestCase):
                 release.publish(args)
                 release.publish(args)
                 self.assertEqual(pushes, ['nuget'])
+                existing_draft = {'isDraft': True, 'targetCommitish': 'different'}
+                with self.assertRaisesRegex(ValueError, 'draft targets another commit'):
+                    release.publish(args)
                 (folder / p['file']).write_bytes(b'tampered')
                 with self.assertRaisesRegex(ValueError, 'hash mismatch'):
                     release.publish(args)
