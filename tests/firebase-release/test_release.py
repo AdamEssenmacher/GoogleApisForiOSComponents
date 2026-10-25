@@ -283,7 +283,8 @@ class ReleaseTests(unittest.TestCase):
 
     def test_toolchain_pins_affect_package_inputs_but_release_labels_do_not(self):
         with tempfile.TemporaryDirectory() as tmp, patch.object(release, 'ROOT', Path(tmp)), \
-                patch.object(release, 'run', return_value='source/Core/Core.csproj'):
+                patch.object(release, 'run', return_value='source/Core/Core.csproj'), \
+                patch.object(release, 'build_fingerprint', return_value='normalized-cake'):
             root = Path(tmp)
             for name in ('build.cake', 'common.cake', 'poco.cake', 'Directory.Build.props', 'global.json',
                          '.config/dotnet-tools.json', 'source/AssemblyInfo.cs', 'custom_externals_download.cake'):
@@ -308,6 +309,17 @@ class ReleaseTests(unittest.TestCase):
                     release.write(root / release.CONFIG, config)
                     with self.assertRaisesRegex(ValueError, 'without a version bump'):
                         release.check_versions(release.snapshot(metadata), {'packages': before})
+
+            config['nativeBuild'] = {'runner': 'macos-26', 'xcode': '26.6'}
+            release.write(root / release.CONFIG, config)
+            for name in ('global.json', '.config/dotnet-tools.json', 'Directory.Build.props'):
+                with self.subTest(shared_file=name):
+                    path = root / name
+                    original = path.read_text()
+                    path.write_text('changed shared toolchain or packaging input')
+                    with self.assertRaisesRegex(ValueError, 'without a version bump'):
+                        release.check_versions(release.snapshot(metadata), {'packages': before})
+                    path.write_text(original)
 
     def test_publish_retry_only_writes_missing_feed(self):
         with tempfile.TemporaryDirectory() as tmp:

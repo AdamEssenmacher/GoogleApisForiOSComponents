@@ -45,8 +45,15 @@ baselines through their `manifest.json` asset. Use `plan --online` to include th
 
 Package inputs include tracked binding/project files, explicitly packed assets, linked
 source, dependency requirements, per-component native definitions and download sources,
-and shared build/toolchain files. Shared packaging changes conservatively require bumps
-across the closure. Changing a single Cake component value does not change unrelated
+and shared build/toolchain files. Cake scripts are parsed as C# tokens, so comments and
+formatting do not change package fingerprints. The fingerprint excludes branches guarded
+by `ARTIFACTS_TO_BUILD.Contains(component)` when that component is outside the Cake-exported
+Firebase dependency closure. It also excludes helpers reachable only from those branches,
+including helpers in other shared Cake files. Helpers used by retained code still count.
+For example, edits inside the guarded Maps/SignIn branch do not require Firebase bumps;
+changes to the shared `DotNetPack` configuration do. Unknown guards and ambiguous code
+remain conservative inputs; component names in comments or task names are not exemptions.
+Shared packaging changes that remain in this effective script require bumps across the closure. Changing a single Cake component value does not change unrelated
 components' fingerprints. Project-reference version changes affect consumers' fingerprints.
 Development-only documentation and test edits do not require package version bumps.
 

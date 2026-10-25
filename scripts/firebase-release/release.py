@@ -15,6 +15,7 @@ import re
 import subprocess
 import sys
 import time
+import tempfile
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -112,16 +113,22 @@ def previous_release():
     return json.loads(request(asset['browser_download_url']))
 
 
+def build_fingerprint(metadata):
+    with tempfile.TemporaryDirectory() as temp:
+        selected = Path(temp) / 'selected.json'
+        output = Path(temp) / 'normalized.json'
+        write(selected, [p['key'] for p in metadata])
+        run('dotnet', 'run', '--project', str(ROOT / 'scripts/FirebaseReleaseFingerprint'),
+            '--verbosity', 'quiet', '--', str(ROOT), str(selected), str(output))
+        return digest(output.read_bytes())
+
+
 def snapshot(metadata):
     """Fingerprint tracked inputs, not generated outputs or archive timestamps."""
     tracked = set(run('git', 'ls-files').splitlines())
-    shared = ['build.cake', 'common.cake', 'poco.cake', 'Directory.Build.props',
-              'global.json', '.config/dotnet-tools.json', 'source/AssemblyInfo.cs']
-    custom = (ROOT / 'custom_externals_download.cake').read_text()
-    # Values are exported per artifact. Shared download implementation still affects all packages.
-    custom = re.sub(r'var ExternalDownloads = .*?\n};', '', custom, flags=re.S)
+    shared = ['Directory.Build.props', 'global.json', '.config/dotnet-tools.json', 'source/AssemblyInfo.cs']
     shared_data = {p: digest((ROOT / p).read_bytes()) for p in shared}
-    shared_data['downloadImplementation'] = digest(custom.encode())
+    shared_data['cakeBuild'] = build_fingerprint(metadata)
     shared_data['nativeBuild'] = native_build(read(ROOT / CONFIG))
     ids = {p['id']: p for p in metadata}
     require(len(ids) == len(metadata), 'Duplicate package IDs')

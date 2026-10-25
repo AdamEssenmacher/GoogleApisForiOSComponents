@@ -17,5 +17,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\FirebaseBindingAudit\FirebaseBindingAudit.csproj" />
+    <ProjectReference Include="../FirebaseReleaseFingerprint/FirebaseReleaseFingerprint.csproj" />
   </ItemGroup>
 </Project>
