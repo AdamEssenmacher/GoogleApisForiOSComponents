@@ -317,8 +317,12 @@ def inspect_package(data, package, packages, new_commit=None):
                             require(any(n.startswith(prefix + '/') for n in native.namelist()), f'Missing native library: {prefix}')
                     if new_commit and package.get('project'):
                         project = ET.parse(ROOT / package['project'])
-                        expected = {Path(e.attrib['Include'].replace('\\', '/')).name: e for e in project.findall('.//NativeReference')}
-                        require(set(expected) == {r.attrib['Name'] for r in references}, 'Native references differ from project')
+                        expected = {Path(e.attrib['Include'].replace('\\', '/')).name: e for e in project.iter()
+                                    if e.tag in ('NativeReference', '_NativeReference')}
+                        actual_names = {r.attrib['Name'] for r in references}
+                        require(set(expected) == actual_names,
+                                f"Native references differ from project: {info['id']} ({name}); "
+                                f"missing={sorted(set(expected) - actual_names)}, extra={sorted(actual_names - set(expected))}")
                         for reference in references:
                             for field in ('Kind', 'ForceLoad', 'SmartLink', 'Frameworks', 'WeakFrameworks', 'LinkerFlags'):
                                 value = expected[reference.attrib['Name']].findtext(field)

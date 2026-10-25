@@ -90,6 +90,19 @@ class ReleaseTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'Unsatisfied dependency'):
             release.inspect_package(data, self.p, packages)
 
+    def test_native_reference_declaration_forms_and_missing_frameworks(self):
+        with tempfile.TemporaryDirectory() as tmp, patch.object(release, 'ROOT', Path(tmp)):
+            project = Path(tmp) / 'Core.csproj'
+            p = {**self.p, 'project': 'Core.csproj'}
+            for item in ('NativeReference', '_NativeReference'):
+                with self.subTest(item=item):
+                    project.write_text(f'<Project><ItemGroup><{item} Include="../Core.xcframework">'
+                                       f'<Kind>Framework</Kind></{item}></ItemGroup></Project>')
+                    release.inspect_package(package(), p, {p['id']: p}, 'abc')
+            project.write_text('<Project><ItemGroup><_NativeReference Include="Missing.xcframework"/></ItemGroup></Project>')
+            with self.assertRaisesRegex(ValueError, 'missing=.*Missing.xcframework'):
+                release.inspect_package(package(), p, {p['id']: p}, 'abc')
+
     def test_only_404_means_missing(self):
         for code in (401, 403, 429, 500, 404):
             with self.subTest(code=code), patch('urllib.request.OpenerDirector.open', side_effect=urllib.error.HTTPError('https://feed', code, '', {}, None)):
