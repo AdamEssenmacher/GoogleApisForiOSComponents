@@ -5,6 +5,8 @@ import os
 from pathlib import Path
 import plistlib
 import tempfile
+import subprocess
+import sys
 import types
 import unittest
 from unittest.mock import patch
@@ -46,6 +48,19 @@ def package(package_id='AdamE.Firebase.iOS.Core', value='12.12.0', dependency=''
 class ReleaseTests(unittest.TestCase):
     def setUp(self):
         self.p = {'id': 'AdamE.Firebase.iOS.Core', 'version': '12.12.0', 'fingerprint': 'new'}
+
+    def test_fingerprint_build_failure_exposes_compiler_output(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            dotnet = Path(tmp) / 'dotnet'
+            dotnet.write_text('#!/bin/sh\necho "error CS1002: ; expected"\nexit 1\n')
+            dotnet.chmod(0o755)
+            script = (f"import importlib.util; spec=importlib.util.spec_from_file_location('release', {str(ROOT / 'scripts/firebase-release/release.py')!r}); "
+                      "release=importlib.util.module_from_spec(spec); spec.loader.exec_module(release); "
+                      "release.build_fingerprint([{'key':'Firebase.Core'}])")
+            result = subprocess.run([sys.executable, '-c', script], text=True, capture_output=True,
+                                    env={**os.environ, 'PATH': tmp + os.pathsep + os.environ['PATH']})
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn('error CS1002: ; expected', result.stdout + result.stderr)
 
     def test_changed_input_without_bump_fails(self):
         with self.assertRaisesRegex(ValueError, 'without a version bump'):

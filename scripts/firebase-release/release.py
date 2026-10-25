@@ -118,8 +118,10 @@ def build_fingerprint(metadata):
         selected = Path(temp) / 'selected.json'
         output = Path(temp) / 'normalized.json'
         write(selected, [p['key'] for p in metadata])
-        run('dotnet', 'run', '--project', str(ROOT / 'scripts/FirebaseReleaseFingerprint'),
-            '--verbosity', 'quiet', '--', str(ROOT), str(selected), str(output))
+        # The result is a file; stream build output so compiler/restore errors reach CI logs.
+        subprocess.run(['dotnet', 'run', '--project', str(ROOT / 'scripts/FirebaseReleaseFingerprint'),
+                        '--verbosity', 'minimal', '--', str(ROOT), str(selected), str(output)],
+                       cwd=ROOT, check=True)
         return digest(output.read_bytes())
 
 
