@@ -176,6 +176,7 @@ def git_file(ref, path):
 def plan(args):
     packages = snapshot(read(args.metadata))
     config = read(ROOT / CONFIG)
+    require(version(config['minimumFirebaseVersion']) >= version('12.12.0'), 'Firebase publication floor cannot precede 12.12')
     latest = previous_release() if args.online else None
     baseline = latest or read(ROOT / BASELINE)
     if args.base:
@@ -349,7 +350,8 @@ def prepare(args):
         if available:
             require(len({payload_hash(data) for data in available}) == 1, f"Feeds disagree: {p['id']}")
         data = available[0] if available else candidates[p['id']].read_bytes()
-        p['packageDependencies'] = inspect_package(data, p, packages, None if available else manifest['sourceCommit'])
+        expected_commit = manifest['sourceCommit'] if not available or p['id'] in manifest['changed'] else None
+        p['packageDependencies'] = inspect_package(data, p, packages, expected_commit)
         p['file'] = f"{p['id']}.{normalized(p['version'])}.nupkg"
         p['sha256'], p['payloadHash'] = digest(data), payload_hash(data)
         p['reused'] = bool(available)
@@ -404,7 +406,8 @@ def publish(args):
         require(Path(p['file']).name == p['file'], 'Invalid artifact filename')
         data = (folder / p['file']).read_bytes()
         require(digest(data) == p['sha256'] and payload_hash(data) == p['payloadHash'], 'Artifact hash mismatch')
-        inspect_package(data, allowed[p['id']], allowed, None if p['reused'] else manifest['sourceCommit'])
+        expected_commit = manifest['sourceCommit'] if not p['reused'] or p['id'] in manifest['changed'] else None
+        inspect_package(data, allowed[p['id']], allowed, expected_commit)
     registries = feeds()
     # Preflight every existing package before making the first write.
     for p in manifest['packages']:

@@ -109,7 +109,7 @@ class ReleaseTests(unittest.TestCase):
                 built = folder / 'built'
                 built.mkdir()
                 (built / 'core.nupkg').write_bytes(package())
-                plan = {'eligible': True, 'sourceCommit': 'abc', 'packages': [self.p]}
+                plan = {'eligible': True, 'sourceCommit': 'abc', 'packages': [self.p], 'changed': []}
                 release.write(folder / 'plan.json', plan)
                 published = package(commit='original')
                 nuget = None if state == 'neither' else published
@@ -135,6 +135,18 @@ class ReleaseTests(unittest.TestCase):
             (folder / 'signin.nupkg').write_bytes(package('AdamE.Google.iOS.SignIn'))
             with self.assertRaisesRegex(ValueError, 'Unexpected output'):
                 release.prepare(types.SimpleNamespace(plan=folder / 'plan.json', package_dir=folder, output=folder / 'candidate', online=False))
+
+    def test_new_version_cannot_reuse_another_commits_package(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            folder = Path(tmp)
+            (folder / 'core.nupkg').write_bytes(package())
+            release.write(folder / 'plan.json', {'eligible': True, 'sourceCommit': 'abc',
+                                               'changed': [self.p['id']], 'packages': [self.p]})
+            feed = types.SimpleNamespace(name='nuget', fetch=lambda p: package(commit='different'))
+            with patch.object(release, 'feeds', return_value=[feed]):
+                with self.assertRaisesRegex(ValueError, 'Wrong repository commit'):
+                    release.prepare(types.SimpleNamespace(plan=folder / 'plan.json', package_dir=folder,
+                                                          output=folder / 'candidate', online=True))
 
     def test_incomplete_validation_fails(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -171,7 +183,7 @@ class ReleaseTests(unittest.TestCase):
             data = package()
             p = {**self.p, 'file': 'core.nupkg', 'sha256': release.digest(data),
                  'payloadHash': release.payload_hash(data), 'reused': False}
-            manifest = {'eligible': True, 'sourceCommit': 'abc', 'releaseVersion': '12.12.0',
+            manifest = {'eligible': True, 'sourceCommit': 'abc', 'releaseVersion': '12.12.0', 'changed': [p['id']],
                         'validation': dict.fromkeys(release.VALIDATIONS, 'passed'), 'packages': [p]}
             release.write(folder / 'manifest.json', manifest)
             release.write(folder / 'metadata.json', [self.p])
