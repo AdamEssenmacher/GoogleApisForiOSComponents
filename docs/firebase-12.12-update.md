@@ -20,7 +20,7 @@ Both unrestricted and repository-pinned CocoaPods resolutions retain the same 41
 
 The complete podspec diff adds no system frameworks, weak frameworks, native libraries, or compiler/linker flags for the supported products. Changes to Foundation Models Swift flags and macOS/watchOS deployment targets apply to AI Logic, which is excluded. Package identities, .NET 10 targets, deployment targets, ad-ID selection, and native framework ownership are preserved, including Database `icucore` and Firestore C++ linkage.
 
-The published `12.12.0` FirebaseAnalytics and GoogleAppMeasurement podspecs explicitly reuse the `12.11.0` binary archives. Keep their native download coordinates unchanged:
+The published `12.12.0` [FirebaseAnalytics podspec](https://github.com/CocoaPods/Specs/blob/master/Specs/e/2/1/FirebaseAnalytics/12.12.0/FirebaseAnalytics.podspec.json) and [GoogleAppMeasurement podspec](https://github.com/CocoaPods/Specs/blob/master/Specs/e/3/b/GoogleAppMeasurement/12.12.0/GoogleAppMeasurement.podspec.json) explicitly reuse the `12.11.0` binary archives. Keep their native download coordinates unchanged:
 
 - FirebaseAnalytics: archive version `12.11.0`, key `6bc1249dd7c18a16`.
 - GoogleAppMeasurement: archive version `12.11.0`, key `f529849317f9fdf5`.
@@ -33,7 +33,16 @@ The existing GoogleAdsOnDeviceConversion omission is preserved. The native measu
 
 Previous native outputs and NuGets were isolated before building this candidate. Generated local evidence is under `output/firebase-12.12-validation/` and is not committed. Local preparation packages are not publication artifacts: CI must build, validate, inspect, and seal the exact merged main commit before deployment approval.
 
-Local preparation checks completed so far: release updater/check, 76 audit unit tests, 24 release-tooling tests, and six consumer-harness regression tests passed. The full native build, native header audit, package inspection, and consumer runs are still in progress. The local GitHub Packages feed-read probe returns HTTP 403 for the CLI login; the PR workflow has passed the unchanged authenticated feed probe using its repository token.
+Local preparation validation passed:
+
+- Release updater/check, 76 audit unit tests, 24 release-tooling tests, and six consumer-harness regression tests.
+- Fresh native builds for the complete closure and dependency-ordered managed build/pack of all 23 packages for .NET 10 iOS and Mac Catalyst.
+- All 16 native audit targets, including the real Sharpie 26.3.0.11 fallback for Firestore, with zero actionable failures and no new suppressions.
+- The workflow package inspector staged the complete 23-package candidate. Detailed inspection of the 17 updated packages verified 34 managed assemblies and 68 native references, including versions, architectures, native resources, linker metadata, and Crashlytics assets.
+- Consumer smoke and nullability; all 1,726 binding surfaces exercised, with no waivers or failures.
+- All 22 runtime cases have passing results across recorded runs. Hosted all-mode stopped at the known Firestore seed-write permission denial; the two backend-dependent cases passed separately against the local emulator, and remaining cases passed individually. This does not claim a single all-mode pass or validate hosted security rules and production indexes.
+
+Supplementary Mac Catalyst and unsigned iOS device Release consumer build results are reported on [PR #219](https://github.com/AdamEssenmacher/GoogleApisForiOSComponents/pull/219). The local GitHub Packages feed-read probe returns HTTP 403 for the CLI login; the PR workflow has passed the unchanged authenticated feed probe using its repository token. CI remains responsible for validating the effective feed-reused package set and the exact merged publication commit.
 
 The release planner reports 17 changed package versions within the 23-package Firebase dependency closure. The six unchanged support packages retain their versions. The initial fingerprint baseline is unchanged. The workflow reuses existing verified package payloads and can copy required unchanged support versions to a missing feed.
 
