@@ -44,7 +44,13 @@ namespace FirebaseFoundationE2E;
 
 static partial class FirebaseRuntimeDriftCases
 {
+#if ENABLE_FIRESTORE_EMULATOR
+    // A cold emulator's first gRPC request can exceed five seconds on hosted CI.
+    // Keep callbacks bounded while still requiring every server result and assertion.
+    static readonly TimeSpan AsyncTimeout = TimeSpan.FromSeconds(30);
+#else
     static readonly TimeSpan AsyncTimeout = TimeSpan.FromSeconds(5);
+#endif
 
     public sealed record RuntimeDriftCase(string Id, string MethodName);
 
