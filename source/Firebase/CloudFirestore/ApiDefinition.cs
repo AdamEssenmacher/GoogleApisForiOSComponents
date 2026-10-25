@@ -411,7 +411,7 @@ namespace Firebase.CloudFirestore
 	{
 		// - (id)initWithName:(NSString *)name Args:(NSArray<FIRExprBridge *> *)args Options:(NSDictionary<NSString *, FIRExprBridge *> * _Nullable)options;
 		[Export ("initWithName:Args:Options:")]
-		NativeHandle Constructor (string name, ExprBridge [] args, [NullAllowed] NSDictionary<NSString, ExprBridge> options);
+		NativeHandle Constructor (string name, ExprBridge [] args, [NullAllowed] NSDictionary<NSString, NSObject> options);
 	}
 
 	[DisableDefaultCtor]
@@ -473,7 +473,7 @@ namespace Firebase.CloudFirestore
 	interface DefineStageBridge
 	{
 		[Export ("initWithVariables:")]
-		NativeHandle Constructor (NSDictionary<NSString, ExprBridge> variables);
+		NativeHandle Constructor (NSDictionary<NSString, NSObject> variables);
 	}
 
 	[DisableDefaultCtor]
@@ -481,7 +481,7 @@ namespace Firebase.CloudFirestore
 	interface SearchStageBridge
 	{
 		[Export ("initWithOptions:addFields:select:sort:")]
-		NativeHandle Constructor (NSDictionary<NSString, ExprBridge> options, NSDictionary<NSString, ExprBridge> addFields, NSDictionary<NSString, ExprBridge> select, OrderingBridge [] sort);
+		NativeHandle Constructor (NSDictionary<NSString, NSObject> options, NSDictionary<NSString, NSObject> addFields, NSDictionary<NSString, NSObject> select, OrderingBridge [] sort);
 	}
 
 	// @interface FIRCollectionSourceStageBridge : FIRStageBridge

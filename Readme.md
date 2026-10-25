@@ -121,6 +121,8 @@ dotnet tool run dotnet-cake -- --target=nuget --names=Google.SignIn
 
 These packages target `net10.0-ios` and `net10.0-maccatalyst`. .NET 9 is no longer supported.
 
+Firebase 12.12 requires Xcode 26.2 or later and Swift 6.2.3 or later. Use an Xcode version compatible with the installed .NET Apple workloads; see [local build prerequisites](docs/BUILDING.md).
+
 ### `Firebase.Installations` may need an explicit reference
 
 Some package combinations still work more reliably when `AdamE.Firebase.iOS.Installations` is referenced explicitly, even if it looks like it should be brought in transitively.

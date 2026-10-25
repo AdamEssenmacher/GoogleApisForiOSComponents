@@ -6,11 +6,11 @@ This checkout prepares the 16 active Firebase packages and GoogleAppMeasurement 
 
 The [upstream 12.11-to-12.12 comparison](https://github.com/firebase/firebase-ios-sdk/compare/12.11.0...12.12.0) contains 70 commits and 323 changed files. The full Git comparison was reviewed because the GitHub comparison API limits its file list to 300 entries. The supported products' public Objective-C header changes are in `Firestore/Source/Public/FirebaseFirestore/FIRPipelineBridge.h`.
 
-- `FIRFunctionExprBridge` replaces `initWithName:Args:` with `initWithName:Args:Options:`. The binding now exports the three-argument initializer with nullable `NSDictionary<NSString, ExprBridge>` options. The existing two-argument managed constructor forwards to the new initializer with null options, preserving managed callers without sending the removed selector.
+- `FIRFunctionExprBridge` replaces `initWithName:Args:` with `initWithName:Args:Options:`. The binding now exports the three-argument initializer with nullable `NSDictionary<NSString, NSObject>` options (the existing binding representation for native expression dictionaries). The existing two-argument managed constructor forwards to the new initializer with null options, preserving managed callers without sending the removed selector.
 - Add the five new public bridge types: `VariableBridge`, `SubcollectionSourceStageBridge`, `DefineStageBridge`, `SearchStageBridge`, and `PipelineExprBridge`.
 - The `cloudfirestore-pipeline-bridges` runtime regression exercises the compatibility constructor, null and non-null options, and all five new bridge constructors without backend access. The release workflow requires this lane before sealing a candidate.
 
-The [upstream release notes](https://firebase.google.com/support/release-notes/ios#version_12120_-_april_6_2026) also add Swift async sequences for Auth state/token changes and Remote Config updates, and expand the Swift Firestore pipeline surface. Generated Objective-C compatibility headers must be reviewed separately from these Swift-only APIs. Firebase AI Logic remains outside this package set.
+The [upstream release notes](https://firebase.google.com/support/release-notes/ios#version_12120_-_april_6_2026) also add Swift async sequences for Auth state/token changes and Remote Config updates, and expand the Swift Firestore pipeline surface. The fresh Auth Objective-C compatibility header changes `uid`, `email`, and `phoneNumber` to read-only; the managed binding already exposes getters only. Generated compatibility headers are reviewed separately from the Swift-only APIs. Firebase AI Logic remains outside this package set.
 
 ## Dependencies and build settings
 
@@ -33,7 +33,7 @@ The existing GoogleAdsOnDeviceConversion omission is preserved. The native measu
 
 Previous native outputs and NuGets were isolated before building this candidate. Generated local evidence is under `output/firebase-12.12-validation/` and is not committed. Local preparation packages are not publication artifacts: CI must build, validate, inspect, and seal the exact merged main commit before deployment approval.
 
-Local preparation checks completed so far: release updater/check, 76 audit unit tests, 24 release-tooling tests, and six consumer-harness regression tests passed. The full native build, native header audit, package inspection, and consumer runs are still in progress. The local GitHub Packages feed-read probe returns HTTP 403 for the CLI login; CI must pass the unchanged authenticated feed probe using its repository token.
+Local preparation checks completed so far: release updater/check, 76 audit unit tests, 24 release-tooling tests, and six consumer-harness regression tests passed. The full native build, native header audit, package inspection, and consumer runs are still in progress. The local GitHub Packages feed-read probe returns HTTP 403 for the CLI login; the PR workflow has passed the unchanged authenticated feed probe using its repository token.
 
 The release planner reports 17 changed package versions within the 23-package Firebase dependency closure. The six unchanged support packages retain their versions. The initial fingerprint baseline is unchanged. The workflow reuses existing verified package payloads and can copy required unchanged support versions to a missing feed.
 

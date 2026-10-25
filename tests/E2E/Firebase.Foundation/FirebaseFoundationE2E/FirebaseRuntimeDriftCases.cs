@@ -2611,7 +2611,7 @@ static partial class FirebaseRuntimeDriftCases
         ExprBridge[] args = [field];
         using var compatible = new FunctionExprBridge("add", args);
         using var nullableOptions = new FunctionExprBridge("add", args, null);
-        using var options = new NSDictionary<NSString, ExprBridge>();
+        using var options = new NSDictionary<NSString, NSObject>();
         using var explicitOptions = new FunctionExprBridge("add", args, options);
         using var variable = new VariableBridge("score");
         using var subcollection = new SubcollectionSourceStageBridge("items");
@@ -2620,7 +2620,7 @@ static partial class FirebaseRuntimeDriftCases
         using var pipeline = new PipelineExprBridge([subcollection, define]);
 
         RequireConstructor(typeof(FunctionExprBridge),
-            [typeof(string), typeof(ExprBridge[]), typeof(NSDictionary<NSString, ExprBridge>)],
+            [typeof(string), typeof(ExprBridge[]), typeof(NSDictionary<NSString, NSObject>)],
             "initWithName:Args:Options:");
         foreach (var bridge in new NSObject[] { compatible, nullableOptions, explicitOptions,
                      variable, subcollection, define, search, pipeline })
