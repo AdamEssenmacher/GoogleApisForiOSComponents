@@ -200,6 +200,13 @@ jobs:
         run: |
           dotnet tool restore
           dotnet tool run dotnet-cake -- --target=firebase-publish-metadata
+      - name: Configure authenticated GitHub Packages source
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          dotnet nuget add source "https://nuget.pkg.github.com/$GITHUB_REPOSITORY_OWNER/index.json" \
+            --name firebase-github --username "$GITHUB_ACTOR" --password "$GH_TOKEN" \
+            --store-password-in-clear-text
       - name: NuGet trusted publishing login
         uses: NuGet/login@v1
         id: nuget
