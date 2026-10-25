@@ -23,8 +23,10 @@ existing projects and Cake metadata. Third-party packages are consumed, not repu
    a GitHub Release with package assets, manifest, checksums, and generated notes.
 
 Merging alone does not authorize a deployment. PRs cannot publish. A main-branch run
-is release-eligible when the release version changes; a manual run on main can rebuild
-and revalidate an incomplete candidate. No ordinary tag push publishes packages.
+is release-eligible when the release version changes; unrelated merges do not recreate
+a rejected or expired deployment candidate. Re-run the original failed jobs while artifacts
+remain available, or deliberately request a new candidate with a manual run on main,
+which rebuilds and revalidates the incomplete release. No ordinary tag push publishes packages.
 
 ## What needs publishing
 
@@ -83,7 +85,10 @@ required PR reviewers while keeping the separate deployment approval.
 Two package registries cannot be updated atomically. If one upload fails, the workflow fails
 and reports the package/feed. Choose **Re-run failed jobs** to reuse the retained, validated
 candidate. The environment requires approval again; existing matching versions are skipped.
-An existing version with different contents is an error, never an overwrite.
+An existing version with different contents is an error, never an overwrite. Missing packages
+are submitted in dependency order before waiting up to 30 minutes for the full set to become
+downloadable. Existing verified versions are downloaded once per job. A successful upload
+alone is insufficient: matching payloads must be available from both feeds before release creation.
 
 Candidates and diagnostics are retained for 90 days. Once artifacts expire, manually run
 the workflow on main to rebuild and revalidate, then review the new candidate. If rebuilding

@@ -183,7 +183,7 @@ class ReleaseTests(unittest.TestCase):
         baseline = {'packages': [self.p]}
         config = {'releaseVersion': None, 'minimumFirebaseVersion': '12.12.0',
                   'nativeBuild': {'runner': 'macos-26', 'xcode': '26.6'}}
-        with tempfile.TemporaryDirectory() as tmp, patch.object(release, 'snapshot', return_value=[self.p]), \
+        with tempfile.TemporaryDirectory() as tmp, patch.object(release, 'snapshot', return_value=[{**self.p, 'project': 'source/Firebase/Core/Core.csproj'}]), \
                 patch.object(release, 'read', side_effect=[[], config, baseline, baseline]), \
                 patch.object(release, 'git_file', side_effect=[baseline, config]), \
                 patch.object(release, 'run', side_effect=['Readme.md', 'abc']):
@@ -192,6 +192,94 @@ class ReleaseTests(unittest.TestCase):
             result = json.loads(dest.read_text())
             self.assertFalse(result['eligible'])
             self.assertFalse(result['relevant'])
+
+    def test_pending_release_only_validates_changes_in_current_diff(self):
+        p = {**self.p, 'project': 'source/Firebase/Core/Core.csproj', 'firebase': True}
+        baseline = {'packages': [{**p, 'version': '12.11.0', 'fingerprint': 'old'}]}
+        config = {'releaseVersion': '12.12.0', 'minimumFirebaseVersion': '12.12.0',
+                  'nativeBuild': {'runner': 'macos-26', 'xcode': '26.6'}}
+        for filename, manual, relevant in [('Readme.md', False, False),
+                ('source/Google/Maps/ApiDefinition.cs', False, False),
+                ('source/Firebase/Core/ApiDefinition.cs', False, True),
+                ('source/AssemblyInfo.cs', False, True), ('Readme.md', True, True)]:
+            with self.subTest(filename=filename, manual=manual), tempfile.TemporaryDirectory() as tmp, \
+                    patch.object(release, 'snapshot', return_value=[p]), \
+                    patch.object(release, 'read', side_effect=[[], config, baseline, baseline]), \
+                    patch.object(release, 'git_file', side_effect=[baseline, config]), \
+                    patch.object(release, 'run', side_effect=[filename, 'abc']):
+                dest = Path(tmp) / 'plan.json'
+                release.plan(types.SimpleNamespace(metadata='unused', online=False, base='base', manual=manual, output=dest))
+                result = json.loads(dest.read_text())
+                self.assertEqual(result['changed'], [p['id']])
+                self.assertEqual(result['relevant'], relevant)
+                self.assertEqual(result['eligible'], manual)
+
+    def test_validation_evidence_rejects_failure_skipped_and_incomplete_results(self):
+        for fault in (None, 'unit', 'inspection', 'case', 'surface', 'missing'):
+            with self.subTest(fault=fault), tempfile.TemporaryDirectory() as tmp:
+                folder = Path(tmp)
+                for name in release.VALIDATIONS[2:]:
+                    release.write(folder / (name + '.json'), {
+                        'Success': True, 'FatalError': None, 'Cases': [{'Success': fault != 'case'}],
+                        'BindingSurfaceCoverage': {'Target': 'all', 'SurfaceCount': 2,
+                            'ExercisedCount': 1 if fault == 'surface' else 2, 'WaivedCount': 0, 'FailedCount': 0}})
+                if fault == 'missing':
+                    (folder / 'smoke.json').unlink()
+                env = {'UNIT_TEST_OUTCOME': 'failure' if fault == 'unit' else 'success',
+                       'PACKAGE_INSPECTION_OUTCOME': 'skipped' if fault == 'inspection' else 'success'}
+                with patch.dict(os.environ, env):
+                    args = types.SimpleNamespace(results_dir=folder)
+                    if fault:
+                        with self.assertRaises((ValueError, FileNotFoundError)):
+                            release.collect_validation(args)
+                        self.assertFalse((folder / 'validation.json').exists())
+                    else:
+                        release.collect_validation(args)
+                        self.assertEqual(release.read(folder / 'validation.json'), dict.fromkeys(release.VALIDATIONS, 'passed'))
+
+    def test_publish_submits_all_before_waiting_and_caches_existing_versions(self):
+        packages = [{**self.p, 'id': name, 'file': name + '.nupkg', 'payloadHash': release.payload_hash(package())}
+                    for name in ('dependency', 'consumer', 'existing')]
+        calls, pushes = [], []
+        clock = [0]
+        def fetch(p):
+            calls.append(p['id'])
+            return package() if p['id'] == 'existing' or clock[0] >= 150 else None
+        def push(args, **kwargs):
+            pushes.append(Path(args[3]).stem)
+        def sleep(seconds):
+            self.assertEqual(pushes, ['dependency', 'consumer'])
+            clock[0] += seconds
+        feed = types.SimpleNamespace(name='nuget', source='nuget', fetch=fetch)
+        with patch.dict(os.environ, {'NUGET_API_KEY': 'test'}), \
+                patch.object(release.subprocess, 'run', side_effect=push), \
+                patch.object(release.time, 'monotonic', side_effect=lambda: clock[0]), \
+                patch.object(release.time, 'sleep', side_effect=sleep):
+            release.publish_packages(Path('/tmp'), packages, [feed], wait_seconds=1800)
+        self.assertEqual(calls.count('existing'), 1)
+        self.assertEqual(pushes, ['dependency', 'consumer'])
+        self.assertGreater(clock[0], 120)
+
+    def test_publish_wait_reports_all_outstanding_and_rejects_conflicts_and_errors(self):
+        packages = [{**self.p, 'id': name, 'file': name + '.nupkg', 'payloadHash': release.payload_hash(package())}
+                    for name in ('dependency', 'consumer')]
+        for state in ('timeout', 'conflict', 'unavailable'):
+            calls = [0]
+            def fetch(p):
+                calls[0] += 1
+                if calls[0] <= 4:
+                    return None
+                if state == 'conflict':
+                    return package(commit='other')
+                if state == 'unavailable':
+                    raise RuntimeError('HTTP 503')
+                return None
+            feed = types.SimpleNamespace(name='nuget', source='nuget', fetch=fetch)
+            with self.subTest(state=state), patch.dict(os.environ, {'NUGET_API_KEY': 'test'}), \
+                    patch.object(release.subprocess, 'run'), patch.object(release.time, 'sleep'):
+                expected = {'timeout': 'dependency.*consumer', 'conflict': 'conflict', 'unavailable': 'HTTP 503'}[state]
+                with self.assertRaisesRegex((ValueError, RuntimeError), expected):
+                    release.publish_packages(Path('/tmp'), packages, [feed], wait_seconds=0)
 
     def test_toolchain_pins_affect_package_inputs_but_release_labels_do_not(self):
         with tempfile.TemporaryDirectory() as tmp, patch.object(release, 'ROOT', Path(tmp)), \

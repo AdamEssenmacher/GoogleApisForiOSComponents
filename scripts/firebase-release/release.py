@@ -115,8 +115,6 @@ def previous_release():
 def snapshot(metadata):
     """Fingerprint tracked inputs, not generated outputs or archive timestamps."""
     tracked = set(run('git', 'ls-files').splitlines())
-    # Include newly added files during the initial setup before they are staged.
-    tracked.update(p.as_posix() for p in Path('eng').glob('*.json'))
     shared = ['build.cake', 'common.cake', 'poco.cake', 'Directory.Build.props',
               'global.json', '.config/dotnet-tools.json', 'source/AssemblyInfo.cs']
     custom = (ROOT / 'custom_externals_download.cake').read_text()
@@ -204,10 +202,21 @@ def plan(args):
             require(not changed or version(release_version) > version(latest['releaseVersion']),
                     'Package changes require a new release version')
     files = run('git', 'diff', '--name-only', args.base, 'HEAD').splitlines() if args.base else ['build.cake']
-    relevant = bool(changed) or any(
-        p.endswith('.cake') or p.startswith(('eng/', 'scripts/', 'tests/E2E/Firebase.Foundation/',
+    project_dirs = tuple(str(Path(p['project']).parent) + '/' for p in packages)
+    relevant = any(
+        p.startswith(project_dirs) or p == 'source/AssemblyInfo.cs'
+        or p.endswith('.cake') or p.startswith(('eng/', 'scripts/', 'tests/E2E/Firebase.Foundation/',
                                            'tools/e2e/', '.github/workflows/firebase-release.yml'))
         or p in ('global.json', 'Directory.Build.props', '.config/dotnet-tools.json') for p in files)
+    for package in packages:
+        project = ROOT / package['project']
+        for element in ET.parse(project).iter():
+            if element.get('Pack', '').lower() == 'true' or element.tag in ('Compile', 'Import'):
+                include = element.get('Include') or element.get('Project')
+                if include and '$(' not in include and '*' not in include:
+                    path = (project.parent / include.replace('\\', '/')).resolve()
+                    if path.is_relative_to(ROOT):
+                        relevant = relevant or path.relative_to(ROOT).as_posix() in files
     old_config = git_file(args.base, CONFIG) if args.base else None
     triggered = args.manual or old_config is None or old_config.get('releaseVersion') != release_version
     eligible = bool(release_version and triggered and (not latest or version(release_version) > version(latest['releaseVersion'])))
@@ -400,6 +409,68 @@ def finalize(args):
             summary.write('\n'.join(lines) + '\n')
 
 
+def collect_validation(args):
+    results = {}
+    for name, variable in [('unit-tests', 'UNIT_TEST_OUTCOME'), ('package-structure', 'PACKAGE_INSPECTION_OUTCOME')]:
+        require(os.environ.get(variable) == 'success', f'{name} did not succeed')
+        results[name] = 'passed'
+    for name in VALIDATIONS[2:]:
+        result = read(Path(args.results_dir) / (name + '.json'))
+        require(result.get('Success') is True and not result.get('FatalError'), f'{name} failed')
+        cases = result.get('Cases', [])
+        require(cases and all(c.get('Success') is True for c in cases), f'{name} has missing or failed cases')
+        if name == 'surface':
+            coverage = result.get('BindingSurfaceCoverage') or {}
+            require(coverage.get('Target') == 'all' and coverage.get('SurfaceCount', 0) > 0
+                    and coverage.get('FailedCount') == 0
+                    and coverage.get('ExercisedCount', 0) + coverage.get('WaivedCount', 0) == coverage['SurfaceCount'],
+                    'Incomplete binding surface coverage')
+        results[name] = 'passed'
+    write(Path(args.results_dir) / 'validation.json', results)
+
+
+def publish_packages(folder, packages, registries, wait_seconds=1800, poll_seconds=15):
+    # Cache verified identities, not package bytes. Existing immutable versions need one download.
+    verified = set()
+    pending = []
+    for p in packages:
+        for feed in registries:
+            data = feed.fetch(p)
+            require(data is None or payload_hash(data) == p['payloadHash'], f"Existing package conflict: {feed.name}/{p['id']}")
+            if data is not None:
+                verified.add((feed.name, p['id'], p['version']))
+    # Submit the entire dependency-ordered set before waiting for registry indexing.
+    for p in packages:
+        for feed in registries:
+            if (feed.name, p['id'], p['version']) in verified:
+                continue
+            data = feed.fetch(p)  # Recheck missing destinations immediately before writing.
+            if data is not None:
+                require(payload_hash(data) == p['payloadHash'], f"Existing package conflict: {feed.name}/{p['id']}")
+                continue
+            key = os.environ['NUGET_API_KEY'] if feed.name == 'nuget' else os.environ['GH_TOKEN']
+            subprocess.run(['dotnet', 'nuget', 'push', str(folder / p['file']), '--source', feed.source,
+                            '--api-key', key], check=False)
+            pending.append((feed, p))
+    # A push result (including a conflict) is never proof of matching published bytes.
+    deadline = time.monotonic() + wait_seconds
+    while pending:
+        remaining = []
+        for feed, p in pending:
+            data = feed.fetch(p)
+            if data is None:
+                remaining.append((feed, p))
+            else:
+                require(payload_hash(data) == p['payloadHash'], f"Published package conflict: {feed.name}/{p['id']}")
+                print(f"Verified {feed.name}: {p['id']} {p['version']}")
+        pending = remaining
+        if pending:
+            outstanding = ', '.join(f"{f.name}/{p['id']} {p['version']}" for f, p in pending)
+            require(time.monotonic() < deadline, f'Publication incomplete: {outstanding}; rerun failed job')
+            print(f'Waiting for registry validation/indexing: {outstanding}', flush=True)
+            time.sleep(min(poll_seconds, max(0, deadline - time.monotonic())))
+
+
 def publish(args):
     folder = Path(args.package_dir)
     manifest = read(folder / 'manifest.json')
@@ -422,26 +493,7 @@ def publish(args):
         expected_commit = manifest['sourceCommit'] if not p['reused'] or p['id'] in manifest['changed'] else None
         inspect_package(data, allowed[p['id']], allowed, expected_commit)
     registries = feeds()
-    # Preflight every existing package before making the first write.
-    for p in manifest['packages']:
-        for feed in registries:
-            data = feed.fetch(p)
-            require(data is None or payload_hash(data) == p['payloadHash'], f"Existing package conflict: {feed.name}/{p['id']}")
-    for p in manifest['packages']:
-        for feed in registries:
-            data = feed.fetch(p)
-            if data is None:
-                key = os.environ['NUGET_API_KEY'] if feed.name == 'nuget' else os.environ['GH_TOKEN']
-                # A failed push can be a race or an interrupted success. Always verify the feed.
-                subprocess.run(['dotnet', 'nuget', 'push', str(folder / p['file']), '--source', feed.source,
-                                '--api-key', key], check=False)
-                for attempt in range(12):
-                    data = feed.fetch(p)
-                    if data is not None:
-                        break
-                    time.sleep(10)
-            require(data is not None and payload_hash(data) == p['payloadHash'], f"Publication incomplete: {feed.name}/{p['id']}; rerun failed job")
-            print(f"Verified {feed.name}: {p['id']} {p['version']}")
+    publish_packages(folder, manifest['packages'], registries)
     tag = 'firebase-v' + manifest['releaseVersion']
     # gh creates the tag at the exact tested SHA. Existing tags must never be moved.
     tags = github('git/matching-refs/tags/' + urllib.parse.quote(tag, safe=''))
@@ -490,6 +542,8 @@ def main():
     p = sub.add_parser('finalize')
     p.add_argument('--package-dir', default='output/firebase-candidate')
     p.add_argument('--results', required=True)
+    p = sub.add_parser('collect_validation')
+    p.add_argument('--results-dir', required=True)
     p = sub.add_parser('publish')
     p.add_argument('--package-dir', default='output/firebase-candidate')
     p.add_argument('--metadata', default='output/firebase-metadata.json')
