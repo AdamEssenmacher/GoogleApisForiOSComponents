@@ -121,7 +121,10 @@ def build_fingerprint(metadata):
         # The result is a file; stream build output so compiler/restore errors reach CI logs.
         subprocess.run(['dotnet', 'run', '--project', str(ROOT / 'scripts/FirebaseReleaseFingerprint'),
                         '--verbosity', 'minimal', '--', str(ROOT), str(selected), str(output)],
-                       cwd=ROOT, check=True)
+                       cwd=ROOT, check=True,
+                       # This net10.0 console tool does not consume Apple workloads. Keep the
+                       # repository SDK pin, but do not require its Apple workload set on Linux.
+                       env={**os.environ, 'MSBuildEnableWorkloadResolver': 'false'})
         return digest(output.read_bytes())
 
 

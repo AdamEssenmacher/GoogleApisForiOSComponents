@@ -52,7 +52,7 @@ class ReleaseTests(unittest.TestCase):
     def test_fingerprint_build_failure_exposes_compiler_output(self):
         with tempfile.TemporaryDirectory() as tmp:
             dotnet = Path(tmp) / 'dotnet'
-            dotnet.write_text('#!/bin/sh\necho "error CS1002: ; expected"\nexit 1\n')
+            dotnet.write_text('#!/bin/sh\necho "resolver=$MSBuildEnableWorkloadResolver"\necho "error CS1002: ; expected"\nexit 1\n')
             dotnet.chmod(0o755)
             script = (f"import importlib.util; spec=importlib.util.spec_from_file_location('release', {str(ROOT / 'scripts/firebase-release/release.py')!r}); "
                       "release=importlib.util.module_from_spec(spec); spec.loader.exec_module(release); "
@@ -61,6 +61,7 @@ class ReleaseTests(unittest.TestCase):
                                     env={**os.environ, 'PATH': tmp + os.pathsep + os.environ['PATH']})
             self.assertNotEqual(result.returncode, 0)
             self.assertIn('error CS1002: ; expected', result.stdout + result.stderr)
+            self.assertIn('resolver=false', result.stdout)
 
     def test_changed_input_without_bump_fails(self):
         with self.assertRaisesRegex(ValueError, 'without a version bump'):
