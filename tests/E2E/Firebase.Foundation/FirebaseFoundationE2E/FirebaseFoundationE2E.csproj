@@ -89,9 +89,9 @@
     <PackageReference Include="AdamE.Firebase.iOS.Installations" Version="$(FirebasePackageVersion)" />
     <PackageReference Include="AdamE.Google.iOS.GoogleAppMeasurement" Version="$(GoogleAppMeasurementPackageVersion)" />
     <PackageReference Include="AdamE.Google.iOS.GoogleDataTransport" Version="10.1.0.5" />
-    <PackageReference Include="AdamE.Google.iOS.GoogleUtilities" Version="8.1.0.3" />
+    <PackageReference Include="AdamE.Google.iOS.GoogleUtilities" Version="8.1.0.4" />
     <PackageReference Include="AdamE.Google.iOS.Nanopb" Version="3.30910.0.5" />
-    <PackageReference Include="AdamE.Google.iOS.PromisesObjC" Version="2.4.0.5" />
+    <PackageReference Include="AdamE.Google.iOS.PromisesObjC" Version="2.4.0.6" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(EnableNullabilityValidation)' == 'true' or '$(EnableFirestoreEmulator)' == 'true'">

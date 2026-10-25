@@ -35,7 +35,7 @@ Previous native outputs and NuGets were isolated before building this candidate.
 
 Local preparation validation passed:
 
-- Release updater/check, 76 audit unit tests, 24 release-tooling tests, and six consumer-harness regression tests.
+- Release updater/check, 76 audit unit tests, 26 release-tooling tests, and six consumer-harness regression tests.
 - Fresh native builds for the complete closure and dependency-ordered managed build/pack of all 23 packages for .NET 10 iOS and Mac Catalyst.
 - All 16 native audit targets, including the real Sharpie 26.3.0.11 fallback for Firestore, with zero actionable failures and no new suppressions.
 - The workflow package inspector staged the complete 23-package candidate. Detailed inspection of the 17 updated packages verified 34 managed assemblies and 68 native references, including versions, architectures, native resources, linker metadata, and Crashlytics assets.
@@ -44,6 +44,15 @@ Local preparation validation passed:
 
 Supplementary Mac Catalyst and unsigned iOS device Release consumer build results are reported on [PR #219](https://github.com/AdamEssenmacher/GoogleApisForiOSComponents/pull/219). The local GitHub Packages feed-read probe returns HTTP 403 for the CLI login; the PR workflow has passed the unchanged authenticated feed probe using its repository token. CI remains responsible for validating the effective feed-reused package set and the exact merged publication commit.
 
-The release planner reports 17 changed package versions within the 23-package Firebase dependency closure. The six unchanged support packages retain their versions. The initial fingerprint baseline is unchanged. The workflow reuses existing verified package payloads and can copy required unchanged support versions to a missing feed.
+CI found that four historical support versions have different payloads on NuGet.org and GitHub Packages, including different repository commits (`5d3d66d2` or `6498909d` on NuGet.org versus `edc4a483` on GitHub Packages). The strict feed comparison correctly blocked publication. Resolve these collisions with new binding revisions:
+
+| Support package | Previous version | Prepared version |
+| --- | --- | --- |
+| PromisesObjC | 2.4.0.5 | 2.4.0.6 |
+| GoogleUtilities | 8.1.0.3 | 8.1.0.4 |
+| GTMSessionFetcher | 3.5.0.5 | 3.5.0.6 |
+| AppCheckCore | 11.2.0 | 11.2.0.1 |
+
+Their native CocoaPods versions and framework ownership remain unchanged. Revised Firebase and AppCheckCore package dependency minimums select the new binding revisions. Nanopb and GoogleDataTransport have matching payloads across the feeds and retain their versions. The release planner now reports 21 changed versions within the same 23-package closure. The initial fingerprint baseline is unchanged. An early feed preflight reports all existing payload/structure conflicts before native builds; staging and publication still independently enforce feed identity. The local consumer results above predate these support revisions; CI must validate the effective candidate with the revised dependencies.
 
 `eng/firebase-release.json` sets `releaseVersion` to `12.12.0`. After this PR is merged, the main-branch workflow must pass **Firebase validation**, then wait for maintainer approval of the `firebase-release` environment. The publish job uses NuGet trusted publishing, verifies both NuGet.org and GitHub Packages, and only then creates `firebase-v12.12.0` and its GitHub release with package assets, manifest, and checksums. A manual tag or Chrome upload is not part of this release path.

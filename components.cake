@@ -22,15 +22,15 @@ Artifact GOOGLE_CAST_ARTIFACT                      = new Artifact ("Google.Cast"
 Artifact GOOGLE_MAPS_ARTIFACT                      = new Artifact ("Google.Maps",                     "9.2.0.9",   "15.0", ComponentGroup.Google, csprojName: "Maps");
 Artifact GOOGLE_UMP_ARTIFACT                       = new Artifact ("Google.UserMessagingPlatform",    "1.1.0.1",   "15.0", ComponentGroup.Google, csprojName: "UserMessagingPlatform");
 Artifact GOOGLE_PLACES_ARTIFACT                    = new Artifact ("Google.Places",                   "7.4.0.3",   "15.0", ComponentGroup.Google, csprojName: "Places");
-Artifact GOOGLE_APP_CHECK_CORE_ARTIFACT            = new Artifact ("Google.AppCheckCore",             "11.2.0.0",  "15.0", ComponentGroup.Google, csprojName: "AppCheckCore");
+Artifact GOOGLE_APP_CHECK_CORE_ARTIFACT            = new Artifact ("Google.AppCheckCore",             "11.2.0.1",  "15.0", ComponentGroup.Google, csprojName: "AppCheckCore");
 Artifact GOOGLE_SIGN_IN_ARTIFACT                   = new Artifact ("Google.SignIn",                   "9.0.0.0",   "15.0", ComponentGroup.Google, csprojName: "SignIn");
 Artifact GOOGLE_TAG_MANAGER_ARTIFACT               = new Artifact ("Google.TagManager",               "9.2.0.0",   "15.0", ComponentGroup.Google, csprojName: "TagManager");
 
 Artifact GOOGLE_GOOGLE_APP_MEASUREMENT_ARTIFACT    = new Artifact ("Google.AppMeasurement",           "12.12.0",      "15.0", ComponentGroup.Google, csprojName: "GoogleAppMeasurement");
-Artifact GOOGLE_PROMISES_OBJC_ARTIFACT             = new Artifact ("Google.PromisesObjC",             "2.4.0.5",     "15.0", ComponentGroup.Google, csprojName: "PromisesObjC");
-Artifact GOOGLE_GTM_SESSION_FETCHER_ARTIFACT       = new Artifact ("Google.GTMSessionFetcher",        "3.5.0.5",     "15.0", ComponentGroup.Google, csprojName: "GTMSessionFetcher");
+Artifact GOOGLE_PROMISES_OBJC_ARTIFACT             = new Artifact ("Google.PromisesObjC",             "2.4.0.6",     "15.0", ComponentGroup.Google, csprojName: "PromisesObjC");
+Artifact GOOGLE_GTM_SESSION_FETCHER_ARTIFACT       = new Artifact ("Google.GTMSessionFetcher",        "3.5.0.6",     "15.0", ComponentGroup.Google, csprojName: "GTMSessionFetcher");
 Artifact GOOGLE_NANOPB_ARTIFACT                    = new Artifact ("Google.Nanopb",                   "3.30910.0.5", "15.0", ComponentGroup.Google, csprojName: "Nanopb");
-Artifact GOOGLE_GOOGLE_UTILITIES_ARTIFACT          = new Artifact ("Google.GoogleUtilities",          "8.1.0.3",     "15.0", ComponentGroup.Google, csprojName: "GoogleUtilities");
+Artifact GOOGLE_GOOGLE_UTILITIES_ARTIFACT          = new Artifact ("Google.GoogleUtilities",          "8.1.0.4",     "15.0", ComponentGroup.Google, csprojName: "GoogleUtilities");
 Artifact GOOGLE_GOOGLE_DATA_TRANSPORT_ARTIFACT     = new Artifact ("Google.GoogleDataTransport",      "10.1.0.5",    "15.0", ComponentGroup.Google, csprojName: "GoogleDataTransport");
 
 // MLKit artifacts available to be built. These artifacts generate NuGets.
