@@ -15,6 +15,8 @@ jobs:
     outputs:
       relevant: ${{ steps.plan.outputs.relevant }}
       eligible: ${{ steps.plan.outputs.eligible }}
+      runner: ${{ steps.plan.outputs.runner }}
+      xcode: ${{ steps.plan.outputs.xcode }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -54,7 +56,7 @@ jobs:
   validate:
     needs: plan
     if: needs.plan.outputs.relevant == 'true'
-    runs-on: macos-26
+    runs-on: ${{ needs.plan.outputs.runner }}
     timeout-minutes: 360
     permissions:
       contents: read
@@ -62,15 +64,16 @@ jobs:
     env:
       BUILD_COMMIT: ${{ github.sha }}
       BUILD_NUMBER: ${{ github.run_number }}
+      XCODE_VERSION: ${{ needs.plan.outputs.xcode }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
         with:
           name: firebase-plan
           path: output
-      - name: Select Xcode 26.6
+      - name: Select configured Xcode
         run: |
-          sudo xcode-select --switch /Applications/Xcode_26.6.app/Contents/Developer
+          sudo xcode-select --switch "/Applications/Xcode_${XCODE_VERSION}.app/Contents/Developer"
           xcodebuild -version
       - uses: actions/setup-dotnet@v4
         with:

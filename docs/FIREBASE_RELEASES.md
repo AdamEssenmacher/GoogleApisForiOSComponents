@@ -48,6 +48,11 @@ across the closure. Changing a single Cake component value does not change unrel
 components' fingerprints. Project-reference version changes affect consumers' fingerprints.
 Development-only documentation and test edits do not require package version bumps.
 
+The native runner and Xcode pins live in `nativeBuild` in `eng/firebase-release.json`;
+the workflow reads those pins, and they are part of every package's fingerprint.
+The .NET SDK and tool pins remain in the existing repository configuration. Advancing
+a shared build/toolchain pin requires explicit package-version bumps across the closure.
+
 An unchanged dependency keeps its version. Existing packages are downloaded and reused
 when a feed needs that version; the consumer tests restore the staged effective package
 set. A feed disagreement fails validation. NuGet repository signatures and ZIP timestamps

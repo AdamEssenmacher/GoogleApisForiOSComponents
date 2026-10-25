@@ -181,7 +181,8 @@ class ReleaseTests(unittest.TestCase):
 
     def test_disabled_configuration_and_unrelated_changes(self):
         baseline = {'packages': [self.p]}
-        config = {'releaseVersion': None, 'minimumFirebaseVersion': '12.12.0'}
+        config = {'releaseVersion': None, 'minimumFirebaseVersion': '12.12.0',
+                  'nativeBuild': {'runner': 'macos-26', 'xcode': '26.6'}}
         with tempfile.TemporaryDirectory() as tmp, patch.object(release, 'snapshot', return_value=[self.p]), \
                 patch.object(release, 'read', side_effect=[[], config, baseline, baseline]), \
                 patch.object(release, 'git_file', side_effect=[baseline, config]), \
@@ -191,6 +192,34 @@ class ReleaseTests(unittest.TestCase):
             result = json.loads(dest.read_text())
             self.assertFalse(result['eligible'])
             self.assertFalse(result['relevant'])
+
+    def test_toolchain_pins_affect_package_inputs_but_release_labels_do_not(self):
+        with tempfile.TemporaryDirectory() as tmp, patch.object(release, 'ROOT', Path(tmp)), \
+                patch.object(release, 'run', return_value='source/Core/Core.csproj'):
+            root = Path(tmp)
+            for name in ('build.cake', 'common.cake', 'poco.cake', 'Directory.Build.props', 'global.json',
+                         '.config/dotnet-tools.json', 'source/AssemblyInfo.cs', 'custom_externals_download.cake'):
+                path = root / name
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_text('shared input')
+            project = root / 'source/Core/Core.csproj'
+            project.parent.mkdir(parents=True)
+            project.write_text(f'<Project><PropertyGroup><PackageId>{self.p["id"]}</PackageId>'
+                               '<PackageVersion>12.12.0</PackageVersion></PropertyGroup></Project>')
+            metadata = [{'id': self.p['id'], 'version': '12.12.0', 'dependencies': [], 'project': 'source/Core/Core.csproj'}]
+            config = {'releaseVersion': '12.12.0', 'nativeBuild': {'runner': 'macos-26', 'xcode': '26.6'}}
+            release.write(root / release.CONFIG, config)
+            before = release.snapshot(metadata)
+            config['releaseVersion'] = '12.12.0.1'
+            release.write(root / release.CONFIG, config)
+            self.assertEqual(before, release.snapshot(metadata))
+            for setting, value in (('xcode', '26.7'), ('runner', 'macos-27')):
+                with self.subTest(setting=setting):
+                    config['nativeBuild'] = {'runner': 'macos-26', 'xcode': '26.6'}
+                    config['nativeBuild'][setting] = value
+                    release.write(root / release.CONFIG, config)
+                    with self.assertRaisesRegex(ValueError, 'without a version bump'):
+                        release.check_versions(release.snapshot(metadata), {'packages': before})
 
     def test_publish_retry_only_writes_missing_feed(self):
         with tempfile.TemporaryDirectory() as tmp:

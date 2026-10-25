@@ -62,6 +62,13 @@ def normalized(value):
     return '.'.join(map(str, parts[:3] if parts[3] == 0 else parts))
 
 
+def native_build(config):
+    settings = config['nativeBuild']
+    require(bool(re.fullmatch(r'macos-\d+', settings['runner'])), 'Expected a pinned hosted macOS runner')
+    require(bool(re.fullmatch(r'\d+(?:\.\d+){1,2}', settings['xcode'])), 'Expected a pinned stable Xcode version')
+    return settings
+
+
 class SafeRedirect(urllib.request.HTTPRedirectHandler):
     def redirect_request(self, req, fp, code, msg, headers, newurl):
         redirected = super().redirect_request(req, fp, code, msg, headers, newurl)
@@ -117,6 +124,7 @@ def snapshot(metadata):
     custom = re.sub(r'var ExternalDownloads = .*?\n};', '', custom, flags=re.S)
     shared_data = {p: digest((ROOT / p).read_bytes()) for p in shared}
     shared_data['downloadImplementation'] = digest(custom.encode())
+    shared_data['nativeBuild'] = native_build(read(ROOT / CONFIG))
     ids = {p['id']: p for p in metadata}
     require(len(ids) == len(metadata), 'Duplicate package IDs')
     records = []
@@ -205,11 +213,12 @@ def plan(args):
     eligible = bool(release_version and triggered and (not latest or version(release_version) > version(latest['releaseVersion'])))
     result = {'schemaVersion': 1, 'sourceCommit': run('git', 'rev-parse', 'HEAD'),
               'releaseVersion': release_version, 'packages': packages, 'changed': changed,
-              'eligible': eligible, 'relevant': relevant or eligible}
+              'eligible': eligible, 'relevant': relevant or eligible, 'nativeBuild': native_build(config)}
     write(args.output, result)
     if os.environ.get('GITHUB_OUTPUT'):
         with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
             output.write(f"relevant={str(result['relevant']).lower()}\neligible={str(eligible).lower()}\n")
+            output.write(f"runner={result['nativeBuild']['runner']}\nxcode={result['nativeBuild']['xcode']}\n")
     print(f"Firebase validation required: {result['relevant']}; release eligible: {eligible}; changed packages: {len(changed)}")
 
 
