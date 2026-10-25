@@ -94,6 +94,11 @@ jobs:
         run: |
           dotnet test scripts/FirebaseBindingAudit.Tests/FirebaseBindingAudit.Tests.csproj --nologo
           python3 -m unittest discover -s tests/E2E/Firebase.Foundation -p 'test_*.py'
+      - name: Verify feed read access
+        if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/firebase-release/release.py probe-feeds
       - name: Build and pack the complete Firebase closure
         shell: bash
         run: |

@@ -10,6 +10,7 @@ import io
 import json
 import os
 from pathlib import Path
+import plistlib
 import re
 import subprocess
 import sys
@@ -297,6 +298,35 @@ def inspect_package(data, package, packages, new_commit=None):
                 f"Missing {platform} assembly: {info['id']}")
         require(any(n.startswith('lib/' + platform) and ('.resources/' in n or n.endswith('.resources.zip')) for n in names),
                 f"Missing {platform} native resources: {info['id']}")
+    with zipfile.ZipFile(io.BytesIO(data)) as archive:
+        for name in names:
+            if name.startswith('lib/net10.0-') and name.endswith('.resources.zip'):
+                with zipfile.ZipFile(io.BytesIO(archive.read(name))) as native:
+                    references = ET.fromstring(native.read('manifest')).findall('NativeReference')
+                    require(bool(references), f"Empty native manifest: {info['id']}")
+                    for reference in references:
+                        framework = reference.attrib['Name']
+                        require(reference.findtext('Kind') == 'Framework', f'Unexpected native kind: {framework}')
+                        require(framework.endswith('.xcframework'), f'Unexpected native reference: {framework}')
+                        libraries = plistlib.loads(native.read(framework + '/Info.plist'))['AvailableLibraries']
+                        variants = {lib.get('SupportedPlatformVariant', '') for lib in libraries if lib['SupportedPlatform'] == 'ios'}
+                        require({'', 'simulator', 'maccatalyst'} <= variants, f'Missing native platform slices: {framework}')
+                        for lib in libraries:
+                            prefix = framework + '/' + lib['LibraryIdentifier'] + '/' + lib['LibraryPath']
+                            require(any(n.startswith(prefix + '/') for n in native.namelist()), f'Missing native library: {prefix}')
+                    if new_commit and package.get('project'):
+                        project = ET.parse(ROOT / package['project'])
+                        expected = {Path(e.attrib['Include'].replace('\\', '/')).name: e for e in project.findall('.//NativeReference')}
+                        require(set(expected) == {r.attrib['Name'] for r in references}, 'Native references differ from project')
+                        for reference in references:
+                            for field in ('Kind', 'ForceLoad', 'SmartLink', 'Frameworks', 'WeakFrameworks', 'LinkerFlags'):
+                                value = expected[reference.attrib['Name']].findtext(field)
+                                if value is not None:
+                                    actual = reference.findtext(field) or ''
+                                    if field in ('ForceLoad', 'SmartLink'):
+                                        value, actual = value.lower(), actual.lower()
+                                    require(' '.join(value.split()) == ' '.join(actual.split()),
+                                            f"Native {field} metadata differs: {reference.attrib['Name']}")
     return info['dependencies']
 
 
@@ -445,10 +475,16 @@ def main():
     p = sub.add_parser('publish')
     p.add_argument('--package-dir', default='output/firebase-candidate')
     p.add_argument('--metadata', default='output/firebase-metadata.json')
+    sub.add_parser('probe-feeds')
     args = parser.parse_args()
     if args.command == 'snapshot':
         packages = [{k: p[k] for k in ('id', 'version', 'fingerprint')} for p in snapshot(read(args.metadata))]
         write(args.output, {'schemaVersion': 1, 'published': False, 'packages': packages})
+    elif args.command == 'probe-feeds':
+        # Small existing dependency exercises actual download authorization, not just the public index.
+        for feed in feeds():
+            data = feed.fetch({'id': 'AdamE.Google.iOS.PromisesObjC', 'version': '2.4.0.5'})
+            print(f'{feed.name}: authenticated lookup succeeded ({"present" if data else "absent"})')
     else:
         globals()[args.command](args)
 

@@ -3,6 +3,7 @@ import io
 import json
 import os
 from pathlib import Path
+import plistlib
 import tempfile
 import types
 import unittest
@@ -19,12 +20,22 @@ spec.loader.exec_module(release)
 
 def package(package_id='AdamE.Firebase.iOS.Core', value='12.12.0', dependency='', commit='abc', extra=None):
     buffer = io.BytesIO()
+    resource = io.BytesIO()
+    with zipfile.ZipFile(resource, 'w') as native:
+        native.writestr('manifest', '<BindingAssembly><NativeReference Name="Core.xcframework"><Kind>Framework</Kind></NativeReference></BindingAssembly>')
+        libraries = []
+        for variant in ('', 'simulator', 'maccatalyst'):
+            identifier = 'ios-arm64' + ('-' + variant if variant else '')
+            libraries.append({'LibraryIdentifier': identifier, 'LibraryPath': 'Core.framework',
+                              'SupportedPlatform': 'ios', 'SupportedPlatformVariant': variant})
+            native.writestr(f'Core.xcframework/{identifier}/Core.framework/Core', 'binary')
+        native.writestr('Core.xcframework/Info.plist', plistlib.dumps({'AvailableLibraries': libraries}))
     with zipfile.ZipFile(buffer, 'w') as archive:
         archive.writestr('package.nuspec', f'<package><metadata><id>{package_id}</id><version>{value}</version>'
                          f'<repository commit="{commit}"/><dependencies>{dependency}</dependencies></metadata></package>')
         for platform in ('ios', 'maccatalyst'):
             archive.writestr(f'lib/net10.0-{platform}/Firebase.Core.dll', 'assembly')
-            archive.writestr(f'lib/net10.0-{platform}/Firebase.Core.resources.zip', 'native')
+            archive.writestr(f'lib/net10.0-{platform}/Firebase.Core.resources.zip', resource.getvalue())
         for name, data in (extra or {}).items():
             archive.writestr(name, data)
     return buffer.getvalue()
