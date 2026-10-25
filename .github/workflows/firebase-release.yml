@@ -132,6 +132,7 @@ jobs:
           lane smoke
           lane surface --binding-surface-target all
           lane nullability --enable-nullability-validation
+          lane firestore-pipeline --runtime-drift-case cloudfirestore-pipeline-bridges
           lane firestore-aggregate --runtime-drift-case cloudfirestore-aggregate-query --firestore-emulator
           lane firestore-filters --runtime-drift-case cloudfirestore-query-filters --firestore-emulator
       - name: Collect validation evidence

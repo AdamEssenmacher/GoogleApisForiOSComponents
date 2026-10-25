@@ -409,9 +409,25 @@ namespace Firebase.CloudFirestore
 	[BaseType (typeof (ExprBridge), Name = "FIRFunctionExprBridge")]
 	interface FunctionExprBridge
 	{
-		// - (id)initWithName:(NSString *)name Args:(NSArray<FIRExprBridge *> *)args;
-		[Export ("initWithName:Args:")]
-		NativeHandle Constructor (string name, ExprBridge [] args);
+		// - (id)initWithName:(NSString *)name Args:(NSArray<FIRExprBridge *> *)args Options:(NSDictionary<NSString *, FIRExprBridge *> * _Nullable)options;
+		[Export ("initWithName:Args:Options:")]
+		NativeHandle Constructor (string name, ExprBridge [] args, [NullAllowed] NSDictionary<NSString, ExprBridge> options);
+	}
+
+	[DisableDefaultCtor]
+	[BaseType (typeof (ExprBridge), Name = "FIRVariableBridge")]
+	interface VariableBridge
+	{
+		[Export ("initWithName:")]
+		NativeHandle Constructor (string name);
+	}
+
+	[DisableDefaultCtor]
+	[BaseType (typeof (ExprBridge), Name = "FIRPipelineExprBridge")]
+	interface PipelineExprBridge
+	{
+		[Export ("initWithStages:")]
+		NativeHandle Constructor (StageBridge [] stages);
 	}
 
 	// @interface FIRAggregateFunctionBridge : NSObject
@@ -442,6 +458,30 @@ namespace Firebase.CloudFirestore
 		// @property(nonatomic, readonly) NSString *name;
 		[Export ("name")]
 		string Name { get; }
+	}
+
+	[DisableDefaultCtor]
+	[BaseType (typeof (StageBridge), Name = "FIRSubcollectionSourceStageBridge")]
+	interface SubcollectionSourceStageBridge
+	{
+		[Export ("initWithPath:")]
+		NativeHandle Constructor (string path);
+	}
+
+	[DisableDefaultCtor]
+	[BaseType (typeof (StageBridge), Name = "FIRDefineStageBridge")]
+	interface DefineStageBridge
+	{
+		[Export ("initWithVariables:")]
+		NativeHandle Constructor (NSDictionary<NSString, ExprBridge> variables);
+	}
+
+	[DisableDefaultCtor]
+	[BaseType (typeof (StageBridge), Name = "FIRSearchStageBridge")]
+	interface SearchStageBridge
+	{
+		[Export ("initWithOptions:addFields:select:sort:")]
+		NativeHandle Constructor (NSDictionary<NSString, ExprBridge> options, NSDictionary<NSString, ExprBridge> addFields, NSDictionary<NSString, ExprBridge> select, OrderingBridge [] sort);
 	}
 
 	// @interface FIRCollectionSourceStageBridge : FIRStageBridge

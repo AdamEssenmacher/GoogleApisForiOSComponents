@@ -143,7 +143,7 @@ If your project targets multiple platforms, keep these packages inside Apple-onl
 
 ```xml
 <ItemGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">
-  <PackageReference Include="AdamE.Firebase.iOS.Core" Version="12.11.0" />
+  <PackageReference Include="AdamE.Firebase.iOS.Core" Version="12.12.0" />
 </ItemGroup>
 ```
 
@@ -169,28 +169,30 @@ The lists below record the published baseline on [nuget.org](https://www.nuget.o
 
 Firebase and GoogleAppMeasurement `12.11.0` are published on nuget.org. See the [GitHub release](https://github.com/AdamEssenmacher/GoogleApisForiOSComponents/releases/tag/v12.11.0) and [native review and validation notes](docs/firebase-12.11-update.md).
 
-### Published versions
+This checkout prepares Firebase and GoogleAppMeasurement `12.12.0` for the first release through the [approved CI publishing workflow](docs/FIREBASE_RELEASES.md). The published baseline remains `12.11.0` until deployment and feed verification complete. See the [12.12 native review and validation notes](docs/firebase-12.12-update.md).
+
+### Published and prepared versions
 
 #### Firebase packages (`AdamE.Firebase.iOS.*`)
 
-| Package | Version |
-| --- | --- |
-| `ABTesting` | `12.11.0` |
-| `Analytics` | `12.11.0` |
-| `AppCheck` | `12.11.0` |
-| `AppDistribution` | `12.11.0` |
-| `Auth` | `12.11.0` |
-| `CloudFirestore` | `12.11.0` |
-| `CloudFunctions` | `12.11.0` |
-| `CloudMessaging` | `12.11.0` |
-| `Core` | `12.11.0` |
-| `Crashlytics` | `12.11.0` |
-| `Database` | `12.11.0` |
-| `InAppMessaging` | `12.11.0` |
-| `Installations` | `12.11.0` |
-| `PerformanceMonitoring` | `12.11.0` |
-| `RemoteConfig` | `12.11.0` |
-| `Storage` | `12.11.0` |
+| Package | Published version | Prepared version |
+| --- | --- | --- |
+| `ABTesting` | `12.11.0` | `12.12.0` |
+| `Analytics` | `12.11.0` | `12.12.0` |
+| `AppCheck` | `12.11.0` | `12.12.0` |
+| `AppDistribution` | `12.11.0` | `12.12.0` |
+| `Auth` | `12.11.0` | `12.12.0` |
+| `CloudFirestore` | `12.11.0` | `12.12.0` |
+| `CloudFunctions` | `12.11.0` | `12.12.0` |
+| `CloudMessaging` | `12.11.0` | `12.12.0` |
+| `Core` | `12.11.0` | `12.12.0` |
+| `Crashlytics` | `12.11.0` | `12.12.0` |
+| `Database` | `12.11.0` | `12.12.0` |
+| `InAppMessaging` | `12.11.0` | `12.12.0` |
+| `Installations` | `12.11.0` | `12.12.0` |
+| `PerformanceMonitoring` | `12.11.0` | `12.12.0` |
+| `RemoteConfig` | `12.11.0` | `12.12.0` |
+| `Storage` | `12.11.0` | `12.12.0` |
 
 #### Google packages (`AdamE.Google.iOS.*`)
 

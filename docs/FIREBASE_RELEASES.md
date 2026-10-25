@@ -14,7 +14,8 @@ existing projects and Cake metadata. Third-party packages are consumed, not repu
    A binding-only release can use a revision such as `12.12.0.1`; individual package
    versions may differ from the release version.
 3. Wait for **Firebase validation** before merging. Relevant changes run full build/pack,
-   unit tests, package inspection, simulator smoke/surface/nullability checks, and two
+   unit tests, package inspection, simulator smoke/surface/nullability checks, the Firestore
+   pipeline constructor regression, and two
    local Firestore emulator checks. Unrelated changes report an explicit successful no-op.
 4. After merge, CI validates the exact main commit. Review the workflow summary's package
    versions, reused dependencies, upload destinations, and commit. Select **Review

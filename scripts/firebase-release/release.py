@@ -27,7 +27,7 @@ CONFIG = 'eng/firebase-release.json'
 BASELINE = 'eng/firebase-release-baseline.json'
 REPO = os.environ.get('GITHUB_REPOSITORY', 'AdamEssenmacher/GoogleApisForiOSComponents')
 VALIDATIONS = ['unit-tests', 'package-structure', 'smoke', 'surface', 'nullability',
-               'firestore-aggregate', 'firestore-filters']
+               'firestore-pipeline', 'firestore-aggregate', 'firestore-filters']
 
 
 def require(condition, message):
