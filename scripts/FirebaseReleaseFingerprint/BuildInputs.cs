@@ -43,6 +43,9 @@ public static class BuildInputs
         {
             var kept = root.RemoveNodes(root.Members.OfType<MethodDeclarationSyntax>()
                 .Where(m => candidates.Contains(m.Identifier.ValueText)), SyntaxRemoveOptions.KeepNoTrivia)!;
+            kept = kept.ReplaceTrivia(kept.DescendantTrivia(descendIntoTrivia: true)
+                .Where(t => t.IsKind(SyntaxKind.SingleLineDocumentationCommentTrivia)
+                    || t.IsKind(SyntaxKind.MultiLineDocumentationCommentTrivia)), (_, _) => default);
             // Token boundaries and literal text matter; comments and whitespace trivia do not.
             // Directives and inactive preprocessor text stay conservative, rather than disappearing.
             result[path] = new {

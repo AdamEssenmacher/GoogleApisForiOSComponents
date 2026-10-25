@@ -31,6 +31,10 @@ public class ReleaseBuildFingerprintTests
     public void CommentsAndWhitespaceDoNotAffectFingerprint()
         => Assert.Equal(Fingerprint(Build), Fingerprint("// heading\n" + Build.Replace("SharedPack(\"Release\");", "/* comment */ SharedPack ( \"Release\" ) ; // note")));
 
+    [Fact]
+    public void DocumentationCommentsDoNotAffectFingerprint()
+        => Assert.Equal(Fingerprint(Build), Fingerprint(Build.Replace("void SharedPack", "/// <summary>Pack shared outputs.</summary>\nvoid SharedPack")));
+
     [Theory]
     [InlineData("Release", "Debug")]
     [InlineData("DotNetPack(value)", "DotNetBuild(value)")]
