@@ -607,7 +607,7 @@ def main():
             data = feed.fetch({'id': 'AdamE.Google.iOS.PromisesObjC', 'version': '2.4.0.5'})
             print(f'{feed.name}: authenticated lookup succeeded ({"present" if data else "absent"})')
     else:
-        globals()[args.command](args)
+        globals()[args.command.replace('-', '_')](args)
 
 
 if __name__ == '__main__':

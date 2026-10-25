@@ -159,6 +159,12 @@ class ReleaseTests(unittest.TestCase):
                         expected = package() if state == 'neither' else published
                         self.assertEqual((folder / 'candidate' / result['file']).read_bytes(), expected)
 
+    def test_feed_preflight_cli_dispatch(self):
+        with patch.object(sys, 'argv', ['release.py', 'check-feeds']), patch.object(release, 'check_feeds') as check:
+            release.main()
+        check.assert_called_once()
+        self.assertEqual(check.call_args.args[0].plan, 'output/firebase-plan.json')
+
     def test_feed_preflight_reports_all_conflicts_and_incompatible_packages(self):
         other = {**self.p, 'id': 'AdamE.Google.iOS.PromisesObjC', 'version': '2.4.0.5'}
         with tempfile.TemporaryDirectory() as tmp:
