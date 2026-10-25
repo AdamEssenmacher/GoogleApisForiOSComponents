@@ -1,6 +1,6 @@
 # Firebase 12.11.0 update
 
-This checkout prepares the 16 active Firebase packages and GoogleAppMeasurement at `12.11.0`. It does not establish that these packages have been published.
+The 16 active Firebase packages and GoogleAppMeasurement at `12.11.0` are published on nuget.org. The [GitHub release](https://github.com/AdamEssenmacher/GoogleApisForiOSComponents/releases/tag/v12.11.0) includes the frozen publication manifest and validation evidence.
 
 ## Native review
 
@@ -64,6 +64,18 @@ Two narrow, header-backed suppressions cover Sharpie's `NSObject<Protocol, NSObj
 
 The release-branch audit rerun is written to `output/firebase-12.11-pr-audit/report.md`; the earlier aggregate report remains at `output/firebase-binding-audit/report.md`. Package inspection and separate consumer results are under `output/firebase-12.11-validation/`. These generated artifacts are not committed.
 
-## Publication gate
+## Final publication validation
 
-The validated candidate NuGets were packed while the version changes were uncommitted and identify the earlier base commit in repository metadata. They are preparation artifacts. After the release PR is merged, rebuild and validate the publication set from that exact merge commit, verify the embedded commit and package hashes, and publish only the explicit 17-package manifest. Tagging, the GitHub release, and nuget.org publication follow that final validation; this preparation does not claim publication.
+The publication packages were rebuilt from the exact [#216 merge commit](https://github.com/AdamEssenmacher/GoogleApisForiOSComponents/commit/a13edd9b2b3f1a426b2f44de3067eeed2dab1e3b), `a13edd9b2b3f1a426b2f44de3067eeed2dab1e3b`. The annotated `v12.11.0` tag points to that commit. Earlier candidate packages remain preparation artifacts and were not published.
+
+Final checks passed for the explicit 17-package manifest:
+
+- Package inspection covered 34 managed assemblies and 68 native references, including source commit metadata, dependencies, native versions, slices, resources, and Crashlytics assets.
+- Release metadata/dependency checks, 62 audit unit tests, six harness regression tests, and all 16 native audit targets passed.
+- Consumer smoke and nullability passed. All 1,714 binding surfaces were exercised, with no waivers or failures.
+- All 21 runtime cases have passing results across recorded runs. Hosted all-mode stopped at the known Firestore seed-write permission denial; the two backend-dependent cases passed separately against the emulator, and the remaining cases passed individually.
+- Mac Catalyst and unsigned iOS device Release builds passed, with LLVM/AOT enabled for the device build. Physical-device execution was not performed.
+
+All 17 versions were downloaded anonymously from nuget.org and their contents matched the frozen artifacts, excluding NuGet's added repository signature. A clean consumer restore and smoke run used nuget.org exclusively with empty package and HTTP caches; all 17 exact versions also restored for iOS and Mac Catalyst through the public feed. The existing six support packages were reused without republication.
+
+The release assets retain the publication manifest, validation summary, and public verification results. Generated build logs and local test configuration are not committed. The GoogleAdsOnDeviceConversion omission and emulator validation limits described above still apply.
