@@ -3,6 +3,7 @@
 #load "common.cake"
 #load "custom_externals_download.cake"
 #load "firebase_release.cake"
+#load "firebase_publish.cake"
 
 var TARGET = Argument ("t", Argument ("target", "ci"));
 var NAMES = Argument ("names", "");
@@ -217,6 +218,10 @@ Task ("nuget")
 	var outputPath = MakeAbsolute ((DirectoryPath)"./output/");
 	var dotNetBuildMsBuildSettings = new DotNetMSBuildSettings ();
 	dotNetBuildMsBuildSettings.Properties ["RestoreAdditionalProjectSources"] = new [] { outputPath.FullPath };
+	if (!string.IsNullOrWhiteSpace (EnvironmentVariable ("GITHUB_SHA"))) {
+		dotNetBuildMsBuildSettings.Properties ["RepositoryCommit"] = new [] { EnvironmentVariable ("GITHUB_SHA") };
+		dotNetBuildMsBuildSettings.Properties ["ContinuousIntegrationBuild"] = new [] { "true" };
+	}
 
 	var dotNetBuildSettings = new DotNetBuildSettings {
 		Configuration = "Release",
@@ -229,6 +234,7 @@ Task ("nuget")
 		Configuration = "Release",
 		NoRestore = true,
 		NoBuild = true,
+		MSBuildSettings = dotNetBuildMsBuildSettings,
 		OutputDirectory = "./output/",
 		Verbosity = DotNetVerbosity.Diagnostic,
 	};

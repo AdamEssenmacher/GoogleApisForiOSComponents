@@ -1,0 +1,121 @@
+{
+  "packages": [
+    {
+      "fingerprint": "31d434cdad0a5a47a097febfd9b29e59b988e5de16367ebebce15f73ab3f68c6",
+      "id": "AdamE.Google.iOS.Nanopb",
+      "version": "3.30910.0.5"
+    },
+    {
+      "fingerprint": "61c04ae6d9c3faa8f1a31af21c09fcc4fe956bbefb561b84d56bef7fefe9f65e",
+      "id": "AdamE.Google.iOS.PromisesObjC",
+      "version": "2.4.0.5"
+    },
+    {
+      "fingerprint": "5c7651c1014b6c9787ef65deb15a963939a5cc125deea49815e5238fb243bc08",
+      "id": "AdamE.Google.iOS.GoogleDataTransport",
+      "version": "10.1.0.5"
+    },
+    {
+      "fingerprint": "cc3b59b8389288d91d100a400e2aa24a3f1618a6c0b0de7ca2419fa6ec782873",
+      "id": "AdamE.Google.iOS.GoogleUtilities",
+      "version": "8.1.0.3"
+    },
+    {
+      "fingerprint": "ecd4d36e9962fe8bded4b3fc661d22399b408ae2c44f560980891715baaa7389",
+      "id": "AdamE.Firebase.iOS.Core",
+      "version": "12.11.0"
+    },
+    {
+      "fingerprint": "a9ddca6a31399e4400ff4f651855c4ac49686396a80b9bb4f6f1238ddd42ed83",
+      "id": "AdamE.Firebase.iOS.ABTesting",
+      "version": "12.11.0"
+    },
+    {
+      "fingerprint": "751834c526d3a168b8ec51c1d2d627af0628d6dd534afe779326b949af9a0aee",
+      "id": "AdamE.Firebase.iOS.Installations",
+      "version": "12.11.0"
+    },
+    {
+      "fingerprint": "812a63fa0604689ee294063a6b568907c89132bb213ed1a7e55fde7400d88c05",
+      "id": "AdamE.Google.iOS.GoogleAppMeasurement",
+      "version": "12.11.0"
+    },
+    {
+      "fingerprint": "a46a98b0cce8467a188935f76ed80d890a37845b5a8b902f79c66c8dc72c3deb",
+      "id": "AdamE.Firebase.iOS.Analytics",
+      "version": "12.11.0"
+    },
+    {
+      "fingerprint": "d4d3372920374a5558561315fb0a1ada4a2cd091fc28896dfa3d4d5ae8d64a4b",
+      "id": "AdamE.Google.iOS.GTMSessionFetcher",
+      "version": "3.5.0.5"
+    },
+    {
+      "fingerprint": "3e5a97b9f89b21d4f0d6755ab5bb8949e02b439719ac957d7ae9bdc22f214dd7",
+      "id": "AdamE.Firebase.iOS.Auth",
+      "version": "12.11.0"
+    },
+    {
+      "fingerprint": "ce418a86da33fb46d123c05d26d85aacfa662a65132717223236f351a18d1f99",
+      "id": "AdamE.Firebase.iOS.CloudFirestore",
+      "version": "12.11.0"
+    },
+    {
+      "fingerprint": "a235cc9be0e638b932fe56543fa533918e1a7ee8c07cd2b1e4424d4f7d32a950",
+      "id": "AdamE.Firebase.iOS.CloudFunctions",
+      "version": "12.11.0"
+    },
+    {
+      "fingerprint": "44419498d76411a1c2b82984e6e20c30a294a53156fe638fe15e7c2c3b0de1aa",
+      "id": "AdamE.Firebase.iOS.CloudMessaging",
+      "version": "12.11.0"
+    },
+    {
+      "fingerprint": "2e92183cfbcdbdd06b6d8be7e0adfc7586aa318a780871295bd70ed4dbfaa68b",
+      "id": "AdamE.Firebase.iOS.Crashlytics",
+      "version": "12.11.0"
+    },
+    {
+      "fingerprint": "6524a7656a071acf35b7686bb97b6f1c788ef7380dff53613e22689a66fc22ed",
+      "id": "AdamE.Firebase.iOS.Database",
+      "version": "12.11.0"
+    },
+    {
+      "fingerprint": "04fef5505daa312d6e6e7079dafab125faee7b7eb3da6fcf5370ce143babbad3",
+      "id": "AdamE.Firebase.iOS.InAppMessaging",
+      "version": "12.11.0"
+    },
+    {
+      "fingerprint": "85a9809e8f8c2b3005c15279cac3f895a11e76a8e6d8ef459faf9e237652f303",
+      "id": "AdamE.Firebase.iOS.RemoteConfig",
+      "version": "12.11.0"
+    },
+    {
+      "fingerprint": "a54bab2d4896d5a90268488c01093071a90701a657e87357b09a0ae8f327966e",
+      "id": "AdamE.Firebase.iOS.PerformanceMonitoring",
+      "version": "12.11.0"
+    },
+    {
+      "fingerprint": "d712a96baa6a87fb1edebc6444814ffdf5c2ad6144a90a151a7baf04d23ea5e9",
+      "id": "AdamE.Firebase.iOS.Storage",
+      "version": "12.11.0"
+    },
+    {
+      "fingerprint": "cee202fe1fcc4fd6f662557ee02d2b5f51bae1716d90a7a56392bb146d2e67b2",
+      "id": "AdamE.Firebase.iOS.AppDistribution",
+      "version": "12.11.0"
+    },
+    {
+      "fingerprint": "bcef44e888e789949cc7c67de76f0811ed6c5bab714ab916c5aff2cbbf9d7189",
+      "id": "AdamE.Google.iOS.AppCheckCore",
+      "version": "11.2.0.0"
+    },
+    {
+      "fingerprint": "7b3033b6f3b6c099f02c7483b9bbdcb722a745111e0eacb86cb20c7c690d9ec0",
+      "id": "AdamE.Firebase.iOS.AppCheck",
+      "version": "12.11.0"
+    }
+  ],
+  "published": false,
+  "schemaVersion": 1
+}
