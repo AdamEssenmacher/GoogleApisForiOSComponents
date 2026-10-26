@@ -45,6 +45,7 @@ public class ReleaseMetadataUpdateTests
               public static void Information(string message) { }
             """ + Method(release, "UpdateFirebaseReleaseExternalDownloadsCake")
                 + Method(release, "ReplaceFirebaseReleasePackageReferenceVersion")
+                + Method(release, "ResolveFirebaseNativeReleaseVersion")
                 + Method(downloads, "VerifyArchiveHash") + """
               public static string UpdateDownload(string text, string version, string key, string hash) =>
                 UpdateFirebaseReleaseExternalDownloadsCake(text, new Dictionary<string, FirebaseReleaseDownloadInfo> {
@@ -69,6 +70,25 @@ public class ReleaseMetadataUpdateTests
     {
         try { return Helpers.Value.GetMethod(name)!.Invoke(null, args); }
         catch (TargetInvocationException e) when (e.InnerException is not null) { throw e.InnerException; }
+    }
+
+    [Theory]
+    [InlineData("Firebase", "12.19.3")]
+    [InlineData("Firebase/AppDistribution", "12.19.3")]
+    [InlineData("FirebaseCore", "12.19.3")]
+    [InlineData("FirebaseFirestore", "12.19.3")]
+    [InlineData("FirebaseFirestoreInternal", "12.19.3")]
+    [InlineData("FirebaseCoreInternal", "12.19.0")]
+    [InlineData("FirebaseCoreExtension", "12.19.0")]
+    [InlineData("FirebaseSharedSwift", "12.19.0")]
+    [InlineData("FirebaseAnalytics", "12.19.0")]
+    [InlineData("GoogleAppMeasurement", "12.19.0")]
+    [InlineData("FirebaseSessions", "12.19.0")]
+    public void SecurityPatch_UsesOnlyPublishedNativeVersions(string pod, string expected)
+    {
+        Assert.Equal(expected, Invoke("ResolveFirebaseNativeReleaseVersion", pod, "12.19.3"));
+        // A normal minor release retains uniform native version selection.
+        Assert.Equal("12.18.0", Invoke("ResolveFirebaseNativeReleaseVersion", pod, "12.18.0"));
     }
 
     [Theory]

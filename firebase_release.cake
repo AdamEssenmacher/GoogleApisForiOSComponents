@@ -379,7 +379,7 @@ string UpdateFirebaseReleaseComponentsCake (string text, string targetVersion)
 		text = ReplaceFirebaseReleaseArtifactVersion (text, variableName, targetVersion);
 
 	foreach (var podSpecName in FIREBASE_RELEASE_PODSPEC_NAMES)
-		text = ReplaceFirebaseReleasePodSpecVersion (text, podSpecName, targetVersion);
+		text = ReplaceFirebaseReleasePodSpecVersion (text, podSpecName, ResolveFirebaseNativeReleaseVersion (podSpecName, targetVersion));
 
 	return text;
 }
@@ -687,9 +687,19 @@ FirebaseReleaseNativeMetadata ResolveFirebaseReleasePodSpecNativeMetadata (PodSp
 	}
 }
 
+// Firebase 12.19.3 patches Core and Firestore only; the other pods retain 12.19.0.
+string ResolveFirebaseNativeReleaseVersion (string podName, string releaseVersion)
+{
+	if (releaseVersion != "12.19.3")
+		return releaseVersion;
+	return podName == "Firebase" || podName.StartsWith ("Firebase/", StringComparison.Ordinal)
+		|| podName == "FirebaseCore" || podName == "FirebaseFirestore" || podName == "FirebaseFirestoreInternal"
+		? "12.19.3" : "12.19.0";
+}
+
 string GetFirebaseReleasePodSpecVersion (PodSpec podSpec, string firebaseVersion)
 	=> FIREBASE_RELEASE_PODSPEC_NAMES.Contains (podSpec.Name)
-		? firebaseVersion
+		? ResolveFirebaseNativeReleaseVersion (podSpec.Name, firebaseVersion)
 		: podSpec.Version;
 
 void AddFirebaseReleaseNativeMetadataFromPlatformElement (FirebaseReleaseNativeMetadata metadata, JsonElement element)
@@ -832,7 +842,7 @@ Dictionary<string, FirebaseReleaseDownloadInfo> ResolveFirebaseReleaseExternalDo
 	var result = new Dictionary<string, FirebaseReleaseDownloadInfo> ();
 
 	foreach (var id in new [] { "FirebaseAnalytics", "GoogleAppMeasurement" }) {
-		var specJson = RunPodSpecCatExact (id, version);
+		var specJson = RunPodSpecCatExact (id, ResolveFirebaseNativeReleaseVersion (id, version));
 		using (var document = JsonDocument.Parse (specJson)) {
 			var sourceUrl = document.RootElement.GetProperty ("source").GetProperty ("http").GetString ();
 			var match = Regex.Match (sourceUrl, "/analytics/([^/]+)/" + Regex.Escape (id) + "-([^/]+)\\.tar\\.gz$");
@@ -938,7 +948,7 @@ FirebaseReleasePodResolution ResolveFirebaseReleasePodfile (string version, bool
 	};
 
 	foreach (var pod in FIREBASE_RELEASE_RESOLUTION_PODS)
-		podfileLines.Add ($"\tpod '{pod}', '{version}'");
+		podfileLines.Add ($"\tpod '{pod}', '{ResolveFirebaseNativeReleaseVersion (pod, version)}'");
 
 	if (useRepositoryPins)
 		foreach (var pin in FIREBASE_RELEASE_MANUAL_POD_PINS.OrderBy (pair => pair.Key, StringComparer.Ordinal))
