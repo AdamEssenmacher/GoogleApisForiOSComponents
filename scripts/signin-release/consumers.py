@@ -99,7 +99,7 @@ def main():
     catalyst_rid = 'maccatalyst-' + architecture
     evidence = results / (kind + '.json'); evidence.unlink(missing_ok=True)
     work = Path(tempfile.mkdtemp(prefix='signin-consumers-')).resolve()
-    bundle = 'com.googleapisforioscomponents.tests.signin.' + work.name.removeprefix('signin-consumers-')
+    bundle = 'com.googleapisforioscomponents.tests.signin.' + work.name.removeprefix('signin-consumers-').replace('_', '-')
     shutil.copy2(ROOT / 'global.json', work / 'global.json')
     (results / (kind + '-workspace.txt')).write_text(str(work) + '\n')
     tools = work / 'tools'; tools.mkdir()
