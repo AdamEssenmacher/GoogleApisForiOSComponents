@@ -122,7 +122,7 @@ dotnet tool run dotnet-cake -- --target=nuget --names=Google.SignIn
 
 These packages target `net10.0-ios` and `net10.0-maccatalyst`. .NET 9 is no longer supported.
 
-Firebase 12.12 requires Xcode 26.2 or later and Swift 6.2.3 or later. Use an Xcode version compatible with the installed .NET Apple workloads; see [local build prerequisites](docs/BUILDING.md).
+Firebase 12.12 and later require Xcode 26.2 or later and Swift 6.2.3 or later. Use an Xcode version compatible with the installed .NET Apple workloads; see [local build prerequisites](docs/BUILDING.md).
 
 ### `Firebase.Installations` may need an explicit reference
 
@@ -146,7 +146,7 @@ If your project targets multiple platforms, keep these packages inside Apple-onl
 
 ```xml
 <ItemGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">
-  <PackageReference Include="AdamE.Firebase.iOS.Core" Version="12.12.0" />
+  <PackageReference Include="AdamE.Firebase.iOS.Core" Version="12.13.0" />
 </ItemGroup>
 ```
 
@@ -170,9 +170,9 @@ Archiving can still be more reliable on macOS or from the command line.
 
 The lists below record the published baseline on [nuget.org](https://www.nuget.org/profiles/adamessenmacher) under the `adamessenmacher` owner profile. The repo state in [`components.cake`](components.cake) can contain version bumps that have not been published yet.
 
-Firebase and GoogleAppMeasurement `12.11.0` are published on nuget.org. See the [GitHub release](https://github.com/AdamEssenmacher/GoogleApisForiOSComponents/releases/tag/v12.11.0) and [native review and validation notes](docs/firebase-12.11-update.md).
+Firebase and GoogleAppMeasurement `12.12.0` are published on nuget.org through the [approved CI publishing workflow](docs/FIREBASE_RELEASES.md). See the [GitHub release](https://github.com/AdamEssenmacher/GoogleApisForiOSComponents/releases/tag/firebase-v12.12.0) and [12.12 native review and validation notes](docs/firebase-12.12-update.md).
 
-This checkout prepares Firebase and GoogleAppMeasurement `12.12.0` for the first release through the [approved CI publishing workflow](docs/FIREBASE_RELEASES.md). The published baseline remains `12.11.0` until deployment and feed verification complete. See the [12.12 native review and validation notes](docs/firebase-12.12-update.md).
+This checkout prepares Firebase and GoogleAppMeasurement `12.13.0`. Publication remains pending. See the [12.13 native review and validation notes](docs/firebase-12.13-update.md).
 
 ### Published and prepared versions
 
@@ -180,22 +180,22 @@ This checkout prepares Firebase and GoogleAppMeasurement `12.12.0` for the first
 
 | Package | Published version | Prepared version |
 | --- | --- | --- |
-| `ABTesting` | `12.11.0` | `12.12.0` |
-| `Analytics` | `12.11.0` | `12.12.0` |
-| `AppCheck` | `12.11.0` | `12.12.0` |
-| `AppDistribution` | `12.11.0` | `12.12.0` |
-| `Auth` | `12.11.0` | `12.12.0` |
-| `CloudFirestore` | `12.11.0` | `12.12.0` |
-| `CloudFunctions` | `12.11.0` | `12.12.0` |
-| `CloudMessaging` | `12.11.0` | `12.12.0` |
-| `Core` | `12.11.0` | `12.12.0` |
-| `Crashlytics` | `12.11.0` | `12.12.0` |
-| `Database` | `12.11.0` | `12.12.0` |
-| `InAppMessaging` | `12.11.0` | `12.12.0` |
-| `Installations` | `12.11.0` | `12.12.0` |
-| `PerformanceMonitoring` | `12.11.0` | `12.12.0` |
-| `RemoteConfig` | `12.11.0` | `12.12.0` |
-| `Storage` | `12.11.0` | `12.12.0` |
+| `ABTesting` | `12.12.0` | `12.13.0` |
+| `Analytics` | `12.12.0` | `12.13.0` |
+| `AppCheck` | `12.12.0` | `12.13.0` |
+| `AppDistribution` | `12.12.0` | `12.13.0` |
+| `Auth` | `12.12.0` | `12.13.0` |
+| `CloudFirestore` | `12.12.0` | `12.13.0` |
+| `CloudFunctions` | `12.12.0` | `12.13.0` |
+| `CloudMessaging` | `12.12.0` | `12.13.0` |
+| `Core` | `12.12.0` | `12.13.0` |
+| `Crashlytics` | `12.12.0` | `12.13.0` |
+| `Database` | `12.12.0` | `12.13.0` |
+| `InAppMessaging` | `12.12.0` | `12.13.0` |
+| `Installations` | `12.12.0` | `12.13.0` |
+| `PerformanceMonitoring` | `12.12.0` | `12.13.0` |
+| `RemoteConfig` | `12.12.0` | `12.13.0` |
+| `Storage` | `12.12.0` | `12.13.0` |
 
 #### Google packages (`AdamE.Google.iOS.*`)
 
@@ -211,12 +211,13 @@ These packages are usually consumed transitively rather than referenced directly
 
 | Package | Version |
 | --- | --- |
-| `AppCheckCore` | `11.2.0` |
-| `GoogleAppMeasurement` | `12.11.0` |
+| `AppCheckCore` | `11.2.0.1` |
+| `GoogleAppMeasurement` | `12.12.0` |
 | `GoogleDataTransport` | `10.1.0.5` |
-| `GoogleUtilities` | `8.1.0.3` |
+| `GoogleUtilities` | `8.1.0.4` |
+| `GTMSessionFetcher` | `3.5.0.6` |
 | `Nanopb` | `3.30910.0.5` |
-| `PromisesObjC` | `2.4.0.5` |
+| `PromisesObjC` | `2.4.0.6` |
 
 #### ML Kit packages (`AdamE.MLKit.iOS.*`)
 
