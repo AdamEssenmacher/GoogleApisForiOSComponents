@@ -237,3 +237,203 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           NUGET_API_KEY: ${{ steps.nuget.outputs.NUGET_API_KEY }}
         run: python3 scripts/firebase-release/release.py publish
+
+  signin-plan:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
+    outputs:
+      relevant: ${{ steps.plan.outputs.relevant }}
+      eligible: ${{ steps.plan.outputs.eligible }}
+      runner: ${{ steps.plan.outputs.runner }}
+      xcode: ${{ steps.plan.outputs.xcode }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+      - run: dotnet tool restore
+      - name: Export Sign-In dependency closure
+        run: dotnet tool run dotnet-cake -- signin_publish.cake
+      - name: Release tooling tests
+        run: python3 -m unittest discover -s tests/firebase-release -v
+      - name: Plan Sign-In validation and release
+        id: plan
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+          EVENT_NAME: ${{ github.event_name }}
+        shell: bash
+        run: |
+          args=(--online)
+          if [[ "$EVENT_NAME" == workflow_dispatch ]]; then
+            args+=(--manual)
+          elif [[ -n "$BASE_SHA" && "$BASE_SHA" != 0000000000000000000000000000000000000000 ]]; then
+            args+=(--base "$BASE_SHA")
+          fi
+          python3 scripts/firebase-release/release.py --channel signin plan "${args[@]}"
+      - name: Preflight Sign-In feeds
+        if: steps.plan.outputs.eligible == 'true' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/firebase-release/release.py --channel signin check-feeds
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: signin-plan
+          path: |
+            output/signin-plan.json
+            output/signin-metadata.json
+            output/signin-feed-check.json
+          if-no-files-found: error
+          retention-days: 90
+
+  signin-validate:
+    needs: signin-plan
+    if: needs.signin-plan.outputs.relevant == 'true'
+    runs-on: ${{ needs.signin-plan.outputs.runner }}
+    timeout-minutes: 360
+    permissions:
+      contents: read
+      packages: read
+    env:
+      BUILD_COMMIT: ${{ github.sha }}
+      BUILD_NUMBER: ${{ github.run_number }}
+      XCODE_VERSION: ${{ needs.signin-plan.outputs.xcode }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: signin-plan
+          path: output
+      - name: Select configured Xcode
+        run: sudo xcode-select --switch "/Applications/Xcode_${XCODE_VERSION}.app/Contents/Developer"
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.3'
+      - name: Install pinned producer tools
+        run: |
+          dotnet tool restore
+          dotnet workload install ios maccatalyst
+          pin=$(python3 -c 'import json; print(json.load(open("eng/signin-release.json"))["nativeBuild"]["cocoapods"])')
+          gem install cocoapods --version "$pin" --no-document
+          test "$(pod --version)" = "$pin"
+      - name: Unit tests
+        id: unit-tests
+        run: python3 -m unittest discover -s tests/firebase-release -v
+      - name: Build and pack Sign-In closure
+        run: dotnet tool run dotnet-cake -- --target=nuget --names=Google.SignIn
+      - name: Inspect and stage Sign-In candidate
+        id: package-inspection
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          args=()
+          if [[ "${{ github.event_name }}" != pull_request || "${{ github.event.pull_request.head.repo.full_name }}" == "${{ github.repository }}" ]]; then
+            args+=(--online)
+          fi
+          python3 scripts/firebase-release/release.py --channel signin prepare "${args[@]}"
+          python3 scripts/signin-release/validate.py
+      - name: Standalone and transitive offline consumers
+        run: python3 scripts/signin-release/consumers.py
+      - name: Build Firebase 12 integration fixtures only
+        run: |
+          dotnet tool run dotnet-cake -- --target=firebase-publish-metadata
+          dotnet tool run dotnet-cake -- --target=nuget --names=Firebase.Auth,Firebase.Analytics,Firebase.CloudFirestore
+          python3 scripts/signin-release/integration_feed.py
+      - name: Combined Sign-In and Firebase 12 consumers
+        run: python3 scripts/signin-release/consumers.py --feed output/signin-combined --combined
+      - name: Seal Sign-In validation evidence and approval summary
+        env:
+          UNIT_TEST_OUTCOME: ${{ steps.unit-tests.outcome }}
+          PACKAGE_INSPECTION_OUTCOME: ${{ steps.package-inspection.outcome }}
+        run: |
+          python3 scripts/firebase-release/release.py --channel signin collect_validation --results-dir output/signin-results
+          python3 scripts/firebase-release/release.py --channel signin finalize --results output/signin-results/validation.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: signin-candidate
+          path: output/signin-candidate
+          if-no-files-found: error
+          retention-days: 90
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: signin-validation-results
+          path: |
+            output/signin-results
+            output/signin-resolution
+          retention-days: 90
+
+  signin-validation:
+    name: Google Sign-In validation
+    if: always()
+    needs: [signin-plan, signin-validate]
+    runs-on: ubuntu-latest
+    steps:
+      - env:
+          PLAN_RESULT: ${{ needs.signin-plan.result }}
+          RELEVANT: ${{ needs.signin-plan.outputs.relevant }}
+          VALIDATE_RESULT: ${{ needs.signin-validate.result }}
+        run: |
+          test "$PLAN_RESULT" = success
+          if [ "$RELEVANT" = true ]; then
+            test "$VALIDATE_RESULT" = success
+          else
+            test "$VALIDATE_RESULT" = skipped
+            echo 'No Sign-In package or validation inputs changed.'
+          fi
+
+  signin-publish:
+    needs: [signin-plan, signin-validation]
+    if: >-
+      github.ref == 'refs/heads/main' &&
+      (github.event_name == 'push' || github.event_name == 'workflow_dispatch') &&
+      needs.signin-plan.outputs.eligible == 'true' && needs.signin-validation.result == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    environment: firebase-release
+    concurrency:
+      group: firebase-release-publication
+      cancel-in-progress: false
+    permissions:
+      contents: write
+      packages: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+      - uses: actions/download-artifact@v4
+        with:
+          name: signin-candidate
+          path: output/signin-candidate
+      - name: Re-export allowed Sign-In scope
+        run: |
+          dotnet tool restore
+          dotnet tool run dotnet-cake -- signin_publish.cake
+      - name: Configure authenticated GitHub Packages source
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          dotnet nuget add source "https://nuget.pkg.github.com/$GITHUB_REPOSITORY_OWNER/index.json" \
+            --name signin-github --username "$GITHUB_ACTOR" --password "$GH_TOKEN" \
+            --store-password-in-clear-text
+      - name: NuGet trusted publishing login
+        uses: NuGet/login@v1
+        id: nuget
+        with:
+          user: ${{ vars.NUGET_USER }}
+      - name: Publish approved Sign-In artifacts
+        env:
+          GH_TOKEN: ${{ github.token }}
+          NUGET_API_KEY: ${{ steps.nuget.outputs.NUGET_API_KEY }}
+        run: python3 scripts/firebase-release/release.py --channel signin publish
