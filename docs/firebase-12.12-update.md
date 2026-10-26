@@ -1,6 +1,6 @@
 # Firebase 12.12.0 update
 
-This checkout prepares the 16 active Firebase packages and GoogleAppMeasurement at `12.12.0`. Publication remains pending. This is the first release configured for the [CI validation, deployment approval, and trusted NuGet publishing workflow](FIREBASE_RELEASES.md).
+Firebase 12.12.0 is [published](https://github.com/AdamEssenmacher/GoogleApisForiOSComponents/releases/tag/firebase-v12.12.0). The release was built and validated from merge commit `d23f5fab2c58dee642f2d0bc31e929f54c54e055`, then published through the approved CI workflow. The preparation findings and validation history below are retained for reference.
 
 ## Native API review
 
