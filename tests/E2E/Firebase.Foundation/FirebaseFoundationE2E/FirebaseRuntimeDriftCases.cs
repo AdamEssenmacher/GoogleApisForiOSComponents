@@ -2618,7 +2618,8 @@ static partial class FirebaseRuntimeDriftCases
         using var define = new DefineStageBridge(options);
         using var search = new SearchStageBridge(options, options, options, []);
         using var pipeline = new PipelineExprBridge([subcollection, define]);
-        var db = Firebase.CloudFirestore.Firestore.SharedInstance;
+        var db = Firebase.CloudFirestore.Firestore.SharedInstance
+            ?? throw new InvalidOperationException("Firestore.SharedInstance returned null before pipeline bridge validation.");
         using var collection = db.GetCollection("pipeline-bridge-regression");
         using var collectionCompatible = new CollectionSourceStageBridge(collection, db);
         using var collectionNullIndex = new CollectionSourceStageBridge(collection, db, null);

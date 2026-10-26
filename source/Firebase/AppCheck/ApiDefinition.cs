@@ -147,7 +147,7 @@ namespace Firebase.AppCheck {
 	}
 
 	// FIRAppAttestProviderFactory.h, introduced in Firebase 12.14.
-	[iOS (14, 0), MacCatalyst (14, 5)]
+	// [iOS (14, 0), MacCatalyst (14, 5)] — below the supported platform floor.
 	[BaseType (typeof (NSObject), Name = "FIRAppAttestProviderFactory")]
 	interface AppAttestProviderFactory : AppCheckProviderFactory {
 	}
