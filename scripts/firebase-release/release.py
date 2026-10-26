@@ -27,7 +27,7 @@ CONFIG = 'eng/firebase-release.json'
 BASELINE = 'eng/firebase-release-baseline.json'
 REPO = os.environ.get('GITHUB_REPOSITORY', 'AdamEssenmacher/GoogleApisForiOSComponents')
 VALIDATIONS = ['unit-tests', 'package-structure', 'smoke', 'surface', 'nullability',
-               'firestore-aggregate', 'firestore-filters']
+               'firestore-pipeline', 'firestore-aggregate', 'firestore-filters']
 
 
 def require(condition, message):
@@ -297,6 +297,40 @@ def feeds():
             Feed('github', f'https://nuget.pkg.github.com/{REPO.split("/")[0]}/index.json', os.environ.get('GH_TOKEN'))]
 
 
+def check_feeds(args):
+    """Reject all existing payload/structure conflicts before expensive native builds."""
+    manifest = read(args.plan)
+    packages = {p['id']: p for p in manifest['packages']}
+    registries = feeds()
+    report = []
+    errors = []
+    for p in manifest['packages']:
+        row = {'id': p['id'], 'version': p['version'], 'feeds': {}, 'errors': []}
+        available = []
+        for feed in registries:
+            data = feed.fetch(p)
+            if data is None:
+                row['feeds'][feed.name] = {'present': False}
+                continue
+            info = package_info(data)
+            row['feeds'][feed.name] = {'present': True, 'payloadHash': payload_hash(data),
+                                       'commit': info['commit'], 'dependencies': info['dependencies'],
+                                       'frameworks': sorted({n.split('/')[1] for n in info['files'] if n.startswith('lib/')})}
+            available.append(data)
+            try:
+                inspect_package(data, p, packages, manifest['sourceCommit'] if p['id'] in manifest['changed'] else None)
+            except ValueError as error:
+                row['errors'].append(f'{feed.name}: {error}')
+        if len({payload_hash(data) for data in available}) > 1:
+            row['errors'].append('Feeds disagree')
+        report.append(row)
+        status = '; '.join(row['errors']) or 'compatible (or not yet published)'
+        print(f"{p['id']} {p['version']}: {status}", flush=True)
+        errors.extend(f"{p['id']}: {error}" for error in row['errors'])
+    write(args.output, report)
+    require(not errors, 'Existing feed conflicts:\n' + '\n'.join(errors))
+
+
 def contains_version(spec, value):
     """NuGet stable version ranges used by this repository."""
     v = version(value)
@@ -546,6 +580,9 @@ def main():
     p.add_argument('--base')
     p.add_argument('--online', action='store_true')
     p.add_argument('--manual', action='store_true')
+    p = sub.add_parser('check-feeds')
+    p.add_argument('--plan', default='output/firebase-plan.json')
+    p.add_argument('--output', default='output/firebase-feed-check.json')
     p = sub.add_parser('prepare')
     p.add_argument('--plan', default='output/firebase-plan.json')
     p.add_argument('--package-dir', default='output')
@@ -570,7 +607,7 @@ def main():
             data = feed.fetch({'id': 'AdamE.Google.iOS.PromisesObjC', 'version': '2.4.0.5'})
             print(f'{feed.name}: authenticated lookup succeeded ({"present" if data else "absent"})')
     else:
-        globals()[args.command](args)
+        globals()[args.command.replace('-', '_')](args)
 
 
 if __name__ == '__main__':

@@ -159,6 +159,38 @@ class ReleaseTests(unittest.TestCase):
                         expected = package() if state == 'neither' else published
                         self.assertEqual((folder / 'candidate' / result['file']).read_bytes(), expected)
 
+    def test_feed_preflight_cli_dispatch(self):
+        with patch.object(sys, 'argv', ['release.py', 'check-feeds']), patch.object(release, 'check_feeds') as check:
+            release.main()
+        check.assert_called_once()
+        self.assertEqual(check.call_args.args[0].plan, 'output/firebase-plan.json')
+
+    def test_feed_preflight_reports_all_conflicts_and_incompatible_packages(self):
+        other = {**self.p, 'id': 'AdamE.Google.iOS.PromisesObjC', 'version': '2.4.0.5'}
+        with tempfile.TemporaryDirectory() as tmp:
+            folder = Path(tmp)
+            release.write(folder / 'plan.json', {'sourceCommit': 'abc', 'changed': [], 'packages': [self.p, other]})
+            def fetch(p, commit):
+                data = package(p['id'], p['version'], commit=commit)
+                if p['id'] == other['id']:
+                    source = zipfile.ZipFile(io.BytesIO(data))
+                    buffer = io.BytesIO()
+                    with source, zipfile.ZipFile(buffer, 'w') as archive:
+                        for name in source.namelist():
+                            archive.writestr(name.replace('net10.0', 'net9.0'), source.read(name))
+                    data = buffer.getvalue()
+                return data
+            registries = [types.SimpleNamespace(name=name, fetch=lambda p, c=name: fetch(p, c)) for name in ('nuget', 'github')]
+            with patch.object(release, 'feeds', return_value=registries):
+                with self.assertRaisesRegex(ValueError, 'Existing feed conflicts'):
+                    release.check_feeds(types.SimpleNamespace(plan=folder / 'plan.json', output=folder / 'report.json'))
+            rows = release.read(folder / 'report.json')
+            self.assertEqual(len(rows), 2)
+            self.assertIn('Feeds disagree', rows[0]['errors'])
+            self.assertIn('Feeds disagree', rows[1]['errors'])
+            self.assertTrue(any('Missing net10.0-ios assembly' in e for e in rows[1]['errors']))
+            self.assertEqual(rows[0]['feeds']['github']['commit'], 'github')
+
     def test_unexpected_output_fails(self):
         with tempfile.TemporaryDirectory() as tmp:
             folder = Path(tmp)

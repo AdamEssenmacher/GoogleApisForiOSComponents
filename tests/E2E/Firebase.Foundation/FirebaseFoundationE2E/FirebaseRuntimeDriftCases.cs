@@ -28,7 +28,7 @@ using FirebaseCoreOptions = Firebase.Core.Options;
 using Firebase.ABTesting;
 #endif
 
-#if ENABLE_RUNTIME_DRIFT_CASE_CLOUDFIRESTORE_GETQUERYNAMED || ENABLE_RUNTIME_DRIFT_CASE_CLOUDFIRESTORE_FIELDVALUE_VECTORWITHARRAY || ENABLE_RUNTIME_DRIFT_CASE_CLOUDFIRESTORE_AGGREGATE_QUERY || ENABLE_RUNTIME_DRIFT_CASE_CLOUDFIRESTORE_QUERY_FILTERS || ENABLE_RUNTIME_DRIFT_CASE_CLOUDFIRESTORE_SNAPSHOT_LISTEN_OPTIONS || ENABLE_RUNTIME_DRIFT_CASE_CLOUDFIRESTORE_NAMED_DATABASE || ENABLE_RUNTIME_DRIFT_CASE_CLOUDFIRESTORE_CACHE_SETTINGS || ENABLE_RUNTIME_DRIFT_CASE_CLOUDFIRESTORE_INDEX_CONFIGURATION
+#if ENABLE_RUNTIME_DRIFT_CASE_CLOUDFIRESTORE_GETQUERYNAMED || ENABLE_RUNTIME_DRIFT_CASE_CLOUDFIRESTORE_FIELDVALUE_VECTORWITHARRAY || ENABLE_RUNTIME_DRIFT_CASE_CLOUDFIRESTORE_AGGREGATE_QUERY || ENABLE_RUNTIME_DRIFT_CASE_CLOUDFIRESTORE_QUERY_FILTERS || ENABLE_RUNTIME_DRIFT_CASE_CLOUDFIRESTORE_SNAPSHOT_LISTEN_OPTIONS || ENABLE_RUNTIME_DRIFT_CASE_CLOUDFIRESTORE_NAMED_DATABASE || ENABLE_RUNTIME_DRIFT_CASE_CLOUDFIRESTORE_CACHE_SETTINGS || ENABLE_RUNTIME_DRIFT_CASE_CLOUDFIRESTORE_INDEX_CONFIGURATION || ENABLE_RUNTIME_DRIFT_CASE_CLOUDFIRESTORE_PIPELINE_BRIDGES
 using Firebase.CloudFirestore;
 #endif
 
@@ -2599,6 +2599,41 @@ static partial class FirebaseRuntimeDriftCases
 
             return nativeCacheSettings.GetType().FullName ?? assignedRuntimeTypeName;
         }
+    }
+#endif
+
+#if ENABLE_RUNTIME_DRIFT_CASE_CLOUDFIRESTORE_PIPELINE_BRIDGES
+    static Task<string> VerifyCloudFirestorePipelineBridgesAsync()
+    {
+        // FIRPipelineBridge.h replaces initWithName:Args: in 12.12. Exercise the
+        // preserved managed overload and the actual three-argument native selector.
+        using var field = new FieldBridge("score");
+        ExprBridge[] args = [field];
+        using var compatible = new FunctionExprBridge("add", args);
+        using var nullableOptions = new FunctionExprBridge("add", args, null);
+        using var options = new NSDictionary<NSString, NSObject>();
+        using var explicitOptions = new FunctionExprBridge("add", args, options);
+        using var variable = new VariableBridge("score");
+        using var subcollection = new SubcollectionSourceStageBridge("items");
+        using var define = new DefineStageBridge(options);
+        using var search = new SearchStageBridge(options, options, options, []);
+        using var pipeline = new PipelineExprBridge([subcollection, define]);
+
+        RequireConstructor(typeof(FunctionExprBridge),
+            [typeof(string), typeof(ExprBridge[]), typeof(NSDictionary<NSString, NSObject>)],
+            "initWithName:Args:Options:");
+        foreach (var bridge in new NSObject[] { compatible, nullableOptions, explicitOptions,
+                     variable, subcollection, define, search, pipeline })
+        {
+            if (bridge.Handle == IntPtr.Zero)
+                throw new InvalidOperationException($"Native pipeline constructor returned nil: {bridge.GetType().Name}.");
+        }
+        if (!compatible.RespondsToSelector(new Selector("initWithName:Args:Options:")))
+            throw new InvalidOperationException("FunctionExprBridge does not expose the 12.12 native initializer.");
+        if (subcollection.Name != "subcollection" || define.Name != "let" || search.Name != "search")
+            throw new InvalidOperationException("Unexpected native stage names from the 12.12 pipeline bridges.");
+
+        return Task.FromResult("Compatibility, null/non-null options, and five new pipeline bridge constructors crossed the native boundary without backend access.");
     }
 #endif
 

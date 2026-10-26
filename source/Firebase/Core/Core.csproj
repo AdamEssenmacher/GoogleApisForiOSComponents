@@ -8,8 +8,8 @@
     <SupportedOSPlatformVersion>15.0</SupportedOSPlatformVersion>
     <RootNamespace>Firebase.Core</RootNamespace>
     <AssemblyName>Firebase.Core</AssemblyName>
-    <AssemblyVersion>12.11.0</AssemblyVersion>
-    <FileVersion>12.11.0</FileVersion>
+    <AssemblyVersion>12.12.0</AssemblyVersion>
+    <FileVersion>12.12.0</FileVersion>
     <IPhoneResourcePrefix>Resources</IPhoneResourcePrefix>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <CompressBindingResourcePackage>true</CompressBindingResourcePackage>
@@ -27,7 +27,7 @@
     <PackageLicenseFile>License.md</PackageLicenseFile>
     <PackageReadmeFile>NUGET_README.md</PackageReadmeFile>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-    <PackageVersion>12.11.0</PackageVersion>
+    <PackageVersion>12.12.0</PackageVersion>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="..\..\AssemblyInfo.cs" />
@@ -101,8 +101,8 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="AdamE.Google.iOS.GoogleDataTransport" Version="[10.1.0,11.0.0)" />
-    <PackageReference Include="AdamE.Google.iOS.GoogleUtilities" Version="[8.1.0,9.0.0)" />
+    <PackageReference Include="AdamE.Google.iOS.GoogleUtilities" Version="[8.1.0.4,9.0.0)" />
     <PackageReference Include="AdamE.Google.iOS.Nanopb" Version="[3.30910.0,4.0.0)" />
-    <PackageReference Include="AdamE.Google.iOS.PromisesObjC" Version="[2.4.0,3.0.0)" />
+    <PackageReference Include="AdamE.Google.iOS.PromisesObjC" Version="[2.4.0.6,3.0.0)" />
   </ItemGroup>
 </Project>

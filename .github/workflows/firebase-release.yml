@@ -17,6 +17,9 @@ permissions:
 jobs:
   plan:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
     outputs:
       relevant: ${{ steps.plan.outputs.relevant }}
       eligible: ${{ steps.plan.outputs.eligible }}
@@ -49,12 +52,19 @@ jobs:
             args+=(--base "$BASE_SHA")
           fi
           python3 scripts/firebase-release/release.py plan "${args[@]}"
+      - name: Check existing feed payloads before native builds
+        if: steps.plan.outputs.eligible == 'true' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/firebase-release/release.py check-feeds
       - uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: firebase-plan
           path: |
             output/firebase-plan.json
             output/firebase-metadata.json
+            output/firebase-feed-check.json
           if-no-files-found: error
           retention-days: 90
 
@@ -132,6 +142,7 @@ jobs:
           lane smoke
           lane surface --binding-surface-target all
           lane nullability --enable-nullability-validation
+          lane firestore-pipeline --runtime-drift-case cloudfirestore-pipeline-bridges
           lane firestore-aggregate --runtime-drift-case cloudfirestore-aggregate-query --firestore-emulator
           lane firestore-filters --runtime-drift-case cloudfirestore-query-filters --firestore-emulator
       - name: Collect validation evidence

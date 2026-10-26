@@ -6,6 +6,14 @@ using Foundation;
 
 namespace Firebase.CloudFirestore
 {
+	public partial class FunctionExprBridge
+	{
+		// Firebase 12.12 adds nullable native options. Keep the existing managed overload.
+		public FunctionExprBridge (string name, ExprBridge [] args) : this (name, args, null)
+		{
+		}
+	}
+
 	class CloudFirestoreHelper
 	{
 		public static NSObject []? GetNSObjects (object []? objects)
