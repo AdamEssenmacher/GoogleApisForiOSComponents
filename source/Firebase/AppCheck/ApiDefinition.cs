@@ -157,4 +157,21 @@ namespace Firebase.AppCheck {
 	[BaseType (typeof (NSObject), Name = "FIRDeviceCheckProviderFactory")]
 	interface DeviceCheckProviderFactory : AppCheckProviderFactory {
 	}
+	// Firebase 12.15 public reCAPTCHA APIs are unavailable on Mac Catalyst.
+	[NoMacCatalyst]
+	[iOS (15, 0)]
+	[DisableDefaultCtor]
+	[BaseType (typeof (NSObject), Name = "FIRRecaptchaProvider")]
+	interface RecaptchaProvider : AppCheckProvider {
+		[return: NullAllowed]
+		[Export ("initWithApp:")]
+		NativeHandle Constructor (App app);
+	}
+
+	[NoMacCatalyst]
+	[iOS (15, 0)]
+	[BaseType (typeof (NSObject), Name = "FIRRecaptchaProviderFactory")]
+	interface RecaptchaProviderFactory : AppCheckProviderFactory {
+	}
+
 }

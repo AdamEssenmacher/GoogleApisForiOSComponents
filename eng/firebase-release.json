@@ -1,5 +1,5 @@
 {
-  "releaseVersion": "12.14.0",
+  "releaseVersion": "12.15.0",
   "minimumFirebaseVersion": "12.12.0",
   "nativeBuild": {
     "runner": "macos-26",
