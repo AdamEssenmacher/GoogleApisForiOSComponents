@@ -28,6 +28,31 @@ def files(root):
             for p in root.rglob('*') if p.is_file()}
 
 
+def inspect_application(project, rid, expected_bundle):
+    apps = list(project.parent.glob('bin/**/' + rid + '/Probe.app'))
+    if len(apps) != 1:
+        raise ValueError('Missing consumer application: ' + str(project))
+    bundles = list(apps[0].rglob('GoogleSignIn.bundle'))
+    if len(bundles) != 1 or not any(p.is_file() for p in bundles[0].rglob('*')):
+        raise ValueError('Missing/duplicate Sign-In resource bundle: ' + str(project))
+    if files(bundles[0]) != expected_bundle:
+        raise ValueError('Altered Sign-In resource bundle: ' + str(project))
+    counts = Counter(p.name for p in apps[0].rglob('*.bundle') if p.name.startswith(
+        ('GoogleSignIn', 'AppAuth', 'AppCheckCore', 'GTMAppAuth', 'GoogleUtilities', 'FBLPromises', 'PromisesObjC')))
+    if any(count > 1 for count in counts.values()):
+        raise ValueError('Duplicate shared native resource bundle: ' + str(counts))
+    return apps[0]
+
+
+def build_application(run, name, command, project, rid, expected_bundle, rebuild=False):
+    run(name, command, offline=True)
+    app = inspect_application(project, rid, expected_bundle)
+    if rebuild:
+        run(name + '-rebuild', command + ['-t:Rebuild'], offline=True)
+        app = inspect_application(project, rid, expected_bundle)
+    return app
+
+
 PROBE = '''using System; using System.IO; using System.Linq; using System.Reflection;
 using System.Runtime.InteropServices; using Foundation; using UIKit; using ObjCRuntime;
 class Program { static void Main(string[] args) => UIApplication.Main(args, null, typeof(AppDelegate)); }
@@ -62,12 +87,23 @@ class Program { static void Main(string[] args) => UIApplication.Main(args, null
    }
    if (classes < 7 || selectors < 20) throw new Exception("Incomplete native surface probe: " + classes + "/" + selectors);
    EXTRA_PROBE
-   result = "PASS classes=" + classes + " selectors=" + selectors;
+   result = "PASS classes=" + classes + " selectors=" + selectors + "INTEGRATION_RESULT";
   } catch (Exception e) { result = e.ToString(); }
   File.WriteAllText(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "signin-result.txt"), result);
   return true;
  }
 }'''
+
+
+def probe_source(combined, transitive):
+    extra = 'BindingProbe.Describe();' if transitive else ''
+    if combined:
+        extra += '''foreach (var n in new[] { "FIRAuth", "FIRAnalytics", "FIRFirestore" })
+            if (objc_getClass(n) == IntPtr.Zero) throw new Exception("Missing Firebase class " + n);
+            if (!Firebase.Core.App.FirebaseVersion.StartsWith("12.", StringComparison.Ordinal))
+                throw new Exception("Expected Firebase 12 runtime");'''
+    marker = ' firebase12=FIRAuth,FIRAnalytics,FIRFirestore' if combined else ''
+    return PROBE.replace('EXTRA_PROBE', extra).replace('INTEGRATION_RESULT', marker)
 
 
 def main():
@@ -150,10 +186,7 @@ def main():
 <SupportedOSPlatformVersion>15.0</SupportedOSPlatformVersion><EnableDefaultCompileItems>false</EnableDefaultCompileItems>
 <IsPackable>false</IsPackable><MtouchLink>None</MtouchLink><EnableCodeSigning>false</EnableCodeSigning>
 </PropertyGroup><ItemGroup>{refs}<Compile Include="Main.cs" /></ItemGroup></Project>''')
-        extra = 'BindingProbe.Describe();' if transitive else ''
-        if args.combined:
-            extra += 'foreach (var n in new[] { "FIRAuth", "FIRAnalytics", "FIRFirestore" }) new ObjCRuntime.Class(n);'
-        (path / 'Main.cs').write_text(PROBE.replace('EXTRA_PROBE', extra))
+        (path / 'Main.cs').write_text(probe_source(args.combined, transitive))
         (path / 'Info.plist').write_text('<?xml version="1.0"?><plist version="1.0"><dict><key>CFBundleIdentifier</key><string>' + bundle + '</string><key>CFBundleShortVersionString</key><string>1.0</string><key>CFBundleVersion</key><string>1</string></dict></plist>')
         return path / 'Probe.csproj'
 
@@ -173,23 +206,12 @@ def main():
             if platform == 'ios':
                 command += ['-p:Platform=' + ('iPhone' if rid == 'ios-arm64' else 'iPhoneSimulator'),
                             '-p:SdkIsSimulator=' + ('false' if rid == 'ios-arm64' else 'true')]
-            run(name, command, offline=True)
-            apps = list(path.parent.glob('bin/**/' + rid + '/Probe.app'))
-            if len(apps) != 1:
-                raise ValueError('Missing consumer application: ' + name)
-            bundles = list(apps[0].rglob('GoogleSignIn.bundle'))
-            if len(bundles) != 1 or not any(p.is_file() for p in bundles[0].rglob('*')):
-                raise ValueError('Missing/duplicate Sign-In resource bundle: ' + name)
             source = next(p for p in manifest['packages'] if p['id'] == 'AdamE.Google.iOS.SignIn')
-            if files(bundles[0]) != validation.signin_bundle((feed / source['file']).read_bytes(), platform, rid):
-                raise ValueError('Altered Sign-In resource bundle: ' + name)
-            counts = Counter(p.name for p in apps[0].rglob('*.bundle') if p.name.startswith(
-                ('GoogleSignIn', 'AppAuth', 'AppCheckCore', 'GTMAppAuth', 'GoogleUtilities', 'FBLPromises', 'PromisesObjC')))
-            if any(count > 1 for count in counts.values()):
-                raise ValueError('Duplicate shared native resource bundle: ' + str(counts))
-            if platform == 'ios' and not transitive and rid.startswith('iossimulator'):
-                simulator = apps[0]
-                run(name + '-rebuild', command + ['-t:Rebuild'], offline=True)
+            expected_bundle = validation.signin_bundle((feed / source['file']).read_bytes(), platform, rid)
+            rebuild = platform == 'ios' and not transitive and rid.startswith('iossimulator')
+            app = build_application(run, name, command, path, rid, expected_bundle, rebuild)
+            if rebuild:
+                simulator = app
     if pod_marker.exists():
         raise ValueError('Consumer invoked CocoaPods')
     if files(work / 'xbd') or files(work / 'nuget') != restored:
@@ -212,10 +234,12 @@ def main():
         time.sleep(1)
     if not result.exists() or not result.read_text().startswith('PASS '):
         raise ValueError('Sign-In runtime probe failed: ' + (result.read_text() if result.exists() else 'timeout'))
+    if args.combined and ' firebase12=FIRAuth,FIRAnalytics,FIRFirestore' not in result.read_text():
+        raise ValueError('Missing Firebase 12 runtime probe evidence')
     checks.append(result.read_text())
     release.write(evidence, {'Success': True, 'FatalError': None,
         'Cases': [{'Success': True, 'Name': name} for name in checks],
-        'Checks': checks, 'RuntimeArchitecture': architecture,
+        'Checks': checks, 'RuntimeArchitecture': architecture, 'Lane': kind,
         'sourceCommit': manifest['sourceCommit'], 'packageHashes': hashes})
     print('PASS ' + kind + ': ' + str(evidence), flush=True)
 

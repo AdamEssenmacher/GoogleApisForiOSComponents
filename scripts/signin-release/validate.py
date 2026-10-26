@@ -28,6 +28,21 @@ def pod_versions(text):
     return versions
 
 
+def native_libraries(libraries, framework):
+    indexed = {}
+    for lib in libraries:
+        key = (lib['SupportedPlatform'], lib.get('SupportedPlatformVariant', ''))
+        if key in indexed:
+            raise ValueError('Duplicate native platform slice: ' + framework)
+        indexed[key] = lib
+    actual = {key: set(lib['SupportedArchitectures']) for key, lib in indexed.items()}
+    expected = {('ios', ''): {'arm64'}, ('ios', 'simulator'): {'arm64', 'x86_64'},
+                ('ios', 'maccatalyst'): {'arm64', 'x86_64'}}
+    if actual != expected:
+        raise ValueError('Unexpected native slices/architectures: ' + framework)
+    return indexed
+
+
 def signin_bundle(data, platform, rid):
     """Return exact resource bytes from the selected packed Sign-In framework slice."""
     with zipfile.ZipFile(io.BytesIO(data)) as package:
@@ -43,7 +58,7 @@ def signin_bundle(data, platform, rid):
                 entries = [n[len(prefix):] for n in package.namelist() if n.startswith(prefix)]
             libs = plistlib.loads(read('GoogleSignIn.xcframework/Info.plist'))['AvailableLibraries']
             variant = 'maccatalyst' if platform == 'maccatalyst' else ('simulator' if rid.startswith('iossimulator') else '')
-            lib = next(n for n in libs if n.get('SupportedPlatformVariant', '') == variant)
+            lib = native_libraries(libs, 'GoogleSignIn.xcframework')[('ios', variant)]
             start = 'GoogleSignIn.xcframework/' + lib['LibraryIdentifier'] + '/'
             bundles = {n.split('GoogleSignIn.bundle/', 1)[0] + 'GoogleSignIn.bundle/' for n in entries
                        if n.startswith(start) and 'GoogleSignIn.bundle/' in n}
@@ -87,9 +102,7 @@ def inspect(data, package):
                     raise ValueError('Native ownership differs from project: ' + package['id'])
                 for framework in expected:
                     libraries = plistlib.loads(read(framework + '/Info.plist'))['AvailableLibraries']
-                    actual = {lib.get('SupportedPlatformVariant', ''): set(lib['SupportedArchitectures']) for lib in libraries}
-                    if actual != {'': {'arm64'}, 'simulator': {'arm64', 'x86_64'}, 'maccatalyst': {'arm64', 'x86_64'}}:
-                        raise ValueError('Unexpected native slices/architectures: ' + framework)
+                    native_libraries(libraries, framework)
                     for lib in libraries:
                         root = framework + '/' + lib['LibraryIdentifier'] + '/' + lib['LibraryPath']
                         binary = lib.get('BinaryPath', lib['LibraryPath'].removesuffix('.framework'))

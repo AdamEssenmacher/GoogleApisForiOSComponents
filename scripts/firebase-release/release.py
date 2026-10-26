@@ -543,8 +543,12 @@ def collect_validation(args):
             manifest = read(Path(args.package_dir) / 'manifest.json')
             validate_manifest_channel(manifest)
             require(result['packageHashes'] == {p['id']: p['sha256'] for p in manifest['packages']}, 'Consumer evidence has wrong packages')
+            require(result.get('Lane') == name, 'Consumer evidence has wrong lane')
             require(signin_checks(result.get('RuntimeArchitecture', 'arm64')) <= set(result['Checks']) and any(c.startswith('PASS classes=') for c in result['Checks']),
                     'Incomplete Sign-In platform/runtime matrix')
+            if name == 'combined':
+                require(any(re.fullmatch(r'PASS classes=\d+ selectors=\d+ firebase12=FIRAuth,FIRAnalytics,FIRFirestore', c)
+                            for c in result['Checks']), 'Missing combined Firebase 12 runtime evidence')
         if name == 'surface':
             coverage = result.get('BindingSurfaceCoverage') or {}
             require(coverage.get('Target') == 'all' and coverage.get('SurfaceCount', 0) > 0
