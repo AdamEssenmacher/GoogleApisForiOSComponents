@@ -104,7 +104,7 @@ var FIREBASE_RELEASE_MANUAL_POD_PINS = new Dictionary<string, string> {
 	{ "abseil", "1.20240722.0" },
 	{ "PromisesSwift", "2.4.0" },
 	{ "leveldb-library", "1.22.6" },
-	{ "GoogleUtilities", "8.1.0" },
+	{ "GoogleUtilities", "8.1.5" },
 	{ "GoogleDataTransport", "10.1.0" },
 	{ "nanopb", "3.30910.0" },
 };
