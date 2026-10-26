@@ -6,6 +6,7 @@ import hashlib
 import importlib.util
 import json
 import os
+import platform as host_platform
 import shutil
 import shlex
 from pathlib import Path
@@ -91,6 +92,11 @@ def main():
     hashes = {p['id']: p['sha256'] for p in manifest['packages']}
     results = ROOT / 'output/signin-results'; results.mkdir(parents=True, exist_ok=True)
     kind = 'combined' if args.combined else 'consumers'
+    architecture = host_platform.machine()
+    if architecture not in ('arm64', 'x86_64'):
+        raise ValueError('Unsupported Apple consumer host architecture: ' + architecture)
+    simulator_rid = 'iossimulator-' + architecture
+    catalyst_rid = 'maccatalyst-' + architecture
     evidence = results / (kind + '.json'); evidence.unlink(missing_ok=True)
     work = Path(tempfile.mkdtemp(prefix='signin-consumers-')).resolve()
     bundle = 'com.googleapisforioscomponents.tests.signin.' + work.name.removeprefix('signin-consumers-')
@@ -129,7 +135,7 @@ def main():
     def project(platform, transitive):
         path = work / (platform + ('-transitive' if transitive else '-direct')); path.mkdir()
         tfm = 'net10.0-' + platform
-        rids = 'iossimulator-arm64;ios-arm64' if platform == 'ios' else 'maccatalyst-arm64'
+        rids = simulator_rid + ';ios-arm64' if platform == 'ios' else catalyst_rid
         selected = ['AdamE.Google.iOS.SignIn']
         if args.combined:
             selected += ['AdamE.Firebase.iOS.' + n for n in ('Auth', 'Analytics', 'CloudFirestore')]
@@ -160,7 +166,7 @@ def main():
     restored = files(work / 'nuget')
     simulator = None
     for platform, transitive, path in projects:
-        for rid in (('iossimulator-arm64', 'ios-arm64') if platform == 'ios' else ('maccatalyst-arm64',)):
+        for rid in ((simulator_rid, 'ios-arm64') if platform == 'ios' else (catalyst_rid,)):
             name = path.parent.name + '-' + rid
             command = ['dotnet', 'build', str(path), '-c', 'Debug', '--no-restore', '-p:RuntimeIdentifier=' + rid,
                        '-p:UseSharedCompilation=false', '-p:BuildInParallel=false']
@@ -209,7 +215,8 @@ def main():
     checks.append(result.read_text())
     release.write(evidence, {'Success': True, 'FatalError': None,
         'Cases': [{'Success': True, 'Name': name} for name in checks],
-        'Checks': checks, 'sourceCommit': manifest['sourceCommit'], 'packageHashes': hashes})
+        'Checks': checks, 'RuntimeArchitecture': architecture,
+        'sourceCommit': manifest['sourceCommit'], 'packageHashes': hashes})
     print('PASS ' + kind + ': ' + str(evidence), flush=True)
 
 

@@ -96,6 +96,15 @@ class SignInTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, 'Unsupported CocoaPods'):
                 release.native_build({'nativeBuild': {'runner': 'macos-26', 'xcode': '26.6', 'cocoapods': pod}})
 
+    def test_matrix_tracks_host_architecture_without_changing_device(self):
+        self.assertEqual(release.signin_checks('arm64'), release.SIGNIN_CHECKS)
+        intel = release.signin_checks('x86_64')
+        self.assertIn('ios-direct-iossimulator-x86_64', intel)
+        self.assertIn('maccatalyst-direct-maccatalyst-x86_64', intel)
+        self.assertIn('ios-direct-ios-arm64', intel)
+        with self.assertRaisesRegex(ValueError, 'Unsupported'):
+            release.signin_checks('unknown')
+
     def plan_fixture(self, release_version=None, immutable=True):
         with tempfile.TemporaryDirectory() as tmp, patch.object(release, 'ROOT', Path(tmp)):
             folder = Path(tmp)

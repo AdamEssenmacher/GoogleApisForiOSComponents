@@ -76,6 +76,12 @@ def require_signin_predecessor(release_version, latest):
             f'Missing preceding Sign-In release: expected {expected or "bootstrap"}, found {previous}')
 
 
+def signin_checks(architecture):
+    require(architecture in ('arm64', 'x86_64'), 'Unsupported consumer host architecture')
+    return {c.replace('iossimulator-arm64', 'iossimulator-' + architecture)
+            .replace('maccatalyst-arm64', 'maccatalyst-' + architecture) for c in SIGNIN_CHECKS}
+
+
 def require(condition, message):
     if not condition:
         raise ValueError(message)
@@ -537,7 +543,7 @@ def collect_validation(args):
             manifest = read(Path(args.package_dir) / 'manifest.json')
             validate_manifest_channel(manifest)
             require(result['packageHashes'] == {p['id']: p['sha256'] for p in manifest['packages']}, 'Consumer evidence has wrong packages')
-            require(SIGNIN_CHECKS <= set(result['Checks']) and any(c.startswith('PASS classes=') for c in result['Checks']),
+            require(signin_checks(result.get('RuntimeArchitecture', 'arm64')) <= set(result['Checks']) and any(c.startswith('PASS classes=') for c in result['Checks']),
                     'Incomplete Sign-In platform/runtime matrix')
         if name == 'surface':
             coverage = result.get('BindingSurfaceCoverage') or {}
