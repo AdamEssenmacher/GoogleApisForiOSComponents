@@ -16,7 +16,9 @@ Fresh generated Objective-C compatibility headers and the complete 16-target nat
 
 The complete podspec diff changes Firebase versions, binary download coordinates, and the omitted conversion dependency. It adds no supported-product deployment target, public-header, vendored-framework ownership, system/weak-framework, library, Swift/C++ setting, or linker-flag changes.
 
-The authoritative CocoaPods podspecs select new binary archives:
+The authoritative CocoaPods podspecs select new binary archives. Both archives have checked-in SHA-256 pins; the release updater/checker refreshes and verifies the coordinate/hash pair together. Analytics declares an exact managed GoogleAppMeasurement dependency (`[12.13.0]`), maintained by the updater. Newer measurement versions are outside that declared constraint.
+
+Archive coordinates:
 
 - [FirebaseAnalytics](https://github.com/CocoaPods/Specs/blob/master/Specs/e/2/1/FirebaseAnalytics/12.13.0/FirebaseAnalytics.podspec.json): version `12.13.0`, key `baa3df53e2800418`.
 - [GoogleAppMeasurement](https://github.com/CocoaPods/Specs/blob/master/Specs/e/3/b/GoogleAppMeasurement/12.13.0/GoogleAppMeasurement.podspec.json): version `12.13.0`, key `1e01f67cfc95cf6a`.
@@ -34,16 +36,22 @@ Prior native outputs and generated packages were isolated before the fresh build
 
 Local preparation validation passed:
 
-- Release updater/check, 76 audit unit tests, 26 release-tooling tests, and six consumer-harness regression tests.
+- Release updater/check, 84 audit/fingerprint/metadata tests, 26 release-tooling tests, and six consumer-harness regression tests.
 - Fresh dependency-first Cake native build and managed build/pack of all 23 closure packages for .NET 10 iOS and Mac Catalyst.
 - All 16 native audit targets, including the real Sharpie 26.3.0.11 Firestore fallback, with zero actionable failures and no new suppressions.
 - Workflow candidate inspection for all 23 packages, with the six unchanged support payloads reused from NuGet.org. Detailed inspection verifies 17 updated NuGets, 34 assemblies at version 12.13.0.0 targeting .NET 10, and 72 native references across both target frameworks. Native reference ownership matches the prior packages; native versions, slices, privacy resources, linker metadata, and Crashlytics assets pass inspection.
 - All six CI consumer lanes from the staged packages: smoke, all 1,726 binding surfaces (zero waivers/failures), nullability, pipeline constructors, and the two Firestore emulator cases separately.
 - All 22 runtime cases have passing results across recorded runs. Hosted all-mode stops on the known Firestore seed-write permission denial; the two backend cases pass separately against the disposable emulator, and the remaining runtime cases pass in all-mode or individually. This does not claim a single all-mode pass or verify hosted backend security rules and production indexes.
-- Mac Catalyst consumer build. Supplementary unsigned iOS device Release/LLVM-AOT results are tracked in the source PR's validation report; no physical-device execution is claimed.
+- Mac Catalyst consumer build. Supplementary unsigned iOS device Release/LLVM-AOT results are tracked in [PR #220’s validation report](https://github.com/AdamEssenmacher/GoogleApisForiOSComponents/pull/220); no physical-device execution is claimed.
 
-Local consumer restore uses an isolated feed and cache. The local CLI cannot read GitHub Packages, so the PR workflow must independently verify both feeds and validate the effective staged candidate using its repository token. Preparation packages identify commit `6637a1b8`; subsequent documentation-only changes do not make these publication artifacts.
+Local consumer restore uses an isolated feed and cache. The local CLI cannot read GitHub Packages, so the PR workflow must independently verify both feeds and validate the effective staged candidate using its repository token. Preparation packages identify [commit `6637a1b8`](https://github.com/AdamEssenmacher/GoogleApisForiOSComponents/commit/6637a1b8611cee9fb7f8d34a5dfb0ff047b39253); subsequent documentation-only changes do not make these publication artifacts.
 
 `eng/firebase-release.json` selects release `12.13.0`; the minimum release floor and immutable initial baseline remain unchanged. The planner must use the published 12.12 release manifest as its previous-release baseline. Only the 17 release artifacts are intended to change version; the six support packages should be reused after feed comparison.
 
 The source PR is merged by the maintainer. The main workflow then builds, validates, and seals packages from the exact merged commit before requesting `firebase-release` deployment approval. Trusted publishing verifies both NuGet.org and GitHub Packages before creating `firebase-v12.13.0` and the GitHub release. Local preparation artifacts are not publication artifacts.
+
+## Tracked nonblocking follow-ups
+
+- [Extracted-download cache identity (#221)](https://github.com/AdamEssenmacher/GoogleApisForiOSComponents/issues/221): directory existence is still insufficient to prove a cache matches the requested source. This preparation isolated prior outputs; release CI uses a clean workspace. Do not rely on retained extracted outputs for release caching until this is corrected.
+- [Crashlytics script content verification (#222)](https://github.com/AdamEssenmacher/GoogleApisForiOSComponents/issues/222): the correct immutable commit is pinned, but opt-in consumer symbol-upload execution still lacks content hashing. This separate consumer-build hardening is not implemented here.
+- [Harness version defaults (#223)](https://github.com/AdamEssenmacher/GoogleApisForiOSComponents/issues/223): reduce repeated manifest versions while retaining explicit overrides and mismatch validation. The release updater/checker keeps the current manifests aligned.

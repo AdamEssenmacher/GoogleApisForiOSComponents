@@ -122,7 +122,7 @@ dotnet tool run dotnet-cake -- --target=nuget --names=Google.SignIn
 
 These packages target `net10.0-ios` and `net10.0-maccatalyst`. .NET 9 is no longer supported.
 
-Firebase 12.13 requires Xcode 26.2 or later and Swift 6.2.3 or later. Use an Xcode version compatible with the installed .NET Apple workloads; see [local build prerequisites](docs/BUILDING.md).
+The Firebase bindings require Xcode 26.2 or later and Swift 6.2.3 or later. Use an Xcode version compatible with the installed .NET Apple workloads; see [local build prerequisites](docs/BUILDING.md).
 
 ### `Firebase.Installations` may need an explicit reference
 
@@ -209,15 +209,15 @@ This checkout prepares Firebase and GoogleAppMeasurement `12.13.0`. Publication 
 
 These packages are usually consumed transitively rather than referenced directly.
 
-| Package | Version |
-| --- | --- |
-| `AppCheckCore` | `11.2.0.1` |
-| `GoogleAppMeasurement` | `12.12.0` |
-| `GoogleDataTransport` | `10.1.0.5` |
-| `GoogleUtilities` | `8.1.0.4` |
-| `GTMSessionFetcher` | `3.5.0.6` |
-| `Nanopb` | `3.30910.0.5` |
-| `PromisesObjC` | `2.4.0.6` |
+| Package | Published version | Prepared version |
+| --- | --- | --- |
+| `AppCheckCore` | `11.2.0.1` | `11.2.0.1` |
+| `GoogleAppMeasurement` | `12.12.0` | `12.13.0` |
+| `GoogleDataTransport` | `10.1.0.5` | `10.1.0.5` |
+| `GoogleUtilities` | `8.1.0.4` | `8.1.0.4` |
+| `GTMSessionFetcher` | `3.5.0.6` | `3.5.0.6` |
+| `Nanopb` | `3.30910.0.5` | `3.30910.0.5` |
+| `PromisesObjC` | `2.4.0.6` | `2.4.0.6` |
 
 #### ML Kit packages (`AdamE.MLKit.iOS.*`)
 

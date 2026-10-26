@@ -172,6 +172,7 @@ class FirebaseReleaseDownloadInfo
 	public string Id { get; set; }
 	public string Version { get; set; }
 	public string ArchiveKey { get; set; }
+	public string ExpectedSha256 { get; set; }
 }
 
 class FirebaseReleaseNativeMetadata
@@ -399,8 +400,12 @@ string UpdateFirebaseReleaseExternalDownloadsCake (string text, Dictionary<strin
 {
 	foreach (var pair in externalDownloads) {
 		var source = pair.Value;
-		var pattern = "(\\{\\s*\"" + Regex.Escape (source.Id) + "\"\\s*,\\s*new ExternalDownloadSource\\s*\\(\\s*\"" + Regex.Escape (source.Id) + "\"\\s*,\\s*\")([^\"]+)(\"\\s*,\\s*\")([^\"]+)(\"\\s*\\)\\s*\\},)";
-		text = Regex.Replace (text, pattern, "${1}" + source.Version + "${3}" + source.ArchiveKey + "${5}");
+		if (!Regex.IsMatch (source.ExpectedSha256 ?? "", "^[a-fA-F0-9]{64}$"))
+			throw new Exception ($"Missing or invalid archive SHA-256 for {source.Id}.");
+		var pattern = "(\\{\\s*\"" + Regex.Escape (source.Id) + "\"\\s*,\\s*new ExternalDownloadSource\\s*\\(\\s*\"" + Regex.Escape (source.Id) + "\"\\s*,\\s*)\"[^\"]+\"\\s*,\\s*\"[^\"]+\"(?:\\s*,\\s*expectedSha256:\\s*\"[^\"]+\")?(\\s*\\)\\s*\\},)";
+		if (Regex.Matches (text, pattern).Count != 1)
+			throw new Exception ($"Expected one supported download declaration for {source.Id}.");
+		text = Regex.Replace (text, pattern, "${1}\"" + source.Version + "\", \"" + source.ArchiveKey + "\", expectedSha256: \"" + source.ExpectedSha256 + "\"${2}");
 	}
 
 	return text;
@@ -438,7 +443,8 @@ string ReplaceFirebaseReleasePackageVersion (string text, string targetVersion)
 string ReplaceFirebaseReleasePackageReferenceVersion (string text, string packageId, string targetVersion)
 {
 	var pattern = "(<PackageReference\\s+Include=\"" + Regex.Escape (packageId) + "\"\\s+Version=\")([^\"]+)(\")";
-	return Regex.Replace (text, pattern, "${1}" + targetVersion + "${3}");
+	var dependencyVersion = packageId == "AdamE.Google.iOS.GoogleAppMeasurement" ? $"[{targetVersion}]" : targetVersion;
+	return Regex.Replace (text, pattern, "${1}" + dependencyVersion + "${3}");
 }
 
 string UpdateFirebaseReleaseNativeReferences (
@@ -836,12 +842,29 @@ Dictionary<string, FirebaseReleaseDownloadInfo> ResolveFirebaseReleaseExternalDo
 			result [id] = new FirebaseReleaseDownloadInfo {
 				Id = id,
 				ArchiveKey = match.Groups [1].Value,
-				Version = match.Groups [2].Value
+				Version = match.Groups [2].Value,
+				ExpectedSha256 = ResolveFirebaseReleaseArchiveSha256 (sourceUrl)
 			};
 		}
 	}
 
 	return result;
+}
+
+string ResolveFirebaseReleaseArchiveSha256 (string sourceUrl)
+{
+	var directory = new DirectoryPath ("output/firebase-release-check/archives");
+	EnsureDirectoryExists (directory);
+	var archive = directory.CombineWithFilePath (Guid.NewGuid ().ToString ("N") + ".tar.gz");
+	try {
+		DownloadFile (sourceUrl, archive);
+		using (var stream = System.IO.File.OpenRead (MakeAbsolute (archive).FullPath))
+		using (var sha256 = System.Security.Cryptography.SHA256.Create ())
+			return BitConverter.ToString (sha256.ComputeHash (stream)).Replace ("-", "").ToLowerInvariant ();
+	} finally {
+		if (FileExists (archive))
+			DeleteFile (archive);
+	}
 }
 
 string RunPodSpecCat (string podName, string version)
