@@ -6,6 +6,21 @@ using Foundation;
 
 namespace Firebase.CloudFirestore
 {
+	public partial class CollectionSourceStageBridge
+	{
+		// Preserve the pre-12.14 managed overload using the new native initializer.
+		public CollectionSourceStageBridge (CollectionReference reference, Firestore db) : this (reference, db, null)
+		{
+		}
+	}
+
+	public partial class CollectionGroupSourceStageBridge
+	{
+		public CollectionGroupSourceStageBridge (string collectionId) : this (collectionId, null)
+		{
+		}
+	}
+
 	public partial class FunctionExprBridge
 	{
 		// Firebase 12.12 adds nullable native options. Keep the existing managed overload.

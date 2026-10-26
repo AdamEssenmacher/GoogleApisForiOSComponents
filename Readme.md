@@ -146,7 +146,7 @@ If your project targets multiple platforms, keep these packages inside Apple-onl
 
 ```xml
 <ItemGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">
-  <PackageReference Include="AdamE.Firebase.iOS.Core" Version="12.13.0" />
+  <PackageReference Include="AdamE.Firebase.iOS.Core" Version="12.14.0" />
 </ItemGroup>
 ```
 
@@ -172,7 +172,7 @@ The lists below record the published baseline on [nuget.org](https://www.nuget.o
 
 Firebase and GoogleAppMeasurement `12.12.0` are published on nuget.org through the [approved CI publishing workflow](docs/FIREBASE_RELEASES.md). See the [GitHub release](https://github.com/AdamEssenmacher/GoogleApisForiOSComponents/releases/tag/firebase-v12.12.0) and [12.12 native review and validation notes](docs/firebase-12.12-update.md).
 
-This checkout prepares Firebase and GoogleAppMeasurement `12.13.0`. Publication remains pending. See the [12.13 native review and validation notes](docs/firebase-12.13-update.md).
+This checkout prepares Firebase and GoogleAppMeasurement `12.14.0`. Publication remains pending. See the [12.14 native review and validation notes](docs/firebase-12.14-update.md).
 
 ### Published and prepared versions
 
@@ -180,22 +180,22 @@ This checkout prepares Firebase and GoogleAppMeasurement `12.13.0`. Publication 
 
 | Package | Published version | Prepared version |
 | --- | --- | --- |
-| `ABTesting` | `12.12.0` | `12.13.0` |
-| `Analytics` | `12.12.0` | `12.13.0` |
-| `AppCheck` | `12.12.0` | `12.13.0` |
-| `AppDistribution` | `12.12.0` | `12.13.0` |
-| `Auth` | `12.12.0` | `12.13.0` |
-| `CloudFirestore` | `12.12.0` | `12.13.0` |
-| `CloudFunctions` | `12.12.0` | `12.13.0` |
-| `CloudMessaging` | `12.12.0` | `12.13.0` |
-| `Core` | `12.12.0` | `12.13.0` |
-| `Crashlytics` | `12.12.0` | `12.13.0` |
-| `Database` | `12.12.0` | `12.13.0` |
-| `InAppMessaging` | `12.12.0` | `12.13.0` |
-| `Installations` | `12.12.0` | `12.13.0` |
-| `PerformanceMonitoring` | `12.12.0` | `12.13.0` |
-| `RemoteConfig` | `12.12.0` | `12.13.0` |
-| `Storage` | `12.12.0` | `12.13.0` |
+| `ABTesting` | `12.12.0` | `12.14.0` |
+| `Analytics` | `12.12.0` | `12.14.0` |
+| `AppCheck` | `12.12.0` | `12.14.0` |
+| `AppDistribution` | `12.12.0` | `12.14.0` |
+| `Auth` | `12.12.0` | `12.14.0` |
+| `CloudFirestore` | `12.12.0` | `12.14.0` |
+| `CloudFunctions` | `12.12.0` | `12.14.0` |
+| `CloudMessaging` | `12.12.0` | `12.14.0` |
+| `Core` | `12.12.0` | `12.14.0` |
+| `Crashlytics` | `12.12.0` | `12.14.0` |
+| `Database` | `12.12.0` | `12.14.0` |
+| `InAppMessaging` | `12.12.0` | `12.14.0` |
+| `Installations` | `12.12.0` | `12.14.0` |
+| `PerformanceMonitoring` | `12.12.0` | `12.14.0` |
+| `RemoteConfig` | `12.12.0` | `12.14.0` |
+| `Storage` | `12.12.0` | `12.14.0` |
 
 #### Google packages (`AdamE.Google.iOS.*`)
 
@@ -212,7 +212,7 @@ These packages are usually consumed transitively rather than referenced directly
 | Package | Published version | Prepared version |
 | --- | --- | --- |
 | `AppCheckCore` | `11.2.0.1` | `11.2.0.1` |
-| `GoogleAppMeasurement` | `12.12.0` | `12.13.0` |
+| `GoogleAppMeasurement` | `12.12.0` | `12.14.0` |
 | `GoogleDataTransport` | `10.1.0.5` | `10.1.0.5` |
 | `GoogleUtilities` | `8.1.0.4` | `8.1.0.4` |
 | `GTMSessionFetcher` | `3.5.0.6` | `3.5.0.6` |

@@ -489,9 +489,9 @@ namespace Firebase.CloudFirestore
 	[BaseType (typeof (StageBridge), Name = "FIRCollectionSourceStageBridge")]
 	interface CollectionSourceStageBridge
 	{
-		// - (id)initWithRef:(FIRCollectionReference *)ref firestore:(FIRFirestore *)db;
-		[Export ("initWithRef:firestore:")]
-		NativeHandle Constructor (CollectionReference reference, Firestore db);
+		// FIRPipelineBridge.h (12.14): forceIndex is nullable.
+		[Export ("initWithRef:firestore:forceIndex:")]
+		NativeHandle Constructor (CollectionReference reference, Firestore db, [NullAllowed] string forceIndex);
 	}
 
 	// @interface FIRDatabaseSourceStageBridge : FIRStageBridge
@@ -509,9 +509,9 @@ namespace Firebase.CloudFirestore
 	[BaseType (typeof (StageBridge), Name = "FIRCollectionGroupSourceStageBridge")]
 	interface CollectionGroupSourceStageBridge
 	{
-		// - (id)initWithCollectionId:(NSString *)id;
-		[Export ("initWithCollectionId:")]
-		NativeHandle Constructor (string collectionId);
+		// FIRPipelineBridge.h (12.14): forceIndex is nullable.
+		[Export ("initWithCollectionId:forceIndex:")]
+		NativeHandle Constructor (string collectionId, [NullAllowed] string forceIndex);
 	}
 
 	// @interface FIRDocumentsSourceStageBridge : FIRStageBridge
