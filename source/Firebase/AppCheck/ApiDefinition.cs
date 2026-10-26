@@ -163,14 +163,17 @@ namespace Firebase.AppCheck {
 	[BaseType (typeof (NSObject), Name = "FIRRecaptchaProvider")]
 	interface RecaptchaProvider : AppCheckProvider {
 		[return: NullAllowed]
-		[Export ("initWithApp:")]
-		NativeHandle Constructor (App app);
+		[Export ("initWithApp:siteKey:")]
+		NativeHandle Constructor (App app, string siteKey);
 	}
 
 	[NoMacCatalyst]
 	[iOS (15, 0)]
+	[DisableDefaultCtor]
 	[BaseType (typeof (NSObject), Name = "FIRRecaptchaProviderFactory")]
 	interface RecaptchaProviderFactory : AppCheckProviderFactory {
+		[Export ("initWithSiteKey:")]
+		NativeHandle Constructor (string siteKey);
 	}
 
 }

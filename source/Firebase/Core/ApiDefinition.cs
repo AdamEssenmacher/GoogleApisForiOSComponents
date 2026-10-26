@@ -89,11 +89,6 @@ namespace Firebase.Core
 	[BaseType (typeof (NSObject), Name = "FIROptions")]
 	interface Options : INSCopying
 	{
-		// FIROptions.h (12.15), copied nullable reCAPTCHA site key.
-		[NullAllowed]
-		[Export ("recaptchaSiteKey", ArgumentSemantic.Copy)]
-		string RecaptchaSiteKey { get; set; }
-
 		// +(FIROptions *)defaultOptions;
 		[Static]
 		[NullAllowed]
