@@ -79,3 +79,9 @@ Avoid mixing unrelated Firebase binding package sets or mismatched Firebase nati
 
 - Repository: https://github.com/AdamEssenmacher/GoogleApisForiOSComponents
 - Issues: https://github.com/AdamEssenmacher/GoogleApisForiOSComponents/issues
+
+### Upload tool integrity
+
+Symbol uploads verify the downloaded `upload-symbols` tool against a SHA-256 digest pinned alongside its immutable Firebase source commit. Remote Mac uploads also verify the copied bytes before execution. Integrity failures stop the build even when `FirebaseCrashlyticsUploadSymbolsContinueOnError` is enabled.
+
+If the tool is missing or its digest differs, remove only the versioned `FCrshlytcs-<version>` directory under the configured Xamarin build download cache, then rebuild to download the pinned tool again. Do not run the rejected file or change the expected digest to match it. Setting `FirebaseCrashlyticsUploadSymbolsEnabled` to `False` skips the tool download and execution. Release preparation updates the source commit, cache version, and digest together.

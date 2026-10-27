@@ -282,7 +282,7 @@ def plan(args):
     relevant = any(
         p.startswith(project_dirs) or p == 'source/AssemblyInfo.cs'
         or p.endswith('.cake') or p.startswith(('eng/', 'scripts/', 'tests/E2E/Firebase.Foundation/',
-                                           'tools/e2e/', '.github/workflows/firebase-release.yml'))
+                                           'tests/crashlytics/', 'tools/e2e/', '.github/workflows/firebase-release.yml'))
         or p in ('global.json', 'Directory.Build.props', '.config/dotnet-tools.json') for p in files)
     for package in packages:
         project = ROOT / package['project']
