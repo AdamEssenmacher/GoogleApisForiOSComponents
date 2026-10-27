@@ -4,6 +4,44 @@ namespace FirebaseBindingAudit.Tests;
 
 public sealed class BindingComparerNormalizationTests
 {
+    [Theory]
+    [InlineData("Ready=1, Done=2", "Ready=999, Done=2", true)]
+    [InlineData("Ready, Done", "Done, Ready", true)]
+    [InlineData("Ready=-1, Done=0", "Ready=1, Done=0", true)]
+    [InlineData("Ready=1<<3, Done=Ready|2, Alias=Done", "Ready=8, Done=10, Alias=10", false)]
+    [InlineData("Ready=0xFF, Done", "Ready=255, Done=256", false)]
+    [InlineData("Ready=Missing", "Ready=Missing", true)]
+    [InlineData("Ready=1, Done=2", "Ready=1", true)]
+    public void Compare_EnumEffectiveNumericValues(string baseline, string generated, bool fails)
+    {
+        var result = Compare($"public enum State : long {{ {baseline} }}", $"public enum State : long {{ {generated} }}");
+        Assert.Equal(fails, result.Failures.Count > 0);
+    }
+
+    [Fact]
+    public void Compare_StringBackedFieldEnumsDoNotTreatOrdinalsAsNativeAbi()
+    {
+        AssertNoFailures(Compare("enum State { [Field(\"A\")] Ready, [Field(\"B\")] Done }",
+                                 "enum State { [Field(\"B\")] Done, [Field(\"A\")] Ready }"));
+    }
+
+    [Fact]
+    public void Parse_ResolvesConstantsAcrossInputFilesAndUnsignedLimits()
+    {
+        var dir = Path.Combine(Path.GetTempPath(), "enum-values-" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(dir);
+        try {
+            var constants = Path.Combine(dir, "Constants.cs");
+            var enums = Path.Combine(dir, "Enums.cs");
+            File.WriteAllText(constants, "class Constants { public const ulong Value = ulong.MaxValue; }");
+            File.WriteAllText(enums, "enum State : ulong { High = Constants.Value, Low = 0 }");
+            var parser = new BindingSyntaxParser([], ["Field"]);
+            var snapshot = parser.Parse([constants, enums], []);
+            Assert.Equal("18446744073709551615", snapshot.Enums["State"].Members["High"].NumericValue);
+            Assert.Equal("0", snapshot.Enums["State"].Members["Low"].NumericValue);
+        } finally { Directory.Delete(dir, true); }
+    }
+
     private static readonly string[] ManualAttributes = ["Wrap", "Advice", "Async", "Internal"];
     private static readonly string[] BindingAttributes = ["Export", "Field", "Notification"];
 

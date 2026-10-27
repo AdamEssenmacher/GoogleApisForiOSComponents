@@ -71,7 +71,10 @@ internal sealed record EnumSurface(
 internal sealed record EnumMemberSurface(
     string Name,
     string? FieldValue,
-    string SourceFile);
+    string SourceFile)
+{
+    public string? NumericValue { get; init; }
+}
 
 internal sealed record ManualSurfaceItem(
     string Category,
@@ -98,6 +101,8 @@ internal sealed class BindingSyntaxParser
 {
     private readonly HashSet<string> manualAttributes;
     private readonly List<string> bindingAttributes;
+    private Dictionary<string, SyntaxTree> enumTrees = [];
+    private CSharpCompilation? enumCompilation;
 
     public BindingSyntaxParser(IEnumerable<string> manualAttributes, IEnumerable<string> bindingAttributes)
     {
@@ -109,17 +114,24 @@ internal sealed class BindingSyntaxParser
 
     public BindingSnapshot Parse(IEnumerable<string> comparableFiles, IEnumerable<string> helperFiles)
     {
+        var comparable = comparableFiles.Distinct(StringComparer.Ordinal).ToArray();
+        var helpers = helperFiles.Distinct(StringComparer.Ordinal).ToArray();
+        enumTrees = comparable.Concat(helpers).Distinct(StringComparer.Ordinal).Where(File.Exists)
+            .ToDictionary(p => p, p => (SyntaxTree)CSharpSyntaxTree.ParseText(File.ReadAllText(p), path: p));
+        enumCompilation = CSharpCompilation.Create("AuditEnumConstants", enumTrees.Values,
+            [MetadataReference.CreateFromFile(typeof(object).Assembly.Location)],
+            new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
         var boundTypes = new Dictionary<string, BoundTypeSurface>(StringComparer.Ordinal);
         var delegates = new Dictionary<string, DelegateSurface>(StringComparer.Ordinal);
         var enums = new Dictionary<string, EnumSurface>(StringComparer.Ordinal);
         var manualItems = new List<ManualSurfaceItem>();
 
-        foreach (var file in comparableFiles.Distinct(StringComparer.Ordinal))
+        foreach (var file in comparable)
         {
             ParseFile(file, isHelperFile: false, boundTypes, delegates, enums, manualItems);
         }
 
-        foreach (var file in helperFiles.Distinct(StringComparer.Ordinal))
+        foreach (var file in helpers)
         {
             ParseFile(file, isHelperFile: true, boundTypes, delegates, enums, manualItems);
         }
@@ -145,7 +157,7 @@ internal sealed class BindingSyntaxParser
             return;
         }
 
-        var syntaxTree = CSharpSyntaxTree.ParseText(File.ReadAllText(filePath), path: filePath);
+        var syntaxTree = enumTrees[filePath];
         var root = syntaxTree.GetCompilationUnitRoot();
         VisitMembers(root.Members, string.Empty, filePath, isHelperFile, boundTypes, delegates, enums, manualItems);
     }
@@ -551,12 +563,18 @@ internal sealed class BindingSyntaxParser
         }
 
         var members = new Dictionary<string, EnumMemberSurface>(StringComparer.Ordinal);
+        var semantics = enumCompilation!.GetSemanticModel(enumDeclaration.SyntaxTree);
         foreach (var member in enumDeclaration.Members)
         {
+            var symbol = semantics.GetDeclaredSymbol(member) as IFieldSymbol;
             members[member.Identifier.Text] = new EnumMemberSurface(
                 Name: member.Identifier.Text,
                 FieldValue: GetAttributeStringValue(member.AttributeLists, "Field"),
-                SourceFile: filePath);
+                SourceFile: filePath) {
+                NumericValue = symbol is { HasConstantValue: true, ConstantValue: not null }
+                    && (member.EqualsValue is null || !semantics.GetDiagnostics(member.EqualsValue.Span).Any(d => d.Severity == DiagnosticSeverity.Error))
+                    ? Convert.ToString(symbol.ConstantValue, System.Globalization.CultureInfo.InvariantCulture) : null
+            };
         }
 
         var comparisonKey = enumDeclaration.Identifier.Text;
@@ -1989,6 +2007,17 @@ internal sealed class BindingComparer
                     continue;
                 }
 
+                if (baselineMemberEntry.Value.FieldValue is null && generatedMember.FieldValue is null
+                    && (baselineMemberEntry.Value.NumericValue is null || generatedMember.NumericValue is null
+                        || baselineMemberEntry.Value.NumericValue != generatedMember.NumericValue))
+                {
+                    failures.Add(new AuditFinding(
+                        Category: "enum-value-drift", Severity: "failure",
+                        Message: $"Enum numeric value differs or is unresolved for '{baselineEntry.DisplayName}.{baselineMemberEntry.Key}': baseline={baselineMemberEntry.Value.NumericValue ?? "unresolved"}, fresh={generatedMember.NumericValue ?? "unresolved"}.",
+                        TypeName: baselineEntry.DisplayName, MemberName: baselineMemberEntry.Key, Selector: null,
+                        BaselineFile: baselineMemberEntry.Value.SourceFile, GeneratedFile: generatedMember.SourceFile,
+                        ComparisonTypeKey: baselineEntry.ComparisonKey, ComparisonMemberKey: baselineMemberEntry.Key));
+                }
                 if (!string.Equals(baselineMemberEntry.Value.FieldValue, generatedMember.FieldValue, StringComparison.Ordinal))
                 {
                     failures.Add(new AuditFinding(
