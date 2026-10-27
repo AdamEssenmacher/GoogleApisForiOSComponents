@@ -50,7 +50,7 @@
         "ApiDefinition.cs",
         "Enums.cs"
       ],
-      "helperFiles": [],
+      "helperFiles": ["Extensions.cs"],
       "sharpieMode": "auto"
     },
     {

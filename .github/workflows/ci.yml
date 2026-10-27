@@ -1,10 +1,9 @@
 name: CI
 
+# Automatic Sign-In build/pack and consumer coverage lives in firebase-release.yml.
+# Keep this entry point for explicitly requested component builds.
+
 on:
-  pull_request:
-  push:
-    branches:
-      - main
   workflow_dispatch:
     inputs:
       names:

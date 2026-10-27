@@ -36,8 +36,11 @@ There is no new SwiftUI binding product. Do not publish an existing version with
 ### 9.1.0 binding update
 
 The `9.1.0.0` package binds Google Sign-In 9.1.0 with AppAuth 2.0.0 and GTMAppAuth 5.0.0.
-It retains the Firebase 12 baseline: AppCheckCore 11.2.0, GTMSessionFetcher 3.5.0,
-PromisesObjC 2.4.0 and GoogleUtilities 8.1.0 in their existing owning packages.
+The Firebase 12.15 preparation advances the shared AppCheckCore pin to 11.3.2,
+which also owns PromisesSwift 2.4.0 and RecaptchaInterop 101.0.0. GTMSessionFetcher
+3.5.0, PromisesObjC 2.4.0 and GoogleUtilities 8.1.0 retain their existing owners.
+The exact Sign-In closure includes all nine native pods; shared frameworks have
+one owner across standalone Sign-In and combined Firebase consumers.
 
 `Claim.CreateAuthTimeClaim()` and `Claim.CreateEssentialAuthTimeClaim()` construct the
 supported `auth_time` claims. `Claim.Name`, `Claim.Essential`, `Constants.AuthTimeClaimName`,

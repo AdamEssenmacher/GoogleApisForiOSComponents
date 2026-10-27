@@ -27,7 +27,8 @@
       "coverageCaseMethod": "VerifyAppCheckBindingSurfaceAsync",
       "sourceFiles": [
         "source/Firebase/AppCheck/ApiDefinition.cs",
-        "source/Firebase/AppCheck/Enums.cs"
+        "source/Firebase/AppCheck/Enums.cs",
+        "source/Firebase/AppCheck/Extensions.cs"
       ],
       "requiredExtraPackages": []
     },
@@ -52,7 +53,7 @@
       "requiredExtraPackages": [
         {
           "id": "AdamE.Firebase.iOS.ABTesting",
-          "version": "12.14.0"
+          "version": "12.15.0"
         }
       ]
     },
@@ -165,7 +166,7 @@
       "requiredExtraPackages": [
         {
           "id": "AdamE.Firebase.iOS.ABTesting",
-          "version": "12.14.0"
+          "version": "12.15.0"
         }
       ]
     },

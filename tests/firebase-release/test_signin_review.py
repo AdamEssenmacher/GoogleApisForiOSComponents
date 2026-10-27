@@ -9,6 +9,7 @@ import shutil
 import tempfile
 import types
 import unittest
+import xml.etree.ElementTree as ET
 from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -28,6 +29,40 @@ release = feed.release
 
 
 class ReviewRegressionTests(unittest.TestCase):
+    def test_shared_native_frameworks_have_one_owner_in_combined_consumers(self):
+        projects = {name: ET.parse(ROOT / path) for name, path in {
+            'AppCheckCore': 'source/Google/AppCheckCore/AppCheckCore.csproj',
+            'Core': 'source/Firebase/Core/Core.csproj',
+            'Auth': 'source/Firebase/Auth/Auth.csproj',
+        }.items()}
+        for framework in ('Promises.xcframework', 'RecaptchaInterop.xcframework'):
+            owners = [name for name, tree in projects.items() for item in tree.iter()
+                      if item.tag in ('NativeReference', '_NativeReference')
+                      and item.attrib['Include'].replace('\\', '/').split('/')[-1] == framework]
+            self.assertEqual(['AppCheckCore'], owners, framework)
+        dependencies = {item.attrib['Include']: item.attrib.get('Version')
+                        for item in projects['Core'].iter('PackageReference')}
+        self.assertEqual('[11.3.2,12.0.0)', dependencies['AdamE.Google.iOS.AppCheckCore'])
+
+    def test_exact_resolution_tracks_shared_appcheck_native_dependencies(self):
+        legacy = {'GoogleSignIn': '9.1.0', 'AppAuth': '2.0.0', 'GTMAppAuth': '5.0.0',
+                  'AppCheckCore': '11.2.0', 'GTMSessionFetcher': '3.5.0',
+                  'PromisesObjC': '2.4.0', 'GoogleUtilities': '8.1.0'}
+        modern = dict(legacy, AppCheckCore='11.3.2', PromisesSwift='2.4.0', RecaptchaInterop='101.0.0')
+        for pins in (legacy, modern):
+            metadata = [{'pods': [{'Name': n, 'Version': v} for n, v in pins.items()]}]
+            self.assertEqual(pins, validation.validate_resolution(pins, metadata))
+            for name in pins:
+                with self.subTest(pins=pins, missing=name), self.assertRaisesRegex(ValueError, 'closure differs'):
+                    validation.validate_resolution({n: v for n, v in pins.items() if n != name}, metadata)
+                with self.subTest(pins=pins, stale=name), self.assertRaisesRegex(ValueError, 'closure differs'):
+                    validation.validate_resolution(dict(pins, **{name: '0.0.0'}), metadata)
+            with self.assertRaisesRegex(ValueError, 'closure differs'):
+                validation.validate_resolution(dict(pins, UnexpectedPod='1.0'), metadata)
+        with self.assertRaisesRegex(ValueError, 'Conflicting metadata'):
+            validation.validate_resolution({}, [{'pods': [{'Name': 'AppCheckCore', 'Version': v}
+                                                           for v in ('11.2.0', '11.3.2')]}])
+
     def test_error_codes_compare_native_header_to_managed_values(self):
         header = 'kGIDSignInErrorCodeEMM = -6, kGIDSignInErrorCodeAmbiguousClaims = -7, kGIDSignInErrorCodeJSONSerializationFailure = -10'
         managed = 'enum ErrorCode : long { Emm = -6, AmbiguousClaims = -7, JsonSerializationFailure = -10 }'

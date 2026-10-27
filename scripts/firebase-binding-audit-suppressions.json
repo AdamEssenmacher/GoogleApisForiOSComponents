@@ -3779,6 +3779,30 @@
         "source/Firebase/CloudFirestore/ApiDefinition.cs#L1288-L1321",
         "tests/E2E/Firebase.Foundation/FirebaseFoundationE2E/FirebaseRuntimeDriftCases.cs#L2414-L2478"
       ]
+    },
+    {
+      "id": "appcheck-recaptchaprovider-gettoken-inherited-protocol-false-positive",
+      "target": "AppCheck",
+      "category": "missing-baseline-binding",
+      "comparisonTypeKey": "FIRRecaptchaProvider",
+      "comparisonMemberKey": "export|getTokenWithCompletion:",
+      "reason": "FIRRecaptchaProvider conforms to FIRAppCheckProvider; the baseline exposes this selector through the inherited AppCheckProvider protocol binding. Confirmed against fresh Firebase 12.15 generated output.",
+      "evidence": [
+        "externals/FirebaseAppCheck.xcframework/ios-arm64_x86_64-simulator/FirebaseAppCheck.framework/Headers/FIRRecaptchaProvider.h#L31-L61",
+        "source/Firebase/AppCheck/ApiDefinition.cs#L62-L70"
+      ]
+    },
+    {
+      "id": "appcheck-recaptchaprovider-getlimitedusetoken-inherited-protocol-false-positive",
+      "target": "AppCheck",
+      "category": "missing-baseline-binding",
+      "comparisonTypeKey": "FIRRecaptchaProvider",
+      "comparisonMemberKey": "export|getLimitedUseTokenWithCompletion:",
+      "reason": "FIRRecaptchaProvider conforms to FIRAppCheckProvider; the baseline exposes this selector through the inherited AppCheckProvider protocol binding. Confirmed against fresh Firebase 12.15 generated output.",
+      "evidence": [
+        "externals/FirebaseAppCheck.xcframework/ios-arm64_x86_64-simulator/FirebaseAppCheck.framework/Headers/FIRRecaptchaProvider.h#L31-L61",
+        "source/Firebase/AppCheck/ApiDefinition.cs#L62-L70"
+      ]
     }
   ]
 }
