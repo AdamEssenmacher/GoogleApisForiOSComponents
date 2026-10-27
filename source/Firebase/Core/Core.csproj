@@ -89,17 +89,13 @@
       <SmartLink>True</SmartLink>
       <ForceLoad>True</ForceLoad>
     </NativeReference>
-    <NativeReference Include="..\..\..\externals\Promises.xcframework">
-      <Kind>Framework</Kind>
-      <SmartLink>True</SmartLink>
-      <ForceLoad>True</ForceLoad>
-    </NativeReference>
   </ItemGroup>
   <ItemGroup>
     <ObjcBindingCoreSource Include="Enums.cs" />
     <ObjcBindingApiDefinition Include="ApiDefinition.cs" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="AdamE.Google.iOS.AppCheckCore" Version="[11.3.2,12.0.0)" />
     <PackageReference Include="AdamE.Google.iOS.GoogleDataTransport" Version="[10.1.0,11.0.0)" />
     <PackageReference Include="AdamE.Google.iOS.GoogleUtilities" Version="[8.1.0.4,9.0.0)" />
     <PackageReference Include="AdamE.Google.iOS.Nanopb" Version="[3.30910.0,4.0.0)" />

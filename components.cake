@@ -104,7 +104,7 @@ void SetArtifactsDependencies ()
 	FIREBASE_CLOUD_FIRESTORE_ARTIFACT.Dependencies         = new [] { FIREBASE_CORE_ARTIFACT, FIREBASE_AUTH_ARTIFACT };
 	FIREBASE_CLOUD_FUNCTIONS_ARTIFACT.Dependencies         = new [] { FIREBASE_CORE_ARTIFACT, GOOGLE_GTM_SESSION_FETCHER_ARTIFACT };
 	FIREBASE_CLOUD_MESSAGING_ARTIFACT.Dependencies         = new [] { FIREBASE_CORE_ARTIFACT, FIREBASE_INSTALLATIONS_ARTIFACT };
-	FIREBASE_CORE_ARTIFACT.Dependencies                    = new [] { GOOGLE_GOOGLE_DATA_TRANSPORT_ARTIFACT, GOOGLE_GOOGLE_UTILITIES_ARTIFACT, GOOGLE_NANOPB_ARTIFACT, GOOGLE_PROMISES_OBJC_ARTIFACT};
+	FIREBASE_CORE_ARTIFACT.Dependencies                    = new [] { GOOGLE_GOOGLE_DATA_TRANSPORT_ARTIFACT, GOOGLE_GOOGLE_UTILITIES_ARTIFACT, GOOGLE_NANOPB_ARTIFACT, GOOGLE_PROMISES_OBJC_ARTIFACT, GOOGLE_APP_CHECK_CORE_ARTIFACT };
 	FIREBASE_CRASHLYTICS_ARTIFACT.Dependencies             = new [] { FIREBASE_CORE_ARTIFACT, FIREBASE_INSTALLATIONS_ARTIFACT };
 	FIREBASE_DATABASE_ARTIFACT.Dependencies                = new [] { FIREBASE_CORE_ARTIFACT };
 	FIREBASE_IN_APP_MESSAGING_ARTIFACT.Dependencies        = new [] { FIREBASE_CORE_ARTIFACT, FIREBASE_INSTALLATIONS_ARTIFACT, FIREBASE_AB_TESTING_ARTIFACT };
@@ -154,8 +154,7 @@ void SetArtifactsPodSpecs ()
 		PodSpec.Create ("FirebaseAnalytics", "12.15.0")
 	};
 	FIREBASE_AUTH_ARTIFACT.PodSpecs = new [] {
-		PodSpec.Create ("FirebaseAuth",     "12.15.0", frameworkSource: FrameworkSource.Pods),
-		PodSpec.Create ("RecaptchaInterop", "101.0.0", frameworkSource: FrameworkSource.Pods)
+		PodSpec.Create ("FirebaseAuth",     "12.15.0", frameworkSource: FrameworkSource.Pods)
 	};
 	FIREBASE_CLOUD_FIRESTORE_ARTIFACT.PodSpecs = new [] {
 		PodSpec.Create ("FirebaseFirestore",         "12.15.0",       frameworkSource: FrameworkSource.Pods),
@@ -180,7 +179,6 @@ void SetArtifactsPodSpecs ()
 		PodSpec.Create ("FirebaseMessagingInterop",    "12.15.0", frameworkSource: FrameworkSource.Pods),
 		PodSpec.Create ("FirebaseRemoteConfigInterop", "12.15.0", frameworkSource: FrameworkSource.Pods),
 		PodSpec.Create ("FirebaseSharedSwift",         "12.15.0", frameworkSource: FrameworkSource.Pods),
-		PodSpec.Create ("PromisesSwift",               "2.4.0",  frameworkSource: FrameworkSource.Pods, frameworkName: "Promises", targetName: "PromisesSwift"),
 		PodSpec.Create ("leveldb-library",             "1.22.6", frameworkSource: FrameworkSource.Pods, frameworkName: "leveldb"),
 	};
 	FIREBASE_CRASHLYTICS_ARTIFACT.PodSpecs = new [] {
@@ -237,6 +235,8 @@ void SetArtifactsPodSpecs ()
 	};
 	GOOGLE_APP_CHECK_CORE_ARTIFACT.PodSpecs = new [] {
 		PodSpec.Create ("AppCheckCore", "11.3.2", frameworkSource: FrameworkSource.Pods),
+		PodSpec.Create ("PromisesSwift", "2.4.0", frameworkSource: FrameworkSource.Pods, frameworkName: "Promises", targetName: "PromisesSwift"),
+		PodSpec.Create ("RecaptchaInterop", "101.0.0", frameworkSource: FrameworkSource.Pods),
 	};
 	GOOGLE_TAG_MANAGER_ARTIFACT.PodSpecs = new [] {
 		PodSpec.Create ("GoogleTagManager", "9.2.0")

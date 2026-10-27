@@ -49,11 +49,6 @@
       <Frameworks>Security SafariServices</Frameworks>
       <LinkerFlags>-ObjC -lc++ -lsqlite3 -lz</LinkerFlags>
     </_NativeReference>
-    <_NativeReference Include="..\..\..\externals\RecaptchaInterop.xcframework">
-      <Kind>Framework</Kind>
-      <SmartLink>True</SmartLink>
-      <ForceLoad>True</ForceLoad>
-    </_NativeReference>
   </ItemGroup>
   <ItemGroup>
     <ObjcBindingCoreSource Include="Enums.cs" />
