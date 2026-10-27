@@ -146,6 +146,12 @@ namespace Firebase.AppCheck {
 		NativeHandle Constructor (App app);
 	}
 
+	// FIRAppAttestProviderFactory.h, introduced in Firebase 12.14.
+	// [iOS (14, 0), MacCatalyst (14, 5)] — below the supported platform floor.
+	[BaseType (typeof (NSObject), Name = "FIRAppAttestProviderFactory")]
+	interface AppAttestProviderFactory : AppCheckProviderFactory {
+	}
+
 	// @interface FIRDeviceCheckProviderFactory : NSObject <FIRAppCheckProviderFactory>
 	//[TV (11, 0), NoWatch, Mac (10, 15), iOS (11, 0)]
 	[BaseType (typeof (NSObject), Name = "FIRDeviceCheckProviderFactory")]

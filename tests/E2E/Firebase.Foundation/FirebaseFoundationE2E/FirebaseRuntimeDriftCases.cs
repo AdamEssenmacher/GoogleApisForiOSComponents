@@ -2618,12 +2618,27 @@ static partial class FirebaseRuntimeDriftCases
         using var define = new DefineStageBridge(options);
         using var search = new SearchStageBridge(options, options, options, []);
         using var pipeline = new PipelineExprBridge([subcollection, define]);
+        var db = Firebase.CloudFirestore.Firestore.SharedInstance
+            ?? throw new InvalidOperationException("Firestore.SharedInstance returned null before pipeline bridge validation.");
+        using var collection = db.GetCollection("pipeline-bridge-regression");
+        using var collectionCompatible = new CollectionSourceStageBridge(collection, db);
+        using var collectionNullIndex = new CollectionSourceStageBridge(collection, db, null);
+        using var collectionIndex = new CollectionSourceStageBridge(collection, db, "index-id");
+        using var groupCompatible = new CollectionGroupSourceStageBridge("items");
+        using var groupNullIndex = new CollectionGroupSourceStageBridge("items", null);
+        using var groupIndex = new CollectionGroupSourceStageBridge("items", "index-id");
+        RequireConstructor(typeof(CollectionSourceStageBridge),
+            [typeof(CollectionReference), typeof(Firebase.CloudFirestore.Firestore), typeof(string)],
+            "initWithRef:firestore:forceIndex:");
+        RequireConstructor(typeof(CollectionGroupSourceStageBridge),
+            [typeof(string), typeof(string)], "initWithCollectionId:forceIndex:");
 
         RequireConstructor(typeof(FunctionExprBridge),
             [typeof(string), typeof(ExprBridge[]), typeof(NSDictionary<NSString, NSObject>)],
             "initWithName:Args:Options:");
         foreach (var bridge in new NSObject[] { compatible, nullableOptions, explicitOptions,
-                     variable, subcollection, define, search, pipeline })
+                     variable, subcollection, define, search, pipeline, collectionCompatible,
+                     collectionNullIndex, collectionIndex, groupCompatible, groupNullIndex, groupIndex })
         {
             if (bridge.Handle == IntPtr.Zero)
                 throw new InvalidOperationException($"Native pipeline constructor returned nil: {bridge.GetType().Name}.");
@@ -2633,7 +2648,7 @@ static partial class FirebaseRuntimeDriftCases
         if (subcollection.Name != "subcollection" || define.Name != "let" || search.Name != "search")
             throw new InvalidOperationException("Unexpected native stage names from the 12.12 pipeline bridges.");
 
-        return Task.FromResult("Compatibility, null/non-null options, and five new pipeline bridge constructors crossed the native boundary without backend access.");
+        return Task.FromResult("Compatibility overloads, null/non-null options and forceIndex arguments, and pipeline bridge constructors crossed the native boundary without backend access.");
     }
 #endif
 
