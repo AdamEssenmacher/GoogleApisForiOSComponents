@@ -11,8 +11,11 @@ namespace Google.SignIn
 		Keychain = -2,
 		HasNoAuthInKeychain = -4,
 		Canceled = -5,
+		Emm = -6,
+		AmbiguousClaims = -7,
 		ScopesAlreadyGranted = -8,
-		MismatchWithCurrentUser = -9
+		MismatchWithCurrentUser = -9,
+		JsonSerializationFailure = -10
 	}
 
 	[Native]

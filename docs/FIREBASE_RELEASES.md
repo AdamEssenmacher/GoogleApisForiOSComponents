@@ -1,5 +1,8 @@
 # Firebase releases
 
+Google Sign-In has an independent channel in the same workflow. See
+[Google Sign-In incremental releases](SIGNIN_RELEASES.md) for its scope and sequence.
+
 Firebase packages and their repository-owned Google dependencies are validated and
 published by `firebase-release.yml`. Package IDs and versions remain defined by the
 existing projects and Cake metadata. Third-party packages are consumed, not republished.
