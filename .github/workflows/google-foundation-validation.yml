@@ -2,52 +2,56 @@ name: Google Foundation Validation
 
 on:
   pull_request:
-    paths:
-      - ".github/workflows/google-foundation-validation.yml"
-      - ".config/dotnet-tools.json"
-      - ".gitignore"
-      - "Directory.Build.props"
-      - "global.json"
-      - "Xamarin.Google.sln"
-      - "*.cake"
-      - "icons/googleiosmaps_128x128.png"
-      - "icons/googleiosplaces_128x128.png"
-      - "source/AssemblyInfo.cs"
-      - "source/Google/Maps/**"
-      - "source/Google/Places/**"
-      - "tests/E2E/Google.Foundation/**"
-      - "tools/e2e/check-consumer-shapes.sh"
-      - "tools/e2e/check-package-structure.sh"
-      - "tools/e2e/check-offline-build.sh"
-      - "tools/e2e/run-google-foundation.sh"
   push:
-    branches:
-      - main
-    paths:
-      - ".github/workflows/google-foundation-validation.yml"
-      - ".config/dotnet-tools.json"
-      - ".gitignore"
-      - "Directory.Build.props"
-      - "global.json"
-      - "Xamarin.Google.sln"
-      - "*.cake"
-      - "icons/googleiosmaps_128x128.png"
-      - "icons/googleiosplaces_128x128.png"
-      - "source/AssemblyInfo.cs"
-      - "source/Google/Maps/**"
-      - "source/Google/Places/**"
-      - "tests/E2E/Google.Foundation/**"
-      - "tools/e2e/check-consumer-shapes.sh"
-      - "tools/e2e/check-package-structure.sh"
-      - "tools/e2e/check-offline-build.sh"
-      - "tools/e2e/run-google-foundation.sh"
+    branches: [main]
   workflow_dispatch:
+
+# Superseded PRs may be canceled; main and explicit runs are independent.
+concurrency:
+  group: google-foundation-${{ github.event_name == 'pull_request' && github.ref || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 permissions:
   contents: read
 
 jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      maps: ${{ steps.plan.outputs.maps }}
+      places: ${{ steps.plan.outputs.places }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+      - run: dotnet tool restore
+      - name: CI planner regression tests
+        run: |
+          python3 -m unittest discover -s tests/ci -v
+          dotnet test scripts/FirebaseBindingAudit.Tests/FirebaseBindingAudit.Tests.csproj --nologo
+        env:
+          MSBuildEnableWorkloadResolver: 'false'
+      - name: Select changed foundation components
+        id: plan
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+          EVENT_NAME: ${{ github.event_name }}
+        shell: bash
+        run: |
+          args=()
+          if [[ "$EVENT_NAME" == workflow_dispatch ]]; then
+            args+=(--manual)
+          elif [[ -n "$BASE_SHA" ]]; then
+            args+=(--base "$BASE_SHA")
+          fi
+          python3 scripts/ci/plan-google-foundation.py "${args[@]}"
+
   places:
+    needs: plan
+    if: needs.plan.outputs.places == 'true'
     runs-on: macos-26
     timeout-minutes: 60
     steps:
@@ -117,6 +121,8 @@ jobs:
           if-no-files-found: ignore
 
   maps:
+    needs: plan
+    if: needs.plan.outputs.maps == 'true'
     runs-on: macos-26
     timeout-minutes: 60
     steps:
