@@ -5,6 +5,20 @@ namespace FirebaseBindingAudit.Tests;
 public sealed class AuditRunnerTests
 {
     [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void RequiredFallbackCannotBeBypassedByDisablingSharpie(bool disabled)
+    {
+        var target = new AuditTargetDefinition { UseSharpieComparisonFallback = true, PackageId = "Fixture" };
+        var finding = AuditRunner.RequiredFallbackFailure(target, "forceFallback", disabled);
+        Assert.NotNull(finding);
+        Assert.Equal("failure", finding.Severity);
+        Assert.Equal(disabled, finding.Message.Contains("explicitly disabled via --disable-sharpie"));
+        Assert.Null(AuditRunner.RequiredFallbackFailure(target, "auto", disabled));
+        Assert.Null(AuditRunner.RequiredFallbackFailure(target, "off", disabled));
+    }
+
+    [Theory]
     [InlineData("forceFallback", true)]
     [InlineData("auto", false)]
     [InlineData("off", false)]
