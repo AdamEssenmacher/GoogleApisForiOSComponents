@@ -21,7 +21,7 @@ Analytics and measurement archives were downloaded from their CocoaPods source U
 | FirebaseAnalytics | `4157b0f8016e6ec3` | `4157b0f8016e6ec3e3bfb5cd0a1de45b07afad69df64c8913f8553a3602b489f` |
 | GoogleAppMeasurement | `59fe326eebd1a79c` | `59fe326eebd1a79c8a22ed36f28c71a97060fccbf69d6b8a9de5ded571479af9` |
 
-Preserve package IDs, .NET 10 targets, deployment targets, native framework ownership and the selected conversion-framework omission except for requirements explicitly identified above. Review support-package API/header drift whenever its native pin changes. No new audit suppression is justified by this preparation.
+Preserve package IDs, .NET 10 targets, deployment targets, native framework ownership and the selected conversion-framework omission except for requirements explicitly identified above. Review support-package API/header drift whenever its native pin changes. Any suppression must be supported by observed generator output and native-header evidence.
 
 ## Validation status and merge gates
 
