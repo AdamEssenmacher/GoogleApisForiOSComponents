@@ -33,6 +33,26 @@ There is no new SwiftUI binding product. Do not publish an existing version with
 
 ## Native delivery and publication scope
 
+### 9.1.0 binding update
+
+The `9.1.0.0` package binds Google Sign-In 9.1.0 with AppAuth 2.0.0 and GTMAppAuth 5.0.0.
+It retains the Firebase 12 baseline: AppCheckCore 11.2.0, GTMSessionFetcher 3.5.0,
+PromisesObjC 2.4.0 and GoogleUtilities 8.1.0 in their existing owning packages.
+
+`Claim.CreateAuthTimeClaim()` and `Claim.CreateEssentialAuthTimeClaim()` construct the
+supported `auth_time` claims. `Claim.Name`, `Claim.Essential`, `Constants.AuthTimeClaimName`,
+and the claims-related error codes expose the corresponding native API. The four
+`SignIn.SignInWithClaims(...)` overloads accept `NSSet<Claim>` along with the optional hint,
+scopes and nonce. Their distinct managed name preserves existing calls that pass a null hint.
+The existing sign-in methods remain available, including the nonce overload. Token expiration
+and wrapper-identifier changes belong to subsequent native releases.
+
+The secret-free simulator probe constructs both claim variants, reads their properties and
+constant, checks native selectors and error codes, and compiles existing null-hint call shapes.
+It does not initiate sign-in or request an ID token. Credentialed claim delivery remains an
+application integration check. The tagged upstream Apache license is included in the package
+notices; the separate Firebase Analytics/App Measurement licensing review remains open.
+
 All four releases use CocoaPods at package-production time and retain packed native frameworks and
 resources. The producer's CocoaPods/Xcode pins are recorded in the Sign-In configuration. Exact
 resolved native versions and Podfile.lock are retained as build evidence. Neither CocoaPods nor

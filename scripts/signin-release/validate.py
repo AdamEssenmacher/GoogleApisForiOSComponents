@@ -43,6 +43,22 @@ def native_libraries(libraries, framework):
     return indexed
 
 
+def framework_version(read, entries, root, expected):
+    paths = [root + suffix for suffix in ('/Info.plist', '/Resources/Info.plist',
+                                          '/Versions/A/Resources/Info.plist')]
+    actual = None
+    for path in paths:
+        if path not in entries:
+            continue
+        try:
+            actual = plistlib.loads(read(path)).get('CFBundleShortVersionString')
+            break
+        except plistlib.InvalidFileException:
+            continue  # A versioned-framework symlink can precede its actual plist.
+    if not actual or release.version(actual) != release.version(expected):
+        raise ValueError(f'Native framework version mismatch: {root}; expected {expected}, found {actual}')
+
+
 def signin_bundle(data, platform, rid):
     """Return exact resource bytes from the selected packed Sign-In framework slice."""
     with zipfile.ZipFile(io.BytesIO(data)) as package:
@@ -76,6 +92,7 @@ def inspect(data, package):
     project = ET.parse(ROOT / package['project'])
     expected = {Path(e.attrib['Include'].replace('\\', '/')).name for e in project.iter()
                 if e.tag in ('NativeReference', '_NativeReference')}
+    versions = {p['FrameworkName'] + '.xcframework': p['Version'] for p in package['pods']}
     with zipfile.ZipFile(io.BytesIO(data)) as archive:
         names = archive.namelist()
         if any(n.endswith(('.podspec', '/Podfile', '/Podfile.lock')) for n in names):
@@ -105,6 +122,7 @@ def inspect(data, package):
                     native_libraries(libraries, framework)
                     for lib in libraries:
                         root = framework + '/' + lib['LibraryIdentifier'] + '/' + lib['LibraryPath']
+                        framework_version(read, entries, root, versions[framework])
                         binary = lib.get('BinaryPath', lib['LibraryPath'].removesuffix('.framework'))
                         # Versioned Catalyst frameworks retain their symlink-shaped package layout.
                         candidates = ([framework + '/' + lib['LibraryIdentifier'] + '/' + binary]

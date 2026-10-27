@@ -546,8 +546,12 @@ def collect_validation(args):
             require(result.get('Lane') == name, 'Consumer evidence has wrong lane')
             require(signin_checks(result.get('RuntimeArchitecture', 'arm64')) <= set(result['Checks']) and any(c.startswith('PASS classes=') for c in result['Checks']),
                     'Incomplete Sign-In platform/runtime matrix')
+            root = next(p for p in manifest['packages'] if p['id'] == 'AdamE.Google.iOS.SignIn')
+            if version(root.get('version', '9.0.0')) >= version('9.1.0'):
+                require(any(re.fullmatch(r'PASS classes=\d+ selectors=\d+ claims=auth_time(?: firebase12=FIRAuth,FIRAnalytics,FIRFirestore)?', c)
+                            for c in result['Checks']), 'Missing Sign-In claims runtime evidence')
             if name == 'combined':
-                require(any(re.fullmatch(r'PASS classes=\d+ selectors=\d+ firebase12=FIRAuth,FIRAnalytics,FIRFirestore', c)
+                require(any(re.fullmatch(r'PASS classes=\d+ selectors=\d+(?: claims=auth_time)? firebase12=FIRAuth,FIRAnalytics,FIRFirestore', c)
                             for c in result['Checks']), 'Missing combined Firebase 12 runtime evidence')
         if name == 'surface':
             coverage = result.get('BindingSurfaceCoverage') or {}

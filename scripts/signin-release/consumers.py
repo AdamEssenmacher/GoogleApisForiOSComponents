@@ -68,6 +68,17 @@ class Program { static void Main(string[] args) => UIApplication.Main(args, null
    if (config.ClientId != "fixture-client-id") throw new Exception("Configuration roundtrip failed");
    if (Google.SignIn.SignIn.SharedInstance is null) throw new Exception("Missing singleton");
    using var button = new Google.SignIn.SignInButton();
+   using var claim = Google.SignIn.Claim.CreateAuthTimeClaim();
+   using var essentialClaim = Google.SignIn.Claim.CreateEssentialAuthTimeClaim();
+   if (claim.Name != "auth_time" || claim.Essential || essentialClaim.Name != "auth_time" || !essentialClaim.Essential)
+    throw new Exception("Claim factory/property roundtrip failed");
+   if (Google.SignIn.Constants.AuthTimeClaimName.ToString() != "auth_time")
+    throw new Exception("Missing auth_time claim constant");
+   using var claims = new NSSet<Google.SignIn.Claim>(claim, essentialClaim);
+   // Compile existing null-hint calls without starting a credentialed flow.
+   Action<UIViewController> existingCall = vc => Google.SignIn.SignIn.SharedInstance.SignInWithPresentingViewController(vc, null, null);
+   if ((long)Google.SignIn.ErrorCode.AmbiguousClaims != -7 || (long)Google.SignIn.ErrorCode.JsonSerializationFailure != -10)
+    throw new Exception("Incorrect claims error codes");
    int classes = 0, selectors = 0;
    foreach (var type in typeof(Google.SignIn.SignIn).Assembly.GetExportedTypes().Where(t => t.Namespace == "Google.SignIn")) {
     var registration = type.GetCustomAttribute<RegisterAttribute>();
@@ -85,9 +96,9 @@ class Program { static void Main(string[] args) => UIApplication.Main(args, null
      selectors++;
     }
    }
-   if (classes < 7 || selectors < 20) throw new Exception("Incomplete native surface probe: " + classes + "/" + selectors);
+   if (classes < 9 || selectors < 60) throw new Exception("Incomplete native surface probe: " + classes + "/" + selectors);
    EXTRA_PROBE
-   result = "PASS classes=" + classes + " selectors=" + selectors + "INTEGRATION_RESULT";
+   result = "PASS classes=" + classes + " selectors=" + selectors + " claims=auth_timeINTEGRATION_RESULT";
   } catch (Exception e) { result = e.ToString(); }
   File.WriteAllText(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "signin-result.txt"), result);
   return true;

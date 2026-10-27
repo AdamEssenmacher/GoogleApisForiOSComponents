@@ -3,6 +3,7 @@ import hashlib
 import importlib.util
 import json
 import os
+import plistlib
 from pathlib import Path
 import shutil
 import tempfile
@@ -27,6 +28,20 @@ release = feed.release
 
 
 class ReviewRegressionTests(unittest.TestCase):
+    def test_stale_native_archive_version_is_rejected(self):
+        root = 'GoogleSignIn.xcframework/ios-arm64/GoogleSignIn.framework'
+        for location in ('/Info.plist', '/Versions/A/Resources/Info.plist'):
+            for native in ('9.0.0', '9.1.0'):
+                with self.subTest(location=location, native=native):
+                    entries = {root + location: plistlib.dumps(dict(CFBundleShortVersionString=native))}
+                    if native == '9.1.0':
+                        validation.framework_version(entries.__getitem__, entries, root, '9.1.0')
+                    else:
+                        with self.assertRaisesRegex(ValueError, 'version mismatch'):
+                            validation.framework_version(entries.__getitem__, entries, root, '9.1.0')
+        with self.assertRaisesRegex(ValueError, 'version mismatch'):
+            validation.framework_version({}.__getitem__, [], root, '9.1.0')
+
     def test_rebuild_resources_are_inspected(self):
         for damage in ('none', 'missing', 'changed', 'duplicate', 'duplicate-shared'):
             with self.subTest(damage=damage), tempfile.TemporaryDirectory() as tmp:
@@ -158,6 +173,31 @@ class ReviewRegressionTests(unittest.TestCase):
                         with self.assertRaises(ValueError):
                             feed.stage_feed(candidate, paths, records, output)
                         self.assertTrue(sentinel.exists())
+
+    def test_91_release_requires_claims_probe_in_each_lane(self):
+        release.configure_channel('signin')
+        self.addCleanup(release.configure_channel, 'firebase')
+        with tempfile.TemporaryDirectory() as tmp:
+            folder = Path(tmp)
+            packages = [dict(id=n, version='9.1.0.0', sha256='expected') for n in sorted(release.SIGNIN_IDS)]
+            release.write(folder / 'manifest.json', dict(channel='signin', packages=packages))
+            args = types.SimpleNamespace(results_dir=folder, package_dir=folder)
+            def evidence(lane, claims):
+                runtime = 'PASS classes=9 selectors=67' + (' claims=auth_time' if claims else '')
+                if lane == 'combined':
+                    runtime += ' firebase12=FIRAuth,FIRAnalytics,FIRFirestore'
+                return dict(Success=True, Cases=[dict(Success=True)], sourceCommit='abc', Lane=lane,
+                            packageHashes={p['id']: p['sha256'] for p in packages},
+                            Checks=sorted(release.SIGNIN_CHECKS) + [runtime])
+            with patch.dict(os.environ, UNIT_TEST_OUTCOME='success', PACKAGE_INSPECTION_OUTCOME='success', BUILD_COMMIT='abc'):
+                for missing in ('consumers', 'combined', None):
+                    for lane in ('consumers', 'combined'):
+                        release.write(folder / (lane + '.json'), evidence(lane, lane != missing))
+                    if missing:
+                        with self.assertRaisesRegex(ValueError, 'claims runtime'):
+                            release.collect_validation(args)
+                    else:
+                        release.collect_validation(args)
 
 
 if __name__ == '__main__':
