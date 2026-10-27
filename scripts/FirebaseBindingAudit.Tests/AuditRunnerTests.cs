@@ -5,6 +5,27 @@ namespace FirebaseBindingAudit.Tests;
 public sealed class AuditRunnerTests
 {
     [Theory]
+    [InlineData("forceFallback", true)]
+    [InlineData("auto", false)]
+    [InlineData("off", false)]
+    public void MissingRequiredFallbackIsFailureEvenWithSuccessfulPrimary(string mode, bool required)
+    {
+        var target = new AuditTargetDefinition { UseSharpieComparisonFallback = true, PackageId = "Fixture" };
+        foreach (var run in new SharpieRunResult?[] { null,
+            new("failed", null, null, null, null, [], [], "failed"),
+            new("inconclusive", null, null, new TargetComparisonResult([], []), null, [], [], null),
+            new("succeeded", null, null, null, null, [], [], null) }) {
+            Assert.False(AuditRunner.ShouldUseSharpieComparisonFallback(target, mode, false, false, run));
+            var finding = AuditRunner.RequiredFallbackFailure(target, mode);
+            Assert.Equal(required, finding is not null);
+            if (required) Assert.Equal("failure", finding!.Severity);
+        }
+        var success = new SharpieRunResult("succeeded", null, null, new TargetComparisonResult([], []), null, [], [], null);
+        Assert.Equal(required, AuditRunner.ShouldUseSharpieComparisonFallback(target, mode, false, false, success));
+        Assert.Null(AuditRunner.RequiredFallbackFailure(new AuditTargetDefinition(), mode));
+    }
+
+    [Theory]
     [InlineData("failed", true, false)]
     [InlineData("inconclusive", false, false)]
     [InlineData("succeeded", false, false)]
