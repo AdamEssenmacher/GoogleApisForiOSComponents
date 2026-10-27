@@ -199,11 +199,11 @@ This checkout prepares Firebase and GoogleAppMeasurement `12.14.0`. Publication 
 
 #### Google packages (`AdamE.Google.iOS.*`)
 
-| Package | Version |
-| --- | --- |
-| `Maps` | `9.2.0.9` |
-| `Places` | `7.4.0.3` |
-| `SignIn` | `9.1.0` |
+| Package | Published version | Prepared version |
+| --- | --- | --- |
+| `Maps` | `9.2.0.9` | `9.2.0.9` |
+| `Places` | `7.4.0.3` | `7.4.0.3` |
+| `SignIn` | `9.0.0` | `9.1.0.0` |
 
 #### Google support packages (`AdamE.Google.iOS.*`)
 

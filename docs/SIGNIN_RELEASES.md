@@ -48,7 +48,10 @@ The existing sign-in methods remain available, including the nonce overload. Tok
 and wrapper-identifier changes belong to subsequent native releases.
 
 The secret-free simulator probe constructs both claim variants, reads their properties and
-constant, checks native selectors and error codes, and compiles existing null-hint call shapes.
+constant, checks native classes/selectors, and compiles existing null-hint call shapes.
+Package inspection separately compares every managed error-code value with the enum declarations
+in each packed native framework's `GIDSignIn.h`, including EMM and both claims errors. Constructing
+an `NSError` with a caller-supplied code would not establish the native enum's declared value.
 It does not initiate sign-in or request an ID token. Credentialed claim delivery remains an
 application integration check. The tagged upstream Apache license is included in the package
 notices; the separate Firebase Analytics/App Measurement licensing review remains open.

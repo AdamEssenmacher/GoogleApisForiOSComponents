@@ -28,6 +28,25 @@ release = feed.release
 
 
 class ReviewRegressionTests(unittest.TestCase):
+    def test_error_codes_compare_native_header_to_managed_values(self):
+        header = 'kGIDSignInErrorCodeEMM = -6, kGIDSignInErrorCodeAmbiguousClaims = -7, kGIDSignInErrorCodeJSONSerializationFailure = -10'
+        managed = 'enum ErrorCode : long { Emm = -6, AmbiguousClaims = -7, JsonSerializationFailure = -10 }'
+        validation.error_code_values(header, managed)
+        for value in ('-6', '-7', '-10'):
+            with self.subTest(value=value), self.assertRaisesRegex(ValueError, 'error codes differ'):
+                validation.error_code_values(header.replace(value, '-99'), managed)
+            with self.subTest(managed=value), self.assertRaisesRegex(ValueError, 'error codes differ'):
+                validation.error_code_values(header, managed.replace(value, '-99'))
+        for missing in ('', 'kGIDSignInErrorCodeEMM = -6'):
+            with self.assertRaisesRegex(ValueError, 'error codes differ'):
+                validation.error_code_values(missing, managed)
+        root = 'GoogleSignIn.framework'
+        for suffix in ('/Headers/GIDSignIn.h', '/Versions/A/Headers/GIDSignIn.h'):
+            entries = {root + suffix: header.encode()}
+            validation.framework_error_codes(entries.__getitem__, entries, root, managed)
+        with self.assertRaisesRegex(ValueError, 'Missing packed'):
+            validation.framework_error_codes({}.__getitem__, [], root, managed)
+
     def test_stale_native_archive_version_is_rejected(self):
         root = 'GoogleSignIn.xcframework/ios-arm64/GoogleSignIn.framework'
         for location in ('/Info.plist', '/Versions/A/Resources/Info.plist'):
@@ -183,7 +202,7 @@ class ReviewRegressionTests(unittest.TestCase):
             release.write(folder / 'manifest.json', dict(channel='signin', packages=packages))
             args = types.SimpleNamespace(results_dir=folder, package_dir=folder)
             def evidence(lane, claims):
-                runtime = 'PASS classes=9 selectors=67' + (' claims=auth_time' if claims else '')
+                runtime = 'PASS classes=8 selectors=67' + (' claims=auth_time' if claims else '')
                 if lane == 'combined':
                     runtime += ' firebase12=FIRAuth,FIRAnalytics,FIRFirestore'
                 return dict(Success=True, Cases=[dict(Success=True)], sourceCommit='abc', Lane=lane,
@@ -197,6 +216,12 @@ class ReviewRegressionTests(unittest.TestCase):
                         with self.assertRaisesRegex(ValueError, 'claims runtime'):
                             release.collect_validation(args)
                     else:
+                        release.collect_validation(args)
+                for counts in ('classes=7 selectors=67', 'classes=8 selectors=66'):
+                    incomplete = evidence('consumers', True)
+                    incomplete['Checks'][-1] = 'PASS ' + counts + ' claims=auth_time'
+                    release.write(folder / 'consumers.json', incomplete)
+                    with self.assertRaisesRegex(ValueError, 'claims runtime'):
                         release.collect_validation(args)
 
 

@@ -548,8 +548,10 @@ def collect_validation(args):
                     'Incomplete Sign-In platform/runtime matrix')
             root = next(p for p in manifest['packages'] if p['id'] == 'AdamE.Google.iOS.SignIn')
             if version(root.get('version', '9.0.0')) >= version('9.1.0'):
-                require(any(re.fullmatch(r'PASS classes=\d+ selectors=\d+ claims=auth_time(?: firebase12=FIRAuth,FIRAnalytics,FIRFirestore)?', c)
-                            for c in result['Checks']), 'Missing Sign-In claims runtime evidence')
+                probes = [re.fullmatch(r'PASS classes=(\d+) selectors=(\d+) claims=auth_time(?: firebase12=FIRAuth,FIRAnalytics,FIRFirestore)?', c)
+                          for c in result['Checks']]
+                require(any(p and int(p[1]) >= 8 and int(p[2]) >= 67 for p in probes),
+                        'Missing or incomplete Sign-In claims runtime evidence')
             if name == 'combined':
                 require(any(re.fullmatch(r'PASS classes=\d+ selectors=\d+(?: claims=auth_time)? firebase12=FIRAuth,FIRAnalytics,FIRFirestore', c)
                             for c in result['Checks']), 'Missing combined Firebase 12 runtime evidence')

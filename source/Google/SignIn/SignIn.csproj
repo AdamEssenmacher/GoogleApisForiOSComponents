@@ -75,10 +75,4 @@
     <PackageReference Include="AdamE.Google.iOS.GoogleUtilities" Version="[8.1.0.4,9.0.0)" />
     <PackageReference Include="AdamE.Google.iOS.AppCheckCore" Version="[11.2.0.1,12.0.0)" />
   </ItemGroup>
-  <ItemGroup>
-    <!-- Build the repository dependency locally; publish the bounded package relationship above. -->
-    <ProjectReference Include="..\AppCheckCore\AppCheckCore.csproj" PrivateAssets="All">
-      <GlobalPropertiesToRemove>PackageVersion</GlobalPropertiesToRemove>
-    </ProjectReference>
-  </ItemGroup>
 </Project>

@@ -77,14 +77,16 @@ class Program { static void Main(string[] args) => UIApplication.Main(args, null
    using var claims = new NSSet<Google.SignIn.Claim>(claim, essentialClaim);
    // Compile existing null-hint calls without starting a credentialed flow.
    Action<UIViewController> existingCall = vc => Google.SignIn.SignIn.SharedInstance.SignInWithPresentingViewController(vc, null, null);
-   if ((long)Google.SignIn.ErrorCode.AmbiguousClaims != -7 || (long)Google.SignIn.ErrorCode.JsonSerializationFailure != -10)
-    throw new Exception("Incorrect claims error codes");
+   var registeredClasses = new System.Collections.Generic.HashSet<string>();
+   var expectedClasses = new[] { "GIDClaim", "GIDConfiguration", "GIDGoogleUser", "GIDProfileData",
+                                "GIDSignIn", "GIDSignInButton", "GIDSignInResult", "GIDToken" };
    int classes = 0, selectors = 0;
    foreach (var type in typeof(Google.SignIn.SignIn).Assembly.GetExportedTypes().Where(t => t.Namespace == "Google.SignIn")) {
-    var registration = type.GetCustomAttribute<RegisterAttribute>();
+    var registration = type.GetCustomAttribute<RegisterAttribute>(inherit: false);
     if (registration is null || !typeof(NSObject).IsAssignableFrom(type)) continue;
     var native = objc_getClass(registration.Name);
     if (native == IntPtr.Zero) throw new Exception("Missing native class " + registration.Name);
+    if (!registeredClasses.Add(registration.Name)) throw new Exception("Duplicate native registration " + registration.Name);
     classes++;
     foreach (var member in type.GetMembers(BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic)) {
      if (member is not MethodBase method) continue;
@@ -96,7 +98,9 @@ class Program { static void Main(string[] args) => UIApplication.Main(args, null
      selectors++;
     }
    }
-   if (classes < 9 || selectors < 60) throw new Exception("Incomplete native surface probe: " + classes + "/" + selectors);
+   // The 9.1 simulator inventory has eight SDK classes and 67 declared/generated selectors.
+   if (!registeredClasses.SetEquals(expectedClasses) || selectors < 67)
+    throw new Exception("Incomplete native surface probe: " + classes + "/" + selectors);
    EXTRA_PROBE
    result = "PASS classes=" + classes + " selectors=" + selectors + " claims=auth_timeINTEGRATION_RESULT";
   } catch (Exception e) { result = e.ToString(); }
