@@ -26,6 +26,34 @@ public sealed class BindingComparerNormalizationTests
     }
 
     [Fact]
+    public void Compare_UnresolvedEnumValuesProduceOneDiagnosticWhileKnownDriftStillFails()
+    {
+        var result = Compare("enum State : long { A=Missing, B, C, Known=4 }",
+                             "enum State : long { A=Missing, B, C, Known=5 }");
+        Assert.Equal(2, result.Failures.Count);
+        var unresolved = Assert.Single(result.Failures, f => f.MemberName is null);
+        Assert.Equal("enum-value-drift", unresolved.Category);
+        Assert.Contains("Baseline members: [A, B, C]; fresh members: [A, B, C]", unresolved.Message);
+        Assert.Equal("Known", Assert.Single(result.Failures, f => f.MemberName is not null).MemberName);
+    }
+
+    [Theory]
+    [InlineData("enum State { [Field(\"A\")] Ready, Unknown }", "enum State { Unknown, [Field(\"A\")] Ready }")]
+    [InlineData("enum State { [Field(\"A\")] Ready, Unknown }", "enum State { [Field(\"B\")] Done, [Field(\"A\")] Ready, Unknown }")]
+    public void Compare_MixedFieldBackedEnumsIgnorePlainMemberOrdinals(string baseline, string generated)
+    {
+        var result = Compare(baseline, generated);
+        Assert.DoesNotContain(result.Failures, f => f.Category == "enum-value-drift");
+    }
+
+    [Fact]
+    public void Compare_MixedFieldBackedEnumsStillDetectFieldIdentityDrift()
+    {
+        var result = Compare("enum State { [Field(\"A\")] Ready, Unknown }", "enum State { [Field(\"B\")] Ready, Unknown }");
+        Assert.Contains(result.Failures, f => f.Category == "attribute-drift");
+    }
+
+    [Fact]
     public void Parse_ResolvesConstantsAcrossInputFilesAndUnsignedLimits()
     {
         var dir = Path.Combine(Path.GetTempPath(), "enum-values-" + Guid.NewGuid().ToString("N"));

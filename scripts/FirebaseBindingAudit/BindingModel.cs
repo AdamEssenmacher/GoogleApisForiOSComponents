@@ -1989,6 +1989,23 @@ internal sealed class BindingComparer
                     ComparisonTypeKey: baselineEntry.ComparisonKey));
             }
 
+            var numericEnum = !baselineEntry.Members.Values.Any(member => member.FieldValue is not null)
+                && !generatedEnum.Members.Values.Any(member => member.FieldValue is not null);
+            if (numericEnum)
+            {
+                var unresolvedBaseline = baselineEntry.Members.Where(entry => entry.Value.NumericValue is null).Select(entry => entry.Key).ToArray();
+                var unresolvedGenerated = generatedEnum.Members.Where(entry => entry.Value.NumericValue is null).Select(entry => entry.Key).ToArray();
+                if (unresolvedBaseline.Length > 0 || unresolvedGenerated.Length > 0)
+                {
+                    failures.Add(new AuditFinding(
+                        Category: "enum-value-drift", Severity: "failure",
+                        Message: $"Enum numeric values could not be resolved for '{baselineEntry.DisplayName}'. Baseline members: [{string.Join(", ", unresolvedBaseline)}]; fresh members: [{string.Join(", ", unresolvedGenerated)}].",
+                        TypeName: baselineEntry.DisplayName, MemberName: null, Selector: null,
+                        BaselineFile: baselineEntry.SourceFile, GeneratedFile: generatedEnum.SourceFile,
+                        ComparisonTypeKey: baselineEntry.ComparisonKey));
+                }
+            }
+
             foreach (var baselineMemberEntry in baselineEntry.Members)
             {
                 if (!TryGetComparableEnumMember(generatedEnum, baselineMemberEntry.Key, aliases, out var generatedMember))
@@ -2007,13 +2024,12 @@ internal sealed class BindingComparer
                     continue;
                 }
 
-                if (baselineMemberEntry.Value.FieldValue is null && generatedMember.FieldValue is null
-                    && (baselineMemberEntry.Value.NumericValue is null || generatedMember.NumericValue is null
-                        || baselineMemberEntry.Value.NumericValue != generatedMember.NumericValue))
+                if (numericEnum && baselineMemberEntry.Value.NumericValue is not null && generatedMember.NumericValue is not null
+                    && baselineMemberEntry.Value.NumericValue != generatedMember.NumericValue)
                 {
                     failures.Add(new AuditFinding(
                         Category: "enum-value-drift", Severity: "failure",
-                        Message: $"Enum numeric value differs or is unresolved for '{baselineEntry.DisplayName}.{baselineMemberEntry.Key}': baseline={baselineMemberEntry.Value.NumericValue ?? "unresolved"}, fresh={generatedMember.NumericValue ?? "unresolved"}.",
+                        Message: $"Enum numeric value differs for '{baselineEntry.DisplayName}.{baselineMemberEntry.Key}': baseline={baselineMemberEntry.Value.NumericValue ?? "unresolved"}, fresh={generatedMember.NumericValue ?? "unresolved"}.",
                         TypeName: baselineEntry.DisplayName, MemberName: baselineMemberEntry.Key, Selector: null,
                         BaselineFile: baselineMemberEntry.Value.SourceFile, GeneratedFile: generatedMember.SourceFile,
                         ComparisonTypeKey: baselineEntry.ComparisonKey, ComparisonMemberKey: baselineMemberEntry.Key));
