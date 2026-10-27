@@ -33,7 +33,8 @@
     AfterTargets="$(_FirebaseCrashlyticsUploadDSymToFirebaseMasterAfterTargets)"
     BeforeTargets="$(_FirebaseCrashlyticsUploadDSymToFirebaseMasterBeforeTargets)"
     DependsOnTargets="$(_FirebaseCrashlyticsUploadDSymToFirebaseMasterDependsOnTargets)" />
-  <Target Name="_FirebaseCrashlyticsVerifyUploadTool">
+  <Target Name="_FirebaseCrashlyticsVerifyUploadTool"
+    Condition="('$(OutputType)'!='Library' OR '$(IsAppExtension)'=='True') AND '$(FirebaseCrashlyticsUploadSymbolsEnabled)'=='True'">
     <Error Condition="!Exists('$(_FirebaseCrashlyticsSDKBaseFolder)$(_FirebaseScriptName)')"
       Text="Crashlytics upload tool is missing. Remove the versioned $(_FirebaseCrashlyticsItemsFolder) download cache and rebuild to restore the pinned tool." />
     <GetFileHash Files="$(_FirebaseCrashlyticsSDKBaseFolder)$(_FirebaseScriptName)" Algorithm="SHA256">
@@ -44,7 +45,7 @@
   </Target>
 <!-- Target to upload dSYM symbols to Firebase when using Visual Studio for Mac -->
   <Target Name="_FirebaseCrashlyticsUploadDSymToFirebaseOnMac"
-    Condition="'$(FirebaseCrashlyticsUploadSymbolsEnabled)'=='True'"
+    Condition="('$(OutputType)'!='Library' OR '$(IsAppExtension)'=='True') AND '$(FirebaseCrashlyticsUploadSymbolsEnabled)'=='True'"
     DependsOnTargets="_FirebaseCrashlyticsVerifyUploadTool">
     <!-- Make file executable -->
     <Exec Command="chmod +x '$(_FirebaseCrashlyticsSDKBaseFolder)$(_FirebaseScriptName)'" ContinueOnError="true" />
@@ -56,7 +57,7 @@
   </Target>
   <!-- Target to upload dSYM symbols to Firebase when using Visual Studio for Windows -->
   <Target Name="_FirebaseCrashlyticsUploadDSymToFirebaseOnWindows"
-    Condition="'$(IsMacEnabled)'=='true' AND '$(FirebaseCrashlyticsUploadSymbolsEnabled)'=='True'"
+    Condition="('$(OutputType)'!='Library' OR '$(IsAppExtension)'=='True') AND '$(IsMacEnabled)'=='true' AND '$(FirebaseCrashlyticsUploadSymbolsEnabled)'=='True'"
     DependsOnTargets="_FirebaseCrashlyticsVerifyUploadTool">
     <ItemGroup>
       <_CopyFilesToMacOutput Include="$(_FirebaseCrashlyticsSDKBaseFolder)$(_FirebaseScriptName)">

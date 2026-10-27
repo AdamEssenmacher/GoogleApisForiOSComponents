@@ -36,7 +36,7 @@ return true;
 
 
 class UploadIntegrityTests(unittest.TestCase):
-    def exercise(self, remote=False, content=TOOL, enabled=True, tamper=False, continue_on_error=False, recover=False):
+    def exercise(self, remote=False, content=TOOL, enabled=True, tamper=False, continue_on_error=False, recover=False, output_type="Exe", app_extension=False):
         with tempfile.TemporaryDirectory(prefix='crashlytics-integrity-') as tmp:
             root = Path(tmp).resolve()
             (root / 'global.json').write_bytes((ROOT / 'global.json').read_bytes())
@@ -54,7 +54,8 @@ class UploadIntegrityTests(unittest.TestCase):
                        '-p:_FirebaseCrashlyticsScriptSha256=' + hashlib.sha256(TOOL).hexdigest(),
                        '-p:FirebaseCrashlyticsUploadSymbolsEnabled=' + str(enabled),
                        '-p:FirebaseCrashlyticsUploadSymbolsContinueOnError=' + str(continue_on_error),
-                       '-p:IsMacEnabled=true', '-p:BuildSessionId=fixture']
+                       '-p:IsMacEnabled=true', '-p:BuildSessionId=fixture',
+                       '-p:OutputType=' + output_type, '-p:IsAppExtension=' + str(app_extension)]
             result = subprocess.run(command, cwd=root, env=env, capture_output=True, text=True)
             if recover:
                 self.assertNotEqual(0, result.returncode, result.stdout + result.stderr)
@@ -64,6 +65,22 @@ class UploadIntegrityTests(unittest.TestCase):
                 script.write_bytes(TOOL)
                 result = subprocess.run(command, cwd=root, env=env, capture_output=True, text=True)
             return result.returncode, marker.exists(), result.stdout + result.stderr
+
+    def test_library_consumers_skip_verification_and_execution(self):
+        for remote in (False, True):
+            for content in (None, b'corrupt'):
+                with self.subTest(remote=remote, content=content):
+                    code, executed, log = self.exercise(remote=remote, content=content, output_type="Library")
+                    self.assertEqual(0, code, log)
+                    self.assertFalse(executed)
+
+    def test_app_extensions_still_require_and_execute_verified_tool(self):
+        for remote in (False, True):
+            for content in (None, b'corrupt', TOOL):
+                with self.subTest(remote=remote, content=content):
+                    code, executed, log = self.exercise(remote=remote, content=content, output_type="Library", app_extension=True)
+                    self.assertEqual(content == TOOL, code == 0, log)
+                    self.assertEqual(content == TOOL, executed, log)
 
     def test_removing_bad_cache_and_restoring_pinned_tool_recovers(self):
         for remote in (False, True):
