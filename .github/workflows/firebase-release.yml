@@ -57,7 +57,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: python3 scripts/firebase-release/release.py check-feeds
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v6
         if: always()
         with:
           name: firebase-plan
@@ -153,7 +153,7 @@ jobs:
       - name: Seal candidate and write approval summary
         run: python3 scripts/firebase-release/release.py finalize --results output/firebase-results/validation.json
       - name: Upload validated candidate
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: firebase-candidate
           path: output/firebase-candidate
@@ -161,7 +161,7 @@ jobs:
           retention-days: 90
       - name: Upload diagnostics
         if: always()
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: firebase-validation-results
           path: |
@@ -280,7 +280,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: python3 scripts/firebase-release/release.py --channel signin check-feeds
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v6
         if: always()
         with:
           name: signin-plan
@@ -357,13 +357,13 @@ jobs:
         run: |
           python3 scripts/firebase-release/release.py --channel signin collect_validation --results-dir output/signin-results
           python3 scripts/firebase-release/release.py --channel signin finalize --results output/signin-results/validation.json
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v6
         with:
           name: signin-candidate
           path: output/signin-candidate
           if-no-files-found: error
           retention-days: 90
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v6
         if: always()
         with:
           name: signin-validation-results
