@@ -74,13 +74,7 @@ class Program { static void Main(string[] args) => UIApplication.Main(args, null
     throw new Exception("Claim factory/property roundtrip failed");
    if (Google.SignIn.Constants.AuthTimeClaimName.ToString() != "auth_time")
     throw new Exception("Missing auth_time claim constant");
-   using var amr = Google.SignIn.Claim.CreateAmrClaim();
-   using var essentialAmr = Google.SignIn.Claim.CreateEssentialAmrClaim();
-   if (amr.Name != "amr" || amr.Essential || essentialAmr.Name != "amr" || !essentialAmr.Essential)
-    throw new Exception("AMR claim factory/property roundtrip failed");
-   if (Google.SignIn.Constants.AmrClaimName.ToString() != "amr")
-    throw new Exception("Missing amr claim constant");
-   using var claims = new NSSet<Google.SignIn.Claim>(claim, essentialClaim, amr, essentialAmr);
+   CLAIMS_PROBE
    // Actual refresh-token expiry requires credentialed token acquisition.
    Func<Google.SignIn.GoogleUser, NSDate?> refreshExpiration = user => user.RefreshToken.ExpirationDate;
    // Compile existing null-hint calls without starting a credentialed flow.
@@ -106,11 +100,10 @@ class Program { static void Main(string[] args) => UIApplication.Main(args, null
      selectors++;
     }
    }
-   // 9.2 adds two AMR factory selectors to the 9.1 inventory of 67.
-   if (!registeredClasses.SetEquals(expectedClasses) || selectors < 69)
+   if (!registeredClasses.SetEquals(expectedClasses) || selectors < SELECTOR_FLOOR)
     throw new Exception("Incomplete native surface probe: " + classes + "/" + selectors);
    EXTRA_PROBE
-   result = "PASS classes=" + classes + " selectors=" + selectors + " claims=auth_time,amrINTEGRATION_RESULT";
+   result = "PASS classes=" + classes + " selectors=" + selectors + " claims=CLAIM_NAMESINTEGRATION_RESULT";
   } catch (Exception e) { result = e.ToString(); }
   File.WriteAllText(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "signin-result.txt"), result);
   return true;
@@ -118,7 +111,19 @@ class Program { static void Main(string[] args) => UIApplication.Main(args, null
 }'''
 
 
-def probe_source(combined, transitive):
+AMR_PROBE = """   using var amr = Google.SignIn.Claim.CreateAmrClaim();
+   using var essentialAmr = Google.SignIn.Claim.CreateEssentialAmrClaim();
+   if (amr.Name != "amr" || amr.Essential || essentialAmr.Name != "amr" || !essentialAmr.Essential)
+    throw new Exception("AMR claim factory/property roundtrip failed");
+   if (Google.SignIn.Constants.AmrClaimName.ToString() != "amr")
+    throw new Exception("Missing amr claim constant");
+   using var claims = new NSSet<Google.SignIn.Claim>(claim, essentialClaim, amr, essentialAmr);
+"""
+
+
+def probe_source(combined, transitive, package_version):
+    amr = release.version(package_version) >= release.version('9.2.0')
+    claims_probe = AMR_PROBE if amr else 'using var claims = new NSSet<Google.SignIn.Claim>(claim, essentialClaim);'
     extra = 'BindingProbe.Describe();' if transitive else ''
     if combined:
         extra += '''foreach (var n in new[] { "FIRAuth", "FIRAnalytics", "FIRFirestore" })
@@ -126,7 +131,10 @@ def probe_source(combined, transitive):
             if (!Firebase.Core.App.FirebaseVersion.StartsWith("12.", StringComparison.Ordinal))
                 throw new Exception("Expected Firebase 12 runtime");'''
     marker = ' firebase12=FIRAuth,FIRAnalytics,FIRFirestore' if combined else ''
-    return PROBE.replace('EXTRA_PROBE', extra).replace('INTEGRATION_RESULT', marker)
+    return (PROBE.replace('CLAIMS_PROBE', claims_probe)
+            .replace('SELECTOR_FLOOR', '69' if amr else '67')
+            .replace('CLAIM_NAMES', 'auth_time,amr' if amr else 'auth_time')
+            .replace('EXTRA_PROBE', extra).replace('INTEGRATION_RESULT', marker))
 
 
 def main():
@@ -209,7 +217,7 @@ def main():
 <SupportedOSPlatformVersion>15.0</SupportedOSPlatformVersion><EnableDefaultCompileItems>false</EnableDefaultCompileItems>
 <IsPackable>false</IsPackable><MtouchLink>None</MtouchLink><EnableCodeSigning>false</EnableCodeSigning>
 </PropertyGroup><ItemGroup>{refs}<Compile Include="Main.cs" /></ItemGroup></Project>''')
-        (path / 'Main.cs').write_text(probe_source(args.combined, transitive))
+        (path / 'Main.cs').write_text(probe_source(args.combined, transitive, versions['AdamE.Google.iOS.SignIn']))
         (path / 'Info.plist').write_text('<?xml version="1.0"?><plist version="1.0"><dict><key>CFBundleIdentifier</key><string>' + bundle + '</string><key>CFBundleShortVersionString</key><string>1.0</string><key>CFBundleVersion</key><string>1</string></dict></plist>')
         return path / 'Probe.csproj'
 

@@ -4,6 +4,7 @@ import importlib.util
 import json
 import os
 import plistlib
+import re
 from pathlib import Path
 import shutil
 import tempfile
@@ -28,6 +29,37 @@ release = feed.release
 
 
 class ReviewRegressionTests(unittest.TestCase):
+    def test_consumer_probe_matches_candidate_version_in_both_lanes(self):
+        release.configure_channel('signin')
+        self.addCleanup(release.configure_channel, 'firebase')
+        for version in ('9.1.0', '9.1.0.1', '9.2.0', '9.2.0.1'):
+            amr = release.version(version) >= release.version('9.2.0')
+            with self.subTest(version=version), tempfile.TemporaryDirectory() as tmp:
+                folder = Path(tmp)
+                packages = [dict(id=n, version=version, sha256='expected') for n in sorted(release.SIGNIN_IDS)]
+                release.write(folder / 'manifest.json', dict(channel='signin', packages=packages))
+                for combined, lane in ((False, 'consumers'), (True, 'combined')):
+                    for transitive in (False, True):
+                        source = consumers.probe_source(combined, transitive, version)
+                        for api in ('CreateAmrClaim()', 'CreateEssentialAmrClaim()', 'Constants.AmrClaimName'):
+                            self.assertEqual(api in source, amr, (version, lane, transitive, api))
+                        self.assertIn('CreateAuthTimeClaim()', source)
+                        self.assertIn('CreateEssentialAuthTimeClaim()', source)
+                        self.assertIn('user.RefreshToken.ExpirationDate', source)
+                        self.assertEqual('BindingProbe.Describe();' in source, transitive)
+                        floor = int(re.search(r'selectors < (\d+)', source)[1])
+                        self.assertEqual(floor, 69 if amr else 67)
+                        marker = re.search(r' claims=([^";]+)";', source)[1]
+                        self.assertEqual(marker, ('auth_time,amr' if amr else 'auth_time') +
+                                         (' firebase12=FIRAuth,FIRAnalytics,FIRFirestore' if combined else ''))
+                        runtime = f'PASS classes=8 selectors={floor} claims={marker}'
+                        release.write(folder / (lane + '.json'), dict(
+                            Success=True, Cases=[dict(Success=True)], sourceCommit='abc', Lane=lane,
+                            packageHashes={p['id']: p['sha256'] for p in packages},
+                            Checks=sorted(release.SIGNIN_CHECKS) + [runtime]))
+                with patch.dict(os.environ, UNIT_TEST_OUTCOME='success', PACKAGE_INSPECTION_OUTCOME='success', BUILD_COMMIT='abc'):
+                    release.collect_validation(types.SimpleNamespace(results_dir=folder, package_dir=folder))
+
     def test_error_codes_compare_native_header_to_managed_values(self):
         header = 'kGIDSignInErrorCodeEMM = -6, kGIDSignInErrorCodeAmbiguousClaims = -7, kGIDSignInErrorCodeJSONSerializationFailure = -10, kGIDSignInErrorCodeRefreshTokenExpired = -11'
         managed = 'enum ErrorCode : long { Emm = -6, AmbiguousClaims = -7, JsonSerializationFailure = -10, RefreshTokenExpired = -11 }'
