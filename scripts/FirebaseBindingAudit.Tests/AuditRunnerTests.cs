@@ -5,6 +5,20 @@ namespace FirebaseBindingAudit.Tests;
 public sealed class AuditRunnerTests
 {
     [Theory]
+    [InlineData("sharpie-fallback", "succeeded", "confirmed", "sharpie-fallback-comparison-source")]
+    [InlineData("primary", "succeeded", "confirmed", "sharpie-exact-match")]
+    [InlineData("primary", "failed", "low-confidence", "sharpie-failed")]
+    public void EnumValueFindingsReceiveComparisonConfidence(string source, string status, string confidence, string confidenceSource)
+    {
+        var finding = new AuditFinding("enum-value-drift", "failure", "Value changed", "State", "Ready", null,
+            "baseline.cs", "generated.cs", ComparisonTypeKey: "State", ComparisonMemberKey: "Ready");
+        var comparison = new TargetComparisonResult([finding], []);
+        var result = Assert.Single(AuditRunner.AnnotateFindings([finding], true, status, comparison, source));
+        Assert.Equal(confidence, result.Confidence);
+        Assert.Equal(confidenceSource, result.ConfidenceSource);
+    }
+
+    [Theory]
     [InlineData("failed", true, false)]
     [InlineData("inconclusive", false, false)]
     [InlineData("succeeded", false, false)]

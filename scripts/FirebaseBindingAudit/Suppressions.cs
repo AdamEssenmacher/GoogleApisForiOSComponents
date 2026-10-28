@@ -62,7 +62,8 @@ internal static class SuppressionLoader
         "stale-baseline-binding",
         "missing-baseline-binding",
         "signature-drift",
-        "attribute-drift"
+        "attribute-drift",
+        "enum-value-drift"
     };
 
     public static SuppressionConfiguration Load(string suppressionPath)
@@ -169,7 +170,8 @@ internal static class SuppressionEngine
         "stale-baseline-binding",
         "missing-baseline-binding",
         "signature-drift",
-        "attribute-drift"
+        "attribute-drift",
+        "enum-value-drift"
     };
 
     public static SuppressionApplicationResult Apply(
