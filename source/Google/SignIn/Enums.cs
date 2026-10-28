@@ -15,7 +15,8 @@ namespace Google.SignIn
 		AmbiguousClaims = -7,
 		ScopesAlreadyGranted = -8,
 		MismatchWithCurrentUser = -9,
-		JsonSerializationFailure = -10
+		JsonSerializationFailure = -10,
+		RefreshTokenExpired = -11
 	}
 
 	[Native]

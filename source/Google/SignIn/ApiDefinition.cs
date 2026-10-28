@@ -10,6 +10,9 @@ namespace Google.SignIn
 	{
 		[Field ("kAuthTimeClaimName", "__Internal")]
 		NSString AuthTimeClaimName { get; }
+
+		[Field ("kAMRClaimName", "__Internal")]
+		NSString AmrClaimName { get; }
 	}
 
 	// An OIDC claim requested for an ID token. Construct using the factory methods.
@@ -28,6 +31,12 @@ namespace Google.SignIn
 
 		[Static, Export ("essentialAuthTimeClaim")]
 		Claim CreateEssentialAuthTimeClaim ();
+
+		[Static, Export ("AMRClaim")]
+		Claim CreateAmrClaim ();
+
+		[Static, Export ("essentialAMRClaim")]
+		Claim CreateEssentialAmrClaim ();
 	}
 
 	// @interface GIDConfiguration : NSObject <NSCopying, NSSecureCoding>

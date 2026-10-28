@@ -29,10 +29,10 @@ release = feed.release
 
 class ReviewRegressionTests(unittest.TestCase):
     def test_error_codes_compare_native_header_to_managed_values(self):
-        header = 'kGIDSignInErrorCodeEMM = -6, kGIDSignInErrorCodeAmbiguousClaims = -7, kGIDSignInErrorCodeJSONSerializationFailure = -10'
-        managed = 'enum ErrorCode : long { Emm = -6, AmbiguousClaims = -7, JsonSerializationFailure = -10 }'
+        header = 'kGIDSignInErrorCodeEMM = -6, kGIDSignInErrorCodeAmbiguousClaims = -7, kGIDSignInErrorCodeJSONSerializationFailure = -10, kGIDSignInErrorCodeRefreshTokenExpired = -11'
+        managed = 'enum ErrorCode : long { Emm = -6, AmbiguousClaims = -7, JsonSerializationFailure = -10, RefreshTokenExpired = -11 }'
         validation.error_code_values(header, managed)
-        for value in ('-6', '-7', '-10'):
+        for value in ('-6', '-7', '-10', '-11'):
             with self.subTest(value=value), self.assertRaisesRegex(ValueError, 'error codes differ'):
                 validation.error_code_values(header.replace(value, '-99'), managed)
             with self.subTest(managed=value), self.assertRaisesRegex(ValueError, 'error codes differ'):
@@ -223,6 +223,35 @@ class ReviewRegressionTests(unittest.TestCase):
                     release.write(folder / 'consumers.json', incomplete)
                     with self.assertRaisesRegex(ValueError, 'claims runtime'):
                         release.collect_validation(args)
+
+    def test_92_requires_amr_and_its_complete_selector_inventory(self):
+        release.configure_channel('signin')
+        self.addCleanup(release.configure_channel, 'firebase')
+        with tempfile.TemporaryDirectory() as tmp:
+            folder = Path(tmp)
+            packages = [dict(id=n, version='9.2.0.0', sha256='expected') for n in sorted(release.SIGNIN_IDS)]
+            release.write(folder / 'manifest.json', dict(channel='signin', packages=packages))
+            args = types.SimpleNamespace(results_dir=folder, package_dir=folder)
+            def evidence(lane, runtime):
+                if lane == 'combined':
+                    runtime += ' firebase12=FIRAuth,FIRAnalytics,FIRFirestore'
+                return dict(Success=True, Cases=[dict(Success=True)], sourceCommit='abc', Lane=lane,
+                            packageHashes={p['id']: p['sha256'] for p in packages},
+                            Checks=sorted(release.SIGNIN_CHECKS) + [runtime])
+            valid = 'PASS classes=8 selectors=69 claims=auth_time,amr'
+            with patch.dict(os.environ, UNIT_TEST_OUTCOME='success', PACKAGE_INSPECTION_OUTCOME='success', BUILD_COMMIT='abc'):
+                for lane in ('consumers', 'combined'):
+                    release.write(folder / (lane + '.json'), evidence(lane, valid))
+                release.collect_validation(args)
+                for lane in ('consumers', 'combined'):
+                    for invalid in ('PASS classes=8 selectors=69 claims=auth_time',
+                                    'PASS classes=8 selectors=68 claims=auth_time,amr',
+                                    'PASS classes=7 selectors=69 claims=auth_time,amr'):
+                        with self.subTest(lane=lane, runtime=invalid):
+                            release.write(folder / (lane + '.json'), evidence(lane, invalid))
+                            with self.assertRaisesRegex(ValueError, 'claims runtime'):
+                                release.collect_validation(args)
+                            release.write(folder / (lane + '.json'), evidence(lane, valid))
 
 
 if __name__ == '__main__':

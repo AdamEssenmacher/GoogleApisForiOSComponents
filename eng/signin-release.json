@@ -1,5 +1,5 @@
 {
-  "releaseVersion": "9.1.0",
+  "releaseVersion": "9.2.0",
   "nativeBuild": {
     "runner": "macos-26",
     "xcode": "26.6",

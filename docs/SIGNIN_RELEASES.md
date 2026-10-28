@@ -20,11 +20,16 @@ After the setup PR is merged, prepare these PRs individually from refreshed main
 | `codex/signin-10.0.0` | `10.0.0.0` | `10.0.0` | `3.0.0` | `6.0.0` | `9.2.0` |
 | `codex/signin-10.1.0` | `10.1.0.0` | `10.1.0` | `3.0.0` | `6.0.0` | `10.0.0` |
 
-Wait for each preceding release to complete before delivering the next version PR. Refresh shared
+Wait for each preceding release to complete before marking the next version PR ready for merge. Refresh shared
 dependency versions from main, preserve upstream-compatible bounds, and rerun validation if Firebase
 12.x advances in between. The publisher rechecks the preceding Sign-In release after deployment
 approval. A new binding revision of the current native version is permitted without skipping the
 native release sequence. Tags use `google-signin-v<releaseVersion>`; Firebase tags remain separate.
+
+Draft validation for the next version can proceed while its predecessor's publication is being
+repaired, but keep the draft explicitly blocked. In particular, 9.2.0 must not be merged or deployed
+until 9.1.0 is verified on both feeds and its `google-signin-v9.1.0` release is complete. Do not
+bypass the publisher's predecessor check or use package presence on only one feed as completion.
 
 Each release updates native pins, managed/package/file versions, binding APIs, notices, fixtures,
 and `releaseVersion` together. Include the applicable claims APIs, refresh-token expiration APIs,
@@ -55,6 +60,26 @@ an `NSError` with a caller-supplied code would not establish the native enum's d
 It does not initiate sign-in or request an ID token. Credentialed claim delivery remains an
 application integration check. The tagged upstream Apache license is included in the package
 notices; the separate Firebase Analytics/App Measurement licensing review remains open.
+
+### 9.2.0 binding update
+
+The prepared `9.2.0.0` package binds Google Sign-In 9.2.0 with AppAuth 2.1.0 and GTMAppAuth 5.0.0.
+Shared packages and their compatible version bounds remain at the Firebase 12 baseline above.
+
+`Claim.CreateAmrClaim()` and `Claim.CreateEssentialAmrClaim()` request the voluntary or essential
+`amr` (Authentication Methods References) claim. `Constants.AmrClaimName` exposes its native name;
+these objects use the existing `SignInWithClaims(...)` methods. Existing `auth_time` APIs remain.
+
+Refresh-token expiration is available through the already-bound nullable
+`GoogleUser.RefreshToken.ExpirationDate`; this release needs no duplicate expiration property.
+When an expired refresh token is detected, the native SDK reports `ErrorCode.RefreshTokenExpired`
+(-11), which is included in the native-header enum comparison. Reading an actual issued token's
+expiration and observing its refresh failure requires credentialed integration testing.
+
+The secret-free probe constructs both `amr` variants, checks their names/essential flags and native
+constant, verifies all eight bound SDK classes and at least 69 selectors, and compiles access to the
+existing nullable expiration property. Evidence for 9.2 must include both `auth_time` and `amr`;
+9.1-only evidence is rejected. No credentialed sign-in or refresh is initiated by these probes.
 
 All four releases use CocoaPods at package-production time and retain packed native frameworks and
 resources. The producer's CocoaPods/Xcode pins are recorded in the Sign-In configuration. Exact

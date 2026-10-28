@@ -74,7 +74,15 @@ class Program { static void Main(string[] args) => UIApplication.Main(args, null
     throw new Exception("Claim factory/property roundtrip failed");
    if (Google.SignIn.Constants.AuthTimeClaimName.ToString() != "auth_time")
     throw new Exception("Missing auth_time claim constant");
-   using var claims = new NSSet<Google.SignIn.Claim>(claim, essentialClaim);
+   using var amr = Google.SignIn.Claim.CreateAmrClaim();
+   using var essentialAmr = Google.SignIn.Claim.CreateEssentialAmrClaim();
+   if (amr.Name != "amr" || amr.Essential || essentialAmr.Name != "amr" || !essentialAmr.Essential)
+    throw new Exception("AMR claim factory/property roundtrip failed");
+   if (Google.SignIn.Constants.AmrClaimName.ToString() != "amr")
+    throw new Exception("Missing amr claim constant");
+   using var claims = new NSSet<Google.SignIn.Claim>(claim, essentialClaim, amr, essentialAmr);
+   // Actual refresh-token expiry requires credentialed token acquisition.
+   Func<Google.SignIn.GoogleUser, NSDate?> refreshExpiration = user => user.RefreshToken.ExpirationDate;
    // Compile existing null-hint calls without starting a credentialed flow.
    Action<UIViewController> existingCall = vc => Google.SignIn.SignIn.SharedInstance.SignInWithPresentingViewController(vc, null, null);
    var registeredClasses = new System.Collections.Generic.HashSet<string>();
@@ -98,11 +106,11 @@ class Program { static void Main(string[] args) => UIApplication.Main(args, null
      selectors++;
     }
    }
-   // The 9.1 simulator inventory has eight SDK classes and 67 declared/generated selectors.
-   if (!registeredClasses.SetEquals(expectedClasses) || selectors < 67)
+   // 9.2 adds two AMR factory selectors to the 9.1 inventory of 67.
+   if (!registeredClasses.SetEquals(expectedClasses) || selectors < 69)
     throw new Exception("Incomplete native surface probe: " + classes + "/" + selectors);
    EXTRA_PROBE
-   result = "PASS classes=" + classes + " selectors=" + selectors + " claims=auth_timeINTEGRATION_RESULT";
+   result = "PASS classes=" + classes + " selectors=" + selectors + " claims=auth_time,amrINTEGRATION_RESULT";
   } catch (Exception e) { result = e.ToString(); }
   File.WriteAllText(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "signin-result.txt"), result);
   return true;
