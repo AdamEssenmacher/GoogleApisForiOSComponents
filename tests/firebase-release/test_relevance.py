@@ -78,8 +78,8 @@ class RelevanceTests(unittest.TestCase):
             ('signin_publish.cake', {'signin'}),
             ('source/Firebase/Crashlytics/ApiDefinition.cs', {'firebase'}),
             ('eng/firebase-release.json', {'firebase'}),
-            ('firebase_publish.cake', {'firebase'}),
-            ('firebase_release.cake', {'firebase'}),
+            ('firebase_publish.cake', both),
+            ('firebase_release.cake', both),
             ('scripts/FirebaseBindingAudit/AuditRunner.cs', {'firebase'}),
             ('scripts/FirebaseBindingAudit.Tests/AuditRunnerTests.cs', {'firebase'}),
             ('scripts/firebase-binding-audit.json', {'firebase'}),
@@ -130,9 +130,30 @@ class RelevanceTests(unittest.TestCase):
                                              self.firebase, 'firebase')
         self.assertEqual(reasons, ['common.cake', 'global.json'])
 
+    def test_new_fixture_major_does_not_enforce_staging_policy_during_planning(self):
+        # Exercise roots and a transitive dependency independently, without changing
+        # Sign-In's own package inputs or allowing unrelated changes to schedule it.
+        for name in ('Auth', 'Core'):
+            with self.subTest(package=name):
+                metadata = [{**p, 'version': '13.0.0'} if p['id'] == f'AdamE.Firebase.iOS.{name}' else p
+                            for p in self.firebase]
+                release.write(self.root / 'integration.json', metadata)
+                for path, expected in [('Readme.md', []),
+                        ('eng/firebase-release.json', []),
+                        ('source/Firebase/Crashlytics/ApiDefinition.cs', []),
+                        (f'source/Firebase/{name}/ApiDefinition.cs', [f'source/Firebase/{name}/ApiDefinition.cs']),
+                        ('source/Google/SignIn/ApiDefinition.cs', ['source/Google/SignIn/ApiDefinition.cs'])]:
+                    with self.subTest(path=path):
+                        result = self.plan('signin', path)
+                        self.assertEqual(result['reasons'], expected)
+                        self.assertEqual(result['relevant'], bool(expected))
+                        self.assertFalse(result['eligible'])
+
     def test_incomplete_integration_metadata_fails_closed(self):
-        with self.assertRaisesRegex(ValueError, 'Missing integration metadata'):
-            release.validation_reasons(['Readme.md'], self.signin, 'signin', [])
+        for metadata in ([], [p for p in self.firebase if p['id'] != 'AdamE.Firebase.iOS.Core']):
+            with self.subTest(ids=[p['id'] for p in metadata]):
+                with self.assertRaisesRegex(ValueError, 'Missing integration metadata'):
+                    release.validation_reasons(['Readme.md'], self.signin, 'signin', metadata)
 
 
 if __name__ == '__main__':

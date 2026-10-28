@@ -16,7 +16,11 @@ spec.loader.exec_module(release)
 
 
 def fixture_packages(metadata):
-    return release.fixture_packages(metadata)
+    selected = release.fixture_packages(metadata)
+    for name, value in selected.items():
+        if name.startswith('AdamE.Firebase.iOS.'):
+            release.require(release.version(value)[0] == 12, 'Only Firebase 12 fixtures are permitted')
+    return selected
 
 
 def stage_feed(candidate, fixtures, metadata, output):

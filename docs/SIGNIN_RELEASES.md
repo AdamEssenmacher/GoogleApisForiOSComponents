@@ -122,7 +122,13 @@ CloudFirestore integration fixture dependency closure. The planner and combined-
 stager use the same traversal. Changes to a fixture dependency rerun both affected
 release lanes; Crashlytics-only changes do not rerun Sign-In. Sign-In configuration and
 consumer tooling activate only Sign-In, while shared build inputs and common release
-validation tooling activate both channels. Every affected Sign-In PR still runs standalone,
+validation tooling activate both channels. The Firebase metadata and release Cake
+entrypoints also activate both channels because Sign-In consumes them for its fixtures.
+Closure discovery does not enforce the Firebase 12 version policy: unrelated changes
+can still produce a no-op plan with newer fixture metadata, while affected changes run
+validation and fixture staging still rejects unsupported major versions. Incomplete
+dependency metadata fails planning rather than silently omitting validation inputs.
+Every affected Sign-In PR still runs standalone,
 transitive, offline, and combined Firebase consumers.
 
 Both plans run on every PR and explain native scheduling through `reasons` in the plan

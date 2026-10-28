@@ -249,7 +249,7 @@ def git_file(ref, path):
 
 
 def fixture_packages(metadata):
-    """Firebase-only closure used by Sign-In's combined consumers and planner."""
+    """Discover the fixture closure; staging separately enforces supported versions."""
     records = {p['id']: p for p in metadata}
     require(len(records) == len(metadata), 'Duplicate integration metadata package')
     selected = {}
@@ -260,8 +260,6 @@ def fixture_packages(metadata):
             continue
         require(name in records, 'Missing integration metadata: ' + name)
         record = records[name]
-        if name.startswith('AdamE.Firebase.iOS.'):
-            require(version(record['version'])[0] == 12, 'Only Firebase 12 fixtures are permitted')
         selected[name] = record['version']
         pending.extend(record['dependencies'])
     return selected
@@ -278,12 +276,12 @@ def validation_reasons(files, packages, channel, integration_metadata=()):
         'global.json', 'Directory.Build.props', '.config/dotnet-tools.json',
         'source/AssemblyInfo.cs', '.github/workflows/firebase-release.yml',
         'build.cake', 'common.cake', 'poco.cake', 'custom_externals_download.cake', 'components.cake',
+        'firebase_publish.cake', 'firebase_release.cake',
         f'eng/{channel}-release.json', f'eng/{channel}-release-baseline.json',
     }
     prefixes = ['scripts/firebase-release/', 'scripts/FirebaseReleaseFingerprint/', 'tests/firebase-release/']
     if channel == 'firebase':
-        exact.update(('firebase_publish.cake', 'firebase_release.cake',
-                      'tools/e2e/run-firebase-foundation.sh',
+        exact.update(('tools/e2e/run-firebase-foundation.sh',
                       'scripts/firebase-binding-audit.json', 'scripts/firebase-binding-audit-suppressions.json'))
         prefixes.extend(('scripts/FirebaseBindingAudit/', 'scripts/FirebaseBindingAudit.Tests/',
                          'tests/E2E/Firebase.Foundation/'))
