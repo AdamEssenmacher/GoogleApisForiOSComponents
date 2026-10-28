@@ -8,7 +8,7 @@ on:
 
 # Cancel superseded PR validation, but never cancel a main release candidate.
 concurrency:
-  group: firebase-${{ github.event_name == 'pull_request' && github.ref || github.run_id }}
+  group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.event.pull_request.number || github.run_id }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 permissions:
@@ -256,8 +256,10 @@ jobs:
         with:
           global-json-file: global.json
       - run: dotnet tool restore
-      - name: Export Sign-In dependency closure
-        run: dotnet tool run dotnet-cake -- signin_publish.cake
+      - name: Export Sign-In and integration dependency closures
+        run: |
+          dotnet tool run dotnet-cake -- signin_publish.cake
+          dotnet tool run dotnet-cake -- --target=firebase-publish-metadata
       - name: Release tooling tests
         run: python3 -m unittest discover -s tests/firebase-release -v
       - name: Plan Sign-In validation and release

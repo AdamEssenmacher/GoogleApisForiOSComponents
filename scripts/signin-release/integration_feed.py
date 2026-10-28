@@ -16,23 +16,7 @@ spec.loader.exec_module(release)
 
 
 def fixture_packages(metadata):
-    records = {p['id']: p for p in metadata}
-    if len(records) != len(metadata):
-        raise ValueError('Duplicate integration metadata package')
-    selected = {}
-    pending = ['AdamE.Firebase.iOS.Auth', 'AdamE.Firebase.iOS.Analytics', 'AdamE.Firebase.iOS.CloudFirestore']
-    while pending:
-        name = pending.pop()
-        if name in release.SIGNIN_IDS or name in selected:
-            continue
-        if name not in records:
-            raise ValueError('Missing integration metadata: ' + name)
-        record = records[name]
-        if name.startswith('AdamE.Firebase.iOS.') and release.version(record['version'])[0] != 12:
-            raise ValueError('Only Firebase 12 fixtures are permitted')
-        selected[name] = record['version']
-        pending.extend(record['dependencies'])
-    return selected
+    return release.fixture_packages(metadata)
 
 
 def stage_feed(candidate, fixtures, metadata, output):

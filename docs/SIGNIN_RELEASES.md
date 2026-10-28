@@ -90,6 +90,7 @@ NuGet.org. Interrupted releases use the existing retry/conflict rules described 
 ```sh
 dotnet tool restore
 dotnet tool run dotnet-cake -- signin_publish.cake
+dotnet tool run dotnet-cake -- --target=firebase-publish-metadata
 python3 scripts/firebase-release/release.py --channel signin plan --online
 dotnet tool run dotnet-cake -- --target=nuget --names=Google.SignIn
 python3 scripts/firebase-release/release.py --channel signin prepare
@@ -113,3 +114,17 @@ environment. Its four support package IDs are already in the Firebase dependency
 that the current publishing scope includes them. Retain the environment's maintainer approval,
 main-only restriction, `NUGET_USER`, and no-administrator-bypass policy. No long-lived API key is
 needed. Add **Google Sign-In validation** to main's required checks alongside **Firebase validation**.
+
+## Native validation triggers
+
+Sign-In planning watches its five owned packages and the Firebase Auth, Analytics, and
+CloudFirestore integration fixture dependency closure. The planner and combined-feed
+stager use the same traversal. Changes to a fixture dependency rerun both affected
+release lanes; Crashlytics-only changes do not rerun Sign-In. Sign-In configuration and
+consumer tooling activate only Sign-In, while shared build inputs and common release
+validation tooling activate both channels. Every affected Sign-In PR still runs standalone,
+transitive, offline, and combined Firebase consumers.
+
+Both plans run on every PR and explain native scheduling through `reasons` in the plan
+JSON and log. See [CI lane ownership and scheduling](FIREBASE_RELEASES.md#ci-lane-ownership-and-scheduling)
+for cancellation, required checks, and manual component packing.
