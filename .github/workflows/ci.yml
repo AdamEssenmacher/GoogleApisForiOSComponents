@@ -37,6 +37,11 @@ jobs:
       - name: Release tooling tests
         run: python3 -m unittest discover -s tests/firebase-release -v
 
+      - name: Install emulator runner test shell
+        run: |
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends --yes zsh
+
       - name: Consumer emulator runner regressions
         run: python3 -m unittest discover -s tests/E2E/Firebase.Foundation -p 'test_*.py'
 
