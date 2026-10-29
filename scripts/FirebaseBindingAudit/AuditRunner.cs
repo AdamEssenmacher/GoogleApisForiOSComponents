@@ -432,7 +432,7 @@ internal sealed class AuditRunner
         return AuditFindingSummary.BuildConfidenceSummary(findings.ToList());
     }
 
-    private static List<AuditFinding> AnnotateFindings(
+    internal static List<AuditFinding> AnnotateFindings(
         IReadOnlyList<AuditFinding> findings,
         bool sharpieRequested,
         string sharpieStatus,
@@ -525,7 +525,8 @@ internal sealed class AuditRunner
         return string.Equals(finding.Category, "stale-baseline-binding", StringComparison.Ordinal) ||
                string.Equals(finding.Category, "missing-baseline-binding", StringComparison.Ordinal) ||
                string.Equals(finding.Category, "signature-drift", StringComparison.Ordinal) ||
-               string.Equals(finding.Category, "attribute-drift", StringComparison.Ordinal);
+               string.Equals(finding.Category, "attribute-drift", StringComparison.Ordinal) ||
+               string.Equals(finding.Category, "enum-value-drift", StringComparison.Ordinal);
     }
 
     private static bool IsPrimaryGenerationFinding(AuditFinding finding)

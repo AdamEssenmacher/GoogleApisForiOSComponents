@@ -248,6 +248,58 @@ def git_file(ref, path):
     return json.loads(result.stdout)
 
 
+def fixture_packages(metadata):
+    """Discover the fixture closure; staging separately enforces supported versions."""
+    records = {p['id']: p for p in metadata}
+    require(len(records) == len(metadata), 'Duplicate integration metadata package')
+    selected = {}
+    pending = ['AdamE.Firebase.iOS.Auth', 'AdamE.Firebase.iOS.Analytics', 'AdamE.Firebase.iOS.CloudFirestore']
+    while pending:
+        name = pending.pop()
+        if name in SIGNIN_IDS or name in selected:
+            continue
+        require(name in records, 'Missing integration metadata: ' + name)
+        record = records[name]
+        selected[name] = record['version']
+        pending.extend(record['dependencies'])
+    return selected
+
+
+def validation_reasons(files, packages, channel, integration_metadata=()):
+    """Classify validation inputs without changing package fingerprints or release policy."""
+    packages = list(packages)
+    if channel == 'signin':
+        fixtures = fixture_packages(integration_metadata)
+        packages.extend(p for p in integration_metadata if p['id'] in fixtures)
+    directories = tuple(Path(p['project']).parent.as_posix() + '/' for p in packages)
+    exact = {
+        'global.json', 'Directory.Build.props', '.config/dotnet-tools.json',
+        'source/AssemblyInfo.cs', '.github/workflows/firebase-release.yml',
+        'build.cake', 'common.cake', 'poco.cake', 'custom_externals_download.cake', 'components.cake',
+        'firebase_publish.cake', 'firebase_release.cake',
+        f'eng/{channel}-release.json', f'eng/{channel}-release-baseline.json',
+    }
+    prefixes = ['scripts/firebase-release/', 'scripts/FirebaseReleaseFingerprint/', 'tests/firebase-release/']
+    if channel == 'firebase':
+        exact.update(('tools/e2e/run-firebase-foundation.sh',
+                      'scripts/firebase-binding-audit.json', 'scripts/firebase-binding-audit-suppressions.json'))
+        prefixes.extend(('scripts/FirebaseBindingAudit/', 'scripts/FirebaseBindingAudit.Tests/',
+                         'tests/E2E/Firebase.Foundation/'))
+    else:
+        exact.add('signin_publish.cake')
+        prefixes.append('scripts/signin-release/')
+    for package in packages:
+        project = ROOT / package['project']
+        for element in ET.parse(project).iter():
+            if element.get('Pack', '').lower() == 'true' or element.tag in ('Compile', 'Import'):
+                include = element.get('Include') or element.get('Project')
+                if include and '$(' not in include and '*' not in include:
+                    path = (project.parent / include.replace('\\', '/')).resolve()
+                    if path.is_relative_to(ROOT):
+                        exact.add(path.relative_to(ROOT).as_posix())
+    return sorted({p for p in files if p in exact or p.startswith(directories + tuple(prefixes))})
+
+
 def plan(args):
     packages = snapshot(read(args.metadata))
     validate_scope(packages)
@@ -277,28 +329,23 @@ def plan(args):
             require(version(release_version) >= version(latest['releaseVersion']), 'Release version went backwards')
             require(not changed or version(release_version) > version(latest['releaseVersion']),
                     'Package changes require a new release version')
-    files = run('git', 'diff', '--name-only', args.base, 'HEAD').splitlines() if args.base else ['build.cake']
-    project_dirs = tuple(str(Path(p['project']).parent) + '/' for p in packages)
-    relevant = any(
-        p.startswith(project_dirs) or p == 'source/AssemblyInfo.cs'
-        or p.endswith('.cake') or p.startswith(('eng/', 'scripts/', 'tests/E2E/Firebase.Foundation/',
-                                           'tools/e2e/', '.github/workflows/firebase-release.yml'))
-        or p in ('global.json', 'Directory.Build.props', '.config/dotnet-tools.json') for p in files)
-    for package in packages:
-        project = ROOT / package['project']
-        for element in ET.parse(project).iter():
-            if element.get('Pack', '').lower() == 'true' or element.tag in ('Compile', 'Import'):
-                include = element.get('Include') or element.get('Project')
-                if include and '$(' not in include and '*' not in include:
-                    path = (project.parent / include.replace('\\', '/')).resolve()
-                    if path.is_relative_to(ROOT):
-                        relevant = relevant or path.relative_to(ROOT).as_posix() in files
+    reasons = []
+    if args.manual:
+        reasons.append('manual validation')
+    if not args.base:
+        reasons.append('missing comparison history')
+    if not reasons:
+        files = run('git', 'diff', '--name-only', args.base, 'HEAD').splitlines()
+        integration = read(args.integration_metadata) if CHANNEL == 'signin' else ()
+        reasons = validation_reasons(files, packages, CHANNEL, integration)
     old_config = git_file(args.base, CONFIG) if args.base else None
     triggered = args.manual or old_config is None or old_config.get('releaseVersion') != release_version
     eligible = bool(release_version and triggered and (not latest or version(release_version) > version(latest['releaseVersion'])))
+    if eligible:
+        reasons.append('eligible release')
     result = {'schemaVersion': 1, 'sourceCommit': run('git', 'rev-parse', 'HEAD'),
               'releaseVersion': release_version, 'packages': packages, 'changed': changed,
-              'eligible': eligible, 'relevant': relevant or eligible, 'nativeBuild': native_build(config)}
+              'eligible': eligible, 'relevant': bool(reasons), 'reasons': reasons, 'nativeBuild': native_build(config)}
     if CHANNEL == 'signin':
         result['channel'] = CHANNEL
     write(args.output, result)
@@ -307,6 +354,7 @@ def plan(args):
             output.write(f"relevant={str(result['relevant']).lower()}\neligible={str(eligible).lower()}\n")
             output.write(f"runner={result['nativeBuild']['runner']}\nxcode={result['nativeBuild']['xcode']}\n")
     print(f"{LABEL} validation required: {result['relevant']}; release eligible: {eligible}; changed packages: {len(changed)}")
+    print('Validation reasons: ' + (', '.join(reasons) if reasons else 'no matching inputs changed'))
 
 
 def payload_hash(data):
@@ -682,6 +730,8 @@ def main():
     p.add_argument('--metadata', default=f'output/{CHANNEL}-metadata.json')
     p.add_argument('--output', default=f'output/{CHANNEL}-plan.json')
     p.add_argument('--base')
+    p.add_argument('--integration-metadata', default='output/firebase-metadata.json',
+                   help='Firebase metadata for Sign-In combined-consumer input classification')
     p.add_argument('--online', action='store_true')
     p.add_argument('--manual', action='store_true')
     p = sub.add_parser('check-feeds')

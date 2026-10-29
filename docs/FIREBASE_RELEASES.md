@@ -7,6 +7,31 @@ Firebase packages and their repository-owned Google dependencies are validated a
 published by `firebase-release.yml`. Package IDs and versions remain defined by the
 existing projects and Cake metadata. Third-party packages are consumed, not republished.
 
+## CI lane ownership and scheduling
+
+The `CI` workflow's `build` check runs managed unit tests on Linux without Apple
+workloads. Automatic Sign-In native builds belong to **Google Sign-In validation**;
+Firebase native builds belong to **Firebase validation**. Both retain their complete
+consumer suites. Maps and Places retain their separate Foundation validation workflow.
+
+Both release planners run on every PR. Each planner reports `reasons` in its plan JSON
+and log: matching changed paths, manual validation, missing comparison history, or an
+eligible release. Unrelated changes produce a successful no-op required check. Native
+validation follows each channel's package closure, linked/packed inputs, configuration,
+and validation tooling. Shared SDK/build inputs and common release tooling activate both
+channels. Shared Cake scripts, including `components.cake`, are conservative inputs;
+channel-specific Cake entrypoints activate only their own channel. Documentation and
+unrelated scripts or Maps/Places inputs do not activate these release lanes.
+
+Every workflow cancels superseded runs for the same PR. Main and manual runs are kept,
+and publication remains serialized behind environment approval. This policy applies to
+new runs; it does not clean up older queued runs.
+
+For an ad hoc component build, manually dispatch `CI` with the existing `names` input.
+Its macOS `pack` job uses the normal Cake build and uploads the `nuget` artifact. Automatic
+CI no longer uploads that artifact: consumers should use the dedicated `firebase-candidate`
+or `signin-candidate` release-workflow artifacts, or request a manual pack run.
+
 ## Preparing a release
 
 1. Open a version-update PR. Update affected package versions and native metadata,
