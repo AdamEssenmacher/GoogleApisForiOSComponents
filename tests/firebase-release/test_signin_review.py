@@ -32,8 +32,9 @@ class ReviewRegressionTests(unittest.TestCase):
     def test_consumer_probe_matches_candidate_version_in_both_lanes(self):
         release.configure_channel('signin')
         self.addCleanup(release.configure_channel, 'firebase')
-        for version in ('9.1.0', '9.1.0.1', '9.2.0', '9.2.0.1'):
+        for version in ('9.1.0', '9.1.0.1', '9.2.0', '9.2.0.1', '10.0.0', '10.0.0.1'):
             amr = release.version(version) >= release.version('9.2.0')
+            wrapper = release.version(version) >= release.version('10.0.0')
             with self.subTest(version=version), tempfile.TemporaryDirectory() as tmp:
                 folder = Path(tmp)
                 packages = [dict(id=n, version=version, sha256='expected') for n in sorted(release.SIGNIN_IDS)]
@@ -43,6 +44,7 @@ class ReviewRegressionTests(unittest.TestCase):
                         source = consumers.probe_source(combined, transitive, version)
                         for api in ('CreateAmrClaim()', 'CreateEssentialAmrClaim()', 'Constants.AmrClaimName'):
                             self.assertEqual(api in source, amr, (version, lane, transitive, api))
+                        self.assertEqual('SignIn.WrapperIdentifier' in source, wrapper, (version, lane, transitive))
                         self.assertIn('CreateAuthTimeClaim()', source)
                         self.assertIn('CreateEssentialAuthTimeClaim()', source)
                         self.assertIn('user.RefreshToken.ExpirationDate', source)
@@ -54,9 +56,10 @@ class ReviewRegressionTests(unittest.TestCase):
                             self.assertIn('Constants.AppCheckErrorDomain', guarded)
                         self.assertEqual('BindingProbe.Describe();' in source, transitive)
                         floor = int(re.search(r'selectors < (\d+)', source)[1])
-                        self.assertEqual(floor, 73 if amr else 67)
+                        self.assertEqual(floor, 75 if wrapper else 73 if amr else 67)
                         marker = re.search(r' claims=([^";]+)";', source)[1]
                         self.assertEqual(marker, ('auth_time,amr' if amr else 'auth_time') +
+                                         (' wrapper=wrapperIdentifier' if wrapper else '') +
                                          (' firebase12=FIRAuth,FIRAnalytics,FIRFirestore' if combined else ''))
                         runtime = f'PASS classes=8 selectors={floor} claims={marker}'
                         release.write(folder / (lane + '.json'), dict(
@@ -308,6 +311,36 @@ class ReviewRegressionTests(unittest.TestCase):
                                     'PASS classes=8 selectors=69 claims=auth_time,amr',
                                     'PASS classes=8 selectors=72 claims=auth_time,amr',
                                     'PASS classes=7 selectors=73 claims=auth_time,amr'):
+                        with self.subTest(lane=lane, runtime=invalid):
+                            release.write(folder / (lane + '.json'), evidence(lane, invalid))
+                            with self.assertRaisesRegex(ValueError, 'claims runtime'):
+                                release.collect_validation(args)
+                            release.write(folder / (lane + '.json'), evidence(lane, valid))
+
+    def test_100_requires_wrapper_identifier_and_its_selectors(self):
+        release.configure_channel('signin')
+        self.addCleanup(release.configure_channel, 'firebase')
+        with tempfile.TemporaryDirectory() as tmp:
+            folder = Path(tmp)
+            packages = [dict(id=n, version='10.0.0.0', sha256='expected') for n in sorted(release.SIGNIN_IDS)]
+            release.write(folder / 'manifest.json', dict(channel='signin', packages=packages))
+            args = types.SimpleNamespace(results_dir=folder, package_dir=folder)
+            def evidence(lane, runtime):
+                if lane == 'combined':
+                    runtime += ' firebase12=FIRAuth,FIRAnalytics,FIRFirestore'
+                return dict(Success=True, Cases=[dict(Success=True)], sourceCommit='abc', Lane=lane,
+                            packageHashes={p['id']: p['sha256'] for p in packages},
+                            Checks=sorted(release.SIGNIN_CHECKS) + [runtime])
+            valid = 'PASS classes=8 selectors=75 claims=auth_time,amr wrapper=wrapperIdentifier'
+            with patch.dict(os.environ, UNIT_TEST_OUTCOME='success', PACKAGE_INSPECTION_OUTCOME='success', BUILD_COMMIT='abc'):
+                for lane in ('consumers', 'combined'):
+                    release.write(folder / (lane + '.json'), evidence(lane, valid))
+                release.collect_validation(args)
+                for lane in ('consumers', 'combined'):
+                    for invalid in ('PASS classes=8 selectors=75 claims=auth_time,amr',
+                                    'PASS classes=8 selectors=73 claims=auth_time,amr wrapper=wrapperIdentifier',
+                                    'PASS classes=8 selectors=74 claims=auth_time,amr wrapper=wrapperIdentifier',
+                                    'PASS classes=7 selectors=75 claims=auth_time,amr wrapper=wrapperIdentifier'):
                         with self.subTest(lane=lane, runtime=invalid):
                             release.write(folder / (lane + '.json'), evidence(lane, invalid))
                             with self.assertRaisesRegex(ValueError, 'claims runtime'):

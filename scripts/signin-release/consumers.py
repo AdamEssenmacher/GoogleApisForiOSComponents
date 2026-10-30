@@ -128,9 +128,19 @@ AMR_PROBE = """   using var amr = Google.SignIn.Claim.CreateAmrClaim();
 """
 
 
+WRAPPER_PROBE = """   // The native property is write-once and reported only on sign-in/refresh requests.
+   Google.SignIn.SignIn.WrapperIdentifier = "adame-signin-probe";
+   if (Google.SignIn.SignIn.WrapperIdentifier != "adame-signin-probe")
+    throw new Exception("Wrapper identifier roundtrip failed");
+"""
+
+
 def probe_source(combined, transitive, package_version):
     amr = release.version(package_version) >= release.version('9.2.0')
+    wrapper = release.version(package_version) >= release.version('10.0.0')
     claims_probe = AMR_PROBE if amr else 'using var claims = new NSSet<Google.SignIn.Claim>(claim, essentialClaim);'
+    if wrapper:
+        claims_probe += WRAPPER_PROBE
     extra = 'BindingProbe.Describe();' if transitive else ''
     if combined:
         extra += '''foreach (var n in new[] { "FIRAuth", "FIRAnalytics", "FIRFirestore" })
@@ -139,8 +149,8 @@ def probe_source(combined, transitive, package_version):
                 throw new Exception("Expected Firebase 12 runtime");'''
     marker = ' firebase12=FIRAuth,FIRAnalytics,FIRFirestore' if combined else ''
     return (PROBE.replace('CLAIMS_PROBE', claims_probe)
-            .replace('SELECTOR_FLOOR', '73' if amr else '67')
-            .replace('CLAIM_NAMES', 'auth_time,amr' if amr else 'auth_time')
+            .replace('SELECTOR_FLOOR', '75' if wrapper else '73' if amr else '67')
+            .replace('CLAIM_NAMES', ('auth_time,amr' if amr else 'auth_time') + (' wrapper=wrapperIdentifier' if wrapper else ''))
             .replace('EXTRA_PROBE', extra).replace('INTEGRATION_RESULT', marker))
 
 

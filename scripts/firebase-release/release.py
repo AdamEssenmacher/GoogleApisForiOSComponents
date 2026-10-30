@@ -597,13 +597,16 @@ def collect_validation(args):
             root = next(p for p in manifest['packages'] if p['id'] == 'AdamE.Google.iOS.SignIn')
             if version(root.get('version', '9.0.0')) >= version('9.1.0'):
                 amr = version(root['version']) >= version('9.2.0')
+                wrapper = version(root['version']) >= version('10.0.0')
                 claims = 'auth_time,amr' if amr else 'auth_time'
+                if wrapper:
+                    claims += ' wrapper=wrapperIdentifier'
                 probes = [re.fullmatch(r'PASS classes=(\d+) selectors=(\d+) claims=' + claims + r'(?: firebase12=FIRAuth,FIRAnalytics,FIRFirestore)?', c)
                           for c in result['Checks']]
-                require(any(p and int(p[1]) >= 8 and int(p[2]) >= (73 if amr else 67) for p in probes),
+                require(any(p and int(p[1]) >= 8 and int(p[2]) >= (75 if wrapper else 73 if amr else 67) for p in probes),
                         'Missing or incomplete Sign-In claims runtime evidence')
             if name == 'combined':
-                require(any(re.fullmatch(r'PASS classes=\d+ selectors=\d+(?: claims=auth_time(?:,amr)?)? firebase12=FIRAuth,FIRAnalytics,FIRFirestore', c)
+                require(any(re.fullmatch(r'PASS classes=\d+ selectors=\d+(?: claims=auth_time(?:,amr(?: wrapper=wrapperIdentifier)?)?)? firebase12=FIRAuth,FIRAnalytics,FIRFirestore', c)
                             for c in result['Checks']), 'Missing combined Firebase 12 runtime evidence')
         if name == 'surface':
             coverage = result.get('BindingSurfaceCoverage') or {}

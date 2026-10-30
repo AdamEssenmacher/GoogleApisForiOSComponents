@@ -88,6 +88,21 @@ existing nullable expiration property. On iOS it also compiles the App Check set
 error-domain constant, without calling setup, so no App Attest keys are generated. Evidence for 9.2 must include both `auth_time` and `amr`;
 9.1-only evidence is rejected. No credentialed sign-in or refresh is initiated by these probes.
 
+### 10.0.0 binding update
+
+The prepared `10.0.0.0` package binds Google Sign-In 10.0.0 with AppAuth 3.0.0 and GTMAppAuth 6.0.0.
+The native minimum deployment target rises to iOS 15.0, which already matches the package's
+`SupportedOSPlatformVersion`. Upstream widens `GTMSessionFetcher/Core` to `>= 3.3, < 6.0`, so the
+Firebase 12 baseline (GTMSessionFetcher 3.5.0) and its compatible bounds are unchanged.
+
+`SignIn.WrapperIdentifier` binds the native write-once class property `wrapperIdentifier`, which lets
+an SDK that embeds Google Sign-In identify itself in Google's diagnostic logs. It is opt-in: this
+package does not set it on behalf of consuming apps. The 10.0 claim factory `NS_SWIFT_NAME`
+annotations change only Swift names, so the existing managed claim selectors are unchanged.
+
+The secret-free probe sets and reads back a fixture wrapper identifier and requires at least 75
+selectors. Evidence for 10.0 must include `wrapper=wrapperIdentifier`; 9.2-only evidence is rejected.
+
 All four releases use CocoaPods at package-production time and retain packed native frameworks and
 resources. The producer's CocoaPods/Xcode pins are recorded in the Sign-In configuration. Exact
 resolved native versions and Podfile.lock are retained as build evidence. Neither CocoaPods nor
