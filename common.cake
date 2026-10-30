@@ -328,7 +328,13 @@ void BuildSdkOnPodfileV2 (Artifact artifact)
 		}
 	}
 
-	BuildXcodeXcframework (podsProject, podSpecsToBuild.ToArray (), platforms, workingDirectory: workingDirectory);
+	// Podspecs may declare deployment targets older than current Xcode accepts (for example iOS 10).
+	// Build every pod target for the package's own minimum OS, which is what consumers require anyway.
+	var buildSettings = new Dictionary<string, string> {
+		["IPHONEOS_DEPLOYMENT_TARGET"] = GetMinimunSupportedVersion (artifact)
+	};
+
+	BuildXcodeXcframework (podsProject, podSpecsToBuild.ToArray (), platforms, workingDirectory: workingDirectory, buildSettings: buildSettings);
 
 	foreach (var podSpec in podSpecsToBuild) {
 		var xcframeworkName = $"{podSpec.FrameworkName}.xcframework";

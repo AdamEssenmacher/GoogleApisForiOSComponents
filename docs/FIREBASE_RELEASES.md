@@ -27,6 +27,9 @@ Every workflow cancels superseded runs for the same PR. Main and manual runs are
 and publication remains serialized behind environment approval. This policy applies to
 new runs; it does not clean up older queued runs.
 
+Native validation runs on a maintainer's self-hosted Mac, and fork pull requests cannot reach
+it; see [SELF_HOSTED_MACOS_RUNNER.md](SELF_HOSTED_MACOS_RUNNER.md).
+
 For an ad hoc component build, manually dispatch `CI` with the existing `names` input.
 Its macOS `pack` job uses the normal Cake build and uploads the `nuget` artifact. Automatic
 CI no longer uploads that artifact: consumers should use the dedicated `firebase-candidate`
@@ -86,7 +89,7 @@ Shared packaging changes that remain in this effective script require bumps acro
 components' fingerprints. Project-reference version changes affect consumers' fingerprints.
 Development-only documentation and test edits do not require package version bumps.
 
-The native runner and Xcode pins live in `nativeBuild` in `eng/firebase-release.json`;
+The native runner label and Xcode pins live in `nativeBuild` in `eng/firebase-release.json`;
 the workflow reads those pins, and they are part of every package's fingerprint.
 The .NET SDK and tool pins remain in the existing repository configuration. Advancing
 a shared build/toolchain pin requires explicit package-version bumps across the closure.

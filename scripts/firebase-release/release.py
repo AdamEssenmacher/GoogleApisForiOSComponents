@@ -117,7 +117,8 @@ def normalized(value):
 
 def native_build(config):
     settings = config['nativeBuild']
-    require(bool(re.fullmatch(r'macos-\d+', settings['runner'])), 'Expected a pinned hosted macOS runner')
+    # Native builds run on the self-hosted Mac labelled with its pinned Xcode (docs/SELF_HOSTED_MACOS_RUNNER.md).
+    require(bool(re.fullmatch(r'xcode-\d+(?:\.\d+){1,2}', settings['runner'])), 'Expected a pinned self-hosted runner label')
     require(bool(re.fullmatch(r'\d+(?:\.\d+){1,2}', settings['xcode'])), 'Expected a pinned stable Xcode version')
     if CHANNEL == 'signin':
         require(version('1.12.0') <= version(settings['cocoapods']) < version('2.0.0'), 'Unsupported CocoaPods runtime')
@@ -274,7 +275,7 @@ def validation_reasons(files, packages, channel, integration_metadata=()):
     directories = tuple(Path(p['project']).parent.as_posix() + '/' for p in packages)
     exact = {
         'global.json', 'Directory.Build.props', '.config/dotnet-tools.json',
-        'source/AssemblyInfo.cs', '.github/workflows/firebase-release.yml',
+        'source/AssemblyInfo.cs', '.github/workflows/firebase-release.yml', 'tools/ci/select-xcode.sh',
         'build.cake', 'common.cake', 'poco.cake', 'custom_externals_download.cake', 'components.cake',
         'firebase_publish.cake', 'firebase_release.cake',
         f'eng/{channel}-release.json', f'eng/{channel}-release-baseline.json',
