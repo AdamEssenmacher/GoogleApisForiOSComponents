@@ -167,6 +167,7 @@ internal static class ProgramEntry
     private static void PrintUsage()
     {
         Console.WriteLine("Usage: FirebaseBindingAudit --repo-root <path> --output-dir <path> [--targets a,b] [--generator-version 0.7.0] [--keep-temp] [--sharpie-path /path/to/sharpie] [--sharpie-version 26.3.0.11] [--disable-sharpie] [--disable-suppressions]");
+        Console.WriteLine("--disable-sharpie skips Sharpie execution; targets requiring forceFallback still fail without a successful fallback comparison.");
         Console.WriteLine("       FirebaseBindingAudit --generate-binding-surface-coverage --repo-root <path> --coverage-manifest <path> --coverage-output <path> --coverage-props-output <path> --binding-surface-target <target|all>");
     }
 
