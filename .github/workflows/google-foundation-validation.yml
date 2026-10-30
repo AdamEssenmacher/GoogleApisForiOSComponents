@@ -43,6 +43,11 @@ on:
       - "tools/e2e/run-google-foundation.sh"
   workflow_dispatch:
 
+# Cancel superseded PR validation; keep every main and manual run.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 permissions:
   contents: read
 
