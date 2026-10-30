@@ -188,6 +188,8 @@ def main():
     def project(platform, transitive):
         path = work / (platform + ('-transitive' if transitive else '-direct')); path.mkdir()
         tfm = 'net10.0-' + platform
+        # The Xcode 27 Mac Catalyst workload rejects apps targeting below Mac Catalyst 17.0.
+        minimum_os = '17.0' if platform == 'maccatalyst' else '15.0'
         rids = simulator_rid + ';ios-arm64' if platform == 'ios' else catalyst_rid
         selected = ['AdamE.Google.iOS.SignIn']
         if args.combined:
@@ -200,7 +202,7 @@ def main():
             refs = '<ProjectReference Include="Bindings/Bindings.csproj" />'
         (path / 'Probe.csproj').write_text(f'''<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup>
 <TargetFramework>{tfm}</TargetFramework><RuntimeIdentifiers Condition="'$(RuntimeIdentifier)' == ''">{rids}</RuntimeIdentifiers><OutputType>Exe</OutputType>
-<SupportedOSPlatformVersion>15.0</SupportedOSPlatformVersion><EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+<SupportedOSPlatformVersion>{minimum_os}</SupportedOSPlatformVersion><EnableDefaultCompileItems>false</EnableDefaultCompileItems>
 <IsPackable>false</IsPackable><MtouchLink>None</MtouchLink><EnableCodeSigning>false</EnableCodeSigning>
 </PropertyGroup><ItemGroup>{refs}<Compile Include="Main.cs" /></ItemGroup></Project>''')
         (path / 'Main.cs').write_text(probe_source(args.combined, transitive))
