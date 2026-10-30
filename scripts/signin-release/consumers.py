@@ -56,6 +56,8 @@ def build_application(run, name, command, project, rid, expected_bundle, rebuild
 PROBE = '''using System; using System.IO; using System.Linq; using System.Reflection;
 using System.Runtime.InteropServices; using Foundation; using UIKit; using ObjCRuntime;
 class Program { static void Main(string[] args) => UIApplication.Main(args, null, typeof(AppDelegate)); }
+// iOS 27 requires the UIScene lifecycle; the probe needs a scene but no window.
+[Register("SceneDelegate")] public class SceneDelegate : UIWindowSceneDelegate { public override UIWindow Window { get; set; } }
 [Register("AppDelegate")] public class AppDelegate : UIApplicationDelegate {
  [DllImport("/usr/lib/libobjc.dylib")] static extern IntPtr objc_getClass(string name);
  [DllImport("/usr/lib/libobjc.dylib")] static extern IntPtr sel_registerName(string name);
@@ -202,7 +204,12 @@ def main():
 <IsPackable>false</IsPackable><MtouchLink>None</MtouchLink><EnableCodeSigning>false</EnableCodeSigning>
 </PropertyGroup><ItemGroup>{refs}<Compile Include="Main.cs" /></ItemGroup></Project>''')
         (path / 'Main.cs').write_text(probe_source(args.combined, transitive))
-        (path / 'Info.plist').write_text('<?xml version="1.0"?><plist version="1.0"><dict><key>CFBundleIdentifier</key><string>' + bundle + '</string><key>CFBundleShortVersionString</key><string>1.0</string><key>CFBundleVersion</key><string>1</string></dict></plist>')
+        (path / 'Info.plist').write_text('<?xml version="1.0"?><plist version="1.0"><dict><key>CFBundleIdentifier</key><string>' + bundle + '</string><key>CFBundleShortVersionString</key><string>1.0</string><key>CFBundleVersion</key><string>1</string>'
+            '<key>UIApplicationSceneManifest</key><dict><key>UIApplicationSupportsMultipleScenes</key><false/>'
+            '<key>UISceneConfigurations</key><dict><key>UIWindowSceneSessionRoleApplication</key><array><dict>'
+            '<key>UISceneConfigurationName</key><string>Default Configuration</string>'
+            '<key>UISceneDelegateClassName</key><string>SceneDelegate</string></dict></array></dict></dict>'
+            '</dict></plist>')
         return path / 'Probe.csproj'
 
     projects = [(platform, transitive, project(platform, transitive)) for platform in ('ios', 'maccatalyst') for transitive in (False, True)]
