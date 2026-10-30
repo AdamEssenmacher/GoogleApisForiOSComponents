@@ -176,6 +176,11 @@ namespace Google.SignIn
 		[NullAllowed, Export ("configuration", ArgumentSemantic.Assign)]
 		Configuration Configuration { get; set; }
 
+		// @property (nonatomic, class, nullable, copy) NSString * wrapperIdentifier;
+		[Static]
+		[NullAllowed, Export ("wrapperIdentifier", ArgumentSemantic.Copy)]
+		string WrapperIdentifier { get; set; }
+
 		// -(BOOL)handleURL:(NSURL * _Nonnull)url;
 		[Export ("handleURL:")]
 		bool HandleUrl (NSUrl url);
