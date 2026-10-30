@@ -70,8 +70,10 @@ jobs:
 
   validate:
     needs: plan
-    if: needs.plan.outputs.relevant == 'true'
-    runs-on: ${{ needs.plan.outputs.runner }}
+    if: needs.plan.outputs.relevant == 'true' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
+    # Native builds run only on the maintainers' self-hosted Mac (docs/SELF_HOSTED_MACOS_RUNNER.md).
+    # Fork pull requests never reach it; their required check fails with instructions instead.
+    runs-on: [self-hosted, macOS, ARM64, '${{ needs.plan.outputs.runner }}']
     timeout-minutes: 360
     permissions:
       contents: read
@@ -87,9 +89,7 @@ jobs:
           name: firebase-plan
           path: output
       - name: Select configured Xcode
-        run: |
-          sudo xcode-select --switch "/Applications/Xcode_${XCODE_VERSION}.app/Contents/Developer"
-          xcodebuild -version
+        run: tools/ci/select-xcode.sh "$XCODE_VERSION"
       - uses: actions/setup-dotnet@v5
         with:
           global-json-file: global.json
@@ -182,8 +182,13 @@ jobs:
           PLAN_RESULT: ${{ needs.plan.result }}
           RELEVANT: ${{ needs.plan.outputs.relevant }}
           VALIDATE_RESULT: ${{ needs.validate.result }}
+          TRUSTED: ${{ (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) }}
         run: |
           test "$PLAN_RESULT" = success
+          if [ "$RELEVANT" = true ] && [ "$TRUSTED" != true ]; then
+            echo '::error::Firebase native validation runs only on the maintainers'"'"' self-hosted Mac. A maintainer must push this branch to the repository to validate it.'
+            exit 1
+          fi
           if [ "$RELEVANT" = true ]; then
             test "$VALIDATE_RESULT" = success
           else
@@ -295,8 +300,10 @@ jobs:
 
   signin-validate:
     needs: signin-plan
-    if: needs.signin-plan.outputs.relevant == 'true'
-    runs-on: ${{ needs.signin-plan.outputs.runner }}
+    if: needs.signin-plan.outputs.relevant == 'true' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
+    # Native builds run only on the maintainers' self-hosted Mac (docs/SELF_HOSTED_MACOS_RUNNER.md).
+    # Fork pull requests never reach it; their required check fails with instructions instead.
+    runs-on: [self-hosted, macOS, ARM64, '${{ needs.signin-plan.outputs.runner }}']
     timeout-minutes: 360
     permissions:
       contents: read
@@ -312,20 +319,21 @@ jobs:
           name: signin-plan
           path: output
       - name: Select configured Xcode
-        run: sudo xcode-select --switch "/Applications/Xcode_${XCODE_VERSION}.app/Contents/Developer"
+        run: tools/ci/select-xcode.sh "$XCODE_VERSION"
       - uses: actions/setup-dotnet@v5
         with:
           global-json-file: global.json
-      - uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: '3.3'
       - name: Install pinned producer tools
         run: |
           dotnet tool restore
           dotnet workload install ios maccatalyst
           pin=$(python3 -c 'import json; print(json.load(open("eng/signin-release.json"))["nativeBuild"]["cocoapods"])')
+          # Install the pinned CocoaPods into a job-local gem home so the Mac's own gems are untouched.
+          export GEM_HOME="$RUNNER_TEMP/gems"
           gem install cocoapods --version "$pin" --no-document
-          test "$(pod --version)" = "$pin"
+          echo "GEM_HOME=$GEM_HOME" >> "$GITHUB_ENV"
+          echo "$GEM_HOME/bin" >> "$GITHUB_PATH"
+          test "$("$GEM_HOME/bin/pod" --version)" = "$pin"
       - name: Unit tests
         id: unit-tests
         run: python3 -m unittest discover -s tests/firebase-release -v
@@ -392,8 +400,13 @@ jobs:
           PLAN_RESULT: ${{ needs.signin-plan.result }}
           RELEVANT: ${{ needs.signin-plan.outputs.relevant }}
           VALIDATE_RESULT: ${{ needs.signin-validate.result }}
+          TRUSTED: ${{ (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) }}
         run: |
           test "$PLAN_RESULT" = success
+          if [ "$RELEVANT" = true ] && [ "$TRUSTED" != true ]; then
+            echo '::error::Sign-In native validation runs only on the maintainers'"'"' self-hosted Mac. A maintainer must push this branch to the repository to validate it.'
+            exit 1
+          fi
           if [ "$RELEVANT" = true ]; then
             test "$VALIDATE_RESULT" = success
           else
