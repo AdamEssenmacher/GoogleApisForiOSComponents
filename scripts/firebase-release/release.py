@@ -284,7 +284,7 @@ def validation_reasons(files, packages, channel, integration_metadata=()):
         exact.update(('tools/e2e/run-firebase-foundation.sh',
                       'scripts/firebase-binding-audit.json', 'scripts/firebase-binding-audit-suppressions.json'))
         prefixes.extend(('scripts/FirebaseBindingAudit/', 'scripts/FirebaseBindingAudit.Tests/',
-                         'tests/E2E/Firebase.Foundation/'))
+                         'tests/E2E/Firebase.Foundation/', 'tests/crashlytics/'))
     else:
         exact.add('signin_publish.cake')
         prefixes.append('scripts/signin-release/')
