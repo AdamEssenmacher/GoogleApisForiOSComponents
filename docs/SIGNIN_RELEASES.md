@@ -76,9 +76,16 @@ When an expired refresh token is detected, the native SDK reports `ErrorCode.Ref
 (-11), which is included in the native-header enum comparison. Reading an actual issued token's
 expiration and observing its refresh failure requires credentialed integration testing.
 
+The release also binds Sign-In's iOS-only App Check setup, which earlier packages omitted:
+`SignIn.ConfigureWithCompletion(...)`, `SignIn.ConfigureDebugProvider(apiKey, ...)`,
+`Constants.AppCheckErrorDomain` and `AppCheckErrorCode`. These are unavailable on Mac Catalyst, matching
+the native headers. Package inspection compares `AppCheckErrorCode` with `GIDAppCheckError.h` in each
+packed framework slice, as it does for `ErrorCode`.
+
 The secret-free probe constructs both `amr` variants, checks their names/essential flags and native
-constant, verifies all eight bound SDK classes and at least 69 selectors, and compiles access to the
-existing nullable expiration property. Evidence for 9.2 must include both `auth_time` and `amr`;
+constant, verifies all eight bound SDK classes and at least 73 selectors, and compiles access to the
+existing nullable expiration property. On iOS it also compiles the App Check setup calls and reads the
+error-domain constant, without calling setup, so no App Attest keys are generated. Evidence for 9.2 must include both `auth_time` and `amr`;
 9.1-only evidence is rejected. No credentialed sign-in or refresh is initiated by these probes.
 
 All four releases use CocoaPods at package-production time and retain packed native frameworks and

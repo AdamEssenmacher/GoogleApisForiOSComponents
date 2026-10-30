@@ -13,6 +13,11 @@ namespace Google.SignIn
 
 		[Field ("kAMRClaimName", "__Internal")]
 		NSString AmrClaimName { get; }
+
+		// extern NSErrorDomain const kGIDAppCheckErrorDomain;
+		[NoMacCatalyst]
+		[Field ("kGIDAppCheckErrorDomain", "__Internal")]
+		NSString AppCheckErrorDomain { get; }
 	}
 
 	// An OIDC claim requested for an ID token. Construct using the factory methods.
@@ -190,6 +195,16 @@ namespace Google.SignIn
 		// -(void)disconnectWithCompletion:(void (^ _Nullable)(NSError * _Nullable))completion;
 		[Export ("disconnectWithCompletion:")]
 		void DisconnectWithCompletion ([NullAllowed] Action<NSError> completion);
+
+		// -(void)configureWithCompletion:(void (^ _Nullable)(NSError * _Nullable))completion;
+		[NoMacCatalyst]
+		[Export ("configureWithCompletion:")]
+		void ConfigureWithCompletion ([NullAllowed] Action<NSError> completion);
+
+		// -(void)configureDebugProviderWithAPIKey:(NSString * _Nonnull)APIKey completion:(void (^ _Nullable)(NSError * _Nullable))completion API_AVAILABLE(ios(14));
+		[NoMacCatalyst]
+		[Export ("configureDebugProviderWithAPIKey:completion:")]
+		void ConfigureDebugProvider (string apiKey, [NullAllowed] Action<NSError> completion);
 
 		// -(void)signInWithPresentingViewController:(UIViewController * _Nonnull)presentingViewController completion:(void (^ _Nullable)(GIDSignInResult * _Nullable, NSError * _Nullable))completion __attribute__((availability(macos_app_extension, unavailable))) __attribute__((availability(ios_app_extension, unavailable)));
 		//[Unavailable (PlatformName.MacOSXAppExtension)]

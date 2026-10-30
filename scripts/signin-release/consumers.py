@@ -118,6 +118,13 @@ AMR_PROBE = """   using var amr = Google.SignIn.Claim.CreateAmrClaim();
    if (Google.SignIn.Constants.AmrClaimName.ToString() != "amr")
     throw new Exception("Missing amr claim constant");
    using var claims = new NSSet<Google.SignIn.Claim>(claim, essentialClaim, amr, essentialAmr);
+#if !__MACCATALYST__
+   // Compile App Check setup (iOS only) without generating App Attest keys.
+   Action<string> appCheckSetup = key => { Google.SignIn.SignIn.SharedInstance.ConfigureWithCompletion(null);
+    Google.SignIn.SignIn.SharedInstance.ConfigureDebugProvider(key, null); };
+   if (Google.SignIn.Constants.AppCheckErrorDomain is null || Google.SignIn.AppCheckErrorCode.UnexpectedError != (Google.SignIn.AppCheckErrorCode) 1)
+    throw new Exception("Missing App Check error domain");
+#endif
 """
 
 
@@ -132,7 +139,7 @@ def probe_source(combined, transitive, package_version):
                 throw new Exception("Expected Firebase 12 runtime");'''
     marker = ' firebase12=FIRAuth,FIRAnalytics,FIRFirestore' if combined else ''
     return (PROBE.replace('CLAIMS_PROBE', claims_probe)
-            .replace('SELECTOR_FLOOR', '69' if amr else '67')
+            .replace('SELECTOR_FLOOR', '73' if amr else '67')
             .replace('CLAIM_NAMES', 'auth_time,amr' if amr else 'auth_time')
             .replace('EXTRA_PROBE', extra).replace('INTEGRATION_RESULT', marker))
 

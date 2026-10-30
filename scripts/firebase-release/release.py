@@ -552,7 +552,7 @@ def collect_validation(args):
                 claims = 'auth_time,amr' if amr else 'auth_time'
                 probes = [re.fullmatch(r'PASS classes=(\d+) selectors=(\d+) claims=' + claims + r'(?: firebase12=FIRAuth,FIRAnalytics,FIRFirestore)?', c)
                           for c in result['Checks']]
-                require(any(p and int(p[1]) >= 8 and int(p[2]) >= (69 if amr else 67) for p in probes),
+                require(any(p and int(p[1]) >= 8 and int(p[2]) >= (73 if amr else 67) for p in probes),
                         'Missing or incomplete Sign-In claims runtime evidence')
             if name == 'combined':
                 require(any(re.fullmatch(r'PASS classes=\d+ selectors=\d+(?: claims=auth_time(?:,amr)?)? firebase12=FIRAuth,FIRAnalytics,FIRFirestore', c)

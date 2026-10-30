@@ -19,6 +19,13 @@ namespace Google.SignIn
 		RefreshTokenExpired = -11
 	}
 
+	// Reported in kGIDAppCheckErrorDomain (iOS only).
+	[Native]
+	public enum AppCheckErrorCode : long
+	{
+		UnexpectedError = 1
+	}
+
 	[Native]
 	public enum ButtonStyle : long
 	{
