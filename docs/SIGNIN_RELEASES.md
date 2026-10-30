@@ -122,6 +122,7 @@ NuGet.org. Interrupted releases use the existing retry/conflict rules described 
 ```sh
 dotnet tool restore
 dotnet tool run dotnet-cake -- signin_publish.cake
+dotnet tool run dotnet-cake -- --target=firebase-publish-metadata
 python3 scripts/firebase-release/release.py --channel signin plan --online
 dotnet tool run dotnet-cake -- --target=nuget --names=Google.SignIn
 python3 scripts/firebase-release/release.py --channel signin prepare
@@ -137,6 +138,24 @@ Credentialed sign-in/token refresh, real Windows/Pair-to-Mac, and signed-device 
 separate integration checks, not secret-free release gates. These tests do not establish SDK use
 or redistribution license clearance, and do not change the Firebase measurement licensing review.
 
+### Binding drift audit
+
+The consumer probe proves that every bound selector exists natively, but it cannot see native API
+that was never bound. Each Sign-In version update should also run the binding audit, which compares
+`source/Google/SignIn` with bindings freshly generated from the built `GoogleSignIn.xcframework`:
+
+```sh
+dotnet tool run dotnet-cake -- --target=nuget --names=Google.SignIn
+./scripts/compare-firebase-bindings.sh --targets SignIn
+```
+
+The audit needs the Sign-In build's `externals/` output, including `GTMSessionFetcher.xcframework`,
+because Sign-In headers import it. Review `output/firebase-binding-audit/details/SignIn.md`. Expected
+differences are suppressed with header evidence in `scripts/firebase-binding-audit-suppressions.json`:
+unavailable `+new`, the externally typed `fetcherAuthorizer`, and the existing managed enum names.
+Bind any other `missing-baseline-binding` finding, or add a suppression that explains why it stays
+unbound. Like the Firebase targets, the audit is a maintainer check rather than a CI gate.
+
 ## Maintainer configuration
 
 Before the first Sign-In deployment, add `AdamE.Google.iOS.SignIn` to the NuGet Trusted Publishing
@@ -145,3 +164,23 @@ environment. Its four support package IDs are already in the Firebase dependency
 that the current publishing scope includes them. Retain the environment's maintainer approval,
 main-only restriction, `NUGET_USER`, and no-administrator-bypass policy. No long-lived API key is
 needed. Add **Google Sign-In validation** to main's required checks alongside **Firebase validation**.
+
+## Native validation triggers
+
+Sign-In planning watches its five owned packages and the Firebase Auth, Analytics, and
+CloudFirestore integration fixture dependency closure. The planner and combined-feed
+stager use the same traversal. Changes to a fixture dependency rerun both affected
+release lanes; Crashlytics-only changes do not rerun Sign-In. Sign-In configuration and
+consumer tooling activate only Sign-In, while shared build inputs and common release
+validation tooling activate both channels. The Firebase metadata and release Cake
+entrypoints also activate both channels because Sign-In consumes them for its fixtures.
+Closure discovery does not enforce the Firebase 12 version policy: unrelated changes
+can still produce a no-op plan with newer fixture metadata, while affected changes run
+validation and fixture staging still rejects unsupported major versions. Incomplete
+dependency metadata fails planning rather than silently omitting validation inputs.
+Every affected Sign-In PR still runs standalone,
+transitive, offline, and combined Firebase consumers.
+
+Both plans run on every PR and explain native scheduling through `reasons` in the plan
+JSON and log. See [CI lane ownership and scheduling](FIREBASE_RELEASES.md#ci-lane-ownership-and-scheduling)
+for cancellation, required checks, and manual component packing.

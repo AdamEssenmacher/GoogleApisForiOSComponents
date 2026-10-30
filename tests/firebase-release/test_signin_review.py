@@ -241,6 +241,18 @@ class ReviewRegressionTests(unittest.TestCase):
                             feed.stage_feed(candidate, paths, records, output)
                         self.assertTrue(sentinel.exists())
 
+    def test_fixture_staging_retains_major_version_policy_for_roots_and_dependencies(self):
+        roots = ['AdamE.Firebase.iOS.' + n for n in ('Auth', 'Analytics', 'CloudFirestore')]
+        dependency = 'AdamE.Firebase.iOS.Core'
+        baseline = [dict(id=n, version='12.14.0', dependencies=[dependency]) for n in roots]
+        baseline.append(dict(id=dependency, version='12.14.0', dependencies=[]))
+        self.assertEqual(set(feed.fixture_packages(baseline)), set(roots + [dependency]))
+        for name in (roots[0], dependency):
+            with self.subTest(package=name):
+                metadata = [{**p, 'version': '13.0.0'} if p['id'] == name else p for p in baseline]
+                with self.assertRaisesRegex(ValueError, 'Only Firebase 12 fixtures are permitted'):
+                    feed.fixture_packages(metadata)
+
     def test_91_release_requires_claims_probe_in_each_lane(self):
         release.configure_channel('signin')
         self.addCleanup(release.configure_channel, 'firebase')
