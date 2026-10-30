@@ -51,7 +51,7 @@ class RelevanceTests(unittest.TestCase):
         packages = self.signin if channel == 'signin' else self.firebase
         config = {'releaseVersion': ('9.1.0' if channel == 'signin' else '12.14.0') if eligible else None,
                   'minimumFirebaseVersion': '12.12.0',
-                  'nativeBuild': {'runner': 'macos-26', 'xcode': '26.6', 'cocoapods': '1.17.0'}}
+                  'nativeBuild': {'runner': 'xcode-27.1', 'xcode': '27.1', 'cocoapods': '1.17.0'}}
         baseline = {'packages': packages}
         release.write(self.root / release.CONFIG, config)
         release.write(self.root / release.BASELINE, baseline)
@@ -97,7 +97,7 @@ class RelevanceTests(unittest.TestCase):
             ('scripts/firebase-release/release.py', both),
             ('scripts/FirebaseReleaseFingerprint/BuildInputs.cs', both),
             ('tests/firebase-release/test_release.py', both),
-            ('.github/workflows/firebase-release.yml', both),
+            ('.github/workflows/firebase-release.yml', both), ('tools/ci/select-xcode.sh', both),
             ('linked/shared.cs', both), ('icons/shared.png', both), ('eng/shared.targets', both),
             ('source/Google/Maps/ApiDefinition.cs', set()),
             ('source/Google/Places/ApiDefinition.cs', set()),
