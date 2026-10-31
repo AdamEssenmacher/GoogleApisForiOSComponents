@@ -17,14 +17,15 @@ consumer suites. Maps and Places retain their separate Foundation validation wor
 Both release planners run on every PR. Each planner reports `reasons` in its plan JSON
 and log: matching changed paths, manual validation, missing comparison history, or an
 eligible release. On pull requests the required checks only plan: native validation runs
-after merge on `main`, or for any branch through a manual run of the workflow. Unrelated changes
-produce a successful no-op required check. Native validation follows each channel's package closure, linked/packed inputs, configuration,
-and validation tooling. Shared SDK/build inputs and common release tooling activate both
+after merge on `main`, or for any branch through a manual run of the workflow. Unrelated
+changes produce a successful no-op required check. Native validation follows each channel's
+package closure, linked/packed inputs, configuration, and validation tooling. Shared SDK/build inputs and common release tooling activate both
 channels. Shared Cake scripts, including `components.cake`, are conservative inputs;
 channel-specific Cake entrypoints activate only their own channel. Documentation and
 unrelated scripts or Maps/Places inputs do not activate these release lanes.
 
-Every workflow cancels superseded runs for the same PR. Main and manual runs are kept,
+Workflows that run on pull requests cancel superseded runs for the same PR. Main and manual
+runs are kept,
 and publication remains serialized behind environment approval. This policy applies to
 new runs; it does not clean up older queued runs.
 

@@ -28,8 +28,12 @@ pass with a notice instead of waiting on the Mac. Updating a PR branch after ano
 therefore costs only the hosted checks.
 
 Merged changes can break the native build on `main`. Publication still requires a passing
-validation of the exact `main` commit, so a break blocks the release until it is fixed. Run the
-workflow manually on a risky branch to validate it before merging.
+validation of the exact `main` commit, so a broken release candidate never publishes. Each main
+run validates only what its own push changed, so a later unrelated merge can show green while the
+native build is still broken, and a fix merged after a failed release does not restart that
+release because the release version did not change. After fixing a native failure, manually run
+the workflow on `main` to revalidate everything and request a new candidate. Run the workflow
+manually on a risky branch to validate it before merging.
 
 A fork pull request can edit workflow files, so the job conditions alone are not a security
 boundary. Under the repository's Actions settings, require approval for workflow runs from **all
