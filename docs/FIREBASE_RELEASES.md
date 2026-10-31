@@ -16,8 +16,9 @@ consumer suites. Maps and Places retain their separate Foundation validation wor
 
 Both release planners run on every PR. Each planner reports `reasons` in its plan JSON
 and log: matching changed paths, manual validation, missing comparison history, or an
-eligible release. Unrelated changes produce a successful no-op required check. Native
-validation follows each channel's package closure, linked/packed inputs, configuration,
+eligible release. On pull requests the required checks only plan: native validation runs
+after merge on `main`, or for any branch through a manual run of the workflow. Unrelated changes
+produce a successful no-op required check. Native validation follows each channel's package closure, linked/packed inputs, configuration,
 and validation tooling. Shared SDK/build inputs and common release tooling activate both
 channels. Shared Cake scripts, including `components.cake`, are conservative inputs;
 channel-specific Cake entrypoints activate only their own channel. Documentation and
@@ -27,8 +28,8 @@ Every workflow cancels superseded runs for the same PR. Main and manual runs are
 and publication remains serialized behind environment approval. This policy applies to
 new runs; it does not clean up older queued runs.
 
-Native validation runs on a maintainer's self-hosted Mac, and fork pull requests cannot reach
-it; see [SELF_HOSTED_MACOS_RUNNER.md](SELF_HOSTED_MACOS_RUNNER.md).
+Native validation runs on a maintainer's self-hosted Mac, and pull requests never reach it;
+see [SELF_HOSTED_MACOS_RUNNER.md](SELF_HOSTED_MACOS_RUNNER.md).
 
 For an ad hoc component build, manually dispatch `CI` with the existing `names` input.
 Its macOS `pack` job uses the normal Cake build and uploads the `nuget` artifact. Automatic
@@ -44,14 +45,15 @@ or `signin-candidate` release-workflow artifacts, or request a manual pack run.
    The first supported release is `12.12.0`. The initial null value disables publication.
    A binding-only release can use a revision such as `12.12.0.1`; individual package
    versions may differ from the release version.
-3. Wait for **Firebase validation** before merging. Relevant changes run full build/pack,
+3. Optionally, manually run `firebase-release.yml` on the PR branch to validate it before
+   merging. The PR's **Firebase validation** check only plans.
+4. After merge, CI validates the exact main commit. Relevant changes run full build/pack,
    unit tests, package inspection, simulator smoke/surface/nullability checks, the Firestore
-   pipeline constructor regression, and two
-   local Firestore emulator checks. Unrelated changes report an explicit successful no-op.
-4. After merge, CI validates the exact main commit. Review the workflow summary's package
-   versions, reused dependencies, upload destinations, and commit. Select **Review
-   deployments**, approve `firebase-release`, and the protected publish job continues.
-5. After both feeds are verified, automation publishes `firebase-v<releaseVersion>` and
+   pipeline constructor regression, and two local Firestore emulator checks.
+5. Review the workflow summary's package versions, reused dependencies, upload destinations,
+   and commit. Select **Review deployments**, approve `firebase-release`, and the protected
+   publish job continues.
+6. After both feeds are verified, automation publishes `firebase-v<releaseVersion>` and
    a GitHub Release with package assets, manifest, checksums, and generated notes.
 
 Merging alone does not authorize a deployment. PRs cannot publish. A main-branch run

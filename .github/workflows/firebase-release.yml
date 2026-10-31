@@ -6,7 +6,9 @@ on:
     branches: [main]
   workflow_dispatch:
 
-# Cancel superseded PR validation, but never cancel a main release candidate.
+# Pull requests only plan. Native validation runs after merge on main, or for any branch through a
+# manual run, so updating a PR branch never queues the self-hosted Mac.
+# Cancel superseded PR runs, but never cancel a main release candidate.
 concurrency:
   group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.event.pull_request.number || github.run_id }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
@@ -70,9 +72,8 @@ jobs:
 
   validate:
     needs: plan
-    if: needs.plan.outputs.relevant == 'true' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
+    if: needs.plan.outputs.relevant == 'true' && github.event_name != 'pull_request'
     # Native builds run only on the maintainers' self-hosted Mac (docs/SELF_HOSTED_MACOS_RUNNER.md).
-    # Fork pull requests never reach it; their required check fails with instructions instead.
     runs-on: [self-hosted, macOS, ARM64, '${{ needs.plan.outputs.runner }}']
     timeout-minutes: 360
     permissions:
@@ -114,7 +115,6 @@ jobs:
           dotnet test scripts/FirebaseBindingAudit.Tests/FirebaseBindingAudit.Tests.csproj --nologo
           python3 -m unittest discover -s tests/E2E/Firebase.Foundation -p 'test_*.py'
       - name: Verify feed read access
-        if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
         env:
           GH_TOKEN: ${{ github.token }}
         run: python3 scripts/firebase-release/release.py probe-feeds
@@ -182,15 +182,14 @@ jobs:
           PLAN_RESULT: ${{ needs.plan.result }}
           RELEVANT: ${{ needs.plan.outputs.relevant }}
           VALIDATE_RESULT: ${{ needs.validate.result }}
-          TRUSTED: ${{ (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) }}
+          EVENT_NAME: ${{ github.event_name }}
         run: |
           test "$PLAN_RESULT" = success
-          if [ "$RELEVANT" = true ] && [ "$TRUSTED" != true ]; then
-            echo '::error::Firebase native validation runs only on the maintainers'"'"' self-hosted Mac. A maintainer must push this branch to the repository to validate it.'
-            exit 1
-          fi
-          if [ "$RELEVANT" = true ]; then
+          if [ "$RELEVANT" = true ] && [ "$EVENT_NAME" != pull_request ]; then
             test "$VALIDATE_RESULT" = success
+          elif [ "$RELEVANT" = true ]; then
+            test "$VALIDATE_RESULT" = skipped
+            echo '::notice::Firebase native validation is required and runs after merge on main. To run it before merging, manually run this workflow on the branch.'
           else
             test "$VALIDATE_RESULT" = skipped
             echo 'No Firebase package or validation inputs changed.'
@@ -300,9 +299,8 @@ jobs:
 
   signin-validate:
     needs: signin-plan
-    if: needs.signin-plan.outputs.relevant == 'true' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
+    if: needs.signin-plan.outputs.relevant == 'true' && github.event_name != 'pull_request'
     # Native builds run only on the maintainers' self-hosted Mac (docs/SELF_HOSTED_MACOS_RUNNER.md).
-    # Fork pull requests never reach it; their required check fails with instructions instead.
     runs-on: [self-hosted, macOS, ARM64, '${{ needs.signin-plan.outputs.runner }}']
     timeout-minutes: 360
     permissions:
@@ -343,13 +341,8 @@ jobs:
         id: package-inspection
         env:
           GH_TOKEN: ${{ github.token }}
-        shell: bash
         run: |
-          args=()
-          if [[ "${{ github.event_name }}" != pull_request || "${{ github.event.pull_request.head.repo.full_name }}" == "${{ github.repository }}" ]]; then
-            args+=(--online)
-          fi
-          python3 scripts/firebase-release/release.py --channel signin prepare "${args[@]}"
+          python3 scripts/firebase-release/release.py --channel signin prepare --online
           python3 scripts/signin-release/validate.py
       - name: Standalone and transitive offline consumers
         run: python3 scripts/signin-release/consumers.py
@@ -392,15 +385,14 @@ jobs:
           PLAN_RESULT: ${{ needs.signin-plan.result }}
           RELEVANT: ${{ needs.signin-plan.outputs.relevant }}
           VALIDATE_RESULT: ${{ needs.signin-validate.result }}
-          TRUSTED: ${{ (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) }}
+          EVENT_NAME: ${{ github.event_name }}
         run: |
           test "$PLAN_RESULT" = success
-          if [ "$RELEVANT" = true ] && [ "$TRUSTED" != true ]; then
-            echo '::error::Sign-In native validation runs only on the maintainers'"'"' self-hosted Mac. A maintainer must push this branch to the repository to validate it.'
-            exit 1
-          fi
-          if [ "$RELEVANT" = true ]; then
+          if [ "$RELEVANT" = true ] && [ "$EVENT_NAME" != pull_request ]; then
             test "$VALIDATE_RESULT" = success
+          elif [ "$RELEVANT" = true ]; then
+            test "$VALIDATE_RESULT" = skipped
+            echo '::notice::Sign-In native validation is required and runs after merge on main. To run it before merging, manually run this workflow on the branch.'
           else
             test "$VALIDATE_RESULT" = skipped
             echo 'No Sign-In package or validation inputs changed.'
