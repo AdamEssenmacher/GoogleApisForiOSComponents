@@ -227,6 +227,29 @@ class ReleaseTests(unittest.TestCase):
                 with self.assertRaisesRegex(ValueError, 'Only main'):
                     release.publish(types.SimpleNamespace(package_dir=folder))
 
+    def test_last_validated_skips_failed_untrusted_and_unrelated_runs(self):
+        runs = [{'id': 1, 'event': 'push', 'head_sha': 'failed'},
+                {'id': 2, 'event': 'pull_request', 'head_sha': 'pr'},
+                {'id': 3, 'event': 'push', 'head_sha': 'rewritten'},
+                {'id': 4, 'event': 'workflow_dispatch', 'head_sha': 'good'},
+                {'id': 5, 'event': 'push', 'head_sha': 'older'}]
+        gates = {1: 'failure', 2: 'success', 3: 'success', 4: 'success', 5: 'success'}
+        def github(path):
+            if path.startswith('actions/workflows/'):
+                return {'workflow_runs': runs}
+            run_id = int(path.split('/')[2])
+            return {'jobs': [{'name': 'Firebase validation', 'conclusion': gates[run_id]},
+                             {'name': 'Google Sign-In validation', 'conclusion': 'failure'}]}
+        def ancestry(args, **kwargs):
+            return subprocess.CompletedProcess(args, 1 if args[3] == 'rewritten' else 0)
+        with patch.object(release, 'github', side_effect=github), patch.object(release.subprocess, 'run', side_effect=ancestry):
+            self.assertEqual(release.last_validated(), 'good')
+            release.LABEL = 'Google Sign-In'
+            try:
+                self.assertIsNone(release.last_validated())
+            finally:
+                release.LABEL = 'Firebase'
+
     def test_disabled_configuration_and_unrelated_changes(self):
         baseline = {'packages': [self.p]}
         config = {'releaseVersion': None, 'minimumFirebaseVersion': '12.12.0',

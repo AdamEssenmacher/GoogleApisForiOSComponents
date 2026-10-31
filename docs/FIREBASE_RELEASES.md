@@ -58,8 +58,11 @@ or `signin-candidate` release-workflow artifacts, or request a manual pack run.
    a GitHub Release with package assets, manifest, checksums, and generated notes.
 
 Merging alone does not authorize a deployment. PRs cannot publish. A main-branch run
-is release-eligible when the release version changes; unrelated merges do not recreate
-a rejected or expired deployment candidate. Re-run the original failed jobs while artifacts
+compares against the last `main` commit whose validation check passed, and is
+release-eligible when the release version changed since then; unrelated merges do not recreate
+a rejected or expired deployment candidate. A merge that lands while an earlier candidate is still
+validating also becomes a candidate. Approve one: publication refuses a second commit for the same
+release version. Re-run the original failed jobs while artifacts
 remain available, or deliberately request a new candidate with a manual run on main,
 which rebuilds and revalidates the incomplete release. No ordinary tag push publishes packages.
 

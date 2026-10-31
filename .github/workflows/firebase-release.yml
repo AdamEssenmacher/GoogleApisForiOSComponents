@@ -20,6 +20,7 @@ jobs:
   plan:
     runs-on: ubuntu-latest
     permissions:
+      actions: read
       contents: read
       packages: read
     outputs:
@@ -48,6 +49,10 @@ jobs:
         shell: bash
         run: |
           args=(--online)
+          if [[ "$EVENT_NAME" == push ]]; then
+            # Compare with the last commit that passed validation, so a failed run stays in range.
+            BASE_SHA=$(python3 scripts/firebase-release/release.py last-validated)
+          fi
           if [[ "$EVENT_NAME" == workflow_dispatch ]]; then
             args+=(--manual)
           elif [[ -n "$BASE_SHA" && "$BASE_SHA" != 0000000000000000000000000000000000000000 ]]; then
@@ -245,6 +250,7 @@ jobs:
   signin-plan:
     runs-on: ubuntu-latest
     permissions:
+      actions: read
       contents: read
       packages: read
     outputs:
@@ -275,6 +281,10 @@ jobs:
         shell: bash
         run: |
           args=(--online)
+          if [[ "$EVENT_NAME" == push ]]; then
+            # Compare with the last commit that passed validation, so a failed run stays in range.
+            BASE_SHA=$(python3 scripts/firebase-release/release.py --channel signin last-validated)
+          fi
           if [[ "$EVENT_NAME" == workflow_dispatch ]]; then
             args+=(--manual)
           elif [[ -n "$BASE_SHA" && "$BASE_SHA" != 0000000000000000000000000000000000000000 ]]; then
