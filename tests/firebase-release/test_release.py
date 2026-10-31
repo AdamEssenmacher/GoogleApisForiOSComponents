@@ -24,6 +24,7 @@ def package(package_id='AdamE.Firebase.iOS.Core', value='12.12.0', dependency=''
     buffer = io.BytesIO()
     resource = io.BytesIO()
     def put(archive, name, data):
+        # ZipInfo pins the 1980 timestamp so repeated calls produce identical bytes.
         archive.writestr(zipfile.ZipInfo(name), data)
     with zipfile.ZipFile(resource, 'w') as native:
         put(native, 'manifest', '<BindingAssembly><NativeReference Name="Core.xcframework"><Kind>Framework</Kind></NativeReference></BindingAssembly>')
@@ -35,13 +36,13 @@ def package(package_id='AdamE.Firebase.iOS.Core', value='12.12.0', dependency=''
             put(native, f'Core.xcframework/{identifier}/Core.framework/Core', 'binary')
         put(native, 'Core.xcframework/Info.plist', plistlib.dumps({'AvailableLibraries': libraries}))
     with zipfile.ZipFile(buffer, 'w') as archive:
-        archive.writestr('package.nuspec', f'<package><metadata><id>{package_id}</id><version>{value}</version>'
-                         f'<repository commit="{commit}"/><dependencies>{dependency}</dependencies></metadata></package>')
+        put(archive, 'package.nuspec', f'<package><metadata><id>{package_id}</id><version>{value}</version>'
+            f'<repository commit="{commit}"/><dependencies>{dependency}</dependencies></metadata></package>')
         for platform in ('ios', 'maccatalyst'):
-            archive.writestr(f'lib/net10.0-{platform}/Firebase.Core.dll', 'assembly')
-            archive.writestr(f'lib/net10.0-{platform}/Firebase.Core.resources.zip', resource.getvalue())
+            put(archive, f'lib/net10.0-{platform}/Firebase.Core.dll', 'assembly')
+            put(archive, f'lib/net10.0-{platform}/Firebase.Core.resources.zip', resource.getvalue())
         for name, data in (extra or {}).items():
-            archive.writestr(name, data)
+            put(archive, name, data)
     return buffer.getvalue()
 
 
