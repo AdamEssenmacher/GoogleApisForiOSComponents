@@ -23,6 +23,8 @@
     <BindingSurfaceCoveragePropsPath></BindingSurfaceCoveragePropsPath>
     <FirebasePackageVersion>12.15.0</FirebasePackageVersion>
     <GoogleAppMeasurementPackageVersion>12.15.0</GoogleAppMeasurementPackageVersion>
+    <!-- Package references are version floors; restore picks up the packaging revision CI just built. -->
+    <NoWarn>$(NoWarn);NU1603</NoWarn>
   </PropertyGroup>
 
   <Import Project="$(RuntimeDriftCasePropsPath)" Condition="'$(RuntimeDriftCasePropsPath)' != '' and Exists('$(RuntimeDriftCasePropsPath)')" />

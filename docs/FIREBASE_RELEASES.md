@@ -7,6 +7,36 @@ Firebase packages and their repository-owned Google dependencies are validated a
 published by `firebase-release.yml`. Package IDs and versions remain defined by the
 existing projects and Cake metadata. Third-party packages are consumed, not republished.
 
+## CI lane ownership and scheduling
+
+The `CI` workflow's `build` check runs managed unit tests on Linux without Apple
+workloads. Automatic Sign-In native builds belong to **Google Sign-In validation**;
+Firebase native builds belong to **Firebase validation**. Both retain their complete
+consumer suites. Maps and Places retain their separate Foundation validation workflow.
+
+Both release planners run on every PR. Each planner reports `reasons` in its plan JSON
+and log: matching changed paths, manual validation, missing comparison history, or an
+eligible release. On pull requests the required checks only plan: native validation runs
+after merge on `main`, or for any branch through a manual run of the workflow. Unrelated
+changes produce a successful no-op required check. Native validation follows each channel's
+package closure, linked/packed inputs, configuration, and validation tooling. Shared SDK/build inputs and common release tooling activate both
+channels. Shared Cake scripts, including `components.cake`, are conservative inputs;
+channel-specific Cake entrypoints activate only their own channel. Documentation and
+unrelated scripts or Maps/Places inputs do not activate these release lanes.
+
+Workflows that run on pull requests cancel superseded runs for the same PR. Main and manual
+runs are kept,
+and publication remains serialized behind environment approval. This policy applies to
+new runs; it does not clean up older queued runs.
+
+Native validation runs on a maintainer's self-hosted Mac, and pull requests never reach it;
+see [SELF_HOSTED_MACOS_RUNNER.md](SELF_HOSTED_MACOS_RUNNER.md).
+
+For an ad hoc component build, manually dispatch `CI` with the existing `names` input.
+Its macOS `pack` job uses the normal Cake build and uploads the `nuget` artifact. Automatic
+CI no longer uploads that artifact: consumers should use the dedicated `firebase-candidate`
+or `signin-candidate` release-workflow artifacts, or request a manual pack run.
+
 ## Preparing a release
 
 1. Open a version-update PR. Update affected package versions and native metadata,
@@ -16,19 +46,23 @@ existing projects and Cake metadata. Third-party packages are consumed, not repu
    The first supported release is `12.12.0`. The initial null value disables publication.
    A binding-only release can use a revision such as `12.12.0.1`; individual package
    versions may differ from the release version.
-3. Wait for **Firebase validation** before merging. Relevant changes run full build/pack,
+3. Optionally, manually run `firebase-release.yml` on the PR branch to validate it before
+   merging. The PR's **Firebase validation** check only plans.
+4. After merge, CI validates the exact main commit. Relevant changes run full build/pack,
    unit tests, package inspection, simulator smoke/surface/nullability checks, the Firestore
-   pipeline constructor regression, and two
-   local Firestore emulator checks. Unrelated changes report an explicit successful no-op.
-4. After merge, CI validates the exact main commit. Review the workflow summary's package
-   versions, reused dependencies, upload destinations, and commit. Select **Review
-   deployments**, approve `firebase-release`, and the protected publish job continues.
-5. After both feeds are verified, automation publishes `firebase-v<releaseVersion>` and
+   pipeline constructor regression, and two local Firestore emulator checks.
+5. Review the workflow summary's package versions, reused dependencies, upload destinations,
+   and commit. Select **Review deployments**, approve `firebase-release`, and the protected
+   publish job continues.
+6. After both feeds are verified, automation publishes `firebase-v<releaseVersion>` and
    a GitHub Release with package assets, manifest, checksums, and generated notes.
 
 Merging alone does not authorize a deployment. PRs cannot publish. A main-branch run
-is release-eligible when the release version changes; unrelated merges do not recreate
-a rejected or expired deployment candidate. Re-run the original failed jobs while artifacts
+compares against the last `main` commit whose validation check passed, and is
+release-eligible when the release version changed since then; unrelated merges do not recreate
+a rejected or expired deployment candidate. A merge that lands while an earlier candidate is still
+validating also becomes a candidate. Approve one: publication refuses a second commit for the same
+release version. Re-run the original failed jobs while artifacts
 remain available, or deliberately request a new candidate with a manual run on main,
 which rebuilds and revalidates the incomplete release. No ordinary tag push publishes packages.
 
@@ -61,7 +95,7 @@ Shared packaging changes that remain in this effective script require bumps acro
 components' fingerprints. Project-reference version changes affect consumers' fingerprints.
 Development-only documentation and test edits do not require package version bumps.
 
-The native runner and Xcode pins live in `nativeBuild` in `eng/firebase-release.json`;
+The native runner label and Xcode pins live in `nativeBuild` in `eng/firebase-release.json`;
 the workflow reads those pins, and they are part of every package's fingerprint.
 The .NET SDK and tool pins remain in the existing repository configuration. Advancing
 a shared build/toolchain pin requires explicit package-version bumps across the closure.

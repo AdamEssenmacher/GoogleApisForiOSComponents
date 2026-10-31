@@ -233,6 +233,20 @@
         "Extension.cs"
       ],
       "sharpieMode": "auto"
+    },
+    {
+      "id": "SignIn",
+      "packageId": "Google.SignIn",
+      "xcframework": "GoogleSignIn",
+      "baselineDirectory": "source/Google/SignIn",
+      "baselineFiles": [
+        "ApiDefinition.cs",
+        "Enums.cs"
+      ],
+      "helperFiles": [
+        "Loader.cs"
+      ],
+      "sharpieMode": "auto"
     }
   ]
 }

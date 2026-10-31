@@ -6,9 +6,11 @@ on:
     branches: [main]
   workflow_dispatch:
 
-# Cancel superseded PR validation, but never cancel a main release candidate.
+# Pull requests only plan. Native validation runs after merge on main, or for any branch through a
+# manual run, so updating a PR branch never queues the self-hosted Mac.
+# Cancel superseded PR runs, but never cancel a main release candidate.
 concurrency:
-  group: firebase-${{ github.event_name == 'pull_request' && github.ref || github.run_id }}
+  group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.event.pull_request.number || github.run_id }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 permissions:
@@ -18,6 +20,7 @@ jobs:
   plan:
     runs-on: ubuntu-latest
     permissions:
+      actions: read
       contents: read
       packages: read
     outputs:
@@ -26,10 +29,10 @@ jobs:
       runner: ${{ steps.plan.outputs.runner }}
       xcode: ${{ steps.plan.outputs.xcode }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/setup-dotnet@v5
         with:
           global-json-file: global.json
       - run: dotnet tool restore
@@ -46,6 +49,10 @@ jobs:
         shell: bash
         run: |
           args=(--online)
+          if [[ "$EVENT_NAME" == push ]]; then
+            # Compare with the last commit that passed validation, so a failed run stays in range.
+            BASE_SHA=$(python3 scripts/firebase-release/release.py last-validated)
+          fi
           if [[ "$EVENT_NAME" == workflow_dispatch ]]; then
             args+=(--manual)
           elif [[ -n "$BASE_SHA" && "$BASE_SHA" != 0000000000000000000000000000000000000000 ]]; then
@@ -57,7 +64,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: python3 scripts/firebase-release/release.py check-feeds
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         if: always()
         with:
           name: firebase-plan
@@ -70,8 +77,9 @@ jobs:
 
   validate:
     needs: plan
-    if: needs.plan.outputs.relevant == 'true'
-    runs-on: ${{ needs.plan.outputs.runner }}
+    if: needs.plan.outputs.relevant == 'true' && github.event_name != 'pull_request'
+    # Native builds run only on the maintainers' self-hosted Mac (docs/SELF_HOSTED_MACOS_RUNNER.md).
+    runs-on: [self-hosted, macOS, ARM64, '${{ needs.plan.outputs.runner }}']
     timeout-minutes: 360
     permissions:
       contents: read
@@ -81,22 +89,20 @@ jobs:
       BUILD_NUMBER: ${{ github.run_number }}
       XCODE_VERSION: ${{ needs.plan.outputs.xcode }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v4
+      - uses: actions/checkout@v5
+      - uses: actions/download-artifact@v7
         with:
           name: firebase-plan
           path: output
       - name: Select configured Xcode
-        run: |
-          sudo xcode-select --switch "/Applications/Xcode_${XCODE_VERSION}.app/Contents/Developer"
-          xcodebuild -version
-      - uses: actions/setup-dotnet@v4
+        run: tools/ci/select-xcode.sh "$XCODE_VERSION"
+      - uses: actions/setup-dotnet@v5
         with:
           global-json-file: global.json
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version: '22'
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: '21'
@@ -113,8 +119,8 @@ jobs:
         run: |
           dotnet test scripts/FirebaseBindingAudit.Tests/FirebaseBindingAudit.Tests.csproj --nologo
           python3 -m unittest discover -s tests/E2E/Firebase.Foundation -p 'test_*.py'
+          python3 -m unittest discover -s tests/crashlytics -p 'test_*.py'
       - name: Verify feed read access
-        if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
         env:
           GH_TOKEN: ${{ github.token }}
         run: python3 scripts/firebase-release/release.py probe-feeds
@@ -153,7 +159,7 @@ jobs:
       - name: Seal candidate and write approval summary
         run: python3 scripts/firebase-release/release.py finalize --results output/firebase-results/validation.json
       - name: Upload validated candidate
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: firebase-candidate
           path: output/firebase-candidate
@@ -161,7 +167,7 @@ jobs:
           retention-days: 90
       - name: Upload diagnostics
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: firebase-validation-results
           path: |
@@ -182,10 +188,14 @@ jobs:
           PLAN_RESULT: ${{ needs.plan.result }}
           RELEVANT: ${{ needs.plan.outputs.relevant }}
           VALIDATE_RESULT: ${{ needs.validate.result }}
+          EVENT_NAME: ${{ github.event_name }}
         run: |
           test "$PLAN_RESULT" = success
-          if [ "$RELEVANT" = true ]; then
+          if [ "$RELEVANT" = true ] && [ "$EVENT_NAME" != pull_request ]; then
             test "$VALIDATE_RESULT" = success
+          elif [ "$RELEVANT" = true ]; then
+            test "$VALIDATE_RESULT" = skipped
+            echo '::notice::Firebase native validation is required and runs after merge on main. To run it before merging, manually run this workflow on the branch.'
           else
             test "$VALIDATE_RESULT" = skipped
             echo 'No Firebase package or validation inputs changed.'
@@ -208,11 +218,11 @@ jobs:
       packages: write
       id-token: write
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-dotnet@v5
         with:
           global-json-file: global.json
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v7
         with:
           name: firebase-candidate
           path: output/firebase-candidate
@@ -241,6 +251,7 @@ jobs:
   signin-plan:
     runs-on: ubuntu-latest
     permissions:
+      actions: read
       contents: read
       packages: read
     outputs:
@@ -249,15 +260,17 @@ jobs:
       runner: ${{ steps.plan.outputs.runner }}
       xcode: ${{ steps.plan.outputs.xcode }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/setup-dotnet@v5
         with:
           global-json-file: global.json
       - run: dotnet tool restore
-      - name: Export Sign-In dependency closure
-        run: dotnet tool run dotnet-cake -- signin_publish.cake
+      - name: Export Sign-In and integration dependency closures
+        run: |
+          dotnet tool run dotnet-cake -- signin_publish.cake
+          dotnet tool run dotnet-cake -- --target=firebase-publish-metadata
       - name: Release tooling tests
         run: python3 -m unittest discover -s tests/firebase-release -v
       - name: Plan Sign-In validation and release
@@ -269,6 +282,10 @@ jobs:
         shell: bash
         run: |
           args=(--online)
+          if [[ "$EVENT_NAME" == push ]]; then
+            # Compare with the last commit that passed validation, so a failed run stays in range.
+            BASE_SHA=$(python3 scripts/firebase-release/release.py --channel signin last-validated)
+          fi
           if [[ "$EVENT_NAME" == workflow_dispatch ]]; then
             args+=(--manual)
           elif [[ -n "$BASE_SHA" && "$BASE_SHA" != 0000000000000000000000000000000000000000 ]]; then
@@ -280,7 +297,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: python3 scripts/firebase-release/release.py --channel signin check-feeds
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         if: always()
         with:
           name: signin-plan
@@ -293,8 +310,9 @@ jobs:
 
   signin-validate:
     needs: signin-plan
-    if: needs.signin-plan.outputs.relevant == 'true'
-    runs-on: ${{ needs.signin-plan.outputs.runner }}
+    if: needs.signin-plan.outputs.relevant == 'true' && github.event_name != 'pull_request'
+    # Native builds run only on the maintainers' self-hosted Mac (docs/SELF_HOSTED_MACOS_RUNNER.md).
+    runs-on: [self-hosted, macOS, ARM64, '${{ needs.signin-plan.outputs.runner }}']
     timeout-minutes: 360
     permissions:
       contents: read
@@ -304,26 +322,27 @@ jobs:
       BUILD_NUMBER: ${{ github.run_number }}
       XCODE_VERSION: ${{ needs.signin-plan.outputs.xcode }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v4
+      - uses: actions/checkout@v5
+      - uses: actions/download-artifact@v7
         with:
           name: signin-plan
           path: output
       - name: Select configured Xcode
-        run: sudo xcode-select --switch "/Applications/Xcode_${XCODE_VERSION}.app/Contents/Developer"
-      - uses: actions/setup-dotnet@v4
+        run: tools/ci/select-xcode.sh "$XCODE_VERSION"
+      - uses: actions/setup-dotnet@v5
         with:
           global-json-file: global.json
-      - uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: '3.3'
       - name: Install pinned producer tools
         run: |
           dotnet tool restore
           dotnet workload install ios maccatalyst
           pin=$(python3 -c 'import json; print(json.load(open("eng/signin-release.json"))["nativeBuild"]["cocoapods"])')
+          # Install the pinned CocoaPods into a job-local gem home so the Mac's own gems are untouched.
+          export GEM_HOME="$RUNNER_TEMP/gems"
           gem install cocoapods --version "$pin" --no-document
-          test "$(pod --version)" = "$pin"
+          echo "GEM_HOME=$GEM_HOME" >> "$GITHUB_ENV"
+          echo "$GEM_HOME/bin" >> "$GITHUB_PATH"
+          test "$("$GEM_HOME/bin/pod" --version)" = "$pin"
       - name: Unit tests
         id: unit-tests
         run: python3 -m unittest discover -s tests/firebase-release -v
@@ -333,21 +352,24 @@ jobs:
         id: package-inspection
         env:
           GH_TOKEN: ${{ github.token }}
-        shell: bash
         run: |
-          args=()
-          if [[ "${{ github.event_name }}" != pull_request || "${{ github.event.pull_request.head.repo.full_name }}" == "${{ github.repository }}" ]]; then
-            args+=(--online)
-          fi
-          python3 scripts/firebase-release/release.py --channel signin prepare "${args[@]}"
+          python3 scripts/firebase-release/release.py --channel signin prepare --online
           python3 scripts/signin-release/validate.py
       - name: Standalone and transitive offline consumers
         run: python3 scripts/signin-release/consumers.py
-      - name: Build Firebase 12 integration fixtures only
+      - name: Reuse published Firebase 12 integration fixtures
+        id: fixtures
+        env:
+          # GitHub Packages reads need a repository token; fork pull requests use nuget.org alone.
+          GH_TOKEN: ${{ (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) && github.token || '' }}
         run: |
           dotnet tool run dotnet-cake -- --target=firebase-publish-metadata
-          dotnet tool run dotnet-cake -- --target=nuget --names=Firebase.Auth,Firebase.Analytics,Firebase.CloudFirestore
-          python3 scripts/signin-release/integration_feed.py
+          python3 scripts/signin-release/integration_feed.py --fetch-published
+      - name: Build Firebase 12 integration fixtures only
+        if: steps.fixtures.outputs.source != 'published'
+        run: dotnet tool run dotnet-cake -- --target=nuget --names=Firebase.Auth,Firebase.Analytics,Firebase.CloudFirestore
+      - name: Stage Firebase 12 integration feed
+        run: python3 scripts/signin-release/integration_feed.py
       - name: Combined Sign-In and Firebase 12 consumers
         run: python3 scripts/signin-release/consumers.py --feed output/signin-combined --combined
       - name: Seal Sign-In validation evidence and approval summary
@@ -357,13 +379,13 @@ jobs:
         run: |
           python3 scripts/firebase-release/release.py --channel signin collect_validation --results-dir output/signin-results
           python3 scripts/firebase-release/release.py --channel signin finalize --results output/signin-results/validation.json
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         with:
           name: signin-candidate
           path: output/signin-candidate
           if-no-files-found: error
           retention-days: 90
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         if: always()
         with:
           name: signin-validation-results
@@ -382,10 +404,14 @@ jobs:
           PLAN_RESULT: ${{ needs.signin-plan.result }}
           RELEVANT: ${{ needs.signin-plan.outputs.relevant }}
           VALIDATE_RESULT: ${{ needs.signin-validate.result }}
+          EVENT_NAME: ${{ github.event_name }}
         run: |
           test "$PLAN_RESULT" = success
-          if [ "$RELEVANT" = true ]; then
+          if [ "$RELEVANT" = true ] && [ "$EVENT_NAME" != pull_request ]; then
             test "$VALIDATE_RESULT" = success
+          elif [ "$RELEVANT" = true ]; then
+            test "$VALIDATE_RESULT" = skipped
+            echo '::notice::Sign-In native validation is required and runs after merge on main. To run it before merging, manually run this workflow on the branch.'
           else
             test "$VALIDATE_RESULT" = skipped
             echo 'No Sign-In package or validation inputs changed.'
@@ -408,11 +434,11 @@ jobs:
       packages: write
       id-token: write
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-dotnet@v5
         with:
           global-json-file: global.json
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v7
         with:
           name: signin-candidate
           path: output/signin-candidate
