@@ -18,12 +18,21 @@ Planning, the required aggregate checks, and publication stay on GitHub-hosted U
 candidates for `main` are therefore built on the self-hosted Mac and published from hosted
 Ubuntu after environment approval.
 
-## Pull requests from forks
+## When native jobs run
 
-Fork pull requests never run on the self-hosted Mac. Their native jobs are skipped, and the
-**Firebase validation** and **Google Sign-In validation** checks fail with an explanation when
-native validation was required. To validate a fork contribution, a maintainer reviews it and
-pushes the branch to this repository.
+Pull requests never run on the self-hosted Mac. Native validation runs after merge, on each push
+to `main`, and when a maintainer manually runs **Firebase CI and release** or **Google Foundation
+Validation** on a branch. On pull requests the **Firebase validation** and **Google Sign-In
+validation** checks only run the hosted planners. When native validation would be required, they
+pass with a notice instead of waiting on the Mac. Updating a PR branch after another merge
+therefore costs only the hosted checks.
+
+Merged changes can break the native build on `main`. Publication still requires a passing
+validation of the exact `main` commit, so a broken release candidate never publishes. Each main
+run compares against the last `main` commit whose check passed, not the previous push. A failure
+therefore stays in range: later merges keep validating it until a fix passes, and a release
+whose validation failed becomes eligible again with that fix. Run the workflow manually on a
+risky branch to validate it before merging.
 
 A fork pull request can edit workflow files, so the job conditions alone are not a security
 boundary. Under the repository's Actions settings, require approval for workflow runs from **all
@@ -70,8 +79,8 @@ label to the runner before merging the change.
 
 ## Throughput and sharing
 
-One runner runs one job at a time, so native jobs from several pull requests queue behind each
-other. Other runners on the same Mac can run at the same time; they share the CPU and the simulator
+One runner runs one job at a time, so native jobs from several merges or manual runs queue behind
+each other. Other runners on the same Mac can run at the same time; they share the CPU and the simulator
 service. The Firestore emulator checks pick free loopback ports for each run, so they do not
 collide with emulators started by other jobs.
 
