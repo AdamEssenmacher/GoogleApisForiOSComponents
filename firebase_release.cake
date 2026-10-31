@@ -162,6 +162,7 @@ class FirebaseReleaseContext
 	public string TargetVersion { get; set; }
 	public string FromVersion { get; set; }
 	public string TagCommit { get; set; }
+	public string UploadSymbolsSha256 { get; set; }
 	public Dictionary<string, FirebaseReleaseDownloadInfo> ExternalDownloads { get; set; }
 	public Dictionary<string, FirebaseReleaseNativeMetadata> FromNativeMetadata { get; set; }
 	public Dictionary<string, FirebaseReleaseNativeMetadata> TargetNativeMetadata { get; set; }
@@ -265,6 +266,7 @@ FirebaseReleaseContext CreateFirebaseReleaseContext ()
 		TargetVersion = FIREBASE_RELEASE_VERSION,
 		FromVersion = fromVersion,
 		TagCommit = tagCommit,
+		UploadSymbolsSha256 = ResolveFirebaseUploadSymbolsSha256 (tagCommit),
 		ExternalDownloads = externalDownloads,
 		FromNativeMetadata = fromNativeMetadata,
 		TargetNativeMetadata = targetNativeMetadata
@@ -301,7 +303,7 @@ List<FirebaseReleaseFileUpdate> GetFirebaseReleaseFileUpdates (FirebaseReleaseCo
 		updates.Add (CreateFirebaseReleaseFileUpdate (GetArtifactProjectPath (artifact), text => UpdateFirebaseReleaseProjectFile (text, artifact, context)));
 
 	foreach (var targetPath in GetFirebaseReleaseTargetsFiles ())
-		updates.Add (CreateFirebaseReleaseFileUpdate (targetPath, text => UpdateFirebaseReleaseTargetsFile (text, context.TargetVersion, context.TagCommit)));
+		updates.Add (CreateFirebaseReleaseFileUpdate (targetPath, text => UpdateFirebaseReleaseTargetsFile (text, context.TargetVersion, context.TagCommit, context.UploadSymbolsSha256)));
 
 	return updates;
 }
@@ -543,9 +545,14 @@ string SetFirebaseReleaseNativeReferenceElementValue (string block, string eleme
 	return Regex.Replace (block, "(\\r?\\n)(\\s*)(</_?NativeReference>)", insertion + "${1}${2}${3}", RegexOptions.None, TimeSpan.FromSeconds (1));
 }
 
-string UpdateFirebaseReleaseTargetsFile (string text, string targetVersion, string tagCommit)
+string UpdateFirebaseReleaseTargetsFile (string text, string targetVersion, string tagCommit, string scriptSha256)
 {
 	text = Regex.Replace (text, "(<_[^>]+AssemblyName>[^<]* Version=)([^,]+)(,)", "${1}" + targetVersion + "${3}");
+	if (!Regex.IsMatch (scriptSha256, "^[a-fA-F0-9]{64}$"))
+		throw new Exception ("Invalid Crashlytics upload tool digest.");
+	if (!text.Contains ("<_FirebaseCrashlyticsScriptSha256>"))
+		throw new Exception ("Crashlytics targets are missing the upload tool digest contract.");
+	text = Regex.Replace (text, "(<_FirebaseCrashlyticsScriptSha256>)[^<]*(</_FirebaseCrashlyticsScriptSha256>)", "${1}" + scriptSha256.ToLowerInvariant () + "${2}");
 	text = Regex.Replace (text, "(<_FirebaseCrashlyticsItemsFolder>FCrshlytcs-)([^<]+)(</_FirebaseCrashlyticsItemsFolder>)", "${1}" + targetVersion + "${3}");
 	text = Regex.Replace (
 		text,
@@ -794,6 +801,19 @@ void AddFirebaseReleaseUniqueToken (List<string> values, string value)
 		return;
 
 	values.Add (value);
+}
+
+string ResolveFirebaseUploadSymbolsSha256 (string tagCommit)
+{
+	var path = new FilePath (System.IO.Path.GetTempFileName ());
+	try {
+		DownloadFile ("https://raw.githubusercontent.com/firebase/firebase-ios-sdk/" + tagCommit + "/Crashlytics/upload-symbols", path);
+		using (var sha = System.Security.Cryptography.SHA256.Create ())
+		using (var stream = System.IO.File.OpenRead (path.FullPath))
+			return BitConverter.ToString (sha.ComputeHash (stream)).Replace ("-", "").ToLowerInvariant ();
+	} finally {
+		if (FileExists (path)) DeleteFile (path);
+	}
 }
 
 string ResolveFirebaseReleaseTagCommit (string version)

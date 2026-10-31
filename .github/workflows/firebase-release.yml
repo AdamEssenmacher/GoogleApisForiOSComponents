@@ -119,6 +119,7 @@ jobs:
         run: |
           dotnet test scripts/FirebaseBindingAudit.Tests/FirebaseBindingAudit.Tests.csproj --nologo
           python3 -m unittest discover -s tests/E2E/Firebase.Foundation -p 'test_*.py'
+          python3 -m unittest discover -s tests/crashlytics -p 'test_*.py'
       - name: Verify feed read access
         env:
           GH_TOKEN: ${{ github.token }}
