@@ -193,6 +193,42 @@ class ReviewRegressionTests(unittest.TestCase):
                             feed.stage_feed(candidate, paths, records, output)
                         self.assertTrue(sentinel.exists())
 
+    def test_published_fixtures_require_identical_inputs_and_sealed_payloads(self):
+        roots = ['AdamE.Firebase.iOS.' + n for n in ('Auth', 'Analytics', 'CloudFirestore')]
+        metadata = [dict(id=n, version='12.14.0', dependencies=[]) for n in roots]
+        current = {n: dict(id=n, fingerprint='f-' + n) for n in roots}
+        payloads = {n: n.encode() for n in roots}
+
+        def latest():
+            return dict(releaseVersion='12.14.0', packages=[
+                dict(id=n, version='12.14.0', fingerprint='f-' + n, payloadHash='h-' + n) for n in roots])
+
+        def fetch(record):
+            return payloads.get(record['id'])
+
+        with patch.object(release, 'payload_hash', side_effect=lambda b: 'h-' + b.decode()):
+            selected, reason = feed.published_fixtures(metadata, current, latest(), [fetch])
+            self.assertEqual(selected, payloads)
+            self.assertIsNone(reason)
+            for fault in ('unreleased', 'version', 'fingerprint', 'absent'):
+                with self.subTest(fault=fault):
+                    published, fetchers = latest(), [fetch]
+                    if fault == 'unreleased':
+                        published = None
+                    elif fault == 'version':
+                        published['packages'][0]['version'] = '12.13.0'
+                    elif fault == 'fingerprint':
+                        published['packages'][0]['fingerprint'] = 'changed'
+                    else:
+                        fetchers = [lambda record: None]
+                    selected, reason = feed.published_fixtures(metadata, current, published, fetchers)
+                    self.assertIsNone(selected)
+                    self.assertTrue(reason)
+            tampered = latest()
+            tampered['packages'][1]['payloadHash'] = 'other'
+            with self.assertRaisesRegex(ValueError, 'differs from its release manifest'):
+                feed.published_fixtures(metadata, current, tampered, [fetch])
+
     def test_fixture_staging_retains_major_version_policy_for_roots_and_dependencies(self):
         roots = ['AdamE.Firebase.iOS.' + n for n in ('Auth', 'Analytics', 'CloudFirestore')]
         dependency = 'AdamE.Firebase.iOS.Core'

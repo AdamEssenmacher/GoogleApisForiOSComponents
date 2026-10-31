@@ -353,11 +353,19 @@ jobs:
           python3 scripts/signin-release/validate.py
       - name: Standalone and transitive offline consumers
         run: python3 scripts/signin-release/consumers.py
-      - name: Build Firebase 12 integration fixtures only
+      - name: Reuse published Firebase 12 integration fixtures
+        id: fixtures
+        env:
+          # GitHub Packages reads need a repository token; fork pull requests use nuget.org alone.
+          GH_TOKEN: ${{ (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) && github.token || '' }}
         run: |
           dotnet tool run dotnet-cake -- --target=firebase-publish-metadata
-          dotnet tool run dotnet-cake -- --target=nuget --names=Firebase.Auth,Firebase.Analytics,Firebase.CloudFirestore
-          python3 scripts/signin-release/integration_feed.py
+          python3 scripts/signin-release/integration_feed.py --fetch-published
+      - name: Build Firebase 12 integration fixtures only
+        if: steps.fixtures.outputs.source != 'published'
+        run: dotnet tool run dotnet-cake -- --target=nuget --names=Firebase.Auth,Firebase.Analytics,Firebase.CloudFirestore
+      - name: Stage Firebase 12 integration feed
+        run: python3 scripts/signin-release/integration_feed.py
       - name: Combined Sign-In and Firebase 12 consumers
         run: python3 scripts/signin-release/consumers.py --feed output/signin-combined --combined
       - name: Seal Sign-In validation evidence and approval summary
