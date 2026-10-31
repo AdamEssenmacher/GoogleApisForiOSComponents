@@ -50,7 +50,8 @@ jobs:
 
   pack:
     if: github.event_name == 'workflow_dispatch'
-    runs-on: macos-15
+    # Manual packs use the maintainers' self-hosted Mac (docs/SELF_HOSTED_MACOS_RUNNER.md).
+    runs-on: [self-hosted, macOS, ARM64, xcode-27.1]
     env:
       CAKE_NAMES: ${{ inputs.names || 'Google.SignIn' }}
     steps:

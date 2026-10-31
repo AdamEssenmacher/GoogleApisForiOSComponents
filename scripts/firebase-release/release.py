@@ -36,6 +36,7 @@ SIGNIN_CHECKS |= {f'ios-{shape}-{rid}' for shape in ('direct', 'transitive') for
 SIGNIN_CHECKS |= {f'maccatalyst-{shape}-maccatalyst-arm64' for shape in ('direct', 'transitive')}
 SIGNIN_CHECKS.add('ios-direct-iossimulator-arm64-rebuild')
 REPO = os.environ.get('GITHUB_REPOSITORY', 'AdamEssenmacher/GoogleApisForiOSComponents')
+WORKFLOW = 'firebase-release.yml'
 VALIDATIONS = ['unit-tests', 'package-structure', 'smoke', 'surface', 'nullability',
                'firestore-pipeline', 'firestore-aggregate', 'firestore-filters']
 
@@ -117,7 +118,8 @@ def normalized(value):
 
 def native_build(config):
     settings = config['nativeBuild']
-    require(bool(re.fullmatch(r'macos-\d+', settings['runner'])), 'Expected a pinned hosted macOS runner')
+    # Native builds run on the self-hosted Mac labelled with its pinned Xcode (docs/SELF_HOSTED_MACOS_RUNNER.md).
+    require(bool(re.fullmatch(r'xcode-\d+(?:\.\d+){1,2}', settings['runner'])), 'Expected a pinned self-hosted runner label')
     require(bool(re.fullmatch(r'\d+(?:\.\d+){1,2}', settings['xcode'])), 'Expected a pinned stable Xcode version')
     if CHANNEL == 'signin':
         require(version('1.12.0') <= version(settings['cocoapods']) < version('2.0.0'), 'Unsupported CocoaPods runtime')
@@ -241,6 +243,27 @@ def check_versions(packages, baseline):
     return changed
 
 
+def last_validated(head='HEAD', limit=50):
+    """Newest main commit whose required validation check passed, or None.
+
+    Pull requests skip native validation, so main diffs against this commit rather than the
+    previous push: a failed native run stays in range until a later run passes.
+    """
+    gate = LABEL + ' validation'
+    runs = github(f'actions/workflows/{WORKFLOW}/runs?branch=main&status=completed&per_page={limit}')['workflow_runs']
+    for r in runs:
+        if r['event'] not in ('push', 'workflow_dispatch'):
+            continue
+        jobs = github(f"actions/runs/{r['id']}/jobs?filter=latest&per_page=100")['jobs']
+        if not any(j['name'] == gate and j['conclusion'] == 'success' for j in jobs):
+            continue
+        ancestor = subprocess.run(['git', 'merge-base', '--is-ancestor', r['head_sha'], head], cwd=ROOT,
+                                  capture_output=True)
+        if ancestor.returncode == 0:
+            return r['head_sha']
+    return None
+
+
 def git_file(ref, path):
     result = subprocess.run(['git', 'show', f'{ref}:{path}'], cwd=ROOT, text=True, capture_output=True)
     if result.returncode:
@@ -274,7 +297,7 @@ def validation_reasons(files, packages, channel, integration_metadata=()):
     directories = tuple(Path(p['project']).parent.as_posix() + '/' for p in packages)
     exact = {
         'global.json', 'Directory.Build.props', '.config/dotnet-tools.json',
-        'source/AssemblyInfo.cs', '.github/workflows/firebase-release.yml',
+        'source/AssemblyInfo.cs', '.github/workflows/firebase-release.yml', 'tools/ci/select-xcode.sh',
         'build.cake', 'common.cake', 'poco.cake', 'custom_externals_download.cake', 'components.cake',
         'firebase_publish.cake', 'firebase_release.cake',
         f'eng/{channel}-release.json', f'eng/{channel}-release-baseline.json',
@@ -752,6 +775,7 @@ def main():
     p.add_argument('--package-dir', default=f'output/{CHANNEL}-candidate')
     p.add_argument('--metadata', default=f'output/{CHANNEL}-metadata.json')
     sub.add_parser('probe-feeds')
+    sub.add_parser('last-validated')
     args = parser.parse_args()
     if args.command == 'snapshot':
         packages = [{k: p[k] for k in ('id', 'version', 'fingerprint')} for p in snapshot(read(args.metadata))]
@@ -761,6 +785,8 @@ def main():
         for feed in feeds():
             data = feed.fetch({'id': 'AdamE.Google.iOS.PromisesObjC', 'version': '2.4.0.5'})
             print(f'{feed.name}: authenticated lookup succeeded ({"present" if data else "absent"})')
+    elif args.command == 'last-validated':
+        print(last_validated() or '')
     else:
         globals()[args.command.replace('-', '_')](args)
 

@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using Foundation;
 using ObjCRuntime;
@@ -42,6 +43,8 @@ using Firebase.Crashlytics;
 
 namespace FirebaseFoundationE2E;
 
+[UnconditionalSuppressMessage("Trimming", "IL2045", Justification = "The E2E harness inspects binding assemblies by reflection, and the app assembly itself is not trimmed.")]
+[UnconditionalSuppressMessage("Trimming", "IL2070", Justification = "The E2E harness inspects binding assemblies by reflection, and the app assembly itself is not trimmed.")]
 static partial class FirebaseRuntimeDriftCases
 {
 #if ENABLE_FIRESTORE_EMULATOR
