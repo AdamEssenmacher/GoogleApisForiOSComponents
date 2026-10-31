@@ -71,8 +71,9 @@ label to the runner before merging the change.
 ## Throughput and sharing
 
 One runner runs one job at a time, so native jobs from several pull requests queue behind each
-other. Other runners on the same Mac can run at the same time; they share the CPU, the simulator
-service, and network ports such as the Firestore emulator's.
+other. Other runners on the same Mac can run at the same time; they share the CPU and the simulator
+service. The Firestore emulator checks pick free loopback ports for each run, so they do not
+collide with emulators started by other jobs.
 
 ## Caches
 
