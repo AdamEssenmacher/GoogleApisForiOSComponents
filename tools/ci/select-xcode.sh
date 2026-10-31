@@ -22,10 +22,7 @@ fi
 
 developer="$found/Contents/Developer"
 if [[ -n "${GITHUB_ENV:-}" ]]; then
-  {
-    echo "DEVELOPER_DIR=$developer"
-    echo "MD_APPLE_SDK_ROOT=$found"
-  } >> "$GITHUB_ENV"
+  echo "DEVELOPER_DIR=$developer" >> "$GITHUB_ENV"
 fi
 DEVELOPER_DIR="$developer" xcodebuild -version
 DEVELOPER_DIR="$developer" xcode-select -p

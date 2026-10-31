@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using Firebase.Analytics;
 using Firebase.Core;
@@ -7,6 +8,7 @@ using Foundation;
 
 namespace FirebaseFoundationE2E;
 
+[UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "The E2E harness inspects binding assemblies by reflection, and the app assembly itself is not trimmed.")]
 public static class FirebaseSelfTestRunner
 {
     const string ExpectedBundleId = "com.googleapisforioscomponents.tests.firebase.e2e";
