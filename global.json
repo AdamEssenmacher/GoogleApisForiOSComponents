@@ -2,6 +2,6 @@
   "sdk": {
     "version": "10.0.400",
     "rollForward": "latestPatch",
-    "workloadVersion": "10.0.302.1"
+    "workloadVersion": "10.0.402.1"
   }
 }

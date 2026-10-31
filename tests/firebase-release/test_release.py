@@ -228,10 +228,33 @@ class ReleaseTests(unittest.TestCase):
                 with self.assertRaisesRegex(ValueError, 'Only main'):
                     release.publish(types.SimpleNamespace(package_dir=folder))
 
+    def test_last_validated_skips_failed_untrusted_and_unrelated_runs(self):
+        runs = [{'id': 1, 'event': 'push', 'head_sha': 'failed'},
+                {'id': 2, 'event': 'pull_request', 'head_sha': 'pr'},
+                {'id': 3, 'event': 'push', 'head_sha': 'rewritten'},
+                {'id': 4, 'event': 'workflow_dispatch', 'head_sha': 'good'},
+                {'id': 5, 'event': 'push', 'head_sha': 'older'}]
+        gates = {1: 'failure', 2: 'success', 3: 'success', 4: 'success', 5: 'success'}
+        def github(path):
+            if path.startswith('actions/workflows/'):
+                return {'workflow_runs': runs}
+            run_id = int(path.split('/')[2])
+            return {'jobs': [{'name': 'Firebase validation', 'conclusion': gates[run_id]},
+                             {'name': 'Google Sign-In validation', 'conclusion': 'failure'}]}
+        def ancestry(args, **kwargs):
+            return subprocess.CompletedProcess(args, 1 if args[3] == 'rewritten' else 0)
+        with patch.object(release, 'github', side_effect=github), patch.object(release.subprocess, 'run', side_effect=ancestry):
+            self.assertEqual(release.last_validated(), 'good')
+            release.LABEL = 'Google Sign-In'
+            try:
+                self.assertIsNone(release.last_validated())
+            finally:
+                release.LABEL = 'Firebase'
+
     def test_disabled_configuration_and_unrelated_changes(self):
         baseline = {'packages': [self.p]}
         config = {'releaseVersion': None, 'minimumFirebaseVersion': '12.12.0',
-                  'nativeBuild': {'runner': 'macos-26', 'xcode': '26.6'}}
+                  'nativeBuild': {'runner': 'xcode-27.1', 'xcode': '27.1'}}
         with tempfile.TemporaryDirectory() as tmp, patch.object(release, 'snapshot', return_value=[{**self.p, 'project': 'source/Firebase/Core/Core.csproj'}]), \
                 patch.object(release, 'read', side_effect=[[], config, baseline, baseline]), \
                 patch.object(release, 'git_file', side_effect=[baseline, config]), \
@@ -246,7 +269,7 @@ class ReleaseTests(unittest.TestCase):
         p = {**self.p, 'project': 'source/Firebase/Core/Core.csproj', 'firebase': True}
         baseline = {'packages': [{**p, 'version': '12.11.0', 'fingerprint': 'old'}]}
         config = {'releaseVersion': '12.12.0', 'minimumFirebaseVersion': '12.12.0',
-                  'nativeBuild': {'runner': 'macos-26', 'xcode': '26.6'}}
+                  'nativeBuild': {'runner': 'xcode-27.1', 'xcode': '27.1'}}
         for filename, manual, relevant in [('Readme.md', False, False),
                 ('source/Google/Maps/ApiDefinition.cs', False, False),
                 ('source/Firebase/Core/ApiDefinition.cs', False, True),
@@ -345,21 +368,21 @@ class ReleaseTests(unittest.TestCase):
             project.write_text(f'<Project><PropertyGroup><PackageId>{self.p["id"]}</PackageId>'
                                '<PackageVersion>12.12.0</PackageVersion></PropertyGroup></Project>')
             metadata = [{'id': self.p['id'], 'version': '12.12.0', 'dependencies': [], 'project': 'source/Core/Core.csproj'}]
-            config = {'releaseVersion': '12.12.0', 'nativeBuild': {'runner': 'macos-26', 'xcode': '26.6'}}
+            config = {'releaseVersion': '12.12.0', 'nativeBuild': {'runner': 'xcode-27.1', 'xcode': '27.1'}}
             release.write(root / release.CONFIG, config)
             before = release.snapshot(metadata)
             config['releaseVersion'] = '12.12.0.1'
             release.write(root / release.CONFIG, config)
             self.assertEqual(before, release.snapshot(metadata))
-            for setting, value in (('xcode', '26.7'), ('runner', 'macos-27')):
+            for setting, value in (('xcode', '27.2'), ('runner', 'xcode-27.2')):
                 with self.subTest(setting=setting):
-                    config['nativeBuild'] = {'runner': 'macos-26', 'xcode': '26.6'}
+                    config['nativeBuild'] = {'runner': 'xcode-27.1', 'xcode': '27.1'}
                     config['nativeBuild'][setting] = value
                     release.write(root / release.CONFIG, config)
                     with self.assertRaisesRegex(ValueError, 'without a version bump'):
                         release.check_versions(release.snapshot(metadata), {'packages': before})
 
-            config['nativeBuild'] = {'runner': 'macos-26', 'xcode': '26.6'}
+            config['nativeBuild'] = {'runner': 'xcode-27.1', 'xcode': '27.1'}
             release.write(root / release.CONFIG, config)
             for name in ('global.json', '.config/dotnet-tools.json', 'Directory.Build.props'):
                 with self.subTest(shared_file=name):

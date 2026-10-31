@@ -386,9 +386,30 @@ if [[ "$firestore_emulator" == "true" ]]; then
     cd "$emulator_dir"
     export XDG_CONFIG_HOME="$emulator_dir/config"
     export FIREBASE_EMULATORS_PATH="$emulator_dir/cache"
+    # Other jobs on a shared machine may run their own emulators, so each run takes free
+    # loopback ports instead of the checked-in defaults. The consumer receives the actual
+    # Firestore endpoint from the CLI through FIRESTORE_EMULATOR_HOST.
+    emulator_source="$repo_root/tests/E2E/Firebase.Foundation/emulator"
+    cp "$emulator_source/firestore.rules" "$emulator_dir/firestore.rules"
+    python3 - "$emulator_source/firebase.json" "$emulator_dir/firebase.json" <<'PY'
+import json
+import socket
+import sys
+
+config = json.load(open(sys.argv[1]))
+emulators = config['emulators']
+sockets = [socket.socket() for _ in range(4)]
+for s in sockets:
+    s.bind(('127.0.0.1', 0))
+ports = [s.getsockname()[1] for s in sockets]
+for s in sockets:
+    s.close()
+emulators['firestore']['port'], emulators['firestore']['websocketPort'], emulators['hub']['port'], emulators['logging']['port'] = ports
+json.dump(config, open(sys.argv[2], 'w'), indent=2)
+PY
     export E2E_FIRESTORE_EMULATOR_ACTIVE=true
     exec firebase emulators:exec --only firestore --project demo-firebase-bindings \
-      --config "$repo_root/tests/E2E/Firebase.Foundation/emulator/firebase.json" \
+      --config "$emulator_dir/firebase.json" \
       --non-interactive "$emulator_command"
   fi
 
