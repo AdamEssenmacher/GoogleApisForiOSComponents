@@ -1,26 +1,8 @@
 name: Google Foundation Validation
 
+# Native validation runs after merge on main, or for any branch through a manual run, so pull
+# requests never queue the self-hosted Mac.
 on:
-  pull_request:
-    paths:
-      - ".github/workflows/google-foundation-validation.yml"
-      - ".config/dotnet-tools.json"
-      - ".gitignore"
-      - "Directory.Build.props"
-      - "global.json"
-      - "Xamarin.Google.sln"
-      - "*.cake"
-      - "icons/googleiosmaps_128x128.png"
-      - "icons/googleiosplaces_128x128.png"
-      - "source/AssemblyInfo.cs"
-      - "source/Google/Maps/**"
-      - "source/Google/Places/**"
-      - "tests/E2E/Google.Foundation/**"
-      - "tools/ci/select-xcode.sh"
-      - "tools/e2e/check-consumer-shapes.sh"
-      - "tools/e2e/check-package-structure.sh"
-      - "tools/e2e/check-offline-build.sh"
-      - "tools/e2e/run-google-foundation.sh"
   push:
     branches:
       - main
@@ -45,19 +27,12 @@ on:
       - "tools/e2e/run-google-foundation.sh"
   workflow_dispatch:
 
-# Cancel superseded PR validation; keep every main and manual run.
-concurrency:
-  group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.event.pull_request.number || github.run_id }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
-
 permissions:
   contents: read
 
 jobs:
   places:
-    if: (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
     # Native builds run only on the maintainers' self-hosted Mac (docs/SELF_HOSTED_MACOS_RUNNER.md).
-    # Fork pull requests never reach it.
     runs-on: [self-hosted, macOS, ARM64, xcode-27.1]
     timeout-minutes: 60
     steps:
@@ -124,9 +99,7 @@ jobs:
           if-no-files-found: ignore
 
   maps:
-    if: (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
     # Native builds run only on the maintainers' self-hosted Mac (docs/SELF_HOSTED_MACOS_RUNNER.md).
-    # Fork pull requests never reach it.
     runs-on: [self-hosted, macOS, ARM64, xcode-27.1]
     timeout-minutes: 60
     steps:
