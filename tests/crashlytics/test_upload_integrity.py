@@ -103,7 +103,9 @@ class UploadIntegrityTests(unittest.TestCase):
                     code, executed, log = self.exercise(remote=remote, content=content, continue_on_error=True)
                     self.assertNotEqual(0, code, log)
                     self.assertFalse(executed)
-                    self.assertIn('versioned', log)
+                    # Both integrity errors must name the .unpacked marker, without which
+                    # Xamarin.Build.Download treats the deleted cache as already downloaded.
+                    self.assertIn('.unpacked', log)
 
     def test_remote_copy_is_reverified(self):
         code, executed, log = self.exercise(remote=True, tamper=True, continue_on_error=True)
