@@ -41,6 +41,7 @@ class EmulatorRunnerTests(unittest.TestCase):
         self.tests = self.root / 'tests/E2E/Firebase.Foundation'
         self.tests.mkdir(parents=True)
         shutil.copy2(ROOT / 'tests/E2E/Firebase.Foundation/runtime-drift-cases.json', self.tests)
+        shutil.copytree(ROOT / 'tests/E2E/Firebase.Foundation/emulator', self.tests / 'emulator')
         self.project = self.tests / 'FirebaseFoundationE2E'
         self.project.mkdir()
         self.feed = self.root / "local feed's $cash"
@@ -94,6 +95,20 @@ class EmulatorRunnerTests(unittest.TestCase):
                     self.assertIn(str(self.feed), config.read_text())
                     self.assertFalse((self.project / 'GoogleService-Info.plist').exists())
                     self.assertFalse((self.tests / 'artifacts/firestore-emulator/run-consumer.sh').exists())
+
+    def test_emulator_uses_free_loopback_ports(self):
+        result = self.run_lane()
+        self.assertEqual(result.returncode, 42, result.stderr)
+        cli, = self.calls('firebase')
+        config_path = Path(cli['args'][cli['args'].index('--config') + 1])
+        self.assertEqual(config_path.parent, self.tests / 'artifacts/firestore-emulator')
+        self.assertTrue((config_path.parent / 'firestore.rules').is_file())
+        emulators = json.loads(config_path.read_text())['emulators']
+        defaults = json.loads((self.tests / 'emulator/firebase.json').read_text())['emulators']
+        ports = [emulators['firestore']['port'], emulators['firestore']['websocketPort'], emulators['hub']['port'], emulators['logging']['port']]
+        self.assertEqual(len(set(ports)), 4)
+        self.assertNotIn(defaults['firestore']['port'], ports)
+        self.assertEqual({e['host'] for e in (emulators['firestore'], emulators['hub'], emulators['logging'])}, {'127.0.0.1'})
 
     def test_conflicting_lanes_fail_before_startup(self):
         result = self.run_lane(self.args + ['--binding-surface-target', 'all'])
