@@ -9,7 +9,15 @@ import shutil
 import xml.etree.ElementTree as ET
 
 ROOT = Path(__file__).resolve().parents[2]
+TARGETS = ROOT / 'source/Firebase/Crashlytics/Crashlytics.targets'
 TOOL = b'#!/bin/sh\nprintf executed >> "$TEST_UPLOAD_MARKER"\n'
+
+
+def targets_property(name):
+    value = ET.parse(TARGETS).findtext('.//' + name)
+    if not value:
+        raise AssertionError('Crashlytics.targets is missing ' + name)
+    return value.strip()
 SHIMS = r'''
 <UsingTask TaskName="Exec" TaskFactory="RoslynCodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)/Microsoft.Build.Tasks.Core.dll" Override="true">
 <ParameterGroup><Command ParameterType="System.String" Required="true"/><SessionId ParameterType="System.String"/></ParameterGroup>
@@ -36,11 +44,26 @@ return true;
 
 
 class UploadIntegrityTests(unittest.TestCase):
+    def assertRecoveryStepsNamed(self, log):
+        """Guard the recovery steps themselves, which only live in the error text.
+
+        test_download_cache_recovery.py proves what the cache does; nothing but this
+        checks that the messages tell a consumer to do it.
+        """
+        folder = targets_property('_FirebaseCrashlyticsItemsFolder')
+        suffix = Path(targets_property('_FirebaseScriptName')).suffix
+        # The marker is what makes deleting the directory alone a no-op.
+        self.assertIn(folder + '.unpacked', log)
+        # The download cache restores its bytes instead of re-downloading.
+        self.assertIn(folder + suffix, log)
+        # Deleting it is immaterial to recovery, so the steps must not ask for it.
+        self.assertNotIn(folder + '.locked', log)
+
     def exercise(self, remote=False, content=TOOL, enabled=True, tamper=False, continue_on_error=False, recover=False, output_type="Exe", app_extension=False):
         with tempfile.TemporaryDirectory(prefix='crashlytics-integrity-') as tmp:
             root = Path(tmp).resolve()
             (root / 'global.json').write_bytes((ROOT / 'global.json').read_bytes())
-            cache_name = ET.parse(ROOT / 'source/Firebase/Crashlytics/Crashlytics.targets').findtext('.//_FirebaseCrashlyticsItemsFolder')
+            cache_name = targets_property('_FirebaseCrashlyticsItemsFolder')
             cache = root / 'cache' / cache_name; cache.mkdir(parents=True)
             script = cache / 'upload-symbols.sh'
             if content is not None: script.write_bytes(content)
@@ -106,9 +129,7 @@ class UploadIntegrityTests(unittest.TestCase):
                     code, executed, log = self.exercise(remote=remote, content=content, continue_on_error=True)
                     self.assertNotEqual(0, code, log)
                     self.assertFalse(executed)
-                    # Both integrity errors must name the .unpacked marker, without which
-                    # Xamarin.Build.Download treats the deleted cache as already downloaded.
-                    self.assertIn('.unpacked', log)
+                    self.assertRecoveryStepsNamed(log)
 
     def test_remote_copy_is_reverified(self):
         code, executed, log = self.exercise(remote=True, tamper=True, continue_on_error=True)

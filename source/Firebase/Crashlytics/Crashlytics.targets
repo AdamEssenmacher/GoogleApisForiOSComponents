@@ -6,6 +6,8 @@
     <!-- Requires a file extension, otherwise XDB will complain  -->
     <_FirebaseScriptName>upload-symbols.sh</_FirebaseScriptName>
     <_FirebaseCrashlyticsScriptSha256>ad9cd5816b9abe1f746ff37b073d3b3cf3a2dc835f1a1476bc30ba5bf66e2822</_FirebaseCrashlyticsScriptSha256>
+    <!-- Xamarin.Build.Download names its download cache after the item plus the ToFile extension. -->
+    <_FirebaseCrashlyticsDownloadCache>$(_FirebaseCrashlyticsItemsFolder)$([System.IO.Path]::GetExtension('$(_FirebaseScriptName)'))</_FirebaseCrashlyticsDownloadCache>
     
     <_FirebaseCrashlyticsUploadSymbolsContinueOnError Condition="'$(FirebaseCrashlyticsUploadSymbolsContinueOnError)'=='True'">True</_FirebaseCrashlyticsUploadSymbolsContinueOnError>
     <_FirebaseCrashlyticsUploadSymbolsContinueOnError Condition="'$(FirebaseCrashlyticsUploadSymbolsContinueOnError)'!='True'">False</_FirebaseCrashlyticsUploadSymbolsContinueOnError>
@@ -36,12 +38,12 @@
   <Target Name="_FirebaseCrashlyticsVerifyUploadTool"
     Condition="('$(OutputType)'!='Library' OR '$(IsAppExtension)'=='True') AND '$(FirebaseCrashlyticsUploadSymbolsEnabled)'=='True'">
     <Error Condition="!Exists('$(_FirebaseCrashlyticsSDKBaseFolder)$(_FirebaseScriptName)')"
-      Text="Crashlytics upload tool is missing. From $(XamarinBuildDownloadDir), delete the $(_FirebaseCrashlyticsItemsFolder) directory together with the $(_FirebaseCrashlyticsItemsFolder).unpacked marker and the $(_FirebaseCrashlyticsItemsFolder).sh download cache beside it, then rebuild to download the pinned tool again. All three must go together: the marker records the download as complete, the .sh file holds cached bytes that are moved back into the directory, and deleting the marker while the directory remains fails the next build with an unrelated 'already exists' error." />
+      Text="Crashlytics upload tool is missing. From $(XamarinBuildDownloadDir), delete both the $(_FirebaseCrashlyticsItemsFolder) directory and the $(_FirebaseCrashlyticsItemsFolder).unpacked marker beside it, then rebuild to download the pinned tool again. The marker records the download as complete, so deleting the directory on its own restores nothing. Delete $(_FirebaseCrashlyticsDownloadCache) as well if an earlier failed attempt left it there, because its bytes are restored in place of a fresh download." />
     <GetFileHash Files="$(_FirebaseCrashlyticsSDKBaseFolder)$(_FirebaseScriptName)" Algorithm="SHA256">
       <Output TaskParameter="Items" ItemName="_FirebaseCrashlyticsHashedTool" />
     </GetFileHash>
     <Error Condition="'%(_FirebaseCrashlyticsHashedTool.FileHash)'!='$(_FirebaseCrashlyticsScriptSha256)'"
-      Text="Crashlytics upload tool SHA-256 mismatch. The tool was not executed. From $(XamarinBuildDownloadDir), delete the $(_FirebaseCrashlyticsItemsFolder) directory together with the $(_FirebaseCrashlyticsItemsFolder).unpacked marker and the $(_FirebaseCrashlyticsItemsFolder).sh download cache beside it, then rebuild to download the pinned tool again. All three must go together: leaving the marker or the .sh file behind means the rejected bytes are restored instead of re-downloaded." />
+      Text="Crashlytics upload tool SHA-256 mismatch. The tool was not executed. From $(XamarinBuildDownloadDir), delete both the $(_FirebaseCrashlyticsItemsFolder) directory and the $(_FirebaseCrashlyticsItemsFolder).unpacked marker beside it, then rebuild to download the pinned tool again. The marker records the download as complete, so deleting the directory on its own leaves the rejected bytes in place. Delete $(_FirebaseCrashlyticsDownloadCache) as well if an earlier failed attempt left it there, because its bytes are restored in place of a fresh download." />
   </Target>
 <!-- Target to upload dSYM symbols to Firebase when using Visual Studio for Mac -->
   <Target Name="_FirebaseCrashlyticsUploadDSymToFirebaseOnMac"
