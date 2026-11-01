@@ -3,6 +3,39 @@ using Xunit;
 
 public class ReleaseBuildFingerprintTests
 {
+    const string Components = """
+        Artifact MAPS = new Artifact("Google.Maps", "1.0");
+        Artifact FIREBASE = new Artifact("Firebase.Core", "12.14");
+        var ARTIFACTS = new Dictionary<string, Artifact> { { "Google.Maps", MAPS }, { "Firebase.Core", FIREBASE } };
+        void SetPins() {
+            MAPS.PodSpecs = new[] { PodSpec.Create("GoogleMaps", "1.0") };
+            FIREBASE.PodSpecs = new[] { PodSpec.Create("FirebaseCore", "12.14") };
+            MAPS.Dependencies = new[] { FIREBASE };
+            SharedSetup("shared");
+        }
+        """;
+
+    [Fact]
+    public void FoundationScopeIgnoresUnselectedVersionPinsAndRegistryEntries()
+    {
+        var old = BuildInputs.NormalizeComponents(Components, ["FIREBASE"]);
+        Assert.Equal(old, BuildInputs.NormalizeComponents(Components.Replace("12.14", "12.15"), ["FIREBASE"]));
+        Assert.Equal(old, BuildInputs.NormalizeComponents("// comment\n" + Components, ["FIREBASE"]));
+        Assert.Equal(old, BuildInputs.NormalizeComponents(Components.Replace("Firebase.Core", "Firebase.Other"), ["FIREBASE"]));
+        Assert.NotEqual(old, BuildInputs.NormalizeComponents(Components + "\n#if IOS\nSharedSetup(\"changed\");\n#endif", ["FIREBASE"]));
+        Assert.NotEqual(old, BuildInputs.NormalizeComponents(Components.Replace("1.0", "2.0"), ["FIREBASE"]));
+        Assert.NotEqual(old, BuildInputs.NormalizeComponents(Components.Replace("shared", "changed"), ["FIREBASE"]));
+        Assert.NotEqual(old, BuildInputs.NormalizeComponents(Components.Replace("new[] { FIREBASE }", "new Artifact[0]"), ["FIREBASE"]));
+    }
+
+    [Fact]
+    public void FoundationScopeIncludesSelectedTransitiveDependencyPins()
+    {
+        Assert.NotEqual(BuildInputs.NormalizeComponents(Components, []),
+            BuildInputs.NormalizeComponents(Components.Replace("12.14", "12.15"), []));
+        Assert.Throws<InvalidOperationException>(() => BuildInputs.NormalizeComponents("invalid {{{", []));
+    }
+
     const string Build = """
         Task("nuget").Does(() => {
             if (ARTIFACTS_TO_BUILD.Contains(GOOGLE_MAPS_ARTIFACT)) MapsOnly();

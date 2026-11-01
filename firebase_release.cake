@@ -94,7 +94,7 @@ var FIREBASE_RELEASE_RESOLUTION_PODS = new [] {
 };
 
 var FIREBASE_RELEASE_MANUAL_POD_PINS = new Dictionary<string, string> {
-	{ "AppCheckCore", "11.2.0" },
+	{ "AppCheckCore", "11.3.2" },
 	{ "GTMSessionFetcher", "3.5.0" },
 	{ "PromisesObjC", "2.4.0" },
 	{ "RecaptchaInterop", "101.0.0" },

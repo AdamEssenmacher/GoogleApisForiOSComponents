@@ -41,9 +41,13 @@ jobs:
       - name: Release tooling tests
         run: python3 -m unittest discover -s tests/firebase-release -v
       # MSBuild fixtures needing no Xcode or iOS workload, so they gate pull requests here
-      # instead of waiting for the Mac. The download suite also fetches the pinned
-      # upload-symbols source; CRASHLYTICS_SKIP_NETWORK_TESTS=1 skips it when offline.
+      # instead of waiting for the Mac. The cache-recovery suite additionally downloads the
+      # pinned upload-symbols source, which would put raw.githubusercontent.com in the path of
+      # the required pull request check; leave it to main and manual runs, where an outage
+      # there cannot block review.
       - name: Crashlytics upload integrity tests
+        env:
+          CRASHLYTICS_SKIP_NETWORK_TESTS: ${{ github.event_name == 'pull_request' && '1' || '0' }}
         run: python3 -m unittest discover -s tests/crashlytics -p 'test_*.py'
       - name: Plan validation and release
         id: plan

@@ -16,9 +16,14 @@ on:
       - "*.cake"
       - "icons/googleiosmaps_128x128.png"
       - "icons/googleiosplaces_128x128.png"
+      # The job selection tooling must validate itself; keep in step with the
+      # planner's COVERAGE list (tests/ci/test_foundation_plan.py pins this).
+      - "scripts/ci/**"
+      - "scripts/FirebaseReleaseFingerprint/**"
       - "source/AssemblyInfo.cs"
       - "source/Google/Maps/**"
       - "source/Google/Places/**"
+      - "tests/ci/**"
       - "tests/E2E/Google.Foundation/**"
       - "tools/ci/select-xcode.sh"
       - "tools/e2e/check-consumer-shapes.sh"
@@ -31,7 +36,43 @@ permissions:
   contents: read
 
 jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      maps: ${{ steps.plan.outputs.maps }}
+      places: ${{ steps.plan.outputs.places }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+      - run: dotnet tool restore
+      - name: CI planner regression tests
+        run: |
+          python3 -m unittest discover -s tests/ci -v
+          dotnet test scripts/FirebaseBindingAudit.Tests/FirebaseBindingAudit.Tests.csproj --nologo
+        env:
+          MSBuildEnableWorkloadResolver: 'false'
+      - name: Select changed foundation components
+        id: plan
+        env:
+          BASE_SHA: ${{ github.event.before }}
+          EVENT_NAME: ${{ github.event_name }}
+        shell: bash
+        run: |
+          args=()
+          if [[ "$EVENT_NAME" == workflow_dispatch ]]; then
+            args+=(--manual)
+          elif [[ -n "$BASE_SHA" ]]; then
+            args+=(--base "$BASE_SHA")
+          fi
+          python3 scripts/ci/plan-google-foundation.py "${args[@]}"
+
   places:
+    needs: plan
+    if: needs.plan.outputs.places == 'true'
     # Native builds run only on the maintainers' self-hosted Mac (docs/SELF_HOSTED_MACOS_RUNNER.md).
     runs-on: [self-hosted, macOS, ARM64, xcode-27.1]
     timeout-minutes: 60
@@ -99,6 +140,8 @@ jobs:
           if-no-files-found: ignore
 
   maps:
+    needs: plan
+    if: needs.plan.outputs.maps == 'true'
     # Native builds run only on the maintainers' self-hosted Mac (docs/SELF_HOSTED_MACOS_RUNNER.md).
     runs-on: [self-hosted, macOS, ARM64, xcode-27.1]
     timeout-minutes: 60
