@@ -22,7 +22,7 @@ namespace Google.Maps
 				if (groundOverlayDefaultAnchor == null) {
 					IntPtr RTLD_MAIN_ONLY = Dlfcn.dlopen (null, 0);
 					IntPtr ptr = Dlfcn.dlsym (RTLD_MAIN_ONLY, "kGMSGroundOverlayDefaultAnchor");
-					groundOverlayDefaultAnchor = (CGPoint)Marshal.PtrToStructure (ptr, typeof (CGPoint));
+					groundOverlayDefaultAnchor = Marshal.PtrToStructure<CGPoint> (ptr);
 					Dlfcn.dlclose (RTLD_MAIN_ONLY);
 				}
 
@@ -37,7 +37,7 @@ namespace Google.Maps
 				if (markerDefaultGroundAnchor == null) {
 					IntPtr RTLD_MAIN_ONLY = Dlfcn.dlopen (null, 0);
 					IntPtr ptr = Dlfcn.dlsym (RTLD_MAIN_ONLY, "kGMSMarkerDefaultGroundAnchor");
-					markerDefaultGroundAnchor = (CGPoint)Marshal.PtrToStructure (ptr, typeof (CGPoint));
+					markerDefaultGroundAnchor = Marshal.PtrToStructure<CGPoint> (ptr);
 					Dlfcn.dlclose (RTLD_MAIN_ONLY);
 				}
 
@@ -52,7 +52,7 @@ namespace Google.Maps
 				if (markerDefaultInfoWindowAnchor == null) {
 					IntPtr RTLD_MAIN_ONLY = Dlfcn.dlopen (null, 0);
 					IntPtr ptr = Dlfcn.dlsym (RTLD_MAIN_ONLY, "kGMSMarkerDefaultInfoWindowAnchor");
-					markerDefaultInfoWindowAnchor = (CGPoint)Marshal.PtrToStructure (ptr, typeof (CGPoint));
+					markerDefaultInfoWindowAnchor = Marshal.PtrToStructure<CGPoint> (ptr);
 					Dlfcn.dlclose (RTLD_MAIN_ONLY);
 				}
 
@@ -60,14 +60,14 @@ namespace Google.Maps
 			}
 		}
 
-		static UIImage tileLayerNoTile;
+		static UIImage? tileLayerNoTile;
 
 		public static UIImage TileLayerNoTile {
 			get {
 				if (tileLayerNoTile == null)
 					tileLayerNoTile = GetNSObject<UIImage> (_TileLayerNoTile);
 
-				return tileLayerNoTile;
+				return tileLayerNoTile!;
 			}
 		}
 	}
