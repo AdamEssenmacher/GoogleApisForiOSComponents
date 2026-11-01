@@ -3964,6 +3964,27 @@
       "evidence": [
         "externals/GoogleSignIn.xcframework/ios-arm64/GoogleSignIn.framework/Headers/GIDSignInButton.h#L62"
       ]
+    },
+    {
+      "id": "signin-appcheckerrorcode-managed-enum-name",
+      "target": "SignIn",
+      "category": "stale-baseline-binding",
+      "typeName": "Google.SignIn.AppCheckErrorCode",
+      "comparisonTypeKey": "AppCheckErrorCode",
+      "reason": "The Google Sign-In header declares GIDAppCheckErrorCode. The binding exposes it as AppCheckErrorCode, matching the existing ErrorCode naming, with the same NSInteger-backed native values.",
+      "evidence": [
+        "externals/GoogleSignIn.xcframework/ios-arm64/GoogleSignIn.framework/Headers/GIDAppCheckError.h#L29"
+      ]
+    },
+    {
+      "id": "signin-gidappcheckerrorcode-native-enum-name",
+      "target": "SignIn",
+      "category": "missing-baseline-binding",
+      "comparisonTypeKey": "GIDAppCheckErrorCode",
+      "reason": "The Google Sign-In header declares GIDAppCheckErrorCode as the native enum name, while the binding exposes AppCheckErrorCode with equivalent values and NSInteger backing.",
+      "evidence": [
+        "externals/GoogleSignIn.xcframework/ios-arm64/GoogleSignIn.framework/Headers/GIDAppCheckError.h#L29"
+      ]
     }
   ]
 }

@@ -59,22 +59,29 @@ def framework_version(read, entries, root, expected):
         raise ValueError(f'Native framework version mismatch: {root}; expected {expected}, found {actual}')
 
 
-def error_code_values(header, managed_source):
+def error_code_values(header, managed_source, prefix='kGIDSignInErrorCode', enum_name='ErrorCode', label='Sign-In'):
     native = {name.casefold(): int(value) for name, value in re.findall(
-        r'\bkGIDSignInErrorCode(\w+)\s*=\s*(-?\d+)', header)}
-    enum = re.search(r'\benum ErrorCode\s*:\s*long\s*\{([^}]+)\}', managed_source)
+        r'\b' + prefix + r'(\w+)\s*=\s*(-?\d+)', header)}
+    enum = re.search(r'\benum ' + enum_name + r'\s*:\s*long\s*\{([^}]+)\}', managed_source)
     managed = {} if enum is None else {name.casefold(): int(value) for name, value in re.findall(
         r'\b(\w+)\s*=\s*(-?\d+)', enum[1])}
     if not native or native != managed:
-        raise ValueError(f'Native/managed Sign-In error codes differ: native={native}, managed={managed}')
+        raise ValueError(f'Native/managed {label} error codes differ: native={native}, managed={managed}')
+
+
+def framework_header(entries, root, name):
+    paths = [root + suffix + name for suffix in ('/Headers/', '/Versions/A/Headers/')]
+    return next((path for path in paths if path in entries), None)
 
 
 def framework_error_codes(read, entries, root, managed_source):
-    paths = [root + suffix for suffix in ('/Headers/GIDSignIn.h', '/Versions/A/Headers/GIDSignIn.h')]
-    header = next((path for path in paths if path in entries), None)
-    if header is None:
+    header = framework_header(entries, root, 'GIDSignIn.h')
+    app_check = framework_header(entries, root, 'GIDAppCheckError.h')
+    if header is None or app_check is None:
         raise ValueError('Missing packed Sign-In error-code header: ' + root)
     error_code_values(read(header).decode(), managed_source)
+    error_code_values(read(app_check).decode(), managed_source,
+                      prefix='kGIDAppCheck', enum_name='AppCheckErrorCode', label='App Check')
 
 
 def signin_bundle(data, platform, rid):
