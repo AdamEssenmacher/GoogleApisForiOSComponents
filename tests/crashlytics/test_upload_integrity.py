@@ -60,6 +60,9 @@ class UploadIntegrityTests(unittest.TestCase):
             if recover:
                 self.assertNotEqual(0, result.returncode, result.stdout + result.stderr)
                 self.assertFalse(marker.exists())
+                # Stands in for a cache the download has repopulated; the documented
+                # Xamarin.Build.Download recovery itself is covered by
+                # test_download_cache_recovery.py, which drives the real download path.
                 shutil.rmtree(cache)
                 cache.mkdir()
                 script.write_bytes(TOOL)
@@ -82,7 +85,7 @@ class UploadIntegrityTests(unittest.TestCase):
                     self.assertEqual(content == TOOL, code == 0, log)
                     self.assertEqual(content == TOOL, executed, log)
 
-    def test_removing_bad_cache_and_restoring_pinned_tool_recovers(self):
+    def test_build_recovers_once_the_cache_holds_the_pinned_tool(self):
         for remote in (False, True):
             with self.subTest(remote=remote):
                 code, executed, log = self.exercise(remote=remote, content=b'corrupt', recover=True)
