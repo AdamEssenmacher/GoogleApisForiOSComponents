@@ -1,5 +1,5 @@
 {
-  "releaseVersion": "9.2.0",
+  "releaseVersion": null,
   "nativeBuild": {
     "runner": "xcode-27.1",
     "xcode": "27.1",

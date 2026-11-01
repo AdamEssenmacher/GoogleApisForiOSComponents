@@ -213,11 +213,11 @@ These packages are usually consumed transitively rather than referenced directly
 | --- | --- | --- |
 | `AppCheckCore` | `11.2.0.1` | `11.3.2` |
 | `GoogleAppMeasurement` | `12.14.0` | `12.15.0` |
-| `GoogleDataTransport` | `10.1.0.5` | `10.1.0.5` |
-| `GoogleUtilities` | `8.1.0.4` | `8.1.0.4` |
-| `GTMSessionFetcher` | `3.5.0.6` | `3.5.0.6` |
-| `Nanopb` | `3.30910.0.5` | `3.30910.0.5` |
-| `PromisesObjC` | `2.4.0.6` | `2.4.0.6` |
+| `GoogleDataTransport` | `10.1.0.5` | `10.1.0.6` |
+| `GoogleUtilities` | `8.1.0.4` | `8.1.0.6` |
+| `GTMSessionFetcher` | `3.5.0.6` | `3.5.0.8` |
+| `Nanopb` | `3.30910.0.5` | `3.30910.0.6` |
+| `PromisesObjC` | `2.4.0.6` | `2.4.0.8` |
 
 #### ML Kit packages (`AdamE.MLKit.iOS.*`)
 
