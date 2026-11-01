@@ -1,8 +1,8 @@
 {
   "releaseVersion": "9.2.0",
   "nativeBuild": {
-    "runner": "macos-26",
-    "xcode": "26.6",
+    "runner": "xcode-27.1",
+    "xcode": "27.1",
     "cocoapods": "1.17.0"
   }
 }

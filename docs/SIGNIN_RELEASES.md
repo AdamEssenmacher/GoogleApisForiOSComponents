@@ -83,7 +83,7 @@ the native headers. Package inspection compares `AppCheckErrorCode` with `GIDApp
 packed framework slice, as it does for `ErrorCode`.
 
 The secret-free probe constructs both `amr` variants, checks their names/essential flags and native
-constant, verifies all eight bound SDK classes and at least 73 selectors, and compiles access to the
+constant, verifies all eight bound SDK classes and at least 71 selectors, and compiles access to the
 existing nullable expiration property. On iOS it also compiles the App Check setup calls and reads the
 error-domain constant, without calling setup, so no App Attest keys are generated. Evidence for 9.2 must include both `auth_time` and `amr`;
 9.1-only evidence is rejected. No credentialed sign-in or refresh is initiated by these probes.
@@ -178,8 +178,8 @@ Closure discovery does not enforce the Firebase 12 version policy: unrelated cha
 can still produce a no-op plan with newer fixture metadata, while affected changes run
 validation and fixture staging still rejects unsupported major versions. Incomplete
 dependency metadata fails planning rather than silently omitting validation inputs.
-Every affected Sign-In PR still runs standalone,
-transitive, offline, and combined Firebase consumers.
+Every affected Sign-In change still runs standalone,
+transitive, offline, and combined Firebase consumers after merge, or on a manual run.
 
 Both plans run on every PR and explain native scheduling through `reasons` in the plan
 JSON and log. See [CI lane ownership and scheduling](FIREBASE_RELEASES.md#ci-lane-ownership-and-scheduling)

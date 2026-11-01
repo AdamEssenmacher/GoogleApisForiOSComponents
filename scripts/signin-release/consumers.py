@@ -56,6 +56,8 @@ def build_application(run, name, command, project, rid, expected_bundle, rebuild
 PROBE = '''using System; using System.IO; using System.Linq; using System.Reflection;
 using System.Runtime.InteropServices; using Foundation; using UIKit; using ObjCRuntime;
 class Program { static void Main(string[] args) => UIApplication.Main(args, null, typeof(AppDelegate)); }
+// iOS 27 requires the UIScene lifecycle; the probe needs a scene but no window.
+[Register("SceneDelegate")] public class SceneDelegate : UIWindowSceneDelegate { public override UIWindow Window { get; set; } }
 [Register("AppDelegate")] public class AppDelegate : UIApplicationDelegate {
  [DllImport("/usr/lib/libobjc.dylib")] static extern IntPtr objc_getClass(string name);
  [DllImport("/usr/lib/libobjc.dylib")] static extern IntPtr sel_registerName(string name);
@@ -139,7 +141,7 @@ def probe_source(combined, transitive, package_version):
                 throw new Exception("Expected Firebase 12 runtime");'''
     marker = ' firebase12=FIRAuth,FIRAnalytics,FIRFirestore' if combined else ''
     return (PROBE.replace('CLAIMS_PROBE', claims_probe)
-            .replace('SELECTOR_FLOOR', '73' if amr else '67')
+            .replace('SELECTOR_FLOOR', '71' if amr else '67')
             .replace('CLAIM_NAMES', 'auth_time,amr' if amr else 'auth_time')
             .replace('EXTRA_PROBE', extra).replace('INTEGRATION_RESULT', marker))
 
@@ -209,6 +211,8 @@ def main():
     def project(platform, transitive):
         path = work / (platform + ('-transitive' if transitive else '-direct')); path.mkdir()
         tfm = 'net10.0-' + platform
+        # The Xcode 27 Mac Catalyst workload rejects apps targeting below Mac Catalyst 17.0.
+        minimum_os = '17.0' if platform == 'maccatalyst' else '15.0'
         rids = simulator_rid + ';ios-arm64' if platform == 'ios' else catalyst_rid
         selected = ['AdamE.Google.iOS.SignIn']
         if args.combined:
@@ -221,11 +225,16 @@ def main():
             refs = '<ProjectReference Include="Bindings/Bindings.csproj" />'
         (path / 'Probe.csproj').write_text(f'''<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup>
 <TargetFramework>{tfm}</TargetFramework><RuntimeIdentifiers Condition="'$(RuntimeIdentifier)' == ''">{rids}</RuntimeIdentifiers><OutputType>Exe</OutputType>
-<SupportedOSPlatformVersion>15.0</SupportedOSPlatformVersion><EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+<SupportedOSPlatformVersion>{minimum_os}</SupportedOSPlatformVersion><EnableDefaultCompileItems>false</EnableDefaultCompileItems>
 <IsPackable>false</IsPackable><MtouchLink>None</MtouchLink><EnableCodeSigning>false</EnableCodeSigning>
 </PropertyGroup><ItemGroup>{refs}<Compile Include="Main.cs" /></ItemGroup></Project>''')
         (path / 'Main.cs').write_text(probe_source(args.combined, transitive, versions['AdamE.Google.iOS.SignIn']))
-        (path / 'Info.plist').write_text('<?xml version="1.0"?><plist version="1.0"><dict><key>CFBundleIdentifier</key><string>' + bundle + '</string><key>CFBundleShortVersionString</key><string>1.0</string><key>CFBundleVersion</key><string>1</string></dict></plist>')
+        (path / 'Info.plist').write_text('<?xml version="1.0"?><plist version="1.0"><dict><key>CFBundleIdentifier</key><string>' + bundle + '</string><key>CFBundleShortVersionString</key><string>1.0</string><key>CFBundleVersion</key><string>1</string>'
+            '<key>UIApplicationSceneManifest</key><dict><key>UIApplicationSupportsMultipleScenes</key><false/>'
+            '<key>UISceneConfigurations</key><dict><key>UIWindowSceneSessionRoleApplication</key><array><dict>'
+            '<key>UISceneConfigurationName</key><string>Default Configuration</string>'
+            '<key>UISceneDelegateClassName</key><string>SceneDelegate</string></dict></array></dict></dict>'
+            '</dict></plist>')
         return path / 'Probe.csproj'
 
     projects = [(platform, transitive, project(platform, transitive)) for platform in ('ios', 'maccatalyst') for transitive in (False, True)]
