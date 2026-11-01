@@ -1698,8 +1698,8 @@ namespace Google.Maps
 	[DisableDefaultCtor]
 	interface PlaceFeature : Feature {
 		// @property (readonly, nonatomic) GMSFeatureType _Nonnull featureType;
-		[Export ("featureType")]
-		string FeatureType { get; }
+		// Declared by the GMSFeature protocol; the generator emits it from there, as it does for
+		// DatasetFeature. Re-declaring it here only shadows the protocol member.
 
 		// @property (readonly, nonatomic) NSString * _Nonnull placeID;
 		[Export ("placeID")]
