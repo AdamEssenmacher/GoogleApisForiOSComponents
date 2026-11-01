@@ -4,6 +4,7 @@ import importlib.util
 import json
 import os
 import plistlib
+import re
 from pathlib import Path
 import shutil
 import tempfile
@@ -28,11 +29,48 @@ release = feed.release
 
 
 class ReviewRegressionTests(unittest.TestCase):
+    def test_consumer_probe_matches_candidate_version_in_both_lanes(self):
+        release.configure_channel('signin')
+        self.addCleanup(release.configure_channel, 'firebase')
+        for version in ('9.1.0', '9.1.0.1', '9.2.0', '9.2.0.1'):
+            amr = release.version(version) >= release.version('9.2.0')
+            with self.subTest(version=version), tempfile.TemporaryDirectory() as tmp:
+                folder = Path(tmp)
+                packages = [dict(id=n, version=version, sha256='expected') for n in sorted(release.SIGNIN_IDS)]
+                release.write(folder / 'manifest.json', dict(channel='signin', packages=packages))
+                for combined, lane in ((False, 'consumers'), (True, 'combined')):
+                    for transitive in (False, True):
+                        source = consumers.probe_source(combined, transitive, version)
+                        for api in ('CreateAmrClaim()', 'CreateEssentialAmrClaim()', 'Constants.AmrClaimName'):
+                            self.assertEqual(api in source, amr, (version, lane, transitive, api))
+                        self.assertIn('CreateAuthTimeClaim()', source)
+                        self.assertIn('CreateEssentialAuthTimeClaim()', source)
+                        self.assertIn('user.RefreshToken.ExpirationDate', source)
+                        for api in ('ConfigureWithCompletion(null)', 'ConfigureDebugProvider(key, null)', 'Constants.AppCheckErrorDomain'):
+                            self.assertEqual(api in source, amr, (version, lane, transitive, api))
+                        if amr:
+                            guarded = source[source.index('#if !__MACCATALYST__'):source.index('#endif')]
+                            self.assertIn('ConfigureDebugProvider(key, null)', guarded)
+                            self.assertIn('Constants.AppCheckErrorDomain', guarded)
+                        self.assertEqual('BindingProbe.Describe();' in source, transitive)
+                        floor = int(re.search(r'selectors < (\d+)', source)[1])
+                        self.assertEqual(floor, 71 if amr else 67)
+                        marker = re.search(r' claims=([^";]+)";', source)[1]
+                        self.assertEqual(marker, ('auth_time,amr' if amr else 'auth_time') +
+                                         (' firebase12=FIRAuth,FIRAnalytics,FIRFirestore' if combined else ''))
+                        runtime = f'PASS classes=8 selectors={floor} claims={marker}'
+                        release.write(folder / (lane + '.json'), dict(
+                            Success=True, Cases=[dict(Success=True)], sourceCommit='abc', Lane=lane,
+                            packageHashes={p['id']: p['sha256'] for p in packages},
+                            Checks=sorted(release.SIGNIN_CHECKS) + [runtime]))
+                with patch.dict(os.environ, UNIT_TEST_OUTCOME='success', PACKAGE_INSPECTION_OUTCOME='success', BUILD_COMMIT='abc'):
+                    release.collect_validation(types.SimpleNamespace(results_dir=folder, package_dir=folder))
+
     def test_error_codes_compare_native_header_to_managed_values(self):
-        header = 'kGIDSignInErrorCodeEMM = -6, kGIDSignInErrorCodeAmbiguousClaims = -7, kGIDSignInErrorCodeJSONSerializationFailure = -10'
-        managed = 'enum ErrorCode : long { Emm = -6, AmbiguousClaims = -7, JsonSerializationFailure = -10 }'
+        header = 'kGIDSignInErrorCodeEMM = -6, kGIDSignInErrorCodeAmbiguousClaims = -7, kGIDSignInErrorCodeJSONSerializationFailure = -10, kGIDSignInErrorCodeRefreshTokenExpired = -11'
+        managed = 'enum ErrorCode : long { Emm = -6, AmbiguousClaims = -7, JsonSerializationFailure = -10, RefreshTokenExpired = -11 }'
         validation.error_code_values(header, managed)
-        for value in ('-6', '-7', '-10'):
+        for value in ('-6', '-7', '-10', '-11'):
             with self.subTest(value=value), self.assertRaisesRegex(ValueError, 'error codes differ'):
                 validation.error_code_values(header.replace(value, '-99'), managed)
             with self.subTest(managed=value), self.assertRaisesRegex(ValueError, 'error codes differ'):
@@ -40,12 +78,22 @@ class ReviewRegressionTests(unittest.TestCase):
         for missing in ('', 'kGIDSignInErrorCodeEMM = -6'):
             with self.assertRaisesRegex(ValueError, 'error codes differ'):
                 validation.error_code_values(missing, managed)
+        app_check = 'typedef NS_ERROR_ENUM(kGIDAppCheckErrorDomain, GIDAppCheckErrorCode) { kGIDAppCheckUnexpectedError = 1, };'
+        managed += ' enum AppCheckErrorCode : long { UnexpectedError = 1 }'
+        validation.error_code_values(header, managed)
         root = 'GoogleSignIn.framework'
-        for suffix in ('/Headers/GIDSignIn.h', '/Versions/A/Headers/GIDSignIn.h'):
-            entries = {root + suffix: header.encode()}
+        for suffix in ('/Headers/', '/Versions/A/Headers/'):
+            entries = {root + suffix + 'GIDSignIn.h': header.encode(), root + suffix + 'GIDAppCheckError.h': app_check.encode()}
             validation.framework_error_codes(entries.__getitem__, entries, root, managed)
-        with self.assertRaisesRegex(ValueError, 'Missing packed'):
-            validation.framework_error_codes({}.__getitem__, [], root, managed)
+            for drift in (dict(header=app_check.replace('= 1', '= 2')), dict(managed=managed.replace('UnexpectedError = 1', 'UnexpectedError = 2')),
+                          dict(managed=managed.replace(' enum AppCheckErrorCode : long { UnexpectedError = 1 }', ''))):
+                with self.subTest(suffix=suffix, drift=drift), self.assertRaisesRegex(ValueError, 'App Check error codes differ'):
+                    changed = dict(entries, **{root + suffix + 'GIDAppCheckError.h': drift.get('header', app_check).encode()})
+                    validation.framework_error_codes(changed.__getitem__, changed, root, drift.get('managed', managed))
+            for name in ('GIDSignIn.h', 'GIDAppCheckError.h'):
+                partial = {k: v for k, v in entries.items() if not k.endswith('/' + name)}
+                with self.subTest(suffix=suffix, missing=name), self.assertRaisesRegex(ValueError, 'Missing packed'):
+                    validation.framework_error_codes(partial.__getitem__, partial, root, managed)
 
     def test_stale_native_archive_version_is_rejected(self):
         root = 'GoogleSignIn.xcframework/ios-arm64/GoogleSignIn.framework'
@@ -271,6 +319,36 @@ class ReviewRegressionTests(unittest.TestCase):
                     release.write(folder / 'consumers.json', incomplete)
                     with self.assertRaisesRegex(ValueError, 'claims runtime'):
                         release.collect_validation(args)
+
+    def test_92_requires_amr_app_check_and_its_complete_selector_inventory(self):
+        release.configure_channel('signin')
+        self.addCleanup(release.configure_channel, 'firebase')
+        with tempfile.TemporaryDirectory() as tmp:
+            folder = Path(tmp)
+            packages = [dict(id=n, version='9.2.0.0', sha256='expected') for n in sorted(release.SIGNIN_IDS)]
+            release.write(folder / 'manifest.json', dict(channel='signin', packages=packages))
+            args = types.SimpleNamespace(results_dir=folder, package_dir=folder)
+            def evidence(lane, runtime):
+                if lane == 'combined':
+                    runtime += ' firebase12=FIRAuth,FIRAnalytics,FIRFirestore'
+                return dict(Success=True, Cases=[dict(Success=True)], sourceCommit='abc', Lane=lane,
+                            packageHashes={p['id']: p['sha256'] for p in packages},
+                            Checks=sorted(release.SIGNIN_CHECKS) + [runtime])
+            valid = 'PASS classes=8 selectors=71 claims=auth_time,amr'
+            with patch.dict(os.environ, UNIT_TEST_OUTCOME='success', PACKAGE_INSPECTION_OUTCOME='success', BUILD_COMMIT='abc'):
+                for lane in ('consumers', 'combined'):
+                    release.write(folder / (lane + '.json'), evidence(lane, valid))
+                release.collect_validation(args)
+                for lane in ('consumers', 'combined'):
+                    for invalid in ('PASS classes=8 selectors=71 claims=auth_time',
+                                    'PASS classes=8 selectors=69 claims=auth_time,amr',
+                                    'PASS classes=8 selectors=70 claims=auth_time,amr',
+                                    'PASS classes=7 selectors=71 claims=auth_time,amr'):
+                        with self.subTest(lane=lane, runtime=invalid):
+                            release.write(folder / (lane + '.json'), evidence(lane, invalid))
+                            with self.assertRaisesRegex(ValueError, 'claims runtime'):
+                                release.collect_validation(args)
+                            release.write(folder / (lane + '.json'), evidence(lane, valid))
 
 
 if __name__ == '__main__':
