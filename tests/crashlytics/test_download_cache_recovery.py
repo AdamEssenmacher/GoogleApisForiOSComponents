@@ -55,10 +55,13 @@ class DownloadCacheRecoveryTests(unittest.TestCase):
         work = Path(cls._work.name).resolve()
         cls.project = work / 'fixture.csproj'
         cls.project.write_text(PROJECT.format(version=xbd_version(), targets=TARGETS))
-        (work / 'global.json').write_bytes((ROOT / 'global.json').read_bytes())
+        # No global.json beside the fixture: its pinned workloadVersion would make the
+        # workload resolver fail wherever workloads are not installed, and this project
+        # needs none. Disabling the resolver keeps that true however it is invoked.
+        cls.env = dict(os.environ, MSBuildEnableWorkloadResolver='false')
         cls.packages = work / 'packages'
         restore = subprocess.run(['dotnet', 'restore', str(cls.project), '--packages', str(cls.packages)],
-                                 cwd=work, capture_output=True, text=True)
+                                 cwd=work, env=cls.env, capture_output=True, text=True)
         assert restore.returncode == 0, restore.stdout + restore.stderr
 
     @classmethod
@@ -80,7 +83,7 @@ class DownloadCacheRecoveryTests(unittest.TestCase):
              '-p:OutputType=Exe', '-p:FirebaseCrashlyticsUploadSymbolsEnabled=True',
              '-p:RestorePackagesPath=' + str(self.packages),
              '-p:XamarinBuildDownloadDir=' + str(self.cache) + '/'],
-            cwd=self.project.parent, capture_output=True, text=True)
+            cwd=self.project.parent, env=self.env, capture_output=True, text=True)
         return result.returncode, result.stdout + result.stderr
 
     def assertPinnedToolPresent(self, log):
