@@ -11,8 +11,19 @@ namespace Google.SignIn
 		Keychain = -2,
 		HasNoAuthInKeychain = -4,
 		Canceled = -5,
+		Emm = -6,
+		AmbiguousClaims = -7,
 		ScopesAlreadyGranted = -8,
-		MismatchWithCurrentUser = -9
+		MismatchWithCurrentUser = -9,
+		JsonSerializationFailure = -10,
+		RefreshTokenExpired = -11
+	}
+
+	// Reported in kGIDAppCheckErrorDomain (iOS only).
+	[Native]
+	public enum AppCheckErrorCode : long
+	{
+		UnexpectedError = 1
 	}
 
 	[Native]

@@ -2,7 +2,7 @@
   "releaseVersion": "12.16.0",
   "minimumFirebaseVersion": "12.12.0",
   "nativeBuild": {
-    "runner": "macos-26",
-    "xcode": "26.6"
+    "runner": "xcode-27.1",
+    "xcode": "27.1"
   }
 }

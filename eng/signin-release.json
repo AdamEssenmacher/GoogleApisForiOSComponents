@@ -1,0 +1,8 @@
+{
+  "releaseVersion": null,
+  "nativeBuild": {
+    "runner": "xcode-27.1",
+    "xcode": "27.1",
+    "cocoapods": "1.17.0"
+  }
+}

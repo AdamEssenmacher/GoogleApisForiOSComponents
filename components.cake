@@ -23,16 +23,15 @@ Artifact GOOGLE_MAPS_ARTIFACT                      = new Artifact ("Google.Maps"
 Artifact GOOGLE_UMP_ARTIFACT                       = new Artifact ("Google.UserMessagingPlatform",    "1.1.0.1",   "15.0", ComponentGroup.Google, csprojName: "UserMessagingPlatform");
 Artifact GOOGLE_PLACES_ARTIFACT                    = new Artifact ("Google.Places",                   "7.4.0.3",   "15.0", ComponentGroup.Google, csprojName: "Places");
 Artifact GOOGLE_APP_CHECK_CORE_ARTIFACT            = new Artifact ("Google.AppCheckCore",             "11.3.2",  "15.0", ComponentGroup.Google, csprojName: "AppCheckCore");
-Artifact GOOGLE_SIGN_IN_ARTIFACT                   = new Artifact ("Google.SignIn",                   "9.0.0.0",   "15.0", ComponentGroup.Google, csprojName: "SignIn");
+Artifact GOOGLE_SIGN_IN_ARTIFACT                   = new Artifact ("Google.SignIn",                   "9.2.0.0",   "15.0", ComponentGroup.Google, csprojName: "SignIn");
 Artifact GOOGLE_TAG_MANAGER_ARTIFACT               = new Artifact ("Google.TagManager",               "9.2.0.0",   "15.0", ComponentGroup.Google, csprojName: "TagManager");
 
 Artifact GOOGLE_GOOGLE_APP_MEASUREMENT_ARTIFACT    = new Artifact ("Google.AppMeasurement",           "12.16.0",      "15.0", ComponentGroup.Google, csprojName: "GoogleAppMeasurement");
-Artifact GOOGLE_PROMISES_OBJC_ARTIFACT             = new Artifact ("Google.PromisesObjC",             "2.4.0.6",     "15.0", ComponentGroup.Google, csprojName: "PromisesObjC");
-Artifact GOOGLE_GTM_SESSION_FETCHER_ARTIFACT       = new Artifact ("Google.GTMSessionFetcher",        "3.5.0.6",     "15.0", ComponentGroup.Google, csprojName: "GTMSessionFetcher");
-Artifact GOOGLE_NANOPB_ARTIFACT                    = new Artifact ("Google.Nanopb",                   "3.30910.0.5", "15.0", ComponentGroup.Google, csprojName: "Nanopb");
-Artifact GOOGLE_GOOGLE_UTILITIES_ARTIFACT          = new Artifact ("Google.GoogleUtilities",          "8.1.0.4",     "15.0", ComponentGroup.Google, csprojName: "GoogleUtilities");
-Artifact GOOGLE_GOOGLE_DATA_TRANSPORT_ARTIFACT     = new Artifact ("Google.GoogleDataTransport",      "10.1.0.5",    "15.0", ComponentGroup.Google, csprojName: "GoogleDataTransport");
-
+Artifact GOOGLE_PROMISES_OBJC_ARTIFACT             = new Artifact ("Google.PromisesObjC",             "2.4.0.8",     "15.0", ComponentGroup.Google, csprojName: "PromisesObjC");
+Artifact GOOGLE_GTM_SESSION_FETCHER_ARTIFACT       = new Artifact ("Google.GTMSessionFetcher",        "3.5.0.8",     "15.0", ComponentGroup.Google, csprojName: "GTMSessionFetcher");
+Artifact GOOGLE_NANOPB_ARTIFACT                    = new Artifact ("Google.Nanopb",                   "3.30910.0.6", "15.0", ComponentGroup.Google, csprojName: "Nanopb");
+Artifact GOOGLE_GOOGLE_UTILITIES_ARTIFACT          = new Artifact ("Google.GoogleUtilities",          "8.1.0.6",     "15.0", ComponentGroup.Google, csprojName: "GoogleUtilities");
+Artifact GOOGLE_GOOGLE_DATA_TRANSPORT_ARTIFACT     = new Artifact ("Google.GoogleDataTransport",      "10.1.0.6",    "15.0", ComponentGroup.Google, csprojName: "GoogleDataTransport");
 // MLKit artifacts available to be built. These artifacts generate NuGets.
 Artifact MLKIT_CORE_ARTIFACT                     = new Artifact ("MLKit.Core",                        "12.0.0.3",  "16.0", ComponentGroup.MLKit, csprojName: "Core");
 Artifact MLKIT_TEXT_RECOGNITION                  = new Artifact ("MLKit.TextRecognition",             "1.0.0.3",   "15.0", ComponentGroup.MLKit, csprojName: "TextRecognition");
@@ -104,7 +103,7 @@ void SetArtifactsDependencies ()
 	FIREBASE_CLOUD_FIRESTORE_ARTIFACT.Dependencies         = new [] { FIREBASE_CORE_ARTIFACT, FIREBASE_AUTH_ARTIFACT };
 	FIREBASE_CLOUD_FUNCTIONS_ARTIFACT.Dependencies         = new [] { FIREBASE_CORE_ARTIFACT, GOOGLE_GTM_SESSION_FETCHER_ARTIFACT };
 	FIREBASE_CLOUD_MESSAGING_ARTIFACT.Dependencies         = new [] { FIREBASE_CORE_ARTIFACT, FIREBASE_INSTALLATIONS_ARTIFACT };
-	FIREBASE_CORE_ARTIFACT.Dependencies                    = new [] { GOOGLE_GOOGLE_DATA_TRANSPORT_ARTIFACT, GOOGLE_GOOGLE_UTILITIES_ARTIFACT, GOOGLE_NANOPB_ARTIFACT, GOOGLE_PROMISES_OBJC_ARTIFACT};
+	FIREBASE_CORE_ARTIFACT.Dependencies                    = new [] { GOOGLE_GOOGLE_DATA_TRANSPORT_ARTIFACT, GOOGLE_GOOGLE_UTILITIES_ARTIFACT, GOOGLE_NANOPB_ARTIFACT, GOOGLE_PROMISES_OBJC_ARTIFACT, GOOGLE_APP_CHECK_CORE_ARTIFACT };
 	FIREBASE_CRASHLYTICS_ARTIFACT.Dependencies             = new [] { FIREBASE_CORE_ARTIFACT, FIREBASE_INSTALLATIONS_ARTIFACT };
 	FIREBASE_DATABASE_ARTIFACT.Dependencies                = new [] { FIREBASE_CORE_ARTIFACT };
 	FIREBASE_IN_APP_MESSAGING_ARTIFACT.Dependencies        = new [] { FIREBASE_CORE_ARTIFACT, FIREBASE_INSTALLATIONS_ARTIFACT, FIREBASE_AB_TESTING_ARTIFACT };
@@ -154,8 +153,7 @@ void SetArtifactsPodSpecs ()
 		PodSpec.Create ("FirebaseAnalytics", "12.16.0")
 	};
 	FIREBASE_AUTH_ARTIFACT.PodSpecs = new [] {
-		PodSpec.Create ("FirebaseAuth",     "12.16.0", frameworkSource: FrameworkSource.Pods),
-		PodSpec.Create ("RecaptchaInterop", "101.0.0", frameworkSource: FrameworkSource.Pods)
+		PodSpec.Create ("FirebaseAuth",     "12.16.0", frameworkSource: FrameworkSource.Pods)
 	};
 	FIREBASE_CLOUD_FIRESTORE_ARTIFACT.PodSpecs = new [] {
 		PodSpec.Create ("FirebaseFirestore",         "12.16.0",       frameworkSource: FrameworkSource.Pods),
@@ -180,7 +178,6 @@ void SetArtifactsPodSpecs ()
 		PodSpec.Create ("FirebaseMessagingInterop",    "12.16.0", frameworkSource: FrameworkSource.Pods),
 		PodSpec.Create ("FirebaseRemoteConfigInterop", "12.16.0", frameworkSource: FrameworkSource.Pods),
 		PodSpec.Create ("FirebaseSharedSwift",         "12.16.0", frameworkSource: FrameworkSource.Pods),
-		PodSpec.Create ("PromisesSwift",               "2.4.0",  frameworkSource: FrameworkSource.Pods, frameworkName: "Promises", targetName: "PromisesSwift"),
 		PodSpec.Create ("leveldb-library",             "1.22.6", frameworkSource: FrameworkSource.Pods, frameworkName: "leveldb"),
 	};
 	FIREBASE_CRASHLYTICS_ARTIFACT.PodSpecs = new [] {
@@ -231,12 +228,14 @@ void SetArtifactsPodSpecs ()
 		PodSpec.Create ("GooglePlaces", "7.4.0", frameworkSource: FrameworkSource.Custom)
 	};
 	GOOGLE_SIGN_IN_ARTIFACT.PodSpecs = new [] {
-		PodSpec.Create ("GoogleSignIn", "9.0.0", frameworkSource: FrameworkSource.Pods),
-		PodSpec.Create ("AppAuth",      "2.0.0",  frameworkSource: FrameworkSource.Pods),
+		PodSpec.Create ("GoogleSignIn", "9.2.0", frameworkSource: FrameworkSource.Pods),
+		PodSpec.Create ("AppAuth",      "2.1.0",  frameworkSource: FrameworkSource.Pods),
 		PodSpec.Create ("GTMAppAuth",   "5.0.0",  frameworkSource: FrameworkSource.Pods),
 	};
 	GOOGLE_APP_CHECK_CORE_ARTIFACT.PodSpecs = new [] {
 		PodSpec.Create ("AppCheckCore", "11.3.2", frameworkSource: FrameworkSource.Pods),
+		PodSpec.Create ("PromisesSwift", "2.4.0", frameworkSource: FrameworkSource.Pods, frameworkName: "Promises", targetName: "PromisesSwift"),
+		PodSpec.Create ("RecaptchaInterop", "101.0.0", frameworkSource: FrameworkSource.Pods),
 	};
 	GOOGLE_TAG_MANAGER_ARTIFACT.PodSpecs = new [] {
 		PodSpec.Create ("GoogleTagManager", "9.2.0")

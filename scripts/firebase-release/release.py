@@ -25,9 +25,62 @@ import zipfile
 ROOT = Path(__file__).resolve().parents[2]
 CONFIG = 'eng/firebase-release.json'
 BASELINE = 'eng/firebase-release-baseline.json'
+CHANNEL = 'firebase'
+LABEL = 'Firebase'
+TAG_PREFIX = 'firebase-v'
+SIGNIN_IDS = {'AdamE.Google.iOS.' + name for name in
+              ('SignIn', 'AppCheckCore', 'GTMSessionFetcher', 'PromisesObjC', 'GoogleUtilities')}
+SIGNIN_VERSIONS = ('9.1.0', '9.2.0', '10.0.0', '10.1.0')
+SIGNIN_CHECKS = {f'restore-{p}-{shape}' for p in ('ios', 'maccatalyst') for shape in ('direct', 'transitive')}
+SIGNIN_CHECKS |= {f'ios-{shape}-{rid}' for shape in ('direct', 'transitive') for rid in ('iossimulator-arm64', 'ios-arm64')}
+SIGNIN_CHECKS |= {f'maccatalyst-{shape}-maccatalyst-arm64' for shape in ('direct', 'transitive')}
+SIGNIN_CHECKS.add('ios-direct-iossimulator-arm64-rebuild')
 REPO = os.environ.get('GITHUB_REPOSITORY', 'AdamEssenmacher/GoogleApisForiOSComponents')
+WORKFLOW = 'firebase-release.yml'
 VALIDATIONS = ['unit-tests', 'package-structure', 'smoke', 'surface', 'nullability',
                'firestore-pipeline', 'firestore-aggregate', 'firestore-filters']
+
+
+def configure_channel(channel):
+    global CHANNEL, LABEL, TAG_PREFIX, CONFIG, BASELINE, VALIDATIONS
+    CHANNEL = channel
+    CONFIG = f'eng/{channel}-release.json'
+    BASELINE = f'eng/{channel}-release-baseline.json'
+    LABEL = 'Google Sign-In' if channel == 'signin' else 'Firebase'
+    TAG_PREFIX = 'google-signin-v' if channel == 'signin' else 'firebase-v'
+    VALIDATIONS = (['unit-tests', 'package-structure', 'consumers', 'combined'] if channel == 'signin' else
+                   ['unit-tests', 'package-structure', 'smoke', 'surface', 'nullability',
+                    'firestore-pipeline', 'firestore-aggregate', 'firestore-filters'])
+
+
+def validate_scope(packages):
+    if CHANNEL == 'signin':
+        require({p['id'] for p in packages} == SIGNIN_IDS and len(packages) == len(SIGNIN_IDS),
+                'Sign-In metadata must contain exactly its five owned packages')
+        require(all(not p.get('firebase', False) for p in packages), 'Firebase cannot enter the Sign-In publication channel')
+
+
+def validate_manifest_channel(manifest):
+    require(manifest.get('channel', 'firebase') == CHANNEL, 'Wrong release channel')
+    validate_scope(manifest.get('packages', []))
+
+
+def require_signin_predecessor(release_version, latest):
+    native = '.'.join(map(str, version(release_version)[:3]))
+    require(native in SIGNIN_VERSIONS, 'Unexpected Sign-In release version')
+    if latest and version(latest['releaseVersion']) == version(release_version):
+        return  # The caller separately verifies the source commit for completed retries.
+    previous = None if latest is None else '.'.join(map(str, version(latest['releaseVersion'])[:3]))
+    index = SIGNIN_VERSIONS.index(native)
+    expected = SIGNIN_VERSIONS[index - 1] if index else None
+    require(previous == expected or (previous == native and version(release_version) > version(latest['releaseVersion'])),
+            f'Missing preceding Sign-In release: expected {expected or "bootstrap"}, found {previous}')
+
+
+def signin_checks(architecture):
+    require(architecture in ('arm64', 'x86_64'), 'Unsupported consumer host architecture')
+    return {c.replace('iossimulator-arm64', 'iossimulator-' + architecture)
+            .replace('maccatalyst-arm64', 'maccatalyst-' + architecture) for c in SIGNIN_CHECKS}
 
 
 def require(condition, message):
@@ -65,8 +118,11 @@ def normalized(value):
 
 def native_build(config):
     settings = config['nativeBuild']
-    require(bool(re.fullmatch(r'macos-\d+', settings['runner'])), 'Expected a pinned hosted macOS runner')
+    # Native builds run on the self-hosted Mac labelled with its pinned Xcode (docs/SELF_HOSTED_MACOS_RUNNER.md).
+    require(bool(re.fullmatch(r'xcode-\d+(?:\.\d+){1,2}', settings['runner'])), 'Expected a pinned self-hosted runner label')
     require(bool(re.fullmatch(r'\d+(?:\.\d+){1,2}', settings['xcode'])), 'Expected a pinned stable Xcode version')
+    if CHANNEL == 'signin':
+        require(version('1.12.0') <= version(settings['cocoapods']) < version('2.0.0'), 'Unsupported CocoaPods runtime')
     return settings
 
 
@@ -101,16 +157,19 @@ def previous_release():
     page = 1
     while True:
         batch = github(f'releases?per_page=100&page={page}')
-        releases.extend(r for r in batch if r['tag_name'].startswith('firebase-v') and not r['draft'])
+        releases.extend(r for r in batch if r['tag_name'].startswith(TAG_PREFIX) and not r['draft'])
         if len(batch) < 100:
             break
         page += 1
     if not releases:
         return None
-    latest = max(releases, key=lambda r: version(r['tag_name'].removeprefix('firebase-v')))
+    latest = max(releases, key=lambda r: version(r['tag_name'].removeprefix(TAG_PREFIX)))
     asset = next((a for a in latest['assets'] if a['name'] == 'manifest.json'), None)
-    require(asset is not None, 'Previous Firebase release has no manifest; refusing to guess a baseline')
-    return json.loads(request(asset['browser_download_url']))
+    require(asset is not None, f'Previous {LABEL} release has no manifest; refusing to guess a baseline')
+    manifest = json.loads(request(asset['browser_download_url']))
+    if CHANNEL == 'signin':
+        validate_manifest_channel(manifest)
+    return manifest
 
 
 def build_fingerprint(metadata):
@@ -184,6 +243,27 @@ def check_versions(packages, baseline):
     return changed
 
 
+def last_validated(head='HEAD', limit=50):
+    """Newest main commit whose required validation check passed, or None.
+
+    Pull requests skip native validation, so main diffs against this commit rather than the
+    previous push: a failed native run stays in range until a later run passes.
+    """
+    gate = LABEL + ' validation'
+    runs = github(f'actions/workflows/{WORKFLOW}/runs?branch=main&status=completed&per_page={limit}')['workflow_runs']
+    for r in runs:
+        if r['event'] not in ('push', 'workflow_dispatch'):
+            continue
+        jobs = github(f"actions/runs/{r['id']}/jobs?filter=latest&per_page=100")['jobs']
+        if not any(j['name'] == gate and j['conclusion'] == 'success' for j in jobs):
+            continue
+        ancestor = subprocess.run(['git', 'merge-base', '--is-ancestor', r['head_sha'], head], cwd=ROOT,
+                                  capture_output=True)
+        if ancestor.returncode == 0:
+            return r['head_sha']
+    return None
+
+
 def git_file(ref, path):
     result = subprocess.run(['git', 'show', f'{ref}:{path}'], cwd=ROOT, text=True, capture_output=True)
     if result.returncode:
@@ -191,10 +271,64 @@ def git_file(ref, path):
     return json.loads(result.stdout)
 
 
+def fixture_packages(metadata):
+    """Discover the fixture closure; staging separately enforces supported versions."""
+    records = {p['id']: p for p in metadata}
+    require(len(records) == len(metadata), 'Duplicate integration metadata package')
+    selected = {}
+    pending = ['AdamE.Firebase.iOS.Auth', 'AdamE.Firebase.iOS.Analytics', 'AdamE.Firebase.iOS.CloudFirestore']
+    while pending:
+        name = pending.pop()
+        if name in SIGNIN_IDS or name in selected:
+            continue
+        require(name in records, 'Missing integration metadata: ' + name)
+        record = records[name]
+        selected[name] = record['version']
+        pending.extend(record['dependencies'])
+    return selected
+
+
+def validation_reasons(files, packages, channel, integration_metadata=()):
+    """Classify validation inputs without changing package fingerprints or release policy."""
+    packages = list(packages)
+    if channel == 'signin':
+        fixtures = fixture_packages(integration_metadata)
+        packages.extend(p for p in integration_metadata if p['id'] in fixtures)
+    directories = tuple(Path(p['project']).parent.as_posix() + '/' for p in packages)
+    exact = {
+        'global.json', 'Directory.Build.props', '.config/dotnet-tools.json',
+        'source/AssemblyInfo.cs', '.github/workflows/firebase-release.yml', 'tools/ci/select-xcode.sh',
+        'build.cake', 'common.cake', 'poco.cake', 'custom_externals_download.cake', 'components.cake',
+        'firebase_publish.cake', 'firebase_release.cake',
+        f'eng/{channel}-release.json', f'eng/{channel}-release-baseline.json',
+    }
+    prefixes = ['scripts/firebase-release/', 'scripts/FirebaseReleaseFingerprint/', 'tests/firebase-release/']
+    if channel == 'firebase':
+        exact.update(('tools/e2e/run-firebase-foundation.sh',
+                      'scripts/firebase-binding-audit.json', 'scripts/firebase-binding-audit-suppressions.json'))
+        prefixes.extend(('scripts/FirebaseBindingAudit/', 'scripts/FirebaseBindingAudit.Tests/',
+                         'tests/E2E/Firebase.Foundation/', 'tests/crashlytics/'))
+    else:
+        exact.add('signin_publish.cake')
+        prefixes.append('scripts/signin-release/')
+    for package in packages:
+        project = ROOT / package['project']
+        for element in ET.parse(project).iter():
+            if element.get('Pack', '').lower() == 'true' or element.tag in ('Compile', 'Import'):
+                include = element.get('Include') or element.get('Project')
+                if include and '$(' not in include and '*' not in include:
+                    path = (project.parent / include.replace('\\', '/')).resolve()
+                    if path.is_relative_to(ROOT):
+                        exact.add(path.relative_to(ROOT).as_posix())
+    return sorted({p for p in files if p in exact or p.startswith(directories + tuple(prefixes))})
+
+
 def plan(args):
     packages = snapshot(read(args.metadata))
+    validate_scope(packages)
     config = read(ROOT / CONFIG)
-    require(version(config['minimumFirebaseVersion']) >= version('12.12.0'), 'Firebase publication floor cannot precede 12.12')
+    if CHANNEL == 'firebase':
+        require(version(config['minimumFirebaseVersion']) >= version('12.12.0'), 'Firebase publication floor cannot precede 12.12')
     latest = previous_release() if args.online else None
     baseline = latest or read(ROOT / BASELINE)
     if args.base:
@@ -205,7 +339,12 @@ def plan(args):
     release_version = config['releaseVersion']
     if release_version:
         version(release_version)
-        require(version(release_version) >= version(config['minimumFirebaseVersion']), 'Release predates 12.12')
+        if CHANNEL == 'signin':
+            root = next(p for p in packages if p['id'] == 'AdamE.Google.iOS.SignIn')
+            require(normalized(release_version).split('.')[:3] in [v.split('.') for v in SIGNIN_VERSIONS], 'Unexpected Sign-In release version')
+            require(version(root['version']) == version(release_version), 'Sign-In root/release versions differ')
+        else:
+            require(version(release_version) >= version(config['minimumFirebaseVersion']), 'Release predates 12.12')
         for p in packages:
             if p['firebase']:
                 require(version(p['version']) >= version(config['minimumFirebaseVersion']), 'Firebase package predates 12.12')
@@ -213,34 +352,32 @@ def plan(args):
             require(version(release_version) >= version(latest['releaseVersion']), 'Release version went backwards')
             require(not changed or version(release_version) > version(latest['releaseVersion']),
                     'Package changes require a new release version')
-    files = run('git', 'diff', '--name-only', args.base, 'HEAD').splitlines() if args.base else ['build.cake']
-    project_dirs = tuple(str(Path(p['project']).parent) + '/' for p in packages)
-    relevant = any(
-        p.startswith(project_dirs) or p == 'source/AssemblyInfo.cs'
-        or p.endswith('.cake') or p.startswith(('eng/', 'scripts/', 'tests/E2E/Firebase.Foundation/',
-                                           'tools/e2e/', '.github/workflows/firebase-release.yml'))
-        or p in ('global.json', 'Directory.Build.props', '.config/dotnet-tools.json') for p in files)
-    for package in packages:
-        project = ROOT / package['project']
-        for element in ET.parse(project).iter():
-            if element.get('Pack', '').lower() == 'true' or element.tag in ('Compile', 'Import'):
-                include = element.get('Include') or element.get('Project')
-                if include and '$(' not in include and '*' not in include:
-                    path = (project.parent / include.replace('\\', '/')).resolve()
-                    if path.is_relative_to(ROOT):
-                        relevant = relevant or path.relative_to(ROOT).as_posix() in files
+    reasons = []
+    if args.manual:
+        reasons.append('manual validation')
+    if not args.base:
+        reasons.append('missing comparison history')
+    if not reasons:
+        files = run('git', 'diff', '--name-only', args.base, 'HEAD').splitlines()
+        integration = read(args.integration_metadata) if CHANNEL == 'signin' else ()
+        reasons = validation_reasons(files, packages, CHANNEL, integration)
     old_config = git_file(args.base, CONFIG) if args.base else None
     triggered = args.manual or old_config is None or old_config.get('releaseVersion') != release_version
     eligible = bool(release_version and triggered and (not latest or version(release_version) > version(latest['releaseVersion'])))
+    if eligible:
+        reasons.append('eligible release')
     result = {'schemaVersion': 1, 'sourceCommit': run('git', 'rev-parse', 'HEAD'),
               'releaseVersion': release_version, 'packages': packages, 'changed': changed,
-              'eligible': eligible, 'relevant': relevant or eligible, 'nativeBuild': native_build(config)}
+              'eligible': eligible, 'relevant': bool(reasons), 'reasons': reasons, 'nativeBuild': native_build(config)}
+    if CHANNEL == 'signin':
+        result['channel'] = CHANNEL
     write(args.output, result)
     if os.environ.get('GITHUB_OUTPUT'):
         with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
             output.write(f"relevant={str(result['relevant']).lower()}\neligible={str(eligible).lower()}\n")
             output.write(f"runner={result['nativeBuild']['runner']}\nxcode={result['nativeBuild']['xcode']}\n")
-    print(f"Firebase validation required: {result['relevant']}; release eligible: {eligible}; changed packages: {len(changed)}")
+    print(f"{LABEL} validation required: {result['relevant']}; release eligible: {eligible}; changed packages: {len(changed)}")
+    print('Validation reasons: ' + (', '.join(reasons) if reasons else 'no matching inputs changed'))
 
 
 def payload_hash(data):
@@ -300,6 +437,7 @@ def feeds():
 def check_feeds(args):
     """Reject all existing payload/structure conflicts before expensive native builds."""
     manifest = read(args.plan)
+    validate_manifest_channel(manifest)
     packages = {p['id']: p for p in manifest['packages']}
     registries = feeds()
     report = []
@@ -401,6 +539,7 @@ def inspect_package(data, package, packages, new_commit=None):
 
 def prepare(args):
     manifest = read(args.plan)
+    validate_manifest_channel(manifest)
     packages = {p['id']: p for p in manifest['packages']}
     candidates = {}
     for path in Path(args.package_dir).glob('*.nupkg'):
@@ -408,7 +547,7 @@ def prepare(args):
         require(info['id'] in packages, f"Unexpected output package: {info['id']}")
         require(info['id'] not in candidates, f"Multiple candidates: {info['id']}")
         candidates[info['id']] = path
-    require(set(candidates) == set(packages), 'Build output does not match Firebase closure')
+    require(set(candidates) == set(packages), f'Build output does not match {LABEL} closure')
     registries = feeds() if args.online and manifest['eligible'] else []
     output = Path(args.output)
     output.mkdir(parents=True, exist_ok=True)
@@ -437,18 +576,22 @@ def prepare(args):
 def finalize(args):
     folder = Path(args.package_dir)
     manifest = read(folder / 'manifest.json')
+    validate_manifest_channel(manifest)
     results = read(args.results)
     require(set(results) == set(VALIDATIONS) and all(v == 'passed' for v in results.values()), 'Incomplete validation results')
     manifest['validation'] = results
     write(folder / 'manifest.json', manifest)
     (folder / 'SHA256SUMS').write_text(''.join(f"{p['sha256']}  {p['file']}\n" for p in manifest['packages']))
-    lines = [f"# Firebase {manifest['releaseVersion'] or 'validation (publishing disabled)'}",
+    lines = [f"# {LABEL} {manifest['releaseVersion'] or 'validation (publishing disabled)'}",
              '', f"Commit: `{manifest['sourceCommit']}`", '', 'All required validations passed.', '',
              '| Package | Version | Upload destinations | Reused |', '|---|---|---|---|']
     for p in manifest['packages']:
         label = f"[{p['id']}](https://www.nuget.org/packages/{p['id']}/{normalized(p['version'])})"
         lines.append(f"| {label} | {p['version']} | {', '.join(p['destinations']) or 'none'} | {p['reused']} |")
     lines += ['', f'[GitHub Packages](https://github.com/{REPO.split("/")[0]}?tab=packages&repo_name={REPO.split("/")[1]})']
+    if CHANNEL == 'signin':
+        pods = sorted({(pod['Name'], pod['Version']) for p in manifest['packages'] for pod in p['pods']})
+        lines += ['', 'Native CocoaPods versions: ' + ', '.join(f'{name} {value}' for name, value in pods)]
     (folder / 'release-notes.md').write_text('\n'.join(lines) + '\n')
     if os.environ.get('GITHUB_STEP_SUMMARY'):
         with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as summary:
@@ -465,6 +608,26 @@ def collect_validation(args):
         require(result.get('Success') is True and not result.get('FatalError'), f'{name} failed')
         cases = result.get('Cases', [])
         require(cases and all(c.get('Success') is True for c in cases), f'{name} has missing or failed cases')
+        if CHANNEL == 'signin':
+            require(result.get('sourceCommit') == os.environ.get('BUILD_COMMIT'), 'Consumer evidence has wrong source commit')
+            require(result.get('packageHashes') and result.get('Checks'), 'Missing Sign-In consumer evidence')
+            manifest = read(Path(args.package_dir) / 'manifest.json')
+            validate_manifest_channel(manifest)
+            require(result['packageHashes'] == {p['id']: p['sha256'] for p in manifest['packages']}, 'Consumer evidence has wrong packages')
+            require(result.get('Lane') == name, 'Consumer evidence has wrong lane')
+            require(signin_checks(result.get('RuntimeArchitecture', 'arm64')) <= set(result['Checks']) and any(c.startswith('PASS classes=') for c in result['Checks']),
+                    'Incomplete Sign-In platform/runtime matrix')
+            root = next(p for p in manifest['packages'] if p['id'] == 'AdamE.Google.iOS.SignIn')
+            if version(root.get('version', '9.0.0')) >= version('9.1.0'):
+                amr = version(root['version']) >= version('9.2.0')
+                claims = 'auth_time,amr' if amr else 'auth_time'
+                probes = [re.fullmatch(r'PASS classes=(\d+) selectors=(\d+) claims=' + claims + r'(?: firebase12=FIRAuth,FIRAnalytics,FIRFirestore)?', c)
+                          for c in result['Checks']]
+                require(any(p and int(p[1]) >= 8 and int(p[2]) >= (71 if amr else 67) for p in probes),
+                        'Missing or incomplete Sign-In claims runtime evidence')
+            if name == 'combined':
+                require(any(re.fullmatch(r'PASS classes=\d+ selectors=\d+(?: claims=auth_time(?:,amr)?)? firebase12=FIRAuth,FIRAnalytics,FIRFirestore', c)
+                            for c in result['Checks']), 'Missing combined Firebase 12 runtime evidence')
         if name == 'surface':
             coverage = result.get('BindingSurfaceCoverage') or {}
             require(coverage.get('Target') == 'all' and coverage.get('SurfaceCount', 0) > 0
@@ -520,19 +683,29 @@ def publish_packages(folder, packages, registries, wait_seconds=1800, poll_secon
 def publish(args):
     folder = Path(args.package_dir)
     manifest = read(folder / 'manifest.json')
+    validate_manifest_channel(manifest)
     require(os.environ.get('GITHUB_REF') == 'refs/heads/main' and os.environ.get('GITHUB_EVENT_NAME') in ('push', 'workflow_dispatch'), 'Only main can publish')
     require(manifest['eligible'] and manifest['sourceCommit'] == os.environ.get('GITHUB_SHA'), 'Ineligible or wrong-commit artifacts')
     require(manifest.get('validation') == dict.fromkeys(VALIDATIONS, 'passed'), 'Missing successful validation')
-    require(version(manifest['releaseVersion']) >= version('12.12.0'), 'Release predates 12.12')
+    if CHANNEL == 'firebase':
+        require(version(manifest['releaseVersion']) >= version('12.12.0'), 'Release predates 12.12')
     latest = previous_release()
     if latest:
         require(version(latest['releaseVersion']) <= version(manifest['releaseVersion']), 'A newer release already shipped')
         if version(latest['releaseVersion']) == version(manifest['releaseVersion']):
             require(latest['sourceCommit'] == manifest['sourceCommit'], 'Release version belongs to another commit')
+    if CHANNEL == 'signin':
+        require_signin_predecessor(manifest['releaseVersion'], latest)
+        configured = read(ROOT / CONFIG)['releaseVersion']
+        require(configured and version(configured) == version(manifest['releaseVersion']), 'Sign-In publication is disabled or version differs')
     metadata = read(args.metadata)
+    validate_scope(metadata)
     allowed = {p['id']: p for p in metadata}
-    require(set(allowed) == {p['id'] for p in manifest['packages']}, 'Manifest scope differs from Cake')
+    if CHANNEL == 'signin':
+        require(version(allowed['AdamE.Google.iOS.SignIn']['version']) == version(manifest['releaseVersion']), 'Sign-In root/release versions differ')
+    require(set(allowed) == {p['id'] for p in manifest['packages']} and len(allowed) == len(manifest['packages']), 'Manifest scope differs from Cake')
     for p in manifest['packages']:
+        require(version(p['version']) == version(allowed[p['id']]['version']), 'Manifest package version differs from Cake')
         require(Path(p['file']).name == p['file'], 'Invalid artifact filename')
         data = (folder / p['file']).read_bytes()
         require(digest(data) == p['sha256'] and payload_hash(data) == p['payloadHash'], 'Artifact hash mismatch')
@@ -540,7 +713,7 @@ def publish(args):
         inspect_package(data, allowed[p['id']], allowed, expected_commit)
     registries = feeds()
     publish_packages(folder, manifest['packages'], registries)
-    tag = 'firebase-v' + manifest['releaseVersion']
+    tag = TAG_PREFIX + manifest['releaseVersion']
     # gh creates the tag at the exact tested SHA. Existing tags must never be moved.
     tags = github('git/matching-refs/tags/' + urllib.parse.quote(tag, safe=''))
     exact = next((t for t in tags if t['ref'] == 'refs/tags/' + tag), None)
@@ -562,41 +735,49 @@ def publish(args):
         require(draft['targetCommitish'] == manifest['sourceCommit'], 'Existing draft targets another commit')
     else:
         run('gh', 'release', 'create', tag, '--repo', REPO, '--target', manifest['sourceCommit'], '--draft',
-            '--title', 'Firebase ' + manifest['releaseVersion'], '--generate-notes', '--notes-file', str(folder / 'release-notes.md'))
+            '--title', LABEL + ' ' + manifest['releaseVersion'], '--generate-notes', '--notes-file', str(folder / 'release-notes.md'))
     # A draft makes interrupted release-asset uploads resumable without advertising completion.
     run('gh', 'release', 'upload', tag, *assets, '--repo', REPO, '--clobber')
     run('gh', 'release', 'edit', tag, '--repo', REPO, '--draft=false')
 
 
 def main():
-    parser = argparse.ArgumentParser(description=__doc__)
+    channel_parser = argparse.ArgumentParser(add_help=False)
+    channel_parser.add_argument('--channel', choices=('firebase', 'signin'), default='firebase')
+    selection, _ = channel_parser.parse_known_args()
+    configure_channel(selection.channel)
+    parser = argparse.ArgumentParser(description=__doc__, parents=[channel_parser])
     sub = parser.add_subparsers(dest='command', required=True)
     s = sub.add_parser('snapshot')
-    s.add_argument('--metadata', default='output/firebase-metadata.json')
+    s.add_argument('--metadata', default=f'output/{CHANNEL}-metadata.json')
     s.add_argument('--output', default=BASELINE)
     p = sub.add_parser('plan')
-    p.add_argument('--metadata', default='output/firebase-metadata.json')
-    p.add_argument('--output', default='output/firebase-plan.json')
+    p.add_argument('--metadata', default=f'output/{CHANNEL}-metadata.json')
+    p.add_argument('--output', default=f'output/{CHANNEL}-plan.json')
     p.add_argument('--base')
+    p.add_argument('--integration-metadata', default='output/firebase-metadata.json',
+                   help='Firebase metadata for Sign-In combined-consumer input classification')
     p.add_argument('--online', action='store_true')
     p.add_argument('--manual', action='store_true')
     p = sub.add_parser('check-feeds')
-    p.add_argument('--plan', default='output/firebase-plan.json')
-    p.add_argument('--output', default='output/firebase-feed-check.json')
+    p.add_argument('--plan', default=f'output/{CHANNEL}-plan.json')
+    p.add_argument('--output', default=f'output/{CHANNEL}-feed-check.json')
     p = sub.add_parser('prepare')
-    p.add_argument('--plan', default='output/firebase-plan.json')
+    p.add_argument('--plan', default=f'output/{CHANNEL}-plan.json')
     p.add_argument('--package-dir', default='output')
-    p.add_argument('--output', default='output/firebase-candidate')
+    p.add_argument('--output', default=f'output/{CHANNEL}-candidate')
     p.add_argument('--online', action='store_true')
     p = sub.add_parser('finalize')
-    p.add_argument('--package-dir', default='output/firebase-candidate')
+    p.add_argument('--package-dir', default=f'output/{CHANNEL}-candidate')
     p.add_argument('--results', required=True)
     p = sub.add_parser('collect_validation')
     p.add_argument('--results-dir', required=True)
+    p.add_argument('--package-dir', default=f'output/{CHANNEL}-candidate')
     p = sub.add_parser('publish')
-    p.add_argument('--package-dir', default='output/firebase-candidate')
-    p.add_argument('--metadata', default='output/firebase-metadata.json')
+    p.add_argument('--package-dir', default=f'output/{CHANNEL}-candidate')
+    p.add_argument('--metadata', default=f'output/{CHANNEL}-metadata.json')
     sub.add_parser('probe-feeds')
+    sub.add_parser('last-validated')
     args = parser.parse_args()
     if args.command == 'snapshot':
         packages = [{k: p[k] for k in ('id', 'version', 'fingerprint')} for p in snapshot(read(args.metadata))]
@@ -606,6 +787,8 @@ def main():
         for feed in feeds():
             data = feed.fetch({'id': 'AdamE.Google.iOS.PromisesObjC', 'version': '2.4.0.5'})
             print(f'{feed.name}: authenticated lookup succeeded ({"present" if data else "absent"})')
+    elif args.command == 'last-validated':
+        print(last_validated() or '')
     else:
         globals()[args.command.replace('-', '_')](args)
 

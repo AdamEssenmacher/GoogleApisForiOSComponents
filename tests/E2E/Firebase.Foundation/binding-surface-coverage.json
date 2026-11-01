@@ -27,7 +27,8 @@
       "coverageCaseMethod": "VerifyAppCheckBindingSurfaceAsync",
       "sourceFiles": [
         "source/Firebase/AppCheck/ApiDefinition.cs",
-        "source/Firebase/AppCheck/Enums.cs"
+        "source/Firebase/AppCheck/Enums.cs",
+        "source/Firebase/AppCheck/Extensions.cs"
       ],
       "requiredExtraPackages": []
     },

@@ -5,6 +5,45 @@ using ObjCRuntime;
 
 namespace Google.SignIn
 {
+	[Static]
+	interface Constants
+	{
+		[Field ("kAuthTimeClaimName", "__Internal")]
+		NSString AuthTimeClaimName { get; }
+
+		[Field ("kAMRClaimName", "__Internal")]
+		NSString AmrClaimName { get; }
+
+		// extern NSErrorDomain const kGIDAppCheckErrorDomain;
+		[NoMacCatalyst]
+		[Field ("kGIDAppCheckErrorDomain", "__Internal")]
+		NSString AppCheckErrorDomain { get; }
+	}
+
+	// An OIDC claim requested for an ID token. Construct using the factory methods.
+	[BaseType (typeof (NSObject), Name = "GIDClaim")]
+	[DisableDefaultCtor]
+	interface Claim : INativeObject
+	{
+		[Export ("name")]
+		string Name { get; }
+
+		[Export ("isEssential")]
+		bool Essential { get; }
+
+		[Static, Export ("authTimeClaim")]
+		Claim CreateAuthTimeClaim ();
+
+		[Static, Export ("essentialAuthTimeClaim")]
+		Claim CreateEssentialAuthTimeClaim ();
+
+		[Static, Export ("AMRClaim")]
+		Claim CreateAmrClaim ();
+
+		[Static, Export ("essentialAMRClaim")]
+		Claim CreateEssentialAmrClaim ();
+	}
+
 	// @interface GIDConfiguration : NSObject <NSCopying, NSSecureCoding>
 	[BaseType (typeof (NSObject), Name = "GIDConfiguration")]
 	[DisableDefaultCtor]
@@ -157,6 +196,16 @@ namespace Google.SignIn
 		[Export ("disconnectWithCompletion:")]
 		void DisconnectWithCompletion ([NullAllowed] Action<NSError> completion);
 
+		// -(void)configureWithCompletion:(void (^ _Nullable)(NSError * _Nullable))completion;
+		[NoMacCatalyst]
+		[Export ("configureWithCompletion:")]
+		void ConfigureWithCompletion ([NullAllowed] Action<NSError> completion);
+
+		// -(void)configureDebugProviderWithAPIKey:(NSString * _Nonnull)APIKey completion:(void (^ _Nullable)(NSError * _Nullable))completion API_AVAILABLE(ios(14));
+		[NoMacCatalyst]
+		[Export ("configureDebugProviderWithAPIKey:completion:")]
+		void ConfigureDebugProvider (string apiKey, [NullAllowed] Action<NSError> completion);
+
 		// -(void)signInWithPresentingViewController:(UIViewController * _Nonnull)presentingViewController completion:(void (^ _Nullable)(GIDSignInResult * _Nullable, NSError * _Nullable))completion __attribute__((availability(macos_app_extension, unavailable))) __attribute__((availability(ios_app_extension, unavailable)));
 		//[Unavailable (PlatformName.MacOSXAppExtension)]
 		//[Unavailable (PlatformName.iOSAppExtension)]
@@ -174,6 +223,22 @@ namespace Google.SignIn
 		//[Unavailable (PlatformName.iOSAppExtension)]
 		[Export ("signInWithPresentingViewController:hint:additionalScopes:completion:")]
 		void SignInWithPresentingViewController (UIViewController presentingViewController, [NullAllowed] string hint, [NullAllowed] string[] additionalScopes, [NullAllowed] Action<SignInResult, NSError> completion);
+
+		[Export ("signInWithPresentingViewController:hint:additionalScopes:nonce:completion:")]
+		void SignInWithPresentingViewController (UIViewController presentingViewController, [NullAllowed] string hint, [NullAllowed] string[] additionalScopes, [NullAllowed] string nonce, [NullAllowed] Action<SignInResult, NSError> completion);
+
+		// A distinct managed name keeps existing calls with a null hint unambiguous.
+		[Export ("signInWithPresentingViewController:claims:completion:")]
+		void SignInWithClaims (UIViewController presentingViewController, [NullAllowed] NSSet<Claim> claims, [NullAllowed] Action<SignInResult, NSError> completion);
+
+		[Export ("signInWithPresentingViewController:hint:claims:completion:")]
+		void SignInWithClaims (UIViewController presentingViewController, [NullAllowed] string hint, [NullAllowed] NSSet<Claim> claims, [NullAllowed] Action<SignInResult, NSError> completion);
+
+		[Export ("signInWithPresentingViewController:hint:additionalScopes:claims:completion:")]
+		void SignInWithClaims (UIViewController presentingViewController, [NullAllowed] string hint, [NullAllowed] string[] additionalScopes, [NullAllowed] NSSet<Claim> claims, [NullAllowed] Action<SignInResult, NSError> completion);
+
+		[Export ("signInWithPresentingViewController:hint:additionalScopes:nonce:claims:completion:")]
+		void SignInWithClaims (UIViewController presentingViewController, [NullAllowed] string hint, [NullAllowed] string[] additionalScopes, [NullAllowed] string nonce, [NullAllowed] NSSet<Claim> claims, [NullAllowed] Action<SignInResult, NSError> completion);
 	}
 
 	// @interface GIDSignInButton : UIControl
