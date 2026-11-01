@@ -1,6 +1,7 @@
 import copy
 import importlib.util
 from pathlib import Path
+import re
 import unittest
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -37,6 +38,22 @@ class FoundationPlanTests(unittest.TestCase):
         after = copy.deepcopy(self.before)
         after['Maps']['files'] = {}
         self.assertEqual({'maps': True, 'places': False}, plan.select(self.before, after, ['source/Google/Maps/ApiDefinition.cs']))
+
+    def test_workflow_triggers_on_every_path_that_forces_validation(self):
+        # A planner or fingerprint change that forces both components is useless if the
+        # workflow's own paths filter never starts the run, so pin the two lists together.
+        workflow = (ROOT / '.github/workflows/google-foundation-validation.yml').read_text().splitlines()
+        start = workflow.index('    paths:') + 1
+        triggers = set()
+        for line in workflow[start:]:
+            entry = re.fullmatch(r'      - "(.+)"', line)
+            if entry:
+                triggers.add(entry.group(1))
+            elif not line.startswith('      #'):
+                break
+        for prefix in plan.COVERAGE:
+            with self.subTest(prefix=prefix):
+                self.assertIn(prefix + '**' if prefix.endswith('/') else prefix, triggers)
 
     def test_missing_selected_state_fails_instead_of_skipping(self):
         with self.assertRaises(KeyError):

@@ -16,9 +16,14 @@ on:
       - "*.cake"
       - "icons/googleiosmaps_128x128.png"
       - "icons/googleiosplaces_128x128.png"
+      # The job selection tooling must validate itself; keep in step with the
+      # planner's COVERAGE list (tests/ci/test_foundation_plan.py pins this).
+      - "scripts/ci/**"
+      - "scripts/FirebaseReleaseFingerprint/**"
       - "source/AssemblyInfo.cs"
       - "source/Google/Maps/**"
       - "source/Google/Places/**"
+      - "tests/ci/**"
       - "tests/E2E/Google.Foundation/**"
       - "tools/ci/select-xcode.sh"
       - "tools/e2e/check-consumer-shapes.sh"
