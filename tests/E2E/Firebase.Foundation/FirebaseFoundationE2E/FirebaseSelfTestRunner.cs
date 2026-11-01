@@ -89,7 +89,8 @@ public static class FirebaseSelfTestRunner
             await ExecuteCaseAsync(result, statusViewController, "ConnectFirestoreEmulator", async () =>
             {
                 var emulatorHost = Environment.GetEnvironmentVariable("E2E_FIRESTORE_EMULATOR_HOST");
-                if (!System.Net.IPEndPoint.TryParse(emulatorHost, out var endpoint)
+                if (string.IsNullOrWhiteSpace(emulatorHost)
+                    || !System.Net.IPEndPoint.TryParse(emulatorHost, out var endpoint)
                     || !endpoint.Address.Equals(System.Net.IPAddress.Loopback) || endpoint.Port < 1)
                 {
                     throw new InvalidOperationException("Firestore emulator mode requires 127.0.0.1:<port> with a valid port.");
