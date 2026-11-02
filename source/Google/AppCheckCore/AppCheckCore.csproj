@@ -32,6 +32,7 @@
     <Compile Include="..\..\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="THIRD-PARTY-NOTICES.txt" Pack="True" PackagePath="THIRD-PARTY-NOTICES.txt" />
     <None Include="License.md" Pack="True" PackagePath="License.md" />
   </ItemGroup>
   <ItemGroup>
@@ -40,6 +41,16 @@
       <SmartLink>True</SmartLink>
       <ForceLoad>True</ForceLoad>
       <WeakFrameworks>DeviceCheck</WeakFrameworks>
+    </NativeReference>
+    <NativeReference Include="..\..\..\externals\Promises.xcframework">
+      <Kind>Framework</Kind>
+      <SmartLink>True</SmartLink>
+      <ForceLoad>True</ForceLoad>
+    </NativeReference>
+    <NativeReference Include="..\..\..\externals\RecaptchaInterop.xcframework">
+      <Kind>Framework</Kind>
+      <SmartLink>True</SmartLink>
+      <ForceLoad>True</ForceLoad>
     </NativeReference>
   </ItemGroup>
   <ItemGroup>

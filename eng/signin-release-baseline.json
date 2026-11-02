@@ -1,0 +1,31 @@
+{
+  "packages": [
+    {
+      "fingerprint": "9dd595ef0c8f332112ce2627ef9f299cbb4c4329b25778d3763470a06b2a0274",
+      "id": "AdamE.Google.iOS.GTMSessionFetcher",
+      "version": "3.5.0.6"
+    },
+    {
+      "fingerprint": "a8bb436e7a1f23658b92ed3505db1d7b735bb506aee30f828a69b09d11d1b2f5",
+      "id": "AdamE.Google.iOS.PromisesObjC",
+      "version": "2.4.0.6"
+    },
+    {
+      "fingerprint": "a58f2f61e97566c919bc3ee265952942cb9cf30b8714d3951f9bb67b3c18f4c3",
+      "id": "AdamE.Google.iOS.GoogleUtilities",
+      "version": "8.1.0.4"
+    },
+    {
+      "fingerprint": "5f78e0f7019c68a3123faad9c9e19d3c26c4d4dcda0859720830d64791fc00fa",
+      "id": "AdamE.Google.iOS.AppCheckCore",
+      "version": "11.2.0.1"
+    },
+    {
+      "fingerprint": "634697bdc2e6765b4e8655a7401f32518fb26452934e62060cff876c7b0a08af",
+      "id": "AdamE.Google.iOS.SignIn",
+      "version": "9.0.0.0"
+    }
+  ],
+  "published": false,
+  "schemaVersion": 1
+}
