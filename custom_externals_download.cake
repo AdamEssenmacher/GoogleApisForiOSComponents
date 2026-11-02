@@ -34,19 +34,14 @@ class ExternalDownloadSource
 // *.tar.gz URLs can be found in the podspecs (e.g., CocoaPods Specs repo paths), such as:
 // FirebaseAnalytics: https://github.com/CocoaPods/Specs/tree/master/Specs/e/2/1/FirebaseAnalytics
 // GoogleAppMeasurement: https://github.com/CocoaPods/Specs/tree/master/Specs/e/3/b/GoogleAppMeasurement
-// GoogleMaps: https://github.com/CocoaPods/Specs/tree/master/Specs/1/9/0/GoogleMaps
-// GooglePlaces: https://github.com/CocoaPods/Specs/tree/master/Specs/c/3/2/GooglePlaces
+//
+// Only SDKs whose license permits redistribution belong here; everything listed is packed into a
+// published nupkg. Both entries are declared Apache-2.0 in their podspecs. Proprietary SDKs
+// (Maps, Places, Cast, UMP, ML Kit, legacy Analytics) stay on XamarinBuildDownload so consumers
+// fetch them from Google under Google's terms instead of receiving them from us.
 var ExternalDownloads = new Dictionary<string, ExternalDownloadSource> {
 	{ "FirebaseAnalytics", new ExternalDownloadSource ("FirebaseAnalytics", "12.16.0", "fde230ef9469d037", expectedSha256: "fde230ef9469d037bbbc0861efa7c715ed193c94fcbc407c7bbdc344f5619a70") },
 	{ "GoogleAppMeasurement", new ExternalDownloadSource ("GoogleAppMeasurement", "12.16.0", "55d011d9e0f71e0a", expectedSha256: "55d011d9e0f71e0a89b100129a3d1ba5b0838ca452250cb4766cfe17fbc81c6c") },
-	{ "GoogleMaps", new ExternalDownloadSource (
-		"GoogleMaps",
-		"9.2.0",
-		"33a7ac549361ab23",
-		"https://dl.google.com/dl/cpdc",
-		extractionRootName: "Maps",
-		expectedSha256: "81bbd92c2d627087ae222ae955e5f746590812d7389b9d800add15e4004b6431") },
-	{ "GooglePlaces", new ExternalDownloadSource ("GooglePlaces", "7.4.0", "3e8dc2602895d53405d075ff4eb569bff93ff1af97e69915d1e657c07ef28dd8", "https://dl.google.com/dl/geosdk") },
 };
 
 FilePath GetArchivePath (ExternalDownloadSource source, DirectoryPath externalsPath) =>
@@ -136,58 +131,6 @@ void FirebaseAnalyticsDownload ()
 				DeleteDirectory (frameworkDestination, deleteSettings);
 
 			CopyDirectory (frameworkSource, frameworkDestination);
-		});
-}
-
-void GooglePlacesDownload ()
-{
-	var source = ExternalDownloads["GooglePlaces"];
-
-	DownloadAndExtract (
-		source,
-		() => DirectoryExists (new DirectoryPath ("./externals/GooglePlaces.xcframework")),
-		(extractionRoot, externalsPath, deleteSettings) => {
-			var frameworkSource = extractionRoot.Combine ("Frameworks").Combine ("GooglePlaces.xcframework");
-			var frameworkDestination = externalsPath.Combine ("GooglePlaces.xcframework");
-
-			if (!DirectoryExists (frameworkSource))
-				throw new Exception ($"Expected GooglePlaces.xcframework at {frameworkSource} after extraction.");
-
-			if (DirectoryExists (frameworkDestination))
-				DeleteDirectory (frameworkDestination, deleteSettings);
-
-			CopyDirectory (frameworkSource, frameworkDestination);
-		});
-}
-
-void GoogleMapsDownload ()
-{
-	var source = ExternalDownloads["GoogleMaps"];
-
-	DownloadAndExtract (
-		source,
-		() => DirectoryExists (new DirectoryPath ("./externals/GoogleMaps.xcframework")) &&
-		      DirectoryExists (new DirectoryPath ("./externals/GoogleMaps.bundle")),
-		(extractionRoot, externalsPath, deleteSettings) => {
-			var frameworkSource = extractionRoot.Combine ("Frameworks").Combine ("GoogleMaps.xcframework");
-			var resourceSource = extractionRoot.Combine ("Resources").Combine ("GoogleMapsResources").Combine ("GoogleMaps.bundle");
-			var frameworkDestination = externalsPath.Combine ("GoogleMaps.xcframework");
-			var resourceDestination = externalsPath.Combine ("GoogleMaps.bundle");
-
-			if (!DirectoryExists (frameworkSource))
-				throw new Exception ($"Expected GoogleMaps.xcframework at {frameworkSource} after extraction.");
-
-			if (!DirectoryExists (resourceSource))
-				throw new Exception ($"Expected GoogleMaps.bundle at {resourceSource} after extraction.");
-
-			if (DirectoryExists (frameworkDestination))
-				DeleteDirectory (frameworkDestination, deleteSettings);
-
-			if (DirectoryExists (resourceDestination))
-				DeleteDirectory (resourceDestination, deleteSettings);
-
-			CopyDirectory (frameworkSource, frameworkDestination);
-			CopyDirectory (resourceSource, resourceDestination);
 		});
 }
 

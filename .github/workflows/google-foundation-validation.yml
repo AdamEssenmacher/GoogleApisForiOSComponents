@@ -16,6 +16,7 @@ on:
       - "*.cake"
       - "icons/googleiosmaps_128x128.png"
       - "icons/googleiosplaces_128x128.png"
+      - "scripts/check-maps-resource-manifest.py"
       # The job selection tooling must validate itself; keep in step with the
       # planner's COVERAGE list (tests/ci/test_foundation_plan.py pins this).
       - "scripts/ci/**"
@@ -27,8 +28,6 @@ on:
       - "tests/E2E/Google.Foundation/**"
       - "tools/ci/select-xcode.sh"
       - "tools/e2e/check-consumer-shapes.sh"
-      - "tools/e2e/check-package-structure.sh"
-      - "tools/e2e/check-offline-build.sh"
       - "tools/e2e/run-google-foundation.sh"
   workflow_dispatch:
 
@@ -106,21 +105,25 @@ jobs:
       - name: Pack Google.Places
         run: dotnet tool run dotnet-cake -- --target=nuget --names=Google.Places
 
-      - name: Package structure checks
-        run: >-
-          tools/e2e/check-package-structure.sh
-          --target Places
-          --package-dir output
+      - name: Confirm the Google SDK is not redistributed
+        # Google's Places SDK is proprietary. The package ships the binding and a
+        # XamarinBuildDownload hook; consumers fetch the SDK from Google themselves.
+        env:
+          PACKAGE_ID: AdamE.Google.iOS.Places
+        run: |
+          pkgs=$(find output -maxdepth 1 -name "$PACKAGE_ID.[0-9]*.nupkg" ! -name '*.symbols.nupkg')
+          [[ $(printf '%s\n' "$pkgs" | grep -c .) == 1 ]] || { echo "::error::Expected exactly one $PACKAGE_ID package, found: $(echo $pkgs)"; exit 1; }
+          unzip -Z1 "$pkgs" > "$RUNNER_TEMP/contents.txt"
+          if grep -E '\.(xcframework|framework|bundle)/|\.resources(\.zip|/)' "$RUNNER_TEMP/contents.txt"; then
+            echo "::error::$pkgs contains native SDK content"; exit 1
+          fi
+          unzip -p "$pkgs" '*.nuspec' > "$RUNNER_TEMP/package.nuspec"
+          grep -q 'id="Xamarin.Build.Download"' "$RUNNER_TEMP/package.nuspec" \
+            || { echo "::error::$pkgs no longer depends on Xamarin.Build.Download"; exit 1; }
 
       - name: Direct and transitive consumer checks
         run: >-
           tools/e2e/check-consumer-shapes.sh
-          --target Places
-          --package-dir output
-
-      - name: Offline build proof
-        run: >-
-          tools/e2e/check-offline-build.sh
           --target Places
           --package-dir output
 
@@ -175,21 +178,28 @@ jobs:
       - name: Pack Google.Maps
         run: dotnet tool run dotnet-cake -- --target=nuget --names=Google.Maps
 
-      - name: Package structure checks
-        run: >-
-          tools/e2e/check-package-structure.sh
-          --target Maps
-          --package-dir output
+      - name: Maps resource manifest check
+        run: python3 scripts/check-maps-resource-manifest.py
+
+      - name: Confirm the Google SDK is not redistributed
+        # Google's Maps SDK is proprietary. The package ships the binding and a
+        # XamarinBuildDownload hook; consumers fetch the SDK from Google themselves.
+        env:
+          PACKAGE_ID: AdamE.Google.iOS.Maps
+        run: |
+          pkgs=$(find output -maxdepth 1 -name "$PACKAGE_ID.[0-9]*.nupkg" ! -name '*.symbols.nupkg')
+          [[ $(printf '%s\n' "$pkgs" | grep -c .) == 1 ]] || { echo "::error::Expected exactly one $PACKAGE_ID package, found: $(echo $pkgs)"; exit 1; }
+          unzip -Z1 "$pkgs" > "$RUNNER_TEMP/contents.txt"
+          if grep -E '\.(xcframework|framework|bundle)/|\.resources(\.zip|/)' "$RUNNER_TEMP/contents.txt"; then
+            echo "::error::$pkgs contains native SDK content"; exit 1
+          fi
+          unzip -p "$pkgs" '*.nuspec' > "$RUNNER_TEMP/package.nuspec"
+          grep -q 'id="Xamarin.Build.Download"' "$RUNNER_TEMP/package.nuspec" \
+            || { echo "::error::$pkgs no longer depends on Xamarin.Build.Download"; exit 1; }
 
       - name: Direct and transitive consumer checks
         run: >-
           tools/e2e/check-consumer-shapes.sh
-          --target Maps
-          --package-dir output
-
-      - name: Offline build proof
-        run: >-
-          tools/e2e/check-offline-build.sh
           --target Maps
           --package-dir output
 

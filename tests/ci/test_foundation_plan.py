@@ -29,7 +29,7 @@ class FoundationPlanTests(unittest.TestCase):
     def test_manual_and_validation_changes_always_run_both(self):
         for path in ('.github/workflows/google-foundation-validation.yml', 'scripts/ci/plan-google-foundation.py',
                      'scripts/FirebaseReleaseFingerprint/BuildInputs.cs', 'tests/ci/test_foundation_plan.py',
-                     'tests/E2E/Google.Foundation/case.cs', 'tools/e2e/check-offline-build.sh', 'new-helper.cake'):
+                     'tests/E2E/Google.Foundation/case.cs', 'scripts/check-maps-resource-manifest.py', 'new-helper.cake'):
             with self.subTest(path=path):
                 self.assertTrue(all(plan.select(self.before, self.before, [path]).values()))
         self.assertTrue(all(plan.select(self.before, self.before, [], manual=True).values()))
