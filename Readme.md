@@ -170,7 +170,7 @@ Archiving can still be more reliable on macOS or from the command line.
 
 The lists below distinguish the required published baseline on [nuget.org](https://www.nuget.org/profiles/adamessenmacher) under the `adamessenmacher` owner profile from the versions prepared in [`components.cake`](components.cake). Prepared versions are not publication confirmation.
 
-Firebase and GoogleAppMeasurement `12.14.0` are the required published baseline for this update. Verify their publication through the [approved CI publishing workflow](docs/FIREBASE_RELEASES.md) before merging the 12.15 preparation. See the [12.14 native review and validation notes](docs/firebase-12.14-update.md), the [12.13 notes](docs/firebase-12.13-update.md), and the earlier [12.12 notes](docs/firebase-12.12-update.md).
+Firebase and GoogleAppMeasurement `12.15.0` are the required published baseline for this update. Verify their publication through the [approved CI publishing workflow](docs/FIREBASE_RELEASES.md) before merging the 12.16 preparation. See the [12.15 native review and validation notes](docs/firebase-12.15-update.md), the [12.14 notes](docs/firebase-12.14-update.md), and the earlier [12.13 notes](docs/firebase-12.13-update.md).
 
 This checkout prepares Firebase and GoogleAppMeasurement `12.16.0`. Publication remains pending. See the [12.16 native review and validation notes](docs/firebase-12.16-update.md).
 
