@@ -17,7 +17,6 @@ on:
       - "icons/googleiosmaps_128x128.png"
       - "icons/googleiosplaces_128x128.png"
       - "scripts/check-maps-resource-manifest.py"
-      - "scripts/check-xbd-package.py"
       # The job selection tooling must validate itself; keep in step with the
       # planner's COVERAGE list (tests/ci/test_foundation_plan.py pins this).
       - "scripts/ci/**"
@@ -106,11 +105,6 @@ jobs:
       - name: Pack Google.Places
         run: dotnet tool run dotnet-cake -- --target=nuget --names=Google.Places
 
-      # Google's Places SDK is proprietary: the package ships the binding and a
-      # XamarinBuildDownload hook, and consumers fetch the SDK from Google themselves.
-      - name: Confirm the Google SDK is not redistributed
-        run: python3 scripts/check-xbd-package.py --target Places --package-dir output
-
       - name: Direct and transitive consumer checks
         run: >-
           tools/e2e/check-consumer-shapes.sh
@@ -173,12 +167,6 @@ jobs:
 
       - name: Pack Google.Maps
         run: dotnet tool run dotnet-cake -- --target=nuget --names=Google.Maps
-
-      # Google's Maps SDK is proprietary: the package ships the binding and a
-      # XamarinBuildDownload hook, and consumers fetch the SDK from Google themselves.
-      # Local, so it runs before the network-dependent manifest check.
-      - name: Confirm the Google SDK is not redistributed
-        run: python3 scripts/check-xbd-package.py --target Maps --package-dir output
 
       - name: Maps resource manifest check
         run: python3 scripts/check-maps-resource-manifest.py

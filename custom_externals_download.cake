@@ -41,7 +41,7 @@ class ExternalDownloadSource
 // Everything listed here is packed into a published nupkg, so only SDKs whose license permits
 // redistribution belong here; both entries are declared Apache-2.0 in their podspecs. Proprietary
 // SDKs such as Maps and Places stay on XamarinBuildDownload, so consumers fetch them from Google
-// under Google's terms (scripts/check-xbd-package.py checks this for those two).
+// under Google's terms.
 var ExternalDownloads = new Dictionary<string, ExternalDownloadSource> {
 	{ "FirebaseAnalytics", new ExternalDownloadSource ("FirebaseAnalytics", "12.17.0", "5b4ffbefbb018b03", expectedSha256: "5b4ffbefbb018b034c6351126f53381aa63d340bafaf7f47a8e9bc096fb1fcbb") },
 	{ "GoogleAppMeasurement", new ExternalDownloadSource ("GoogleAppMeasurement", "12.17.0", "5e80294989c75a36", expectedSha256: "5e80294989c75a365daaa9f5d0573bc13f9584e3523ce4fced57aad848f5fb3d") },
