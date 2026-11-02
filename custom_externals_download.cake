@@ -1,21 +1,34 @@
 class ExternalDownloadSource
 {
+	// Most of these archives live under the Firebase analytics path, but Google publishes
+	// other SDKs under different hosts/paths, so the prefix is overridable.
+	const string DefaultUrlPrefix = "https://dl.google.com/firebase/ios/analytics";
+
 	public string Id { get; }
 	public string Version { get; }
 	public string ArchiveKey { get; }
+	public string UrlPrefix { get; }
+	public string ExtractionRootName { get; }
 	public string ExpectedSha256 { get; }
 
-	public ExternalDownloadSource (string id, string version, string archiveKey, string expectedSha256 = null)
+	public ExternalDownloadSource (
+		string id,
+		string version,
+		string archiveKey,
+		string urlPrefix = DefaultUrlPrefix,
+		string extractionRootName = null,
+		string expectedSha256 = null)
 	{
 		Id = id;
 		Version = version;
 		ArchiveKey = archiveKey;
+		UrlPrefix = urlPrefix;
+		ExtractionRootName = extractionRootName ?? $"{Id}-{Version}";
 		ExpectedSha256 = expectedSha256;
 	}
 
 	public string ArchiveFileName => $"{Id}-{Version}.tar.gz";
-	public string ExtractionRootName => $"{Id}-{Version}";
-	public string Url => $"https://dl.google.com/firebase/ios/analytics/{ArchiveKey}/{ArchiveFileName}";
+	public string Url => $"{UrlPrefix}/{ArchiveKey}/{ArchiveFileName}";
 }
 
 // *.tar.gz URLs can be found in the podspecs (e.g., CocoaPods Specs repo paths), such as:
