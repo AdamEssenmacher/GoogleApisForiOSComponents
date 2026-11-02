@@ -1,6 +1,6 @@
 # Firebase 12.19.0 preparation
 
-This draft prepares the next incremental release after 12.18.0. It depends on that predecessor’s source PR and publication. The current production release candidate is unaffected. Follow [the existing release workflow](FIREBASE_RELEASES.md); source merge and deployment approval remain maintainer actions.
+This draft prepares the next incremental release after 12.18.0. It depends on that predecessor’s pull request merging and publishing; 12.18.0 is open rather than merged, so this is stacked on it for now. The current production release candidate is unaffected. Follow [the existing release workflow](FIREBASE_RELEASES.md); source merge and deployment approval remain maintainer actions.
 
 ## Native review
 
@@ -8,7 +8,7 @@ The complete [12.18.0 to 12.19.0 source comparison](https://github.com/firebase/
 
 - `Firestore/Source/Public/FirebaseFirestore/FIRFieldValue.h`
 
-Firestore adds double/integer minimum and maximum field transforms. Performance raises GoogleUtilities to `>= 8.1.3, < 9.0`; advance the maintained native pin and support package to compatible 8.1.5. Default measurement conversion requirement advances to `~> 3.7.0`, with the existing omission retained. Analytics real header changes are documentation only; the archives also contain AppleDouble metadata files, which are not API declarations.
+Firestore adds double/integer minimum and maximum field transforms. Performance raises GoogleUtilities from `~> 8.1` to `>= 8.1.3, < 9.0`, which the maintained 8.1.0 pin no longer satisfies, so the native pin and the support package advance to 8.1.5. This is the one support package this release must move, and it changes its native base rather than its packaging revision: `8.1.0.6` becomes `8.1.5`. Default measurement conversion requirement advances to `~> 3.7.0`, with the existing omission retained. Analytics real header changes are documentation only; the archives also contain AppleDouble metadata files, which are not API declarations.
 
 Analytics and measurement archives were downloaded from their CocoaPods source URLs and SHA-256 hashed. All shipped headers, module maps, and Swift interfaces were compared with the preceding archives; these comparisons are preliminary evidence and do not replace the complete generated native audit.
 
@@ -21,6 +21,6 @@ Preserve package IDs, .NET 10 targets, deployment targets, native framework owne
 
 ## Validation status and merge gates
 
-Local shared audit/updater tests (84) and release-tooling tests (26) passed during stack preparation. These do not establish each version’s build or runtime compatibility. Complete unrestricted and repository-pinned CocoaPods resolution remains required for this version. The draft remains blocked on the full 16-target native audit against fresh frameworks, triage/implementation of the public drift described above, dependency-first build/pack, staged package inspection, six consumer lanes including the two separate Firestore emulator cases, Mac Catalyst and unsigned device Release/LLVM-AOT checks, and passing hosted CI. No skipped generator or inherited predecessor result counts as a pass.
+Local shared audit/updater tests (110) and release-tooling tests (59) pass on the rebuilt tree. These do not establish each version’s build or runtime compatibility. Complete unrestricted and repository-pinned CocoaPods resolution remains required for this version. The draft remains blocked on the full 16-target native audit against fresh frameworks, triage/implementation of the public drift described above, dependency-first build/pack, staged package inspection, six consumer lanes including the two separate Firestore emulator cases, Mac Catalyst and unsigned device Release/LLVM-AOT checks, and passing hosted CI. No skipped generator or inherited predecessor result counts as a pass.
 
-Retarget each stacked PR to main only after its predecessor merges; publish releases in order so planning uses the correct published manifest. The exact merged commit must be rebuilt and validated before deployment approval. Do not reuse preparation artifacts for publication.
+Retarget this to main alone once 12.18.0 merges; publish releases in order so planning uses the correct published manifest. The exact merged commit must be rebuilt and validated before deployment approval. Do not reuse preparation artifacts for publication.

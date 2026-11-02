@@ -147,6 +147,7 @@ namespace Firebase.AppCheck {
 	}
 
 	// FIRAppAttestProviderFactory.h, introduced in Firebase 12.14.
+	// [iOS (14, 0), MacCatalyst (14, 5)] — below the supported platform floor.
 	[BaseType (typeof (NSObject), Name = "FIRAppAttestProviderFactory")]
 	interface AppAttestProviderFactory : AppCheckProviderFactory {
 	}
@@ -162,7 +163,10 @@ namespace Firebase.AppCheck {
 	[DisableDefaultCtor]
 	[BaseType (typeof (NSObject), Name = "FIRRecaptchaProvider")]
 	interface RecaptchaProvider : AppCheckProvider {
-		[return: NullAllowed]
+		// -(nullable instancetype)initWithApp:(FIRApp *)app siteKey:(NSString *)siteKey;
+		// Native nil cannot be returned by a C# constructor. Use
+		// RecaptchaProvider.Create for a nullable result.
+		[Internal]
 		[Export ("initWithApp:siteKey:")]
 		NativeHandle Constructor (App app, string siteKey);
 	}
@@ -172,6 +176,7 @@ namespace Firebase.AppCheck {
 	[DisableDefaultCtor]
 	[BaseType (typeof (NSObject), Name = "FIRRecaptchaProviderFactory")]
 	interface RecaptchaProviderFactory : AppCheckProviderFactory {
+		// -(instancetype)initWithSiteKey:(NSString *)siteKey;
 		[Export ("initWithSiteKey:")]
 		NativeHandle Constructor (string siteKey);
 	}

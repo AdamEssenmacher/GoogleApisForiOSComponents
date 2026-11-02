@@ -7,6 +7,58 @@ namespace FirebaseReleaseFingerprint;
 
 public static class BuildInputs
 {
+    // CI relevance only. Publication fingerprints continue to use Normalize unchanged.
+    public static string NormalizeComponents(string text, HashSet<string> excludedArtifacts)
+    {
+        var root = new ComponentScopeRewriter(excludedArtifacts).Visit(Parse(text))!;
+        root = root.ReplaceTrivia(root.DescendantTrivia(descendIntoTrivia: true)
+            .Where(t => t.IsKind(SyntaxKind.SingleLineDocumentationCommentTrivia)
+                || t.IsKind(SyntaxKind.MultiLineDocumentationCommentTrivia)), (_, _) => default);
+        return JsonSerializer.Serialize(new {
+            tokens = root.DescendantTokens(descendIntoTrivia: true).Select(t => new { kind = t.RawKind, text = t.Text }),
+            inactive = root.DescendantTrivia(descendIntoTrivia: true)
+                .Where(t => t.IsKind(SyntaxKind.DisabledTextTrivia)).Select(t => t.ToFullString())
+        });
+    }
+
+    sealed class ComponentScopeRewriter(HashSet<string> excluded) : CSharpSyntaxRewriter
+    {
+        public override SyntaxNode? VisitFieldDeclaration(FieldDeclarationSyntax node)
+        {
+            if (node.Declaration.Variables.All(v => excluded.Contains(v.Identifier.ValueText)))
+                return null;
+            return base.VisitFieldDeclaration(node);
+        }
+
+        public override SyntaxNode? VisitGlobalStatement(GlobalStatementSyntax node)
+        {
+            if (node.Statement is LocalDeclarationStatementSyntax declaration
+                && declaration.Declaration.Variables.All(v => excluded.Contains(v.Identifier.ValueText)))
+                return null;
+            return base.VisitGlobalStatement(node);
+        }
+
+        public override SyntaxNode? VisitExpressionStatement(ExpressionStatementSyntax node)
+        {
+            if (node.Expression is AssignmentExpressionSyntax {
+                    Left: MemberAccessExpressionSyntax { Expression: IdentifierNameSyntax artifact } }
+                && excluded.Contains(artifact.Identifier.ValueText))
+                return null;
+            return base.VisitExpressionStatement(node);
+        }
+
+        public override SyntaxNode? VisitInitializerExpression(InitializerExpressionSyntax node)
+        {
+            var kept = node.Expressions.Where(e => e is not InitializerExpressionSyntax entry
+                || !entry.IsKind(SyntaxKind.ComplexElementInitializerExpression)
+                || entry.Expressions.Count != 2 || entry.Expressions[1] is not IdentifierNameSyntax artifact
+                || !excluded.Contains(artifact.Identifier.ValueText)).ToArray();
+            if (kept.Length != node.Expressions.Count)
+                node = node.WithExpressions(SyntaxFactory.SeparatedList<ExpressionSyntax>(kept));
+            return base.VisitInitializerExpression(node);
+        }
+    }
+
     static CompilationUnitSyntax Parse(string text)
     {
         var tree = CSharpSyntaxTree.ParseText(text, new CSharpParseOptions(kind: SourceCodeKind.Script));

@@ -340,6 +340,9 @@ internal sealed class AuditRunner
         }
         else
         {
+            var requiredFailure = RequiredFallbackFailure(target, target.EffectiveSharpieMode(configuration.Sharpie), options.DisableSharpie);
+            if (requiredFailure is not null)
+                effectiveFindings.Add(requiredFailure);
             if (primaryComparison is not null)
             {
                 effectiveFindings.AddRange(primaryComparison.Failures);
@@ -351,6 +354,14 @@ internal sealed class AuditRunner
         var status = annotatedFindings.Any(static finding => finding.Severity == "failure") ? "failed" : "passed";
         return BuildTargetResult(target, status, generationStatus, comparisonSource, sharpieStatus, BuildConfidenceSummary(annotatedFindings), annotatedFindings);
     }
+
+    internal static AuditFinding? RequiredFallbackFailure(AuditTargetDefinition target, string mode, bool disableSharpie = false)
+        => target.UseSharpieComparisonFallback && string.Equals(mode, "forceFallback", StringComparison.OrdinalIgnoreCase)
+            ? BuildPrimaryGenerationFinding("required-comparison-unavailable", "failure", target.PackageId,
+                disableSharpie
+                    ? "Sharpie was explicitly disabled via --disable-sharpie, but this target requires a successful Sharpie fallback comparison; primary output cannot substitute for it."
+                    : "This target requires a successful Sharpie fallback comparison; primary output cannot substitute for it.")
+            : null;
 
     private bool ShouldRequestSharpie(AuditTargetDefinition target, AuditOptions options, bool primaryFailed, bool primaryComparableSurfaceEmpty)
     {
@@ -421,7 +432,7 @@ internal sealed class AuditRunner
         return AuditFindingSummary.BuildConfidenceSummary(findings.ToList());
     }
 
-    private static List<AuditFinding> AnnotateFindings(
+    internal static List<AuditFinding> AnnotateFindings(
         IReadOnlyList<AuditFinding> findings,
         bool sharpieRequested,
         string sharpieStatus,
@@ -514,7 +525,8 @@ internal sealed class AuditRunner
         return string.Equals(finding.Category, "stale-baseline-binding", StringComparison.Ordinal) ||
                string.Equals(finding.Category, "missing-baseline-binding", StringComparison.Ordinal) ||
                string.Equals(finding.Category, "signature-drift", StringComparison.Ordinal) ||
-               string.Equals(finding.Category, "attribute-drift", StringComparison.Ordinal);
+               string.Equals(finding.Category, "attribute-drift", StringComparison.Ordinal) ||
+               string.Equals(finding.Category, "enum-value-drift", StringComparison.Ordinal);
     }
 
     private static bool IsPrimaryGenerationFinding(AuditFinding finding)

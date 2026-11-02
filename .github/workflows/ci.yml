@@ -1,10 +1,9 @@
 name: CI
 
+# Automatic Sign-In build/pack and consumer coverage lives in firebase-release.yml.
+# Keep this entry point for explicitly requested component builds.
+
 on:
-  pull_request:
-  push:
-    branches:
-      - main
   workflow_dispatch:
     inputs:
       names:
@@ -12,20 +11,51 @@ on:
         required: false
         default: "Google.SignIn"
 
+# Cancel superseded PR validation; keep every main and manual run.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 permissions:
   contents: read
 
 jobs:
   build:
-    runs-on: macos-15
+    runs-on: ubuntu-latest
+    env:
+      MSBuildEnableWorkloadResolver: 'false'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v5
+        with:
+          global-json-file: global.json
+
+      - name: Release tooling tests
+        run: python3 -m unittest discover -s tests/firebase-release -v
+
+      - name: Install emulator runner test shell
+        run: |
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends --yes zsh
+
+      - name: Consumer emulator runner regressions
+        run: python3 -m unittest discover -s tests/E2E/Firebase.Foundation -p 'test_*.py'
+
+      - name: Firebase binding audit and fingerprint unit tests
+        run: dotnet test scripts/FirebaseBindingAudit.Tests/FirebaseBindingAudit.Tests.csproj --nologo
+
+  pack:
+    if: github.event_name == 'workflow_dispatch'
+    # Manual packs use the maintainers' self-hosted Mac (docs/SELF_HOSTED_MACOS_RUNNER.md).
+    runs-on: [self-hosted, macOS, ARM64, xcode-27.1]
     env:
       CAKE_NAMES: ${{ inputs.names || 'Google.SignIn' }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Consumer emulator runner regressions
-        run: python3 -m unittest discover -s tests/E2E/Firebase.Foundation -p 'test_*.py'
+        uses: actions/checkout@v5
 
       - name: Toolchain versions
         run: |
@@ -34,15 +64,12 @@ jobs:
           xcode-select -p
 
       - name: Setup .NET SDK
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v5
         with:
           global-json-file: global.json
 
       - name: Restore .NET workloads
         run: dotnet workload restore Xamarin.Google.sln
-
-      - name: Firebase binding audit unit tests
-        run: dotnet test scripts/FirebaseBindingAudit.Tests/FirebaseBindingAudit.Tests.csproj --nologo
 
       - name: Install CocoaPods
         run: |
@@ -58,7 +85,7 @@ jobs:
         run: dotnet tool run dotnet-cake -- --target=nuget --names="${CAKE_NAMES}"
 
       - name: Upload packages
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: nuget
           path: output/*.nupkg

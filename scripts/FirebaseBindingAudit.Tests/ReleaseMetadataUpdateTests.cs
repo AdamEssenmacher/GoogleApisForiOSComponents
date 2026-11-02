@@ -45,6 +45,7 @@ public class ReleaseMetadataUpdateTests
               public static void Information(string message) { }
             """ + Method(release, "UpdateFirebaseReleaseExternalDownloadsCake")
                 + Method(release, "ReplaceFirebaseReleasePackageReferenceVersion")
+                + Method(release, "UpdateFirebaseReleaseTargetsFile")
                 + Method(downloads, "VerifyArchiveHash") + """
               public static string UpdateDownload(string text, string version, string key, string hash) =>
                 UpdateFirebaseReleaseExternalDownloadsCake(text, new Dictionary<string, FirebaseReleaseDownloadInfo> {
@@ -69,6 +70,24 @@ public class ReleaseMetadataUpdateTests
     {
         try { return Helpers.Value.GetMethod(name)!.Invoke(null, args); }
         catch (TargetInvocationException e) when (e.InnerException is not null) { throw e.InnerException; }
+    }
+
+    [Fact]
+    public void CrashlyticsToolPinAndDigestUpdateTogether()
+    {
+        var text = "<Project><_FirebaseCrashlyticsAssemblyName>Firebase.Crashlytics, Version=12.14.0, Culture=neutral</_FirebaseCrashlyticsAssemblyName>"
+            + "<_FirebaseCrashlyticsItemsFolder>FCrshlytcs-12.14.0</_FirebaseCrashlyticsItemsFolder>"
+            + "<_FirebaseCrashlyticsScriptSha256>" + new string('a', 64) + "</_FirebaseCrashlyticsScriptSha256>"
+            + "<Url>https://raw.githubusercontent.com/firebase/firebase-ios-sdk/old/Crashlytics/upload-symbols</Url></Project>";
+        var hash = new string('b', 64);
+        var updated = (string)Invoke("UpdateFirebaseReleaseTargetsFile", text, "12.15.0", "new", hash)!;
+        var xml = XDocument.Parse(updated);
+        Assert.Equal(hash, xml.Descendants("_FirebaseCrashlyticsScriptSha256").Single().Value);
+        Assert.Contains("/new/Crashlytics/upload-symbols", updated);
+        Assert.Contains("FCrshlytcs-12.15.0", updated);
+        Assert.Equal(updated, Invoke("UpdateFirebaseReleaseTargetsFile", updated, "12.15.0", "new", hash));
+        Assert.Throws<Exception>(() => Invoke("UpdateFirebaseReleaseTargetsFile", text, "12.15.0", "new", "bad"));
+        Assert.Throws<Exception>(() => Invoke("UpdateFirebaseReleaseTargetsFile", "<Project/>", "12.15.0", "new", hash));
     }
 
     [Theory]

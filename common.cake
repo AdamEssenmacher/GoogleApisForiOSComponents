@@ -55,12 +55,23 @@ void CocoaPodInstall (DirectoryPath projectDirectory)
 	ThrowIfProcessFailed ("pod install", StartProcess ("pod", new ProcessSettings { Arguments = args }));
 }
 
+// Build tools default to warnings and errors only. Diagnostic MSBuild and verbose xcodebuild output
+// reach millions of lines per closure, which self-hosted runners must upload. Set BUILD_VERBOSE=1
+// to restore full output when debugging a build locally.
+bool VerboseBuildLogs ()
+	=> EnvironmentVariable ("BUILD_VERBOSE") == "1";
+
+DotNetVerbosity DotNetBuildVerbosity ()
+	=> VerboseBuildLogs () ? DotNetVerbosity.Diagnostic : DotNetVerbosity.Minimal;
+
 void XCodeBuild (XCodeBuildSettings settings)
 {
 	var args = new ProcessArgumentBuilder ();
 
-	if (settings.Verbose)
+	if (settings.Verbose || VerboseBuildLogs ())
 		args.Append ("-verbose");
+	else
+		args.Append ("-quiet");
 	if (!string.IsNullOrWhiteSpace (settings.Project))
 		args.Append ($"-project {QuoteArgument (settings.Project)}");
 	if (!string.IsNullOrWhiteSpace (settings.Target))
@@ -328,7 +339,13 @@ void BuildSdkOnPodfileV2 (Artifact artifact)
 		}
 	}
 
-	BuildXcodeXcframework (podsProject, podSpecsToBuild.ToArray (), platforms, workingDirectory: workingDirectory);
+	// Podspecs may declare deployment targets older than current Xcode accepts (for example iOS 10).
+	// Build every pod target for the package's own minimum OS, which is what consumers require anyway.
+	var buildSettings = new Dictionary<string, string> {
+		["IPHONEOS_DEPLOYMENT_TARGET"] = GetMinimunSupportedVersion (artifact)
+	};
+
+	BuildXcodeXcframework (podsProject, podSpecsToBuild.ToArray (), platforms, workingDirectory: workingDirectory, buildSettings: buildSettings);
 
 	foreach (var podSpec in podSpecsToBuild) {
 		var xcframeworkName = $"{podSpec.FrameworkName}.xcframework";
@@ -392,7 +409,6 @@ void BuildXcodeFatLibrary (FilePath xcodeProject, string target, Platform [] pla
 			Sdk = sdk,
 			Arch = arch,
 			Configuration = "Release",
-			Verbose = true
 		});
 
 		var outputPath = workingDirectory.Combine("build").Combine($"Release-{sdk}").Combine (target).CombineWithFilePath($"lib{libraryTitle}.a");
@@ -432,7 +448,6 @@ void BuildXcodeFatFramework (FilePath xcodeProject, string target, Platform [] p
 			Sdk = sdk,
 			Arch = arch,
 			Configuration = "Release",
-			Verbose = true
 		});
 
 		var outputPath = workingDirectory.Combine ("build").Combine ($"Release-{sdk}").Combine (target).Combine (fatFramework);
@@ -500,7 +515,6 @@ void BuildXcodeFatFramework (FilePath xcodeProject, PodSpec [] podSpecs, Platfor
 				Sdk = sdk,
 				Arch = arch,
 				Configuration = "Release",
-				Verbose = true,
 				BuildSettings = buildSettingsCopy
 			});
 
@@ -593,7 +607,6 @@ void BuildXcodeXcframework (FilePath xcodeProject, PodSpec [] podSpecs, Platform
 				Archive = true,
 				ArchivePath = archiveDirectory.ToString (),
 				Sdk = sdk.Value,
-				Verbose = true,
 				BuildSettings = buildSettingsCopy
 			};
 
