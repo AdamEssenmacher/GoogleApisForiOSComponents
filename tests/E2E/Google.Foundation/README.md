@@ -93,6 +93,11 @@ The same ignored directory contains the simulator log and target-neutral build d
 
 These files aid failure investigation; they are not golden baselines.
 
+CI uploads `artifacts/` when a run fails, so nothing restored or built belongs there. The runner
+restores packages into the separate, ignored `tests/E2E/Google.Foundation/packages/` directory;
+keeping it out of `artifacts/` means a failed run can never publish package contents as a
+downloadable artifact.
+
 Failed structure and offline checks copy their diagnostics to `package-structure-Places/` and
 `offline-Places/` beneath the same artifacts directory.
 
