@@ -63,29 +63,16 @@ static class FirebaseNullabilityValidation
             throw new InvalidOperationException("AppCheck TokenCompletionHandler did not accept null token/error values.");
         }
 
-#if IOS
-        // The native initializer returns nil before loading reCAPTCHA Enterprise
-        // when token-exchange options are incomplete. Exercise the nullable
-        // protocol factory rather than a C# constructor, which cannot return null.
-        using var incompleteOptions = new FirebaseCoreOptions("1:123456789:ios:0123456789abcdef", "123456789")
-        {
-            // Auth may be linked and eagerly requires an API key. Leave only
-            // ProjectId absent to exercise the provider's native nil path.
-            ApiKey = "AIzaSy" + new string('A', 33),
-            RecaptchaSiteKey = "nullability-test-site-key"
-        };
-        const string incompleteAppName = "recaptcha-incomplete-options";
-        FirebaseCoreApp.Configure(incompleteAppName, incompleteOptions);
-        var incompleteApp = FirebaseCoreApp.From(incompleteAppName)
-            ?? throw new InvalidOperationException("The incomplete-options test app was not configured.");
-        using var recaptchaFactory = new RecaptchaProviderFactory();
-        if (recaptchaFactory.CreateProviderWithApp(incompleteApp) is not null ||
-            RecaptchaProvider.Create(incompleteApp) is not null)
-        {
-            throw new InvalidOperationException("The reCAPTCHA provider factory must preserve native nil for incomplete token-exchange options.");
-        }
-        incompleteApp.Delete(_ => { });
-#endif
+        // The reCAPTCHA factory is nil-returning, but no app this harness can configure reaches
+        // that nil, so there is nothing left to assert about it here:
+        //   * an absent FirebaseOptions.RecaptchaSiteKey raises NSInvalidArgumentException;
+        //   * the nil return needs APIKey, ProjectId or GoogleAppId missing, and Installations is
+        //     an eager component whose validator raises on those same three fields inside
+        //     FirebaseApp.Configure, so such an app never finishes configuring;
+        //   * complete options then raise NSInternalInconsistencyException, because the nil check
+        //     sits behind a linkage check for the reCAPTCHA Enterprise SDK that this closure does
+        //     not ship -- it carries RecaptchaInterop only.
+        // The [return: NullAllowed] annotation stays covered by the binding surface audit.
 
         var debugProvider = new AppCheckDebugProvider(defaultApp);
         var deviceCheckProvider = new DeviceCheckProvider(defaultApp);
