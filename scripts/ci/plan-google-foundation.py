@@ -17,8 +17,8 @@ SHARED = ('Directory.Build.props', 'global.json', '.config/dotnet-tools.json',
           'source/AssemblyInfo.cs', 'Xamarin.Google.sln', '.gitignore')
 COVERAGE = ('.github/workflows/google-foundation-validation.yml', 'scripts/ci/', 'tests/ci/',
             'scripts/FirebaseReleaseFingerprint/', 'scripts/check-maps-resource-manifest.py',
-            'tests/E2E/Google.Foundation/', 'tools/e2e/check-consumer-shapes.sh',
-            'tools/e2e/run-google-foundation.sh')
+            'scripts/check-xbd-package.py', 'tests/E2E/Google.Foundation/',
+            'tools/e2e/check-consumer-shapes.sh', 'tools/e2e/run-google-foundation.sh')
 
 
 def run(*args, cwd=ROOT):

@@ -12,8 +12,12 @@ Automatic validation uses two workflows:
   through a manual run, so pull requests never queue the self-hosted Mac
   (docs/SELF_HOSTED_MACOS_RUNNER.md). A Linux planner then schedules the Maps and
   Places Mac jobs independently when their selected inputs change. Those jobs
-  retain build/pack, package structure, direct/transitive consumers, offline
-  builds, and simulator tests.
+  run build/pack, a check that the package carries no Google SDK binaries and
+  still delivers them through `Xamarin.Build.Download`
+  (`scripts/check-xbd-package.py`), direct/transitive consumers, the Maps
+  resource manifest check, and simulator tests. Both SDKs are proprietary, so
+  consumers download them from Google rather than receiving them in our
+  packages; the checker's source half also runs with the Linux planner tests.
 
 The `CI` workflow is an explicit `workflow_dispatch` component build. Its `names`
 input and package artifact remain available; it no longer automatically repeats

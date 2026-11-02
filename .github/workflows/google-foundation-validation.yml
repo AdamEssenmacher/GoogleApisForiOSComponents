@@ -17,6 +17,7 @@ on:
       - "icons/googleiosmaps_128x128.png"
       - "icons/googleiosplaces_128x128.png"
       - "scripts/check-maps-resource-manifest.py"
+      - "scripts/check-xbd-package.py"
       # The job selection tooling must validate itself; keep in step with the
       # planner's COVERAGE list (tests/ci/test_foundation_plan.py pins this).
       - "scripts/ci/**"
@@ -105,21 +106,10 @@ jobs:
       - name: Pack Google.Places
         run: dotnet tool run dotnet-cake -- --target=nuget --names=Google.Places
 
+      # Google's Places SDK is proprietary: the package ships the binding and a
+      # XamarinBuildDownload hook, and consumers fetch the SDK from Google themselves.
       - name: Confirm the Google SDK is not redistributed
-        # Google's Places SDK is proprietary. The package ships the binding and a
-        # XamarinBuildDownload hook; consumers fetch the SDK from Google themselves.
-        env:
-          PACKAGE_ID: AdamE.Google.iOS.Places
-        run: |
-          pkgs=$(find output -maxdepth 1 -name "$PACKAGE_ID.[0-9]*.nupkg" ! -name '*.symbols.nupkg')
-          [[ $(printf '%s\n' "$pkgs" | grep -c .) == 1 ]] || { echo "::error::Expected exactly one $PACKAGE_ID package, found: $(echo $pkgs)"; exit 1; }
-          unzip -Z1 "$pkgs" > "$RUNNER_TEMP/contents.txt"
-          if grep -E '\.(xcframework|framework|bundle)/|\.resources(\.zip|/)' "$RUNNER_TEMP/contents.txt"; then
-            echo "::error::$pkgs contains native SDK content"; exit 1
-          fi
-          unzip -p "$pkgs" '*.nuspec' > "$RUNNER_TEMP/package.nuspec"
-          grep -q 'id="Xamarin.Build.Download"' "$RUNNER_TEMP/package.nuspec" \
-            || { echo "::error::$pkgs no longer depends on Xamarin.Build.Download"; exit 1; }
+        run: python3 scripts/check-xbd-package.py --target Places --package-dir output
 
       - name: Direct and transitive consumer checks
         run: >-
@@ -134,12 +124,18 @@ jobs:
           --package-dir output
           --configuration Debug
 
+      # Text diagnostics only: nothing restored or built leaves the runner, even if a
+      # later change writes package content beneath artifacts/.
       - name: Upload diagnostics
         if: failure()
         uses: actions/upload-artifact@v6
         with:
           name: google-foundation-places-diagnostics
-          path: tests/E2E/Google.Foundation/artifacts/
+          path: |
+            tests/E2E/Google.Foundation/artifacts/**/*.json
+            tests/E2E/Google.Foundation/artifacts/**/*.log
+            tests/E2E/Google.Foundation/artifacts/**/*.txt
+            tests/E2E/Google.Foundation/artifacts/**/*.diff
           if-no-files-found: ignore
 
   maps:
@@ -178,24 +174,14 @@ jobs:
       - name: Pack Google.Maps
         run: dotnet tool run dotnet-cake -- --target=nuget --names=Google.Maps
 
+      # Google's Maps SDK is proprietary: the package ships the binding and a
+      # XamarinBuildDownload hook, and consumers fetch the SDK from Google themselves.
+      # Local, so it runs before the network-dependent manifest check.
+      - name: Confirm the Google SDK is not redistributed
+        run: python3 scripts/check-xbd-package.py --target Maps --package-dir output
+
       - name: Maps resource manifest check
         run: python3 scripts/check-maps-resource-manifest.py
-
-      - name: Confirm the Google SDK is not redistributed
-        # Google's Maps SDK is proprietary. The package ships the binding and a
-        # XamarinBuildDownload hook; consumers fetch the SDK from Google themselves.
-        env:
-          PACKAGE_ID: AdamE.Google.iOS.Maps
-        run: |
-          pkgs=$(find output -maxdepth 1 -name "$PACKAGE_ID.[0-9]*.nupkg" ! -name '*.symbols.nupkg')
-          [[ $(printf '%s\n' "$pkgs" | grep -c .) == 1 ]] || { echo "::error::Expected exactly one $PACKAGE_ID package, found: $(echo $pkgs)"; exit 1; }
-          unzip -Z1 "$pkgs" > "$RUNNER_TEMP/contents.txt"
-          if grep -E '\.(xcframework|framework|bundle)/|\.resources(\.zip|/)' "$RUNNER_TEMP/contents.txt"; then
-            echo "::error::$pkgs contains native SDK content"; exit 1
-          fi
-          unzip -p "$pkgs" '*.nuspec' > "$RUNNER_TEMP/package.nuspec"
-          grep -q 'id="Xamarin.Build.Download"' "$RUNNER_TEMP/package.nuspec" \
-            || { echo "::error::$pkgs no longer depends on Xamarin.Build.Download"; exit 1; }
 
       - name: Direct and transitive consumer checks
         run: >-
@@ -210,10 +196,16 @@ jobs:
           --package-dir output
           --configuration Debug
 
+      # Text diagnostics only: nothing restored or built leaves the runner, even if a
+      # later change writes package content beneath artifacts/.
       - name: Upload diagnostics
         if: failure()
         uses: actions/upload-artifact@v6
         with:
           name: google-foundation-maps-diagnostics
-          path: tests/E2E/Google.Foundation/artifacts/
+          path: |
+            tests/E2E/Google.Foundation/artifacts/**/*.json
+            tests/E2E/Google.Foundation/artifacts/**/*.log
+            tests/E2E/Google.Foundation/artifacts/**/*.txt
+            tests/E2E/Google.Foundation/artifacts/**/*.diff
           if-no-files-found: ignore

@@ -1,44 +1,31 @@
 class ExternalDownloadSource
 {
-	// Most of these archives live under the Firebase analytics path, but Google publishes
-	// other SDKs under different hosts/paths, so the prefix is overridable.
-	const string DefaultUrlPrefix = "https://dl.google.com/firebase/ios/analytics";
-
 	public string Id { get; }
 	public string Version { get; }
 	public string ArchiveKey { get; }
-	public string UrlPrefix { get; }
-	public string ExtractionRootName { get; }
 	public string ExpectedSha256 { get; }
 
-	public ExternalDownloadSource (
-		string id,
-		string version,
-		string archiveKey,
-		string urlPrefix = DefaultUrlPrefix,
-		string extractionRootName = null,
-		string expectedSha256 = null)
+	public ExternalDownloadSource (string id, string version, string archiveKey, string expectedSha256 = null)
 	{
 		Id = id;
 		Version = version;
 		ArchiveKey = archiveKey;
-		UrlPrefix = urlPrefix;
-		ExtractionRootName = extractionRootName ?? $"{Id}-{Version}";
 		ExpectedSha256 = expectedSha256;
 	}
 
 	public string ArchiveFileName => $"{Id}-{Version}.tar.gz";
-	public string Url => $"{UrlPrefix}/{ArchiveKey}/{ArchiveFileName}";
+	public string ExtractionRootName => $"{Id}-{Version}";
+	public string Url => $"https://dl.google.com/firebase/ios/analytics/{ArchiveKey}/{ArchiveFileName}";
 }
 
 // *.tar.gz URLs can be found in the podspecs (e.g., CocoaPods Specs repo paths), such as:
 // FirebaseAnalytics: https://github.com/CocoaPods/Specs/tree/master/Specs/e/2/1/FirebaseAnalytics
 // GoogleAppMeasurement: https://github.com/CocoaPods/Specs/tree/master/Specs/e/3/b/GoogleAppMeasurement
 //
-// Only SDKs whose license permits redistribution belong here; everything listed is packed into a
-// published nupkg. Both entries are declared Apache-2.0 in their podspecs. Proprietary SDKs
-// (Maps, Places, Cast, UMP, ML Kit, legacy Analytics) stay on XamarinBuildDownload so consumers
-// fetch them from Google under Google's terms instead of receiving them from us.
+// Everything listed here is packed into a published nupkg, so only SDKs whose license permits
+// redistribution belong here; both entries are declared Apache-2.0 in their podspecs. Proprietary
+// SDKs such as Maps and Places stay on XamarinBuildDownload, so consumers fetch them from Google
+// under Google's terms (scripts/check-xbd-package.py enforces this for those two).
 var ExternalDownloads = new Dictionary<string, ExternalDownloadSource> {
 	{ "FirebaseAnalytics", new ExternalDownloadSource ("FirebaseAnalytics", "12.16.0", "fde230ef9469d037", expectedSha256: "fde230ef9469d037bbbc0861efa7c715ed193c94fcbc407c7bbdc344f5619a70") },
 	{ "GoogleAppMeasurement", new ExternalDownloadSource ("GoogleAppMeasurement", "12.16.0", "55d011d9e0f71e0a", expectedSha256: "55d011d9e0f71e0a89b100129a3d1ba5b0838ca452250cb4766cfe17fbc81c6c") },
