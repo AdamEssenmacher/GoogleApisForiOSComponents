@@ -118,8 +118,7 @@ jobs:
           --package-dir output
           --configuration Debug
 
-      # Text diagnostics only: nothing restored or built leaves the runner, even if a
-      # later change writes package content beneath artifacts/.
+      # Upload text diagnostics (results, logs, diffs) rather than the whole artifacts/ tree.
       - name: Upload diagnostics
         if: failure()
         uses: actions/upload-artifact@v6
@@ -184,8 +183,7 @@ jobs:
           --package-dir output
           --configuration Debug
 
-      # Text diagnostics only: nothing restored or built leaves the runner, even if a
-      # later change writes package content beneath artifacts/.
+      # Upload text diagnostics (results, logs, diffs) rather than the whole artifacts/ tree.
       - name: Upload diagnostics
         if: failure()
         uses: actions/upload-artifact@v6

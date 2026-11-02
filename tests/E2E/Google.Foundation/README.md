@@ -92,10 +92,10 @@ The same ignored directory contains the simulator log and target-neutral build d
 
 These files aid failure investigation; they are not golden baselines.
 
-CI uploads `artifacts/` when a run fails, so nothing restored or built belongs there. The runner
-restores packages into the separate, ignored `tests/E2E/Google.Foundation/packages/` directory;
-keeping it out of `artifacts/` means a failed run can never publish package contents as a
-downloadable artifact.
+When a run fails, CI uploads the text diagnostics under `artifacts/` (`*.json`, `*.log`, `*.txt`,
+`*.diff`), so nothing restored or built belongs there. The runner restores packages into the
+separate, ignored `tests/E2E/Google.Foundation/packages/` directory, so a failed run does not
+publish package contents as a downloadable artifact.
 
 ## Adding another Google package
 
