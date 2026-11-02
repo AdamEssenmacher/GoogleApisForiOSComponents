@@ -14,6 +14,7 @@ import unittest
 
 ROOT = Path(__file__).resolve().parents[3]
 RUNNER = ROOT / 'tools/e2e/run-firebase-foundation.sh'
+HARNESS = ROOT / 'tests/E2E/Firebase.Foundation/FirebaseFoundationE2E'
 STUB = '''#!/usr/bin/env python3
 import json, os, pathlib, subprocess, sys
 name = pathlib.Path(sys.argv[0]).name
@@ -28,6 +29,22 @@ if name == 'firebase':
 # Stop at restore, before any real build or simulator work.
 sys.exit(42)
 '''
+
+
+class HarnessSurfaceTests(unittest.TestCase):
+    """Source invariants the simulator lanes cannot report cheaply."""
+
+    def test_harness_configures_no_named_secondary_firebase_app(self):
+        # A named secondary app has hand-built options, and Configure validates them against
+        # every linked eager component rather than only the API under test: Installations
+        # raises on an absent APIKey, projectID or googleAppID, which is how the 12.15.0 App
+        # Check nullability probe aborted the whole run. The default app that the lanes
+        # configure from the bundled plist (or from emulator options) is complete by
+        # construction, so probes read DefaultInstance instead of standing up their own app.
+        for source in sorted(HARNESS.glob('*.cs')):
+            with self.subTest(source=source.name):
+                named = re.findall(r'\b(?:FirebaseCoreApp|App)\.Configure\s*\(\s*[^(),]+,', source.read_text())
+                self.assertEqual([], named, 'use the default app; a secondary app is validated by every eager component')
 
 
 class EmulatorRunnerTests(unittest.TestCase):
