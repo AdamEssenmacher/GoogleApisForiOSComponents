@@ -63,6 +63,20 @@ static class FirebaseNullabilityValidation
             throw new InvalidOperationException("AppCheck TokenCompletionHandler did not accept null token/error values.");
         }
 
+        // The reCAPTCHA provider is nil-returning, but no app this harness can configure reaches
+        // that nil, so there is nothing left to assert about it here. 12.17 moved the site key out
+        // of FirebaseOptions and into the initializer; -[FIRRecaptchaProvider initWithApp:siteKey:]
+        // then takes one of three exits, in this order:
+        //   * an empty siteKey argument raises NSInvalidArgumentException;
+        //   * APIKey, ProjectId or GoogleAppId missing returns nil -- but Installations is an eager
+        //     component whose validator raises on those same three fields inside
+        //     FirebaseApp.Configure, so such an app never finishes configuring;
+        //   * otherwise a linkage check for the reCAPTCHA Enterprise SDK raises
+        //     NSInternalInconsistencyException, which this closure cannot pass -- it carries
+        //     RecaptchaInterop only.
+        // The nullable result is surfaced by RecaptchaProvider.Create, which the binding surface
+        // audit covers.
+
         var debugProvider = new AppCheckDebugProvider(defaultApp);
         var deviceCheckProvider = new DeviceCheckProvider(defaultApp);
         var appAttestProvider = new AppAttestProvider(defaultApp);

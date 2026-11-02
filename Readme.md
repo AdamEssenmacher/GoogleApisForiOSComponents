@@ -168,9 +168,9 @@ Archiving can still be more reliable on macOS or from the command line.
 
 ## Package status
 
-The lists below record the published baseline on [nuget.org](https://www.nuget.org/profiles/adamessenmacher) under the `adamessenmacher` owner profile. The repo state in [`components.cake`](components.cake) can contain version bumps that have not been published yet.
+The lists below distinguish the required published baseline on [nuget.org](https://www.nuget.org/profiles/adamessenmacher) under the `adamessenmacher` owner profile from the versions prepared in [`components.cake`](components.cake). Prepared versions are not publication confirmation.
 
-Firebase and GoogleAppMeasurement `12.12.0` are published on nuget.org through the [approved CI publishing workflow](docs/FIREBASE_RELEASES.md). See the [GitHub release](https://github.com/AdamEssenmacher/GoogleApisForiOSComponents/releases/tag/firebase-v12.12.0) and [12.12 native review and validation notes](docs/firebase-12.12-update.md).
+Firebase and GoogleAppMeasurement `12.19.0` are the required published baseline for this update. Verify their publication through the [approved CI publishing workflow](docs/FIREBASE_RELEASES.md) before merging the 12.19.3 preparation. See the [12.19 native review and validation notes](docs/firebase-12.19-update.md), the [12.18 notes](docs/firebase-12.18-update.md), and the earlier [12.17 notes](docs/firebase-12.17-update.md).
 
 This checkout prepares Firebase and GoogleAppMeasurement `12.19.3`. Publication remains pending. See the [12.19.3 native review and validation notes](docs/firebase-12.19.3-update.md).
 
@@ -178,46 +178,46 @@ This checkout prepares Firebase and GoogleAppMeasurement `12.19.3`. Publication 
 
 #### Firebase packages (`AdamE.Firebase.iOS.*`)
 
-| Package | Published version | Prepared version |
+| Package | Required published baseline | Prepared version |
 | --- | --- | --- |
-| `ABTesting` | `12.12.0` | `12.19.3` |
-| `Analytics` | `12.12.0` | `12.19.3` |
-| `AppCheck` | `12.12.0` | `12.19.3` |
-| `AppDistribution` | `12.12.0` | `12.19.3` |
-| `Auth` | `12.12.0` | `12.19.3` |
-| `CloudFirestore` | `12.12.0` | `12.19.3` |
-| `CloudFunctions` | `12.12.0` | `12.19.3` |
-| `CloudMessaging` | `12.12.0` | `12.19.3` |
-| `Core` | `12.12.0` | `12.19.3` |
-| `Crashlytics` | `12.12.0` | `12.19.3` |
-| `Database` | `12.12.0` | `12.19.3` |
-| `InAppMessaging` | `12.12.0` | `12.19.3` |
-| `Installations` | `12.12.0` | `12.19.3` |
-| `PerformanceMonitoring` | `12.12.0` | `12.19.3` |
-| `RemoteConfig` | `12.12.0` | `12.19.3` |
-| `Storage` | `12.12.0` | `12.19.3` |
+| `ABTesting` | `12.19.0` | `12.19.3` |
+| `Analytics` | `12.19.0` | `12.19.3` |
+| `AppCheck` | `12.19.0` | `12.19.3` |
+| `AppDistribution` | `12.19.0` | `12.19.3` |
+| `Auth` | `12.19.0` | `12.19.3` |
+| `CloudFirestore` | `12.19.0` | `12.19.3` |
+| `CloudFunctions` | `12.19.0` | `12.19.3` |
+| `CloudMessaging` | `12.19.0` | `12.19.3` |
+| `Core` | `12.19.0` | `12.19.3` |
+| `Crashlytics` | `12.19.0` | `12.19.3` |
+| `Database` | `12.19.0` | `12.19.3` |
+| `InAppMessaging` | `12.19.0` | `12.19.3` |
+| `Installations` | `12.19.0` | `12.19.3` |
+| `PerformanceMonitoring` | `12.19.0` | `12.19.3` |
+| `RemoteConfig` | `12.19.0` | `12.19.3` |
+| `Storage` | `12.19.0` | `12.19.3` |
 
 #### Google packages (`AdamE.Google.iOS.*`)
 
-| Package | Version |
-| --- | --- |
-| `Maps` | `9.2.0.9` |
-| `Places` | `7.4.0.3` |
-| `SignIn` | `9.0.0` |
+| Package | Published version | Prepared version |
+| --- | --- | --- |
+| `Maps` | `9.2.0.9` | `9.2.0.9` |
+| `Places` | `7.4.0.3` | `7.4.0.3` |
+| `SignIn` | `9.0.0` | `9.2.0.0` |
 
 #### Google support packages (`AdamE.Google.iOS.*`)
 
 These packages are usually consumed transitively rather than referenced directly.
 
-| Package | Published version | Prepared version |
+| Package | Required published baseline | Prepared version |
 | --- | --- | --- |
-| `AppCheckCore` | `11.2.0.1` | `11.3.2` |
-| `GoogleAppMeasurement` | `12.12.0` | `12.19.3` |
-| `GoogleDataTransport` | `10.1.0.5` | `10.1.0.5` |
-| `GoogleUtilities` | `8.1.0.4` | `8.1.5` |
-| `GTMSessionFetcher` | `3.5.0.6` | `3.5.0.6` |
-| `Nanopb` | `3.30910.0.5` | `3.30910.0.5` |
-| `PromisesObjC` | `2.4.0.6` | `2.4.0.6` |
+| `AppCheckCore` | `11.3.2` | `11.3.2` |
+| `GoogleAppMeasurement` | `12.19.0` | `12.19.3` |
+| `GoogleDataTransport` | `10.1.0.6` | `10.1.0.6` |
+| `GoogleUtilities` | `8.1.0.6` | `8.1.5` |
+| `GTMSessionFetcher` | `3.5.0.8` | `3.5.0.8` |
+| `Nanopb` | `3.30910.0.6` | `3.30910.0.6` |
+| `PromisesObjC` | `2.4.0.8` | `2.4.0.8` |
 
 #### ML Kit packages (`AdamE.MLKit.iOS.*`)
 

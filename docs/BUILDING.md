@@ -5,7 +5,8 @@ This repository builds .NET iOS and Mac Catalyst bindings plus NuGet packages us
 ## Prerequisites
 
 - .NET SDK from `global.json`.
-- Xcode compatible with the installed .NET Apple workloads.
+- Xcode matching `nativeBuild.xcode` in `eng/firebase-release.json` (currently 27.1). The pinned
+  .NET Apple workload set requires that exact Xcode major.minor version.
 - The Firebase bindings require at least Xcode 26.2 and Swift 6.2.3. The selected Xcode must also be compatible with the repository's pinned .NET Apple workloads.
 - CocoaPods (`pod`).
 

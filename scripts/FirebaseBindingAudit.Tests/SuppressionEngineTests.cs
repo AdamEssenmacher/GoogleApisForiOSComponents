@@ -4,6 +4,33 @@ namespace FirebaseBindingAudit.Tests;
 
 public sealed class SuppressionEngineTests
 {
+    [Theory]
+    [InlineData("Ready")]
+    [InlineData(null)]
+    public void EnumValueRulesLoadAndSuppressOnlyTheEvidenceBackedFinding(string? member)
+    {
+        var finding = CreateFailureFinding(typeName: "State", memberName: member, selector: null,
+            comparisonTypeKey: "State", comparisonMemberKey: member) with { Category = "enum-value-drift" };
+        var config = new SuppressionConfiguration { Suppressions = [new SuppressionRule {
+            Id = "enum-value", Target = "Core", Category = "enum-value-drift", ComparisonTypeKey = "State",
+            ComparisonMemberKey = member, Reason = "Reviewed fixture value", Evidence = ["fixture header"]
+        }] };
+        var path = Path.GetTempFileName();
+        try {
+            File.WriteAllText(path, System.Text.Json.JsonSerializer.Serialize(config));
+            var loaded = SuppressionLoader.Load(path);
+            var application = SuppressionEngine.Apply([CreateResult("Core", finding)], loaded, false);
+            Assert.Equal("passed", application.Results.Single().Status);
+            Assert.Single(application.Results.Single().SuppressedFindings);
+            Assert.Equal(0, application.Summary.InvalidRuleCount);
+            Assert.Equal(0, application.Summary.StaleRuleCount);
+            Assert.Equal("failed", SuppressionEngine.Apply([CreateResult("Core", finding)], loaded, true).Results.Single().Status);
+            loaded.Suppressions[0].Evidence = [];
+            File.WriteAllText(path, System.Text.Json.JsonSerializer.Serialize(loaded));
+            Assert.Throws<InvalidOperationException>(() => SuppressionLoader.Load(path));
+        } finally { File.Delete(path); }
+    }
+
     [Fact]
     public void Apply_UsesComparisonKeysForExactMemberLevelMatch()
     {
@@ -285,8 +312,8 @@ public sealed class SuppressionEngineTests
 
     private static AuditFinding CreateFailureFinding(
         string typeName,
-        string memberName,
-        string selector,
+        string? memberName,
+        string? selector,
         string? comparisonTypeKey = null,
         string? comparisonMemberKey = null)
     {

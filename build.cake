@@ -196,7 +196,7 @@ Task ("libs")
 {
 	var dotNetBuildSettings = new DotNetBuildSettings {
 		Configuration = "Release",
-		Verbosity = DotNetVerbosity.Diagnostic,
+		Verbosity = DotNetBuildVerbosity (),
 		NoRestore = false
 	};
 	
@@ -225,7 +225,7 @@ Task ("nuget")
 
 	var dotNetBuildSettings = new DotNetBuildSettings {
 		Configuration = "Release",
-		Verbosity = DotNetVerbosity.Diagnostic,
+		Verbosity = DotNetBuildVerbosity (),
 		NoRestore = false,
 		MSBuildSettings = dotNetBuildMsBuildSettings
 	};
@@ -236,7 +236,7 @@ Task ("nuget")
 		NoBuild = true,
 		MSBuildSettings = dotNetBuildMsBuildSettings,
 		OutputDirectory = "./output/",
-		Verbosity = DotNetVerbosity.Diagnostic,
+		Verbosity = DotNetBuildVerbosity (),
 	};
 
 	// Pack each artifact's csproj directly

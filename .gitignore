@@ -12,6 +12,9 @@ tools/e2e/*
 !tools/e2e/check-consumer-shapes.sh
 !tools/e2e/check-package-structure.sh
 !tools/e2e/check-offline-build.sh
+!tools/ci/
+tools/ci/*
+!tools/ci/select-xcode.sh
 tmp-nugets
 *.userprefs
 *.DS_Store

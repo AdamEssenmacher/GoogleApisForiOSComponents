@@ -1,10 +1,13 @@
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Text.Json;
 using Foundation;
 
 namespace GoogleFoundationE2E;
 
+[UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "The E2E harness inspects binding assemblies by reflection, and the app assembly itself is not trimmed.")]
+[UnconditionalSuppressMessage("Trimming", "IL2045", Justification = "The E2E harness inspects binding assemblies by reflection, and the app assembly itself is not trimmed.")]
 public static class GoogleSelfTestRunner
 {
     const string ResultFileName = "google-foundation-e2e-result.json";
