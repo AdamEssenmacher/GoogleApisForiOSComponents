@@ -163,17 +163,22 @@ namespace Firebase.AppCheck {
 	[DisableDefaultCtor]
 	[BaseType (typeof (NSObject), Name = "FIRRecaptchaProvider")]
 	interface RecaptchaProvider : AppCheckProvider {
+		// -(nullable instancetype)initWithApp:(FIRApp *)app siteKey:(NSString *)siteKey;
 		// Native nil cannot be returned by a C# constructor. Use
 		// RecaptchaProvider.Create for a nullable result.
 		[Internal]
-		[Export ("initWithApp:")]
-		NativeHandle Constructor (App app);
+		[Export ("initWithApp:siteKey:")]
+		NativeHandle Constructor (App app, string siteKey);
 	}
 
 	[NoMacCatalyst]
 	[iOS (15, 0)]
+	[DisableDefaultCtor]
 	[BaseType (typeof (NSObject), Name = "FIRRecaptchaProviderFactory")]
 	interface RecaptchaProviderFactory : AppCheckProviderFactory {
+		// -(instancetype)initWithSiteKey:(NSString *)siteKey;
+		[Export ("initWithSiteKey:")]
+		NativeHandle Constructor (string siteKey);
 	}
 
 }

@@ -43,8 +43,8 @@ class ExternalDownloadSource
 // SDKs such as Maps and Places stay on XamarinBuildDownload, so consumers fetch them from Google
 // under Google's terms (scripts/check-xbd-package.py checks this for those two).
 var ExternalDownloads = new Dictionary<string, ExternalDownloadSource> {
-	{ "FirebaseAnalytics", new ExternalDownloadSource ("FirebaseAnalytics", "12.16.0", "fde230ef9469d037", expectedSha256: "fde230ef9469d037bbbc0861efa7c715ed193c94fcbc407c7bbdc344f5619a70") },
-	{ "GoogleAppMeasurement", new ExternalDownloadSource ("GoogleAppMeasurement", "12.16.0", "55d011d9e0f71e0a", expectedSha256: "55d011d9e0f71e0a89b100129a3d1ba5b0838ca452250cb4766cfe17fbc81c6c") },
+	{ "FirebaseAnalytics", new ExternalDownloadSource ("FirebaseAnalytics", "12.17.0", "5b4ffbefbb018b03", expectedSha256: "5b4ffbefbb018b034c6351126f53381aa63d340bafaf7f47a8e9bc096fb1fcbb") },
+	{ "GoogleAppMeasurement", new ExternalDownloadSource ("GoogleAppMeasurement", "12.17.0", "5e80294989c75a36", expectedSha256: "5e80294989c75a365daaa9f5d0573bc13f9584e3523ce4fced57aad848f5fb3d") },
 };
 
 FilePath GetArchivePath (ExternalDownloadSource source, DirectoryPath externalsPath) =>
