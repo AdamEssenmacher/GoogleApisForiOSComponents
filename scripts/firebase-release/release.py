@@ -298,6 +298,7 @@ def validation_reasons(files, packages, channel, integration_metadata=()):
     exact = {
         'global.json', 'Directory.Build.props', '.config/dotnet-tools.json',
         'source/AssemblyInfo.cs', '.github/workflows/firebase-release.yml', 'tools/ci/select-xcode.sh',
+        'tools/e2e/select-simulator.sh',
         'build.cake', 'common.cake', 'poco.cake', 'custom_externals_download.cake', 'components.cake',
         'firebase_publish.cake', 'firebase_release.cake',
         f'eng/{channel}-release.json', f'eng/{channel}-release-baseline.json',

@@ -204,18 +204,7 @@ capture_manifest() {
 
 capture_manifest "$artifacts_dir/manifest-$rid"
 
-simulator_udid="${E2E_SIMULATOR_UDID:-}"
-if [[ -z "$simulator_udid" ]]; then
-  simulator_udid="$(
-    xcrun simctl list devices available |
-      sed -nE "/iPhone/ { s/.*\\(([0-9A-F-]{36})\\).*/\\1/p; q; }"
-  )"
-fi
-
-if [[ -z "$simulator_udid" ]]; then
-  echo "No available iPhone simulator could be found." >&2
-  exit 1
-fi
+simulator_udid="$("$repo_root/tools/e2e/select-simulator.sh")"
 
 echo "Using simulator: $simulator_udid"
 xcrun simctl boot "$simulator_udid" >/dev/null 2>&1 || true
