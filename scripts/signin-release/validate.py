@@ -164,6 +164,18 @@ def inspect(data, package):
                     native.close()
 
 
+def validate_resolution(actual, metadata):
+    expected = {}
+    for package in metadata:
+        for pod in package['pods']:
+            if pod['Name'] in expected and expected[pod['Name']] != pod['Version']:
+                raise ValueError('Conflicting metadata pod pins: ' + pod['Name'])
+            expected[pod['Name']] = pod['Version']
+    if actual != expected:
+        raise ValueError('Sign-In CocoaPods closure differs from exact metadata pins: ' + str(actual))
+    return expected
+
+
 def main():
     release.configure_channel('signin')
     metadata = release.read(ROOT / 'output/signin-metadata.json')
@@ -184,8 +196,7 @@ def main():
         raise ValueError('This release lane requires the Firebase-12-compatible AppCheckCore 11 baseline')
     lock = ROOT / 'externals/build/Google.SignIn/Podfile.lock'
     actual = pod_versions(lock.read_text())
-    if actual != expected:
-        raise ValueError('Sign-In CocoaPods closure differs from exact metadata pins: ' + str(actual))
+    validate_resolution(actual, metadata)
     evidence = ROOT / 'output/signin-resolution'; evidence.mkdir(parents=True, exist_ok=True)
     shutil.copy2(lock, evidence / 'Podfile.lock')
     release.write(evidence / 'native-versions.json', actual)

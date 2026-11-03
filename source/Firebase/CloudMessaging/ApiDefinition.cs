@@ -40,6 +40,14 @@ namespace Firebase.CloudMessaging
 		// @optional -(void)messaging:(FIRMessaging * _Nonnull)messaging didReceiveRegistrationToken:(NSString * _Nullable)fcmToken;
 		[Export ("messaging:didReceiveRegistrationToken:")]
 		void DidReceiveRegistrationToken (Messaging messaging, [NullAllowed] string fcmToken);
+
+		// @optional -(void)messaging:(FIRMessaging * _Nonnull)messaging didReceiveRegistration:(NSString * _Nullable)installationId;
+		[Export ("messaging:didReceiveRegistration:")]
+		void DidReceiveRegistration (Messaging messaging, [NullAllowed] string installationId);
+
+		// @optional -(void)messaging:(FIRMessaging * _Nonnull)messaging didUnregister:(NSString * _Nonnull)installationId;
+		[Export ("messaging:didUnregister:")]
+		void DidUnregister (Messaging messaging, string installationId);
 	}
 
 	// @interface FIRMessaging : NSObject
@@ -47,6 +55,24 @@ namespace Firebase.CloudMessaging
 	[BaseType (typeof (NSObject), Name = "FIRMessaging")]
 	interface Messaging
 	{
+		// FOUNDATION_EXPORT const NSNotificationName FIRMessagingInstallationIdUnregisteredNotification NS_SWIFT_NAME(messagingInstallationIdUnregistered);
+		[Field ("FIRMessagingInstallationIdUnregisteredNotification", "__Internal")]
+		NSString InstallationIdUnregisteredNotification { get; }
+
+		// @property(nonatomic, readonly, getter=isInstallationIdEnabled) BOOL installationIdEnabled;
+		[Export ("isInstallationIdEnabled")]
+		bool InstallationIdEnabled { get; }
+
+		// -(void)registerWithCompletion:(void (^ _Nonnull)(NSError * _Nullable))completion;
+		[Export ("registerWithCompletion:")]
+		[Async]
+		void Register (MessagingDeleteFcmTokenCompletionHandler completion);
+
+		// -(void)unregisterWithCompletion:(void (^ _Nonnull)(NSError * _Nullable))completion;
+		[Export ("unregisterWithCompletion:")]
+		[Async]
+		void Unregister (MessagingDeleteFcmTokenCompletionHandler completion);
+
 		// @property(nonatomic, weak, nullable) id<FIRMessagingDelegate> delegate;
 		[NullAllowed]
 		[Export ("delegate", ArgumentSemantic.Weak)]

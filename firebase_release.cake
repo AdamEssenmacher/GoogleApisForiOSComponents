@@ -94,7 +94,7 @@ var FIREBASE_RELEASE_RESOLUTION_PODS = new [] {
 };
 
 var FIREBASE_RELEASE_MANUAL_POD_PINS = new Dictionary<string, string> {
-	{ "AppCheckCore", "11.2.0" },
+	{ "AppCheckCore", "11.3.2" },
 	{ "GTMSessionFetcher", "3.5.0" },
 	{ "PromisesObjC", "2.4.0" },
 	{ "RecaptchaInterop", "101.0.0" },
@@ -104,7 +104,7 @@ var FIREBASE_RELEASE_MANUAL_POD_PINS = new Dictionary<string, string> {
 	{ "abseil", "1.20240722.0" },
 	{ "PromisesSwift", "2.4.0" },
 	{ "leveldb-library", "1.22.6" },
-	{ "GoogleUtilities", "8.1.0" },
+	{ "GoogleUtilities", "8.1.5" },
 	{ "GoogleDataTransport", "10.1.0" },
 	{ "nanopb", "3.30910.0" },
 };
@@ -162,6 +162,7 @@ class FirebaseReleaseContext
 	public string TargetVersion { get; set; }
 	public string FromVersion { get; set; }
 	public string TagCommit { get; set; }
+	public string UploadSymbolsSha256 { get; set; }
 	public Dictionary<string, FirebaseReleaseDownloadInfo> ExternalDownloads { get; set; }
 	public Dictionary<string, FirebaseReleaseNativeMetadata> FromNativeMetadata { get; set; }
 	public Dictionary<string, FirebaseReleaseNativeMetadata> TargetNativeMetadata { get; set; }
@@ -265,6 +266,7 @@ FirebaseReleaseContext CreateFirebaseReleaseContext ()
 		TargetVersion = FIREBASE_RELEASE_VERSION,
 		FromVersion = fromVersion,
 		TagCommit = tagCommit,
+		UploadSymbolsSha256 = ResolveFirebaseUploadSymbolsSha256 (tagCommit),
 		ExternalDownloads = externalDownloads,
 		FromNativeMetadata = fromNativeMetadata,
 		TargetNativeMetadata = targetNativeMetadata
@@ -301,7 +303,7 @@ List<FirebaseReleaseFileUpdate> GetFirebaseReleaseFileUpdates (FirebaseReleaseCo
 		updates.Add (CreateFirebaseReleaseFileUpdate (GetArtifactProjectPath (artifact), text => UpdateFirebaseReleaseProjectFile (text, artifact, context)));
 
 	foreach (var targetPath in GetFirebaseReleaseTargetsFiles ())
-		updates.Add (CreateFirebaseReleaseFileUpdate (targetPath, text => UpdateFirebaseReleaseTargetsFile (text, context.TargetVersion, context.TagCommit)));
+		updates.Add (CreateFirebaseReleaseFileUpdate (targetPath, text => UpdateFirebaseReleaseTargetsFile (text, context.TargetVersion, context.TagCommit, context.UploadSymbolsSha256)));
 
 	return updates;
 }
@@ -379,7 +381,7 @@ string UpdateFirebaseReleaseComponentsCake (string text, string targetVersion)
 		text = ReplaceFirebaseReleaseArtifactVersion (text, variableName, targetVersion);
 
 	foreach (var podSpecName in FIREBASE_RELEASE_PODSPEC_NAMES)
-		text = ReplaceFirebaseReleasePodSpecVersion (text, podSpecName, targetVersion);
+		text = ReplaceFirebaseReleasePodSpecVersion (text, podSpecName, ResolveFirebaseNativeReleaseVersion (podSpecName, targetVersion));
 
 	return text;
 }
@@ -543,9 +545,14 @@ string SetFirebaseReleaseNativeReferenceElementValue (string block, string eleme
 	return Regex.Replace (block, "(\\r?\\n)(\\s*)(</_?NativeReference>)", insertion + "${1}${2}${3}", RegexOptions.None, TimeSpan.FromSeconds (1));
 }
 
-string UpdateFirebaseReleaseTargetsFile (string text, string targetVersion, string tagCommit)
+string UpdateFirebaseReleaseTargetsFile (string text, string targetVersion, string tagCommit, string scriptSha256)
 {
 	text = Regex.Replace (text, "(<_[^>]+AssemblyName>[^<]* Version=)([^,]+)(,)", "${1}" + targetVersion + "${3}");
+	if (!Regex.IsMatch (scriptSha256, "^[a-fA-F0-9]{64}$"))
+		throw new Exception ("Invalid Crashlytics upload tool digest.");
+	if (!text.Contains ("<_FirebaseCrashlyticsScriptSha256>"))
+		throw new Exception ("Crashlytics targets are missing the upload tool digest contract.");
+	text = Regex.Replace (text, "(<_FirebaseCrashlyticsScriptSha256>)[^<]*(</_FirebaseCrashlyticsScriptSha256>)", "${1}" + scriptSha256.ToLowerInvariant () + "${2}");
 	text = Regex.Replace (text, "(<_FirebaseCrashlyticsItemsFolder>FCrshlytcs-)([^<]+)(</_FirebaseCrashlyticsItemsFolder>)", "${1}" + targetVersion + "${3}");
 	text = Regex.Replace (
 		text,
@@ -687,9 +694,19 @@ FirebaseReleaseNativeMetadata ResolveFirebaseReleasePodSpecNativeMetadata (PodSp
 	}
 }
 
+// Firebase 12.19.3 patches Core and Firestore only; the other pods retain 12.19.0.
+string ResolveFirebaseNativeReleaseVersion (string podName, string releaseVersion)
+{
+	if (releaseVersion != "12.19.3")
+		return releaseVersion;
+	return podName == "Firebase" || podName.StartsWith ("Firebase/", StringComparison.Ordinal)
+		|| podName == "FirebaseCore" || podName == "FirebaseFirestore" || podName == "FirebaseFirestoreInternal"
+		? "12.19.3" : "12.19.0";
+}
+
 string GetFirebaseReleasePodSpecVersion (PodSpec podSpec, string firebaseVersion)
 	=> FIREBASE_RELEASE_PODSPEC_NAMES.Contains (podSpec.Name)
-		? firebaseVersion
+		? ResolveFirebaseNativeReleaseVersion (podSpec.Name, firebaseVersion)
 		: podSpec.Version;
 
 void AddFirebaseReleaseNativeMetadataFromPlatformElement (FirebaseReleaseNativeMetadata metadata, JsonElement element)
@@ -796,6 +813,19 @@ void AddFirebaseReleaseUniqueToken (List<string> values, string value)
 	values.Add (value);
 }
 
+string ResolveFirebaseUploadSymbolsSha256 (string tagCommit)
+{
+	var path = new FilePath (System.IO.Path.GetTempFileName ());
+	try {
+		DownloadFile ("https://raw.githubusercontent.com/firebase/firebase-ios-sdk/" + tagCommit + "/Crashlytics/upload-symbols", path);
+		using (var sha = System.Security.Cryptography.SHA256.Create ())
+		using (var stream = System.IO.File.OpenRead (path.FullPath))
+			return BitConverter.ToString (sha.ComputeHash (stream)).Replace ("-", "").ToLowerInvariant ();
+	} finally {
+		if (FileExists (path)) DeleteFile (path);
+	}
+}
+
 string ResolveFirebaseReleaseTagCommit (string version)
 {
 	var args = new ProcessArgumentBuilder ();
@@ -832,7 +862,7 @@ Dictionary<string, FirebaseReleaseDownloadInfo> ResolveFirebaseReleaseExternalDo
 	var result = new Dictionary<string, FirebaseReleaseDownloadInfo> ();
 
 	foreach (var id in new [] { "FirebaseAnalytics", "GoogleAppMeasurement" }) {
-		var specJson = RunPodSpecCatExact (id, version);
+		var specJson = RunPodSpecCatExact (id, ResolveFirebaseNativeReleaseVersion (id, version));
 		using (var document = JsonDocument.Parse (specJson)) {
 			var sourceUrl = document.RootElement.GetProperty ("source").GetProperty ("http").GetString ();
 			var match = Regex.Match (sourceUrl, "/analytics/([^/]+)/" + Regex.Escape (id) + "-([^/]+)\\.tar\\.gz$");
@@ -938,7 +968,7 @@ FirebaseReleasePodResolution ResolveFirebaseReleasePodfile (string version, bool
 	};
 
 	foreach (var pod in FIREBASE_RELEASE_RESOLUTION_PODS)
-		podfileLines.Add ($"\tpod '{pod}', '{version}'");
+		podfileLines.Add ($"\tpod '{pod}', '{ResolveFirebaseNativeReleaseVersion (pod, version)}'");
 
 	if (useRepositoryPins)
 		foreach (var pin in FIREBASE_RELEASE_MANUAL_POD_PINS.OrderBy (pair => pair.Key, StringComparer.Ordinal))

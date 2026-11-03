@@ -1,4 +1,5 @@
 #if ENABLE_BINDING_SURFACE_COVERAGE
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text.Json;
@@ -7,6 +8,8 @@ using ObjCRuntime;
 
 namespace FirebaseFoundationE2E;
 
+[UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "The E2E harness inspects binding assemblies by reflection, and the app assembly itself is not trimmed.")]
+[UnconditionalSuppressMessage("Trimming", "IL2070", Justification = "The E2E harness inspects binding assemblies by reflection, and the app assembly itself is not trimmed.")]
 public static partial class FirebaseBindingSurfaceCoverage
 {
     const string CoverageResourceName = "binding-surface-coverage.generated";

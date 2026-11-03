@@ -41,8 +41,11 @@ There is no new SwiftUI binding product. Do not publish an existing version with
 ### 9.1.0 binding update
 
 The `9.1.0.0` package binds Google Sign-In 9.1.0 with AppAuth 2.0.0 and GTMAppAuth 5.0.0.
-It retains the Firebase 12 baseline: AppCheckCore 11.2.0, GTMSessionFetcher 3.5.0,
-PromisesObjC 2.4.0 and GoogleUtilities 8.1.0 in their existing owning packages.
+The Firebase 12.15 preparation advances the shared AppCheckCore pin to 11.3.2,
+which also owns PromisesSwift 2.4.0 and RecaptchaInterop 101.0.0. GTMSessionFetcher
+3.5.0, PromisesObjC 2.4.0 and GoogleUtilities 8.1.0 retain their existing owners.
+The exact Sign-In closure includes all nine native pods; shared frameworks have
+one owner across standalone Sign-In and combined Firebase consumers.
 
 `Claim.CreateAuthTimeClaim()` and `Claim.CreateEssentialAuthTimeClaim()` construct the
 supported `auth_time` claims. `Claim.Name`, `Claim.Essential`, `Constants.AuthTimeClaimName`,
@@ -83,7 +86,7 @@ the native headers. Package inspection compares `AppCheckErrorCode` with `GIDApp
 packed framework slice, as it does for `ErrorCode`.
 
 The secret-free probe constructs both `amr` variants, checks their names/essential flags and native
-constant, verifies all eight bound SDK classes and at least 73 selectors, and compiles access to the
+constant, verifies all eight bound SDK classes and at least 71 selectors, and compiles access to the
 existing nullable expiration property. On iOS it also compiles the App Check setup calls and reads the
 error-domain constant, without calling setup, so no App Attest keys are generated. Evidence for 9.2 must include both `auth_time` and `amr`;
 9.1-only evidence is rejected. No credentialed sign-in or refresh is initiated by these probes.
@@ -100,7 +103,7 @@ an SDK that embeds Google Sign-In identify itself in Google's diagnostic logs. I
 package does not set it on behalf of consuming apps. The 10.0 claim factory `NS_SWIFT_NAME`
 annotations change only Swift names, so the existing managed claim selectors are unchanged.
 
-The secret-free probe sets and reads back a fixture wrapper identifier and requires at least 75
+The secret-free probe sets and reads back a fixture wrapper identifier and requires at least 73
 selectors. Evidence for 10.0 must include `wrapper=wrapperIdentifier`; 9.2-only evidence is rejected.
 
 All four releases use CocoaPods at package-production time and retain packed native frameworks and
@@ -193,8 +196,8 @@ Closure discovery does not enforce the Firebase 12 version policy: unrelated cha
 can still produce a no-op plan with newer fixture metadata, while affected changes run
 validation and fixture staging still rejects unsupported major versions. Incomplete
 dependency metadata fails planning rather than silently omitting validation inputs.
-Every affected Sign-In PR still runs standalone,
-transitive, offline, and combined Firebase consumers.
+Every affected Sign-In change still runs standalone,
+transitive, offline, and combined Firebase consumers after merge, or on a manual run.
 
 Both plans run on every PR and explain native scheduling through `reasons` in the plan
 JSON and log. See [CI lane ownership and scheduling](FIREBASE_RELEASES.md#ci-lane-ownership-and-scheduling)

@@ -94,7 +94,7 @@ class SignInTests(unittest.TestCase):
     def test_native_runtime_is_bounded(self):
         for pod in ('1.11.0', '2.0.0'):
             with self.assertRaisesRegex(ValueError, 'Unsupported CocoaPods'):
-                release.native_build({'nativeBuild': {'runner': 'macos-26', 'xcode': '26.6', 'cocoapods': pod}})
+                release.native_build({'nativeBuild': {'runner': 'xcode-27.1', 'xcode': '27.1', 'cocoapods': pod}})
 
     def test_matrix_tracks_host_architecture_without_changing_device(self):
         self.assertEqual(release.signin_checks('arm64'), release.SIGNIN_CHECKS)
@@ -114,7 +114,7 @@ class SignInTests(unittest.TestCase):
             baseline = {'packages': records}
             release.write(folder / release.BASELINE, baseline)
             release.write(folder / release.CONFIG, {'releaseVersion': release_version,
-                'nativeBuild': {'runner': 'macos-26', 'xcode': '26.6', 'cocoapods': '1.17.0'}})
+                'nativeBuild': {'runner': 'xcode-27.1', 'xcode': '27.1', 'cocoapods': '1.17.0'}})
             release.write(folder / 'metadata.json', records)
             def git_file(ref, path):
                 if path == release.BASELINE:

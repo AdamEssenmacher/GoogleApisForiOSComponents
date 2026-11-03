@@ -10,6 +10,7 @@ import shutil
 import tempfile
 import types
 import unittest
+import xml.etree.ElementTree as ET
 from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -56,7 +57,7 @@ class ReviewRegressionTests(unittest.TestCase):
                             self.assertIn('Constants.AppCheckErrorDomain', guarded)
                         self.assertEqual('BindingProbe.Describe();' in source, transitive)
                         floor = int(re.search(r'selectors < (\d+)', source)[1])
-                        self.assertEqual(floor, 75 if wrapper else 73 if amr else 67)
+                        self.assertEqual(floor, 73 if wrapper else 71 if amr else 67)
                         marker = re.search(r' claims=([^";]+)";', source)[1]
                         self.assertEqual(marker, ('auth_time,amr' if amr else 'auth_time') +
                                          (' wrapper=wrapperIdentifier' if wrapper else '') +
@@ -68,6 +69,40 @@ class ReviewRegressionTests(unittest.TestCase):
                             Checks=sorted(release.SIGNIN_CHECKS) + [runtime]))
                 with patch.dict(os.environ, UNIT_TEST_OUTCOME='success', PACKAGE_INSPECTION_OUTCOME='success', BUILD_COMMIT='abc'):
                     release.collect_validation(types.SimpleNamespace(results_dir=folder, package_dir=folder))
+
+    def test_shared_native_frameworks_have_one_owner_in_combined_consumers(self):
+        projects = {name: ET.parse(ROOT / path) for name, path in {
+            'AppCheckCore': 'source/Google/AppCheckCore/AppCheckCore.csproj',
+            'Core': 'source/Firebase/Core/Core.csproj',
+            'Auth': 'source/Firebase/Auth/Auth.csproj',
+        }.items()}
+        for framework in ('Promises.xcframework', 'RecaptchaInterop.xcframework'):
+            owners = [name for name, tree in projects.items() for item in tree.iter()
+                      if item.tag in ('NativeReference', '_NativeReference')
+                      and item.attrib['Include'].replace('\\', '/').split('/')[-1] == framework]
+            self.assertEqual(['AppCheckCore'], owners, framework)
+        dependencies = {item.attrib['Include']: item.attrib.get('Version')
+                        for item in projects['Core'].iter('PackageReference')}
+        self.assertEqual('[11.3.2,12.0.0)', dependencies['AdamE.Google.iOS.AppCheckCore'])
+
+    def test_exact_resolution_tracks_shared_appcheck_native_dependencies(self):
+        legacy = {'GoogleSignIn': '9.1.0', 'AppAuth': '2.0.0', 'GTMAppAuth': '5.0.0',
+                  'AppCheckCore': '11.2.0', 'GTMSessionFetcher': '3.5.0',
+                  'PromisesObjC': '2.4.0', 'GoogleUtilities': '8.1.0'}
+        modern = dict(legacy, AppCheckCore='11.3.2', PromisesSwift='2.4.0', RecaptchaInterop='101.0.0')
+        for pins in (legacy, modern):
+            metadata = [{'pods': [{'Name': n, 'Version': v} for n, v in pins.items()]}]
+            self.assertEqual(pins, validation.validate_resolution(pins, metadata))
+            for name in pins:
+                with self.subTest(pins=pins, missing=name), self.assertRaisesRegex(ValueError, 'closure differs'):
+                    validation.validate_resolution({n: v for n, v in pins.items() if n != name}, metadata)
+                with self.subTest(pins=pins, stale=name), self.assertRaisesRegex(ValueError, 'closure differs'):
+                    validation.validate_resolution(dict(pins, **{name: '0.0.0'}), metadata)
+            with self.assertRaisesRegex(ValueError, 'closure differs'):
+                validation.validate_resolution(dict(pins, UnexpectedPod='1.0'), metadata)
+        with self.assertRaisesRegex(ValueError, 'Conflicting metadata'):
+            validation.validate_resolution({}, [{'pods': [{'Name': 'AppCheckCore', 'Version': v}
+                                                           for v in ('11.2.0', '11.3.2')]}])
 
     def test_error_codes_compare_native_header_to_managed_values(self):
         header = 'kGIDSignInErrorCodeEMM = -6, kGIDSignInErrorCodeAmbiguousClaims = -7, kGIDSignInErrorCodeJSONSerializationFailure = -10, kGIDSignInErrorCodeRefreshTokenExpired = -11'
@@ -244,6 +279,42 @@ class ReviewRegressionTests(unittest.TestCase):
                             feed.stage_feed(candidate, paths, records, output)
                         self.assertTrue(sentinel.exists())
 
+    def test_published_fixtures_require_identical_inputs_and_sealed_payloads(self):
+        roots = ['AdamE.Firebase.iOS.' + n for n in ('Auth', 'Analytics', 'CloudFirestore')]
+        metadata = [dict(id=n, version='12.14.0', dependencies=[]) for n in roots]
+        current = {n: dict(id=n, fingerprint='f-' + n) for n in roots}
+        payloads = {n: n.encode() for n in roots}
+
+        def latest():
+            return dict(releaseVersion='12.14.0', packages=[
+                dict(id=n, version='12.14.0', fingerprint='f-' + n, payloadHash='h-' + n) for n in roots])
+
+        def fetch(record):
+            return payloads.get(record['id'])
+
+        with patch.object(release, 'payload_hash', side_effect=lambda b: 'h-' + b.decode()):
+            selected, reason = feed.published_fixtures(metadata, current, latest(), [fetch])
+            self.assertEqual(selected, payloads)
+            self.assertIsNone(reason)
+            for fault in ('unreleased', 'version', 'fingerprint', 'absent'):
+                with self.subTest(fault=fault):
+                    published, fetchers = latest(), [fetch]
+                    if fault == 'unreleased':
+                        published = None
+                    elif fault == 'version':
+                        published['packages'][0]['version'] = '12.13.0'
+                    elif fault == 'fingerprint':
+                        published['packages'][0]['fingerprint'] = 'changed'
+                    else:
+                        fetchers = [lambda record: None]
+                    selected, reason = feed.published_fixtures(metadata, current, published, fetchers)
+                    self.assertIsNone(selected)
+                    self.assertTrue(reason)
+            tampered = latest()
+            tampered['packages'][1]['payloadHash'] = 'other'
+            with self.assertRaisesRegex(ValueError, 'differs from its release manifest'):
+                feed.published_fixtures(metadata, current, tampered, [fetch])
+
     def test_fixture_staging_retains_major_version_policy_for_roots_and_dependencies(self):
         roots = ['AdamE.Firebase.iOS.' + n for n in ('Auth', 'Analytics', 'CloudFirestore')]
         dependency = 'AdamE.Firebase.iOS.Core'
@@ -301,16 +372,16 @@ class ReviewRegressionTests(unittest.TestCase):
                 return dict(Success=True, Cases=[dict(Success=True)], sourceCommit='abc', Lane=lane,
                             packageHashes={p['id']: p['sha256'] for p in packages},
                             Checks=sorted(release.SIGNIN_CHECKS) + [runtime])
-            valid = 'PASS classes=8 selectors=73 claims=auth_time,amr'
+            valid = 'PASS classes=8 selectors=71 claims=auth_time,amr'
             with patch.dict(os.environ, UNIT_TEST_OUTCOME='success', PACKAGE_INSPECTION_OUTCOME='success', BUILD_COMMIT='abc'):
                 for lane in ('consumers', 'combined'):
                     release.write(folder / (lane + '.json'), evidence(lane, valid))
                 release.collect_validation(args)
                 for lane in ('consumers', 'combined'):
-                    for invalid in ('PASS classes=8 selectors=73 claims=auth_time',
+                    for invalid in ('PASS classes=8 selectors=71 claims=auth_time',
                                     'PASS classes=8 selectors=69 claims=auth_time,amr',
-                                    'PASS classes=8 selectors=72 claims=auth_time,amr',
-                                    'PASS classes=7 selectors=73 claims=auth_time,amr'):
+                                    'PASS classes=8 selectors=70 claims=auth_time,amr',
+                                    'PASS classes=7 selectors=71 claims=auth_time,amr'):
                         with self.subTest(lane=lane, runtime=invalid):
                             release.write(folder / (lane + '.json'), evidence(lane, invalid))
                             with self.assertRaisesRegex(ValueError, 'claims runtime'):
@@ -331,16 +402,16 @@ class ReviewRegressionTests(unittest.TestCase):
                 return dict(Success=True, Cases=[dict(Success=True)], sourceCommit='abc', Lane=lane,
                             packageHashes={p['id']: p['sha256'] for p in packages},
                             Checks=sorted(release.SIGNIN_CHECKS) + [runtime])
-            valid = 'PASS classes=8 selectors=75 claims=auth_time,amr wrapper=wrapperIdentifier'
+            valid = 'PASS classes=8 selectors=73 claims=auth_time,amr wrapper=wrapperIdentifier'
             with patch.dict(os.environ, UNIT_TEST_OUTCOME='success', PACKAGE_INSPECTION_OUTCOME='success', BUILD_COMMIT='abc'):
                 for lane in ('consumers', 'combined'):
                     release.write(folder / (lane + '.json'), evidence(lane, valid))
                 release.collect_validation(args)
                 for lane in ('consumers', 'combined'):
-                    for invalid in ('PASS classes=8 selectors=75 claims=auth_time,amr',
-                                    'PASS classes=8 selectors=73 claims=auth_time,amr wrapper=wrapperIdentifier',
-                                    'PASS classes=8 selectors=74 claims=auth_time,amr wrapper=wrapperIdentifier',
-                                    'PASS classes=7 selectors=75 claims=auth_time,amr wrapper=wrapperIdentifier'):
+                    for invalid in ('PASS classes=8 selectors=73 claims=auth_time,amr',
+                                    'PASS classes=8 selectors=71 claims=auth_time,amr wrapper=wrapperIdentifier',
+                                    'PASS classes=8 selectors=72 claims=auth_time,amr wrapper=wrapperIdentifier',
+                                    'PASS classes=7 selectors=73 claims=auth_time,amr wrapper=wrapperIdentifier'):
                         with self.subTest(lane=lane, runtime=invalid):
                             release.write(folder / (lane + '.json'), evidence(lane, invalid))
                             with self.assertRaisesRegex(ValueError, 'claims runtime'):

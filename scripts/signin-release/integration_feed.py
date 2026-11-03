@@ -6,8 +6,10 @@ from the candidate, including reused feed packages, rather than from fixture reb
 """
 import importlib.util
 import hashlib
+import os
 from pathlib import Path
 import shutil
+import sys
 
 ROOT = Path(__file__).resolve().parents[2]
 spec = importlib.util.spec_from_file_location('release', ROOT / 'scripts/firebase-release/release.py')
@@ -21,6 +23,49 @@ def fixture_packages(metadata):
         if name.startswith('AdamE.Firebase.iOS.'):
             release.require(release.version(value)[0] == 12, 'Only Firebase 12 fixtures are permitted')
     return selected
+
+
+def published_fixtures(metadata, current, latest, fetchers):
+    """Return released fixture payloads when this commit would rebuild identical inputs.
+
+    A fingerprint or version difference means the fixtures must be rebuilt here. A published
+    payload that differs from its sealed release manifest is a hard failure, never a fallback.
+    """
+    if latest is None:
+        return None, 'no published Firebase release'
+    released = {p['id']: p for p in latest['packages']}
+    payloads = {}
+    for name, value in sorted(fixture_packages(metadata).items()):
+        record = released.get(name)
+        if record is None or release.version(record['version']) != release.version(value):
+            return None, f"{name} {value} is not part of Firebase {latest['releaseVersion']}"
+        if record['fingerprint'] != current[name]['fingerprint']:
+            return None, f'{name} inputs differ from the published build'
+        found = [data for data in (fetch(record) for fetch in fetchers) if data is not None]
+        if not found:
+            return None, f'{name} {value} is not on a readable feed'
+        for data in found:
+            release.require(release.payload_hash(data) == record['payloadHash'],
+                            f'Published payload differs from its release manifest: {name}')
+        payloads[name] = found[0]
+    return payloads, None
+
+
+def fetch_published(metadata_path, output):
+    release.configure_channel('firebase')
+    metadata = release.read(metadata_path)
+    current = {p['id']: p for p in release.snapshot(metadata)}
+    # GitHub Packages needs a token; fork pull requests fall back to the public feed alone.
+    registries = (release.feeds() if os.environ.get('GH_TOKEN') else
+                  [release.Feed('nuget', 'https://api.nuget.org/v3/index.json')])
+    payloads, reason = published_fixtures(metadata, current, release.previous_release(), [f.fetch for f in registries])
+    for name, data in (payloads or {}).items():
+        (output / f"{name}.{release.normalized(release.package_info(data)['version'])}.nupkg").write_bytes(data)
+    source = 'published' if payloads else 'build'
+    print(f'Firebase 12 integration fixtures: {source}' + (f' ({reason})' if reason else ''))
+    if os.environ.get('GITHUB_OUTPUT'):
+        with open(os.environ['GITHUB_OUTPUT'], 'a') as handle:
+            handle.write(f'source={source}\n')
 
 
 def stage_feed(candidate, fixtures, metadata, output):
@@ -57,6 +102,9 @@ def stage_feed(candidate, fixtures, metadata, output):
 
 
 def main():
+    if sys.argv[1:] == ['--fetch-published']:
+        fetch_published(ROOT / 'output/firebase-metadata.json', ROOT / 'output')
+        return
     stage_feed(ROOT / 'output/signin-candidate', (ROOT / 'output').glob('*.nupkg'),
                release.read(ROOT / 'output/firebase-metadata.json'), ROOT / 'output/signin-combined')
     print('Staged validation-only Firebase 12 integration feed; sealed candidate unchanged.')
