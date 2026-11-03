@@ -313,6 +313,23 @@ namespace Firebase.CloudFirestore
 	[BaseType (typeof (NSObject), Name = "FIRFieldValue")]
 	interface FieldValue
 	{
+		// FIRFieldValue.h (12.19): preserve native double/int64 overloads.
+		[Static]
+		[Export ("fieldValueForDoubleMinimum:")]
+		FieldValue Minimum (double value);
+
+		[Static]
+		[Export ("fieldValueForIntegerMinimum:")]
+		FieldValue Minimum (long value);
+
+		[Static]
+		[Export ("fieldValueForDoubleMaximum:")]
+		FieldValue Maximum (double value);
+
+		[Static]
+		[Export ("fieldValueForIntegerMaximum:")]
+		FieldValue Maximum (long value);
+
 		// +(instancetype _Nonnull)fieldValueForDelete;
 		[Static]
 		[Export ("fieldValueForDelete")]
