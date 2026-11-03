@@ -37,8 +37,8 @@ class ExternalDownloadSource
 // GoogleMaps: https://github.com/CocoaPods/Specs/tree/master/Specs/1/9/0/GoogleMaps
 // GooglePlaces: https://github.com/CocoaPods/Specs/tree/master/Specs/c/3/2/GooglePlaces
 var ExternalDownloads = new Dictionary<string, ExternalDownloadSource> {
-	{ "FirebaseAnalytics", new ExternalDownloadSource ("FirebaseAnalytics", "12.17.0", "5b4ffbefbb018b03", expectedSha256: "5b4ffbefbb018b034c6351126f53381aa63d340bafaf7f47a8e9bc096fb1fcbb") },
-	{ "GoogleAppMeasurement", new ExternalDownloadSource ("GoogleAppMeasurement", "12.17.0", "5e80294989c75a36", expectedSha256: "5e80294989c75a365daaa9f5d0573bc13f9584e3523ce4fced57aad848f5fb3d") },
+	{ "FirebaseAnalytics", new ExternalDownloadSource ("FirebaseAnalytics", "12.18.0", "66446d79d168c90e", expectedSha256: "66446d79d168c90e11668dd656279144ec07219a582ae47b90b9d9adfc8ae216") },
+	{ "GoogleAppMeasurement", new ExternalDownloadSource ("GoogleAppMeasurement", "12.18.0", "33b40644e79959e4", expectedSha256: "33b40644e79959e40502fe31a619b487229cec30f7e9552c756dcb9c55866409") },
 	{ "GoogleMaps", new ExternalDownloadSource (
 		"GoogleMaps",
 		"9.2.0",
