@@ -214,7 +214,7 @@ These packages are usually consumed transitively rather than referenced directly
 | `AppCheckCore` | `11.3.2` | `11.3.2` |
 | `GoogleAppMeasurement` | `12.19.0` | `12.19.3` |
 | `GoogleDataTransport` | `10.1.0.6` | `10.1.0.6` |
-| `GoogleUtilities` | `8.1.0.6` | `8.1.5` |
+| `GoogleUtilities` | `8.1.5` | `8.1.5` |
 | `GTMSessionFetcher` | `3.5.0.8` | `3.5.0.8` |
 | `Nanopb` | `3.30910.0.6` | `3.30910.0.6` |
 | `PromisesObjC` | `2.4.0.8` | `2.4.0.8` |

@@ -1,6 +1,6 @@
 # Firebase 12.19.3 preparation
 
-This draft prepares the next incremental release after 12.19.0. It depends on that predecessor’s pull request merging and publishing; 12.19.0 is open rather than merged, so this is stacked on it for now. The current production release candidate is unaffected. Follow [the existing release workflow](FIREBASE_RELEASES.md); source merge and deployment approval remain maintainer actions.
+This draft prepares the next incremental release after 12.19.0. That predecessor has merged, so this targets main directly; it still depends on 12.19.0’s publication. The current production release candidate is unaffected. Follow [the existing release workflow](FIREBASE_RELEASES.md); source merge and deployment approval remain maintainer actions.
 
 ## Native review
 
@@ -15,6 +15,6 @@ Preserve package IDs, .NET 10 targets, deployment targets, native framework owne
 
 ## Validation status and merge gates
 
-Local shared audit/updater tests (121, eleven of them new for the mixed-version resolver) and release-tooling tests (59) pass on the rebuilt tree. These do not establish each version’s build or runtime compatibility. Complete unrestricted and repository-pinned CocoaPods resolution remains required for this version. The draft remains blocked on the full 16-target native audit against fresh frameworks, triage/implementation of the public drift described above, dependency-first build/pack, staged package inspection, six consumer lanes including the two separate Firestore emulator cases, Mac Catalyst and unsigned device Release/LLVM-AOT checks, and passing hosted CI. No skipped generator or inherited predecessor result counts as a pass.
+Local shared audit/updater tests (121, eleven of them new for the mixed-version resolver) and release-tooling tests (67) pass on the merged tree. These do not establish each version’s build or runtime compatibility. Complete unrestricted and repository-pinned CocoaPods resolution remains required for this version. The draft remains blocked on the full 16-target native audit against fresh frameworks, triage/implementation of the public drift described above, dependency-first build/pack, staged package inspection, six consumer lanes including the two separate Firestore emulator cases, Mac Catalyst and unsigned device Release/LLVM-AOT checks, and passing hosted CI. No skipped generator or inherited predecessor result counts as a pass.
 
-Retarget this to main alone once 12.19.0 merges; publish releases in order so planning uses the correct published manifest. The exact merged commit must be rebuilt and validated before deployment approval. Do not reuse preparation artifacts for publication.
+This preparation targets main directly now that 12.19.0 has merged; publish releases in order so planning uses the correct published manifest. The exact merged commit must be rebuilt and validated before deployment approval. Do not reuse preparation artifacts for publication.
