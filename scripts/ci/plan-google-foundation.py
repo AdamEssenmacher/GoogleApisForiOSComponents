@@ -18,7 +18,8 @@ SHARED = ('Directory.Build.props', 'global.json', '.config/dotnet-tools.json',
 COVERAGE = ('.github/workflows/google-foundation-validation.yml', 'scripts/ci/', 'tests/ci/',
             'scripts/FirebaseReleaseFingerprint/', 'tests/E2E/Google.Foundation/',
             'tools/e2e/check-consumer-shapes.sh', 'tools/e2e/check-package-structure.sh',
-            'tools/e2e/check-offline-build.sh', 'tools/e2e/run-google-foundation.sh')
+            'tools/e2e/check-offline-build.sh', 'tools/e2e/run-google-foundation.sh',
+            'tools/e2e/select-simulator.sh')
 
 
 def run(*args, cwd=ROOT):

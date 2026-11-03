@@ -4,7 +4,6 @@ import argparse
 from collections import Counter
 import hashlib
 import importlib.util
-import json
 import os
 import platform as host_platform
 import shutil
@@ -266,8 +265,7 @@ def main():
     for library in sorted(simulator.rglob('*.dylib')):
         subprocess.run(['codesign', '--force', '--sign', '-', str(library)], check=True, capture_output=True)
     subprocess.run(['codesign', '--force', '--deep', '--sign', '-', str(simulator)], check=True, capture_output=True)
-    devices = json.loads(subprocess.check_output(['xcrun', 'simctl', 'list', 'devices', 'available', '-j']))
-    device = next(d['udid'] for group in devices['devices'].values() for d in group if d['name'].startswith('iPhone'))
+    device = subprocess.check_output([str(ROOT / 'tools/e2e/select-simulator.sh')], text=True).strip()
     subprocess.run(['xcrun', 'simctl', 'boot', device], capture_output=True)
     subprocess.run(['xcrun', 'simctl', 'bootstatus', device, '-b'], check=True)
     subprocess.run(['xcrun', 'simctl', 'uninstall', device, bundle], capture_output=True)
