@@ -98,6 +98,7 @@ class RelevanceTests(unittest.TestCase):
             ('scripts/FirebaseReleaseFingerprint/BuildInputs.cs', both),
             ('tests/firebase-release/test_release.py', both),
             ('.github/workflows/firebase-release.yml', both), ('tools/ci/select-xcode.sh', both),
+            ('tools/e2e/select-simulator.sh', both),
             ('linked/shared.cs', both), ('icons/shared.png', both), ('eng/shared.targets', both),
             ('source/Google/Maps/ApiDefinition.cs', set()),
             ('source/Google/Places/ApiDefinition.cs', set()),

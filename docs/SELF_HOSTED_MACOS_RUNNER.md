@@ -45,7 +45,8 @@ outside collaborators**, and only approve fork runs after reading their workflow
   `Xcode-27.1.0.app` from Xcodes). Jobs select it with `tools/ci/select-xcode.sh`, which sets
   `DEVELOPER_DIR` and `MD_APPLE_SDK_ROOT` for that job only. It does not run `sudo` and does not
   change the machine's `xcode-select` setting.
-- An iOS simulator runtime for that Xcode.
+- An iOS simulator runtime for that Xcode, and a simulator named `GoogleApisCI-iPhone` that only
+  these jobs use (see [Dedicated simulator](#dedicated-simulator)).
 - A Ruby on `PATH` that can install gems (for example Homebrew Ruby), and CocoaPods (`pod`).
   The Sign-In job installs its pinned CocoaPods into a job-local `GEM_HOME`.
 - Python 3 and Git. .NET, Node.js, and Java are installed per job by their setup actions.
@@ -77,11 +78,40 @@ runner's `.env` to a directory inside the runner folder, so `actions/setup-dotne
 When `nativeBuild.xcode` changes, install the new Xcode and add the matching `xcode-<version>`
 label to the runner before merging the change.
 
+## Dedicated simulator
+
+The simulator jobs install and launch test apps. Launching an app in the foreground suspends
+whatever app another tool had running on that simulator, so these jobs must not share a simulator
+with anything else on the Mac. The workflows set `E2E_SIMULATOR_NAME=GoogleApisCI-iPhone`, and
+`tools/e2e/select-simulator.sh` fails the job if no available simulator has exactly that name, or
+if several do. It never falls back to another simulator.
+
+Create it once, as the user the runner service runs as, with an iPhone device type and the iOS
+runtime of the pinned Xcode:
+
+```bash
+xcrun simctl list runtimes available
+```
+
+```bash
+xcrun simctl create GoogleApisCI-iPhone "iPhone 17 Pro" com.apple.CoreSimulator.SimRuntime.iOS-27-1
+```
+
+The jobs boot it when needed and leave it booted. Do not use it for anything else. When
+`nativeBuild.xcode` moves to a new iOS runtime, delete it and create it again with that runtime:
+
+```bash
+xcrun simctl delete GoogleApisCI-iPhone
+```
+
+Local runs without `E2E_SIMULATOR_NAME` or `E2E_SIMULATOR_UDID` still use the first available
+iPhone simulator.
+
 ## Throughput and sharing
 
 One runner runs one job at a time, so native jobs from several merges or manual runs queue behind
 each other. Other runners on the same Mac can run at the same time; they share the CPU and the simulator
-service. The Firestore emulator checks pick free loopback ports for each run, so they do not
+service, but not a simulator. The Firestore emulator checks pick free loopback ports for each run, so they do not
 collide with emulators started by other jobs.
 
 ## Caches
