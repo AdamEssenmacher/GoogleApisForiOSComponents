@@ -146,7 +146,7 @@ If your project targets multiple platforms, keep these packages inside Apple-onl
 
 ```xml
 <ItemGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">
-  <PackageReference Include="AdamE.Firebase.iOS.Core" Version="12.18.0" />
+  <PackageReference Include="AdamE.Firebase.iOS.Core" Version="12.19.0" />
 </ItemGroup>
 ```
 
@@ -170,9 +170,9 @@ Archiving can still be more reliable on macOS or from the command line.
 
 The lists below distinguish the required published baseline on [nuget.org](https://www.nuget.org/profiles/adamessenmacher) under the `adamessenmacher` owner profile from the versions prepared in [`components.cake`](components.cake). Prepared versions are not publication confirmation.
 
-Firebase and GoogleAppMeasurement `12.17.0` are the required published baseline for this update. Verify their publication through the [approved CI publishing workflow](docs/FIREBASE_RELEASES.md) before merging the 12.18 preparation. See the [12.17 native review and validation notes](docs/firebase-12.17-update.md), the [12.16 notes](docs/firebase-12.16-update.md), and the earlier [12.15 notes](docs/firebase-12.15-update.md).
+Firebase and GoogleAppMeasurement `12.18.0` are the required published baseline for this update. Verify their publication through the [approved CI publishing workflow](docs/FIREBASE_RELEASES.md) before merging the 12.19 preparation. See the [12.18 native review and validation notes](docs/firebase-12.18-update.md), the [12.17 notes](docs/firebase-12.17-update.md), and the earlier [12.16 notes](docs/firebase-12.16-update.md).
 
-This checkout prepares Firebase and GoogleAppMeasurement `12.18.0`. Publication remains pending. See the [12.18 native review and validation notes](docs/firebase-12.18-update.md).
+This checkout prepares Firebase and GoogleAppMeasurement `12.19.0`. Publication remains pending. See the [12.19 native review and validation notes](docs/firebase-12.19-update.md).
 
 ### Published and prepared versions
 
@@ -180,22 +180,22 @@ This checkout prepares Firebase and GoogleAppMeasurement `12.18.0`. Publication 
 
 | Package | Required published baseline | Prepared version |
 | --- | --- | --- |
-| `ABTesting` | `12.17.0` | `12.18.0` |
-| `Analytics` | `12.17.0` | `12.18.0` |
-| `AppCheck` | `12.17.0` | `12.18.0` |
-| `AppDistribution` | `12.17.0` | `12.18.0` |
-| `Auth` | `12.17.0` | `12.18.0` |
-| `CloudFirestore` | `12.17.0` | `12.18.0` |
-| `CloudFunctions` | `12.17.0` | `12.18.0` |
-| `CloudMessaging` | `12.17.0` | `12.18.0` |
-| `Core` | `12.17.0` | `12.18.0` |
-| `Crashlytics` | `12.17.0` | `12.18.0` |
-| `Database` | `12.17.0` | `12.18.0` |
-| `InAppMessaging` | `12.17.0` | `12.18.0` |
-| `Installations` | `12.17.0` | `12.18.0` |
-| `PerformanceMonitoring` | `12.17.0` | `12.18.0` |
-| `RemoteConfig` | `12.17.0` | `12.18.0` |
-| `Storage` | `12.17.0` | `12.18.0` |
+| `ABTesting` | `12.18.0` | `12.19.0` |
+| `Analytics` | `12.18.0` | `12.19.0` |
+| `AppCheck` | `12.18.0` | `12.19.0` |
+| `AppDistribution` | `12.18.0` | `12.19.0` |
+| `Auth` | `12.18.0` | `12.19.0` |
+| `CloudFirestore` | `12.18.0` | `12.19.0` |
+| `CloudFunctions` | `12.18.0` | `12.19.0` |
+| `CloudMessaging` | `12.18.0` | `12.19.0` |
+| `Core` | `12.18.0` | `12.19.0` |
+| `Crashlytics` | `12.18.0` | `12.19.0` |
+| `Database` | `12.18.0` | `12.19.0` |
+| `InAppMessaging` | `12.18.0` | `12.19.0` |
+| `Installations` | `12.18.0` | `12.19.0` |
+| `PerformanceMonitoring` | `12.18.0` | `12.19.0` |
+| `RemoteConfig` | `12.18.0` | `12.19.0` |
+| `Storage` | `12.18.0` | `12.19.0` |
 
 #### Google packages (`AdamE.Google.iOS.*`)
 
@@ -212,9 +212,9 @@ These packages are usually consumed transitively rather than referenced directly
 | Package | Required published baseline | Prepared version |
 | --- | --- | --- |
 | `AppCheckCore` | `11.3.2` | `11.3.2` |
-| `GoogleAppMeasurement` | `12.17.0` | `12.18.0` |
+| `GoogleAppMeasurement` | `12.18.0` | `12.19.0` |
 | `GoogleDataTransport` | `10.1.0.6` | `10.1.0.6` |
-| `GoogleUtilities` | `8.1.0.6` | `8.1.0.6` |
+| `GoogleUtilities` | `8.1.0.6` | `8.1.5` |
 | `GTMSessionFetcher` | `3.5.0.8` | `3.5.0.8` |
 | `Nanopb` | `3.30910.0.6` | `3.30910.0.6` |
 | `PromisesObjC` | `2.4.0.8` | `2.4.0.8` |
