@@ -2621,6 +2621,11 @@ static partial class FirebaseRuntimeDriftCases
         using var define = new DefineStageBridge(options);
         using var search = new SearchStageBridge(options, options, options, []);
         using var pipeline = new PipelineExprBridge([subcollection, define]);
+        // 12.19 min/max sentinels are local constructors and require no backend.
+        using var minimumDouble = FieldValue.Minimum(1.5);
+        using var minimumInteger = FieldValue.Minimum(1L);
+        using var maximumDouble = FieldValue.Maximum(2.5);
+        using var maximumInteger = FieldValue.Maximum(2L);
         var db = Firebase.CloudFirestore.Firestore.SharedInstance
             ?? throw new InvalidOperationException("Firestore.SharedInstance returned null before pipeline bridge validation.");
         using var collection = db.GetCollection("pipeline-bridge-regression");
@@ -2641,7 +2646,8 @@ static partial class FirebaseRuntimeDriftCases
             "initWithName:Args:Options:");
         foreach (var bridge in new NSObject[] { compatible, nullableOptions, explicitOptions,
                      variable, subcollection, define, search, pipeline, collectionCompatible,
-                     collectionNullIndex, collectionIndex, groupCompatible, groupNullIndex, groupIndex })
+                     collectionNullIndex, collectionIndex, groupCompatible, groupNullIndex, groupIndex,
+                     minimumDouble, minimumInteger, maximumDouble, maximumInteger })
         {
             if (bridge.Handle == IntPtr.Zero)
                 throw new InvalidOperationException($"Native pipeline constructor returned nil: {bridge.GetType().Name}.");
