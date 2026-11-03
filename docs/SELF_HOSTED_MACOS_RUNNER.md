@@ -86,15 +86,17 @@ with anything else on the Mac. The workflows set `E2E_SIMULATOR_NAME=GoogleApisC
 `tools/e2e/select-simulator.sh` fails the job if no available simulator has exactly that name, or
 if several do. It never falls back to another simulator.
 
-Create it once, as the user the runner service runs as, with an iPhone device type and the iOS
-runtime of the pinned Xcode:
+Create it once, as the user the runner service runs as, from an iPhone device type and an iOS
+runtime that the pinned Xcode can run. A runtime may support only some device types, so check the
+pair first (each runtime's `supportedDeviceTypes`); `simctl create` fails with "Incompatible
+device" otherwise:
 
 ```bash
-xcrun simctl list runtimes available
+xcrun simctl list runtimes available -j
 ```
 
 ```bash
-xcrun simctl create GoogleApisCI-iPhone "iPhone 17 Pro" com.apple.CoreSimulator.SimRuntime.iOS-27-1
+xcrun simctl create GoogleApisCI-iPhone "iPhone 17 Pro" com.apple.CoreSimulator.SimRuntime.iOS-27-0
 ```
 
 The jobs boot it when needed and leave it booted. Do not use it for anything else. When
@@ -104,8 +106,9 @@ The jobs boot it when needed and leave it booted. Do not use it for anything els
 xcrun simctl delete GoogleApisCI-iPhone
 ```
 
-Local runs without `E2E_SIMULATOR_NAME` or `E2E_SIMULATOR_UDID` still use the first available
-iPhone simulator.
+Register one runner per repository on a Mac: two runners for this repository would share the
+dedicated simulator. Local runs without `E2E_SIMULATOR_NAME` or `E2E_SIMULATOR_UDID` use the first
+available simulator whose name starts with `iPhone`, so they never pick `GoogleApisCI-iPhone`.
 
 ## Throughput and sharing
 

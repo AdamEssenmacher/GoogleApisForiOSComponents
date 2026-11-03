@@ -73,7 +73,7 @@ directory.
 
 Set `E2E_SIMULATOR_UDID` to choose a simulator, or `E2E_SIMULATOR_NAME` to choose one by name; a
 name that matches no available simulator, or several, fails the run. Otherwise, the runner uses the
-first available iPhone simulator. `E2E_TIMEOUT_SECONDS` changes the default 90-second result timeout.
+first available simulator whose name starts with `iPhone`. `E2E_TIMEOUT_SECONDS` changes the default 90-second result timeout.
 
 ## Results and diagnostics
 

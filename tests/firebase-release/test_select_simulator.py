@@ -13,9 +13,9 @@ DEDICATED = '22222222-2222-2222-2222-222222222222'
 IPAD = '33333333-3333-3333-3333-333333333333'
 DEVICES = {
     'com.apple.CoreSimulator.SimRuntime.iOS-27-1': [
+        {'name': 'GoogleApisCI-iPhone', 'udid': DEDICATED},
         {'name': 'iPad Pro 11-inch (M5)', 'udid': IPAD},
         {'name': 'iPhone 17 Pro', 'udid': IPHONE},
-        {'name': 'GoogleApisCI-iPhone', 'udid': DEDICATED},
     ],
 }
 STUB = '''#!/usr/bin/env python3
@@ -71,7 +71,7 @@ class SelectSimulatorTests(unittest.TestCase):
         self.assertEqual((result.returncode, result.stdout), (1, ''))
         self.assertIn('2 available simulators', result.stderr)
 
-    def test_without_settings_uses_first_iphone(self):
+    def test_without_settings_uses_first_iphone_and_skips_ci_simulators(self):
         result = self.select()
         self.assertEqual((result.returncode, result.stdout), (0, IPHONE + '\n'))
 
