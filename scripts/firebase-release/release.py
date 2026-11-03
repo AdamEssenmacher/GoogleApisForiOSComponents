@@ -30,6 +30,10 @@ LABEL = 'Firebase'
 TAG_PREFIX = 'firebase-v'
 SIGNIN_IDS = {'AdamE.Google.iOS.' + name for name in
               ('SignIn', 'AppCheckCore', 'GTMSessionFetcher', 'PromisesObjC', 'GoogleUtilities')}
+SIGNIN_ROOT_ID = 'AdamE.Google.iOS.SignIn'
+# The four support packages are also in the Firebase dependency closure, so Firebase releases
+# publish them. See reused_support_package.
+SIGNIN_SHARED_IDS = SIGNIN_IDS - {SIGNIN_ROOT_ID}
 SIGNIN_VERSIONS = ('9.1.0', '9.2.0', '10.0.0', '10.1.0')
 SIGNIN_CHECKS = {f'restore-{p}-{shape}' for p in ('ios', 'maccatalyst') for shape in ('direct', 'transitive')}
 SIGNIN_CHECKS |= {f'ios-{shape}-{rid}' for shape in ('direct', 'transitive') for rid in ('iossimulator-arm64', 'ios-arm64')}
@@ -58,6 +62,29 @@ def validate_scope(packages):
         require({p['id'] for p in packages} == SIGNIN_IDS and len(packages) == len(SIGNIN_IDS),
                 'Sign-In metadata must contain exactly its five owned packages')
         require(all(not p.get('firebase', False) for p in packages), 'Firebase cannot enter the Sign-In publication channel')
+
+
+def reused_support_package(package_id):
+    """True for a Sign-In support package that a Firebase release publishes instead.
+
+    These four are also in the Firebase dependency closure. Sign-In plans against its own previous
+    release, so one of them counts as changed here whenever Firebase released it in between, even
+    though that Firebase release built and published it under its own commit.
+    """
+    return CHANNEL == 'signin' and package_id in SIGNIN_SHARED_IDS
+
+
+def published_commit_requirement(manifest, package_id):
+    """The commit an already-published changed package must carry, or None when it is reused.
+
+    docs/SIGNIN_RELEASES.md reuses an existing matching package from the feeds, so a shared support
+    package already published at the planned version is not this release's to publish. The Sign-In
+    root, a package missing from the feeds, and the whole Firebase channel stay subject to the
+    commit requirement, and every other inspection applies either way.
+    """
+    if package_id not in manifest['changed'] or reused_support_package(package_id):
+        return None
+    return manifest['sourceCommit']
 
 
 def validate_manifest_channel(manifest):
@@ -457,7 +484,7 @@ def check_feeds(args):
                                        'frameworks': sorted({n.split('/')[1] for n in info['files'] if n.startswith('lib/')})}
             available.append(data)
             try:
-                inspect_package(data, p, packages, manifest['sourceCommit'] if p['id'] in manifest['changed'] else None)
+                inspect_package(data, p, packages, published_commit_requirement(manifest, p['id']))
             except ValueError as error:
                 row['errors'].append(f'{feed.name}: {error}')
         if len({payload_hash(data) for data in available}) > 1:
@@ -558,7 +585,7 @@ def prepare(args):
         if available:
             require(len({payload_hash(data) for data in available}) == 1, f"Feeds disagree: {p['id']}")
         data = available[0] if available else candidates[p['id']].read_bytes()
-        expected_commit = manifest['sourceCommit'] if not available or p['id'] in manifest['changed'] else None
+        expected_commit = manifest['sourceCommit'] if not available else published_commit_requirement(manifest, p['id'])
         p['packageDependencies'] = inspect_package(data, p, packages, expected_commit)
         p['file'] = f"{p['id']}.{normalized(p['version'])}.nupkg"
         p['sha256'], p['payloadHash'] = digest(data), payload_hash(data)
@@ -713,7 +740,7 @@ def publish(args):
         require(Path(p['file']).name == p['file'], 'Invalid artifact filename')
         data = (folder / p['file']).read_bytes()
         require(digest(data) == p['sha256'] and payload_hash(data) == p['payloadHash'], 'Artifact hash mismatch')
-        expected_commit = manifest['sourceCommit'] if not p['reused'] or p['id'] in manifest['changed'] else None
+        expected_commit = manifest['sourceCommit'] if not p['reused'] else published_commit_requirement(manifest, p['id'])
         inspect_package(data, allowed[p['id']], allowed, expected_commit)
     registries = feeds()
     publish_packages(folder, manifest['packages'], registries)

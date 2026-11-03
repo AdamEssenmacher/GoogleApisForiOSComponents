@@ -114,6 +114,12 @@ native SDK downloads are required by consumers.
 The candidate contains exactly Sign-In, AppCheckCore, GTMSessionFetcher, PromisesObjC, and
 GoogleUtilities. Shared native frameworks keep their existing owning NuGets. Existing matching
 packages are reused from the feeds; missing destinations can receive the same verified bytes.
+Sign-In plans against its own previous release, so a support package counts as changed here
+whenever a Firebase release advanced and published it in between. Such a package is reused exactly
+as published and carries that Firebase release's repository commit, so the commit requirement
+applies to the Sign-In root and to any package still missing from the feeds, not to it. Every other
+inspection — identity, in-scope and satisfied dependencies, platform assemblies, native resources
+and manifests, and feed agreement — applies to a reused package either way.
 Feed disagreements fail validation. Only sealed, hash-verified candidates can be published; the
 publish job never rebuilds packages.
 

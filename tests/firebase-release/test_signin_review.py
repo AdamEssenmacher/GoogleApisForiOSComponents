@@ -419,5 +419,27 @@ class ReviewRegressionTests(unittest.TestCase):
                             release.write(folder / (lane + '.json'), evidence(lane, valid))
 
 
+    def test_shared_support_packages_are_reused_from_the_firebase_channel(self):
+        manifest = dict(sourceCommit='signin-commit',
+                        changed=sorted(release.SIGNIN_IDS))
+        release.configure_channel('signin')
+        self.addCleanup(release.configure_channel, 'firebase')
+        for package_id in sorted(release.SIGNIN_SHARED_IDS):
+            with self.subTest(package=package_id):
+                # Firebase published these under its own commit, so Sign-In reuses them as they are.
+                self.assertIsNone(release.published_commit_requirement(manifest, package_id))
+        # The release's own root still has to come from this commit.
+        self.assertEqual('signin-commit',
+                         release.published_commit_requirement(manifest, release.SIGNIN_ROOT_ID))
+        # An unchanged package is never held to a commit, shared or not.
+        self.assertIsNone(release.published_commit_requirement(dict(manifest, changed=[]),
+                                                              release.SIGNIN_ROOT_ID))
+        release.configure_channel('firebase')
+        for package_id in sorted(release.SIGNIN_IDS):
+            with self.subTest(channel='firebase', package=package_id):
+                self.assertEqual('signin-commit',
+                                 release.published_commit_requirement(manifest, package_id))
+
+
 if __name__ == '__main__':
     unittest.main()
