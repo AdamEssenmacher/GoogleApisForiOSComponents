@@ -29,10 +29,16 @@ on:
       - "tools/ci/select-xcode.sh"
       - "tools/e2e/check-consumer-shapes.sh"
       - "tools/e2e/run-google-foundation.sh"
+      - "tools/e2e/select-simulator.sh"
   workflow_dispatch:
 
 permissions:
   contents: read
+
+# Simulator tests use a simulator of their own, so other tools on the same Mac cannot suspend
+# their apps mid-run (docs/SELF_HOSTED_MACOS_RUNNER.md).
+env:
+  E2E_SIMULATOR_NAME: GoogleApisCI-iPhone
 
 jobs:
   plan:

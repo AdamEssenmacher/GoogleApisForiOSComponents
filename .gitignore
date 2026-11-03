@@ -10,6 +10,7 @@ tools/e2e/*
 !tools/e2e/run-firebase-foundation.sh
 !tools/e2e/run-google-foundation.sh
 !tools/e2e/check-consumer-shapes.sh
+!tools/e2e/select-simulator.sh
 !tools/ci/
 tools/ci/*
 !tools/ci/select-xcode.sh
