@@ -29,6 +29,8 @@ jobs:
           global-json-file: global.json
       - run: python3 -m unittest discover -s tests/firebase13 -v
       - run: python3 tools/firebase13/native.py native-assets-validate
+      - name: Crashlytics upload integrity and stock XBD ZIP cache tests
+        run: python3 -m unittest discover -s tests/crashlytics -v
 
   native:
     # Allow this trusted experiment branch to validate before the workflow reaches main.

@@ -53,4 +53,7 @@
   <ItemGroup>
     <Compile Include="$(Firebase13BuildInfoPath)" Condition="'$(Firebase13BuildInfoPath)' != ''" />
   </ItemGroup>
+  <Target Name="_RequireVerifiedFirebase13Producer" BeforeTargets="GenerateNuspec" Condition="'$(Firebase13BuildInfoPath)' == ''">
+    <Error Text="Use dotnet tool run dotnet-cake firebase13.cake --target=nuget to verify the official Firebase archive before packing this package." />
+  </Target>
 </Project>

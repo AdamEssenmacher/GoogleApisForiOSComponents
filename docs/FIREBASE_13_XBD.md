@@ -57,7 +57,14 @@ only extracted files can leave XBD believing extraction already completed.
 
 Consumer cache/extraction behavior is stock XBD. The targets pass the pinned `Sha256` and the 1,800-second `ExclusiveLockTimeout`
 through stock XBD metadata (verified against the installed 0.11.6 implementation).
-Producer/release validation also checks the complete ZIP digest. These targets do
+Producer/release validation independently enforces the complete ZIP digest.
+A real stock-XBD fixture proves that 0.11.6 does **not** enforce that digest after
+a fresh ZIP download: its hash check only applies to an existing archive before
+downloading. Passing `Sha256` metadata therefore does not guarantee consumer-time
+integrity of freshly downloaded frameworks. This experiment accepts the stock
+behavior and does not add a replacement downloader or extraction path. Any stronger
+consumer integrity requirement must be resolved before production promotion.
+These targets do
 not add consumer-time rehashing of completed caches, hostile-archive protection,
 atomic extraction, or warm-cache corruption detection beyond standard XBD. Crashlytics upload-symbols is independently hashed
 before execution, including after copying it to a paired Mac.
@@ -114,10 +121,11 @@ ZIP: use `--archive` when a warm XBD cache no longer retains it. Acquisition use
 XBD, and archive verification occurs before packing. An absent official binary
 archive is a release blocker; there is no CocoaPods or source-build fallback.
 
-`build.cake --target=nuget --names=Firebase.Core` delegates to the new producer.
-Mixed legacy/Firebase production fails with guidance instead of silently invoking
-CocoaPods or mixing shared native versions. The dedicated Cake entry point does
-not load any CocoaPods code.
+Firebase 13 production uses the dedicated `firebase13.cake` entry point. The
+shared legacy `build.cake` is preserved so unrelated product fingerprints stay
+unchanged. Scoped projects reject packing without the verified producer's build
+information; legacy mixed-product builds cannot silently pack this experiment.
+The dedicated entry point does not load CocoaPods code.
 
 ## Managed API updates
 

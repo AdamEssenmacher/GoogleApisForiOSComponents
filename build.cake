@@ -23,24 +23,6 @@ var ARTIFACTS_TO_BUILD = new List<Artifact> ();
 
 var SOURCES_TARGETS = new List<string> ();
 
-bool IsFirebaseXbdArtifact(Artifact artifact)
-{
-    return new [] { "Firebase.ABTesting", "Firebase.Analytics", "Firebase.Auth", "Firebase.CloudFirestore", "Firebase.CloudFunctions", "Firebase.CloudMessaging", "Firebase.Core", "Firebase.Crashlytics", "Firebase.Database", "Firebase.InAppMessaging", "Firebase.Installations", "Firebase.PerformanceMonitoring", "Firebase.RemoteConfig", "Firebase.Storage", "Firebase.AppDistribution", "Firebase.AppCheck", "Google.AppCheckCore", "Google.AppMeasurement", "Google.PromisesObjC", "Google.GTMSessionFetcher", "Google.Nanopb", "Google.GoogleUtilities", "Google.GoogleDataTransport" }.Contains(artifact.Id);
-}
-
-void RunFirebaseXbd(string target)
-{
-    var args = new ProcessArgumentBuilder();
-    args.AppendQuoted("tools/firebase13/native.py").Append(target);
-    if (!string.IsNullOrWhiteSpace(NAMES)) args.Append("--names").AppendQuoted(NAMES);
-    var archive = Argument("archive", "");
-    var cache = Argument("cache", "");
-    if (!string.IsNullOrWhiteSpace(archive)) args.Append("--archive").AppendQuoted(archive);
-    if (!string.IsNullOrWhiteSpace(cache)) args.Append("--cache").AppendQuoted(cache);
-    if (StartProcess("python3", new ProcessSettings { Arguments = args }) != 0)
-        throw new Exception("Firebase 13 XBD operation failed.");
-}
-
 FilePath GetCakeToolPath ()
 {
 	var possibleExe = GetFiles ("./**/tools/Cake/Cake.exe").FirstOrDefault ();
@@ -152,8 +134,6 @@ Task("prepare-artifacts")
 
 	var orderedArtifactsForBuild = OrderArtifactsByDependencies (selectedArtifactsForBuild);
 	ARTIFACTS_TO_BUILD.AddRange (orderedArtifactsForBuild);
-    if (ARTIFACTS_TO_BUILD.Any(IsFirebaseXbdArtifact) && !ARTIFACTS_TO_BUILD.All(IsFirebaseXbdArtifact))
-        throw new Exception("Build Firebase 13 and its dependencies separately with firebase13.cake. Mixed legacy/CocoaPods production is unsupported; non-Firebase packages retain their own native requirements.");
 
 	Information ("Build order:");
 
@@ -167,11 +147,7 @@ Task ("externals")
 	.WithCriteria (!DirectoryExists (EXTERNALS_PATH) || !string.IsNullOrWhiteSpace (NAMES))
 	.Does (() => 
 {
-	if (ARTIFACTS_TO_BUILD.All(IsFirebaseXbdArtifact)) {
-        RunFirebaseXbd("externals");
-        return;
-    }
-    EnsureDirectoryExists (EXTERNALS_PATH);
+	EnsureDirectoryExists (EXTERNALS_PATH);
 
 	Information ("////////////////////////////////////////");
 	Information ("// Pods Repo Update Started           //");
@@ -233,11 +209,7 @@ Task ("nuget")
 	.IsDependentOn("ci-setup")
 	.Does(() =>
 {
-	if (ARTIFACTS_TO_BUILD.All(IsFirebaseXbdArtifact)) {
-        RunFirebaseXbd("nuget");
-        return;
-    }
-    EnsureDirectoryExists("./output/");
+	EnsureDirectoryExists("./output/");
 
 	var outputPath = MakeAbsolute ((DirectoryPath)"./output/");
 	var dotNetBuildMsBuildSettings = new DotNetMSBuildSettings ();

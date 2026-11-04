@@ -351,6 +351,13 @@ def validation_reasons(files, packages, channel, integration_metadata=()):
     return sorted({p for p in files if p in exact or p.startswith(directories + tuple(prefixes))})
 
 
+
+def requires_new_channel_release(changed):
+    # Shared dependencies have their own package versions and may advance through
+    # Firebase while the published Sign-In root is reused byte-for-byte.
+    return bool(changed) if CHANNEL == 'firebase' else 'AdamE.Google.iOS.SignIn' in changed
+
+
 def plan(args):
     packages = snapshot(read(args.metadata))
     validate_scope(packages)
@@ -378,7 +385,7 @@ def plan(args):
                 require(version(p['version']) >= version(config['minimumFirebaseVersion']), 'Firebase package predates 12.12')
         if latest:
             require(version(release_version) >= version(latest['releaseVersion']), 'Release version went backwards')
-            require(not changed or version(release_version) > version(latest['releaseVersion']),
+            require(not requires_new_channel_release(changed) or version(release_version) > version(latest['releaseVersion']),
                     'Package changes require a new release version')
     reasons = []
     if args.manual:

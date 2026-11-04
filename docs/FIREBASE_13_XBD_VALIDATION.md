@@ -36,8 +36,8 @@ completion. No packages have been published by this work.
 - Secret-free simulator probes verify Firebase 13.1.1 load, representative native
   class availability, Firestore BSON value round-trips and pipeline construction.
   Crashlytics upload-symbols executes its help command from the downloaded archive.
-- Eight new Python tests cover manifest/delivery and hostile-archive cases; the
-  existing 69 release-tool tests and 123 binding-audit tests pass.
+- Nine new Python tests cover manifest/delivery and hostile-archive cases; the
+  existing 71 release-tool tests and 123 binding-audit tests pass.
 - Local producer and consumer paths run with a failing pod sentinel. Consumer
   probes assert that it was never invoked. The dedicated Firebase entry point
   never loads CocoaPods code.
@@ -57,6 +57,11 @@ completion. No packages have been published by this work.
 - Real Windows/Pair-to-Mac execution, authenticated Firebase service operations and
   the compatibility of existing non-Firebase packages with the new shared native
   baseline are not established. Current Sign-In dependency bounds are incompatible.
+- Ten Crashlytics tests verify local/remote upload integrity and real stock-XBD
+  ZIP caching with a bounded local archive. This replaces tests of the removed raw
+  script download. The ZIP fixture confirms that a fresh download with deliberately
+  mismatched digest metadata succeeds in XBD 0.11.6; it is explicitly **not** a
+  consumer-time digest guarantee. Producer verification still rejects mismatches.
 - This accepts stock XBD cache/extraction semantics. Producer archive safety and
   digest tests do not establish additional consumer-time protections beyond XBD.
 - Analytics/App Measurement licensing, package acceptance wording and downstream

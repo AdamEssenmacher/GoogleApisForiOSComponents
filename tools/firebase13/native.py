@@ -45,6 +45,8 @@ def validate_schema(m):
         project = ET.parse(ROOT / p['project']).getroot()
         require(project.findtext('PropertyGroup/PackageId') == p['package'], 'Package owner/project mismatch')
         require(project.findtext('PropertyGroup/PackageVersion') == p['version'], 'Package version mismatch')
+        guard=project.find("Target[@Name='_RequireVerifiedFirebase13Producer']")
+        require(guard is not None and guard.get('BeforeTargets') == 'GenerateNuspec' and guard.get('Condition') == "'$(Firebase13BuildInfoPath)' == ''" and guard.find('Error') is not None, 'Verified producer pack guard required')
         require(not list(project.iter('NativeReference')) and not list(project.iter('BundleResource')), 'Producer project embeds native payloads')
         xbd = [n for n in project.iter('PackageReference') if n.get('Include') == 'Xamarin.Build.Download']
         require(len(xbd) == 1 and xbd[0].get('Version') == '[0.11.6]' and xbd[0].get('PrivateAssets') == 'None', 'Exact public XBD dependency required')

@@ -220,7 +220,14 @@ void RunFirebaseReleaseTooling (bool applyChanges)
         var pinnedVersion = manifest.RootElement.GetProperty("releaseVersion").GetString();
         if (!string.IsNullOrWhiteSpace(FIREBASE_RELEASE_VERSION) && FIREBASE_RELEASE_VERSION != pinnedVersion)
             throw new Exception($"This experiment validates only Firebase {pinnedVersion}; no CocoaPods or source-build fallback is available.");
-        RunFirebaseXbd("release-check");
+        var args = new ProcessArgumentBuilder();
+        args.AppendQuoted("tools/firebase13/native.py").Append("release-check");
+        var archive = Argument("archive", "");
+        var cache = Argument("cache", "");
+        if (!string.IsNullOrWhiteSpace(archive)) args.Append("--archive").AppendQuoted(archive);
+        if (!string.IsNullOrWhiteSpace(cache)) args.Append("--cache").AppendQuoted(cache);
+        if (StartProcess("python3", new ProcessSettings { Arguments = args }) != 0)
+            throw new Exception("Firebase 13 archive release check failed.");
         return;
     }
 

@@ -129,6 +129,19 @@ class SignInTests(unittest.TestCase):
                                                   base='main', online=False, manual=True))
             return release.read(output)
 
+    def test_shared_dependency_release_does_not_require_a_signin_binding_revision(self):
+        shared = ['AdamE.Google.iOS.AppCheckCore', 'AdamE.Google.iOS.GTMSessionFetcher']
+        self.assertFalse(release.requires_new_channel_release(shared))
+        self.assertFalse(release.requires_new_channel_release([]))
+        self.assertTrue(release.requires_new_channel_release(shared + ['AdamE.Google.iOS.SignIn']))
+        # Unchanged root version still rejects any real root input/payload change.
+        root = packages()[-1]
+        with self.assertRaisesRegex(ValueError, 'without a version bump'):
+            release.check_versions([{**root, 'fingerprint':'changed'}], {'packages':[root]})
+        release.configure_channel('firebase')
+        try: self.assertTrue(release.requires_new_channel_release(shared))
+        finally: release.configure_channel('signin')
+
     def test_manual_bootstrap_validation_is_not_release_eligible(self):
         manifest = self.plan_fixture()
         self.assertTrue(manifest['relevant'])

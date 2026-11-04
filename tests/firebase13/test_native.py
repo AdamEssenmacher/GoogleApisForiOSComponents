@@ -24,6 +24,20 @@ class NativeTests(unittest.TestCase):
     def test_committed_schema_and_generation(self):
         self.assertEqual(len(native.validate_schema(self.manifest)), 23)
 
+    def test_unverified_pack_fails_before_package_emission(self):
+        guard=ET.parse(ROOT/self.manifest['packages'][0]['project']).find("Target[@Name='_RequireVerifiedFirebase13Producer']")
+        with tempfile.TemporaryDirectory() as tmp:
+            work=Path(tmp);project=work/'fixture.proj';output=work/'packed'
+            project.write_text('<Project>'+ET.tostring(guard,encoding='unicode')+'<Target Name="GenerateNuspec"><WriteLinesToFile File="'+str(output)+'" Lines="packed" /></Target></Project>')
+            command=['dotnet','msbuild',str(project),'-t:GenerateNuspec','-nologo']
+            result=subprocess.run(command,capture_output=True,text=True)
+            self.assertNotEqual(0,result.returncode)
+            self.assertIn('firebase13.cake',result.stdout+result.stderr)
+            self.assertFalse(output.exists())
+            result=subprocess.run(command+['-p:Firebase13BuildInfoPath=producer-info.cs'],capture_output=True,text=True)
+            self.assertEqual(0,result.returncode,result.stdout+result.stderr)
+            self.assertTrue(output.exists())
+
     def test_conflicting_declarations_are_rejected(self):
         for fault, message in [('url','source URL'),('hash','digest'),('id','asset ID'),
                                ('owner','owner'),('path','Unsafe asset'),('native-owner','framework ownership'),
