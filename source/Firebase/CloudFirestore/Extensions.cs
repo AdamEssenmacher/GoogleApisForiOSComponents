@@ -6,6 +6,33 @@ using Foundation;
 
 namespace Firebase.CloudFirestore
 {
+	// Binding-definition interfaces cannot satisfy NSDictionary's INativeObject
+	// constraint before bgen runs. Keep raw initializers internal, and expose the
+	// native expression-valued contract through these generated-class constructors.
+	public partial class LiteralsSourceStageBridge
+	{
+		public LiteralsSourceStageBridge (NSDictionary<NSString, ExprBridge> [] data)
+			: this ((NSDictionary []) (data ?? throw new ArgumentNullException (nameof (data))))
+		{
+		}
+	}
+
+	public partial class UpdateStageBridge
+	{
+		public UpdateStageBridge (NSDictionary<NSString, ExprBridge> fields)
+			: this ((NSDictionary) (fields ?? throw new ArgumentNullException (nameof (fields))))
+		{
+		}
+	}
+
+	public partial class UpsertStageBridge
+	{
+		public UpsertStageBridge (NSDictionary<NSString, ExprBridge> additionalFields, string? collectionPath, ExprBridge? documentIdExpression)
+			: this ((NSDictionary) (additionalFields ?? throw new ArgumentNullException (nameof (additionalFields))), collectionPath, documentIdExpression)
+		{
+		}
+	}
+
 	public partial class CollectionSourceStageBridge
 	{
 		// Preserve the pre-12.14 managed overload using the new native initializer.

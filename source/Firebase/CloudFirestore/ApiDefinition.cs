@@ -1988,8 +1988,9 @@ namespace Firebase.CloudFirestore
 	[BaseType (typeof (StageBridge), Name = "__FIRLiteralsSourceStageBridge")]
 	interface LiteralsSourceStageBridge
 	{
+		[Internal]
 		[Export ("initWithData:")]
-		NativeHandle Constructor (NSDictionary<NSString, NSObject> [] data);
+		NativeHandle Constructor (NSDictionary [] data);
 	}
 
 	[DisableDefaultCtor]
@@ -2004,8 +2005,9 @@ namespace Firebase.CloudFirestore
 	[BaseType (typeof (StageBridge), Name = "__FIRUpdateStageBridge")]
 	interface UpdateStageBridge
 	{
+		[Internal]
 		[Export ("initWithFields:")]
-		NativeHandle Constructor (NSDictionary<NSString, NSObject> fields);
+		NativeHandle Constructor (NSDictionary fields);
 	}
 
 	[DisableDefaultCtor]
@@ -2020,8 +2022,9 @@ namespace Firebase.CloudFirestore
 	[BaseType (typeof (StageBridge), Name = "__FIRUpsertStageBridge")]
 	interface UpsertStageBridge
 	{
+		[Internal]
 		[Export ("initWithAdditionalFields:collectionPath:documentIdExpression:")]
-		NativeHandle Constructor (NSDictionary<NSString, NSObject> additionalFields, [NullAllowed] string collectionPath, [NullAllowed] ExprBridge documentIdExpression);
+		NativeHandle Constructor (NSDictionary additionalFields, [NullAllowed] string collectionPath, [NullAllowed] ExprBridge documentIdExpression);
 	}
 
 }

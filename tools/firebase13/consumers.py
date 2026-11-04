@@ -89,6 +89,15 @@ def main():
                 using var regex=new Firebase.CloudFirestore.RegexValue("a","i");
                 using var bytes=NSData.FromArray(new byte[]{1,2});
                 using var blob=Firebase.CloudFirestore.Blob.FromBsonBinary(bytes,128);
+                using var expression=new Firebase.CloudFirestore.ConstantBridge(new NSString("value"));
+                using var fields=NSDictionary<NSString,Firebase.CloudFirestore.ExprBridge>.FromObjectsAndKeys(new Firebase.CloudFirestore.ExprBridge[]{expression},new NSString[]{new NSString("field")});
+                using var updateStage=new Firebase.CloudFirestore.UpdateStageBridge(fields);
+                using var upsertStage=new Firebase.CloudFirestore.UpsertStageBridge(fields,null,null);
+                using var literalsStage=new Firebase.CloudFirestore.LiteralsSourceStageBridge(new[]{fields});
+                if(typeof(Firebase.CloudFirestore.UpdateStageBridge).GetConstructor(new[]{typeof(NSDictionary)})!=null ||
+                   typeof(Firebase.CloudFirestore.UpsertStageBridge).GetConstructor(new[]{typeof(NSDictionary),typeof(string),typeof(Firebase.CloudFirestore.ExprBridge)})!=null ||
+                   typeof(Firebase.CloudFirestore.LiteralsSourceStageBridge).GetConstructor(new[]{typeof(NSDictionary[])})!=null)
+                    throw new Exception("Untyped stage initializer must remain internal");
                 using var databaseStage=new Firebase.CloudFirestore.DatabaseSourceStageBridge();
                 using var deleteStage=new Firebase.CloudFirestore.DeleteStageBridge();
                 if(objectId.Value!="507f1f77bcf86cd799439011" || timestamp.Seconds!=7 || timestamp.Increment!=2 || integer.Value!=42 || number.Value!="1.25" || regex.Pattern!="a" || regex.Options!="i" || blob.Subtype!=128 || blob.Bytes.Length!=2 || Firebase.CloudFirestore.MinKey.SharedInstance is null || Firebase.CloudFirestore.MaxKey.SharedInstance is null)
@@ -147,9 +156,7 @@ def main():
     app,bundle=simulator
     for lib in sorted(app.rglob('*.dylib')):subprocess.run(['codesign','--force','--sign','-',str(lib)],check=True,capture_output=True)
     subprocess.run(['codesign','--force','--deep','--sign','-',str(app)],check=True,capture_output=True)
-    devices=json.loads(subprocess.check_output(['xcrun','simctl','list','devices','available','-j']))
-    available=[d for v in devices['devices'].values() for d in v if d['name'].startswith('iPhone')]
-    device=next((d['udid'] for d in available if d['name']==os.environ.get('E2E_SIMULATOR_NAME')),available[0]['udid'])
+    device=subprocess.check_output([str(ROOT/'tools/e2e/select-simulator.sh')],text=True).strip()
     subprocess.run(['xcrun','simctl','boot',device],capture_output=True)
     subprocess.run(['xcrun','simctl','bootstatus',device,'-b'],check=True,stdout=subprocess.DEVNULL)
     subprocess.run(['xcrun','simctl','install',device,str(app)],check=True)

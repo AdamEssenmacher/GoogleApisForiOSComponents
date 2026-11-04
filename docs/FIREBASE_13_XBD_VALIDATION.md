@@ -37,7 +37,7 @@ completion. No packages have been published by this work.
   class availability, Firestore BSON value round-trips and pipeline construction.
   Crashlytics upload-symbols executes its help command from the downloaded archive.
 - Nine new Python tests cover manifest/delivery and hostile-archive cases; the
-  existing 71 release-tool tests and 123 binding-audit tests pass.
+  existing 72 release-tool tests and 123 binding-audit tests pass.
 - Local producer and consumer paths run with a failing pod sentinel. Consumer
   probes assert that it was never invoked. The dedicated Firebase entry point
   never loads CocoaPods code.

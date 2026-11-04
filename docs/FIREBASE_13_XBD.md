@@ -133,7 +133,10 @@ Firestore retains its existing managed names while correcting Objective-C class
 names for its pipeline bridge types to the actual `__FIR…Bridge` exports. New 13.x
 bindings cover BSON ObjectId/Timestamp, Decimal128, explicit Int32, binary subtypes,
 MinKey/MaxKey/Regex values, literal-source and write pipeline stages, and the atomic
-pipeline constructor. Simulator probes exercise BSON round-trips, inherited
+pipeline constructor. The literals, update and upsert stages expose expression-valued
+`NSDictionary<NSString, ExprBridge>` constructors (including the literals array).
+Their untyped native interop initializers are internal. Simulator probes exercise
+these typed stage constructors, BSON round-trips, inherited
 NSObject equality and pipeline construction without contacting a Firebase service.
 
 The existing binding audit runs against all 16 Firebase products using the pinned
