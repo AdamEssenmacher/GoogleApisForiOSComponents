@@ -16,6 +16,7 @@ on:
       - "*.cake"
       - "icons/googleiosmaps_128x128.png"
       - "icons/googleiosplaces_128x128.png"
+      - "scripts/check-maps-resource-manifest.py"
       # The job selection tooling must validate itself; keep in step with the
       # planner's COVERAGE list (tests/ci/test_foundation_plan.py pins this).
       - "scripts/ci/**"
@@ -27,8 +28,6 @@ on:
       - "tests/E2E/Google.Foundation/**"
       - "tools/ci/select-xcode.sh"
       - "tools/e2e/check-consumer-shapes.sh"
-      - "tools/e2e/check-package-structure.sh"
-      - "tools/e2e/check-offline-build.sh"
       - "tools/e2e/run-google-foundation.sh"
       - "tools/e2e/select-simulator.sh"
   workflow_dispatch:
@@ -112,21 +111,9 @@ jobs:
       - name: Pack Google.Places
         run: dotnet tool run dotnet-cake -- --target=nuget --names=Google.Places
 
-      - name: Package structure checks
-        run: >-
-          tools/e2e/check-package-structure.sh
-          --target Places
-          --package-dir output
-
       - name: Direct and transitive consumer checks
         run: >-
           tools/e2e/check-consumer-shapes.sh
-          --target Places
-          --package-dir output
-
-      - name: Offline build proof
-        run: >-
-          tools/e2e/check-offline-build.sh
           --target Places
           --package-dir output
 
@@ -137,12 +124,17 @@ jobs:
           --package-dir output
           --configuration Debug
 
+      # Upload text diagnostics (results, logs, diffs) rather than the whole artifacts/ tree.
       - name: Upload diagnostics
         if: failure()
         uses: actions/upload-artifact@v6
         with:
           name: google-foundation-places-diagnostics
-          path: tests/E2E/Google.Foundation/artifacts/
+          path: |
+            tests/E2E/Google.Foundation/artifacts/**/*.json
+            tests/E2E/Google.Foundation/artifacts/**/*.log
+            tests/E2E/Google.Foundation/artifacts/**/*.txt
+            tests/E2E/Google.Foundation/artifacts/**/*.diff
           if-no-files-found: ignore
 
   maps:
@@ -181,21 +173,12 @@ jobs:
       - name: Pack Google.Maps
         run: dotnet tool run dotnet-cake -- --target=nuget --names=Google.Maps
 
-      - name: Package structure checks
-        run: >-
-          tools/e2e/check-package-structure.sh
-          --target Maps
-          --package-dir output
+      - name: Maps resource manifest check
+        run: python3 scripts/check-maps-resource-manifest.py
 
       - name: Direct and transitive consumer checks
         run: >-
           tools/e2e/check-consumer-shapes.sh
-          --target Maps
-          --package-dir output
-
-      - name: Offline build proof
-        run: >-
-          tools/e2e/check-offline-build.sh
           --target Maps
           --package-dir output
 
@@ -206,10 +189,15 @@ jobs:
           --package-dir output
           --configuration Debug
 
+      # Upload text diagnostics (results, logs, diffs) rather than the whole artifacts/ tree.
       - name: Upload diagnostics
         if: failure()
         uses: actions/upload-artifact@v6
         with:
           name: google-foundation-maps-diagnostics
-          path: tests/E2E/Google.Foundation/artifacts/
+          path: |
+            tests/E2E/Google.Foundation/artifacts/**/*.json
+            tests/E2E/Google.Foundation/artifacts/**/*.log
+            tests/E2E/Google.Foundation/artifacts/**/*.txt
+            tests/E2E/Google.Foundation/artifacts/**/*.diff
           if-no-files-found: ignore

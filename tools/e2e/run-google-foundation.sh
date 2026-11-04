@@ -54,7 +54,9 @@ log_file="$artifacts_dir/simulator.log"
 result_file="$artifacts_dir/result.json"
 restore_config="$artifacts_dir/NuGet.generated.config"
 repo_restore_config="$harness_root/NuGet.config"
-packages_cache_dir="$artifacts_dir/packages"
+# Keep the restore cache out of artifacts/. CI uploads artifacts/ when a run fails, and a restored
+# package can carry native SDK content that must not be republished as a downloadable artifact.
+packages_cache_dir="$harness_root/packages"
 
 mkdir -p "$artifacts_dir"
 : > "$log_file"

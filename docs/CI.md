@@ -10,10 +10,12 @@ Automatic validation uses two workflows:
   concurrency groups.
 - `Google Foundation Validation` runs after merge on main, or for any branch
   through a manual run, so pull requests never queue the self-hosted Mac
-  (docs/SELF_HOSTED_MACOS_RUNNER.md). A Linux planner then schedules the Maps and
-  Places Mac jobs independently when their selected inputs change. Those jobs
-  retain build/pack, package structure, direct/transitive consumers, offline
-  builds, and simulator tests.
+  (docs/SELF_HOSTED_MACOS_RUNNER.md). A Linux planner then schedules the Maps
+  and Places Mac jobs independently when their selected inputs change. Those
+  jobs run build/pack, direct/transitive consumers, the Maps resource manifest
+  check, and simulator tests. Both SDKs are proprietary, so the packages carry
+  only the binding and consumers download the SDK from Google through
+  `Xamarin.Build.Download`.
 
 The `CI` workflow is an explicit `workflow_dispatch` component build. Its `names`
 input and package artifact remain available; it no longer automatically repeats

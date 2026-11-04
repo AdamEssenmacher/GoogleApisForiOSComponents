@@ -10,12 +10,15 @@ binding-layer failures such as `EntryPointNotFoundException`, `DllNotFoundExcept
 
 ## Current scope and baseline
 
-Runtime adapters currently cover `AdamE.Google.iOS.Places` 7.4.0.3 and
-`AdamE.Google.iOS.Maps` 9.2.0.9.
+Runtime adapters currently cover `AdamE.Google.iOS.Places` 7.4.0.4 and
+`AdamE.Google.iOS.Maps` 9.2.0.10.
 
-The behavioral expectations were established against the 7.4.0.2 pre-migration package, which used
-`Xamarin.Build.Download` to fetch the Google Places SDK during the consumer build. The harness does
-not assert how the native SDK arrives, so the same checks validate the self-contained package.
+Both packages use `Xamarin.Build.Download` to fetch Google's SDK during the consumer build. That is
+deliberate: the Maps and Places SDKs are proprietary, so these packages ship the binding and a
+download hook rather than Google's binaries. The harness does not assert how the native SDK arrives;
+it asserts the resulting consumer behavior.
+
+The Places expectations were established against the 7.4.0.2 package.
 
 The Places adapter verifies:
 
@@ -26,10 +29,8 @@ The Places adapter verifies:
 - The bundle contains the baseline's 59 files, including representative data, localized string, and
   image files.
 
-The Maps expectations were established against the 9.2.0.8 package while it used
-`Xamarin.Build.Download`; the current package is 9.2.0.9 and carries the SDK itself. Like the Places
-adapter, its checks are independent of how the SDK arrives.
-The Maps adapter verifies:
+The Maps expectations were established against the 9.2.0.8 package. Like the Places adapter, its
+checks are independent of how the SDK arrives. The Maps adapter verifies:
 
 - `Google.Maps.MapView` loads from the restored binding assembly.
 - `GMSGeometryDistance` resolves and returns a finite, positive distance.
@@ -38,9 +39,7 @@ The Maps adapter verifies:
 - The bundle contains the upstream SDK's 190 files, including representative privacy, asset, model,
   and nested resource files.
 
-For self-contained targets, the companion `check-package-structure.sh` and `check-offline-build.sh`
-scripts inspect the package and prove the consumer build no longer downloads native content. The
-harness does not compare stored baselines, exercise a physical device, or test Google backends.
+The harness does not compare stored baselines, exercise a physical device, or test Google backends.
 
 ## Run it
 
@@ -64,7 +63,7 @@ When the directory contains multiple versions, select one explicitly:
 tools/e2e/run-google-foundation.sh \
   --target Places \
   --package-dir output \
-  --package-version 7.4.0.3
+  --package-version 7.4.0.4
 ```
 
 `NuGet.config` maps `AdamE.*` packages to the repository's local `output/` feed. For another package
@@ -94,8 +93,10 @@ The same ignored directory contains the simulator log and target-neutral build d
 
 These files aid failure investigation; they are not golden baselines.
 
-Failed structure and offline checks copy their diagnostics to `package-structure-Places/` and
-`offline-Places/` beneath the same artifacts directory.
+When a run fails, CI uploads the text diagnostics under `artifacts/` (`*.json`, `*.log`, `*.txt`,
+`*.diff`), so nothing restored or built belongs there. The runner restores packages into the
+separate, ignored `tests/E2E/Google.Foundation/packages/` directory, so a failed run does not
+publish package contents as a downloadable artifact.
 
 ## Adding another Google package
 

@@ -19,8 +19,8 @@
   <!-- Which binding package this run exercises. -->
   <PropertyGroup>
     <GoogleE2ETarget Condition="'$(GoogleE2ETarget)' == ''">Places</GoogleE2ETarget>
-    <PlacesPackageVersion Condition="'$(PlacesPackageVersion)' == ''">7.4.0.3</PlacesPackageVersion>
-    <MapsPackageVersion Condition="'$(MapsPackageVersion)' == ''">9.2.0.9</MapsPackageVersion>
+    <PlacesPackageVersion Condition="'$(PlacesPackageVersion)' == ''">7.4.0.4</PlacesPackageVersion>
+    <MapsPackageVersion Condition="'$(MapsPackageVersion)' == ''">9.2.0.10</MapsPackageVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(TargetFramework)' == 'net10.0-ios' and '$(Platform)' == ''">

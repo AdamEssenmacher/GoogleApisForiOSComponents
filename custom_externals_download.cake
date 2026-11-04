@@ -1,3 +1,6 @@
+// The release plan fingerprints this file for every Firebase and Sign-In package, and the Cake
+// metadata export records each download source's properties. Any change to this class, even
+// dropping an option nothing uses, changes all of those packages' release inputs.
 class ExternalDownloadSource
 {
 	// Most of these archives live under the Firebase analytics path, but Google publishes
@@ -34,19 +37,14 @@ class ExternalDownloadSource
 // *.tar.gz URLs can be found in the podspecs (e.g., CocoaPods Specs repo paths), such as:
 // FirebaseAnalytics: https://github.com/CocoaPods/Specs/tree/master/Specs/e/2/1/FirebaseAnalytics
 // GoogleAppMeasurement: https://github.com/CocoaPods/Specs/tree/master/Specs/e/3/b/GoogleAppMeasurement
-// GoogleMaps: https://github.com/CocoaPods/Specs/tree/master/Specs/1/9/0/GoogleMaps
-// GooglePlaces: https://github.com/CocoaPods/Specs/tree/master/Specs/c/3/2/GooglePlaces
+//
+// Everything listed here is packed into a published nupkg, so only SDKs whose license permits
+// redistribution belong here; both entries are declared Apache-2.0 in their podspecs. Proprietary
+// SDKs such as Maps and Places stay on XamarinBuildDownload, so consumers fetch them from Google
+// under Google's terms.
 var ExternalDownloads = new Dictionary<string, ExternalDownloadSource> {
 	{ "FirebaseAnalytics", new ExternalDownloadSource ("FirebaseAnalytics", "12.19.0", "f02e7923f9b32c38", expectedSha256: "f02e7923f9b32c381d309badd6b9366c09d1eb50bd4e9650a91ffa1eea53fc4e") },
 	{ "GoogleAppMeasurement", new ExternalDownloadSource ("GoogleAppMeasurement", "12.19.0", "aa72db15c887f5f9", expectedSha256: "aa72db15c887f5f9f2c6169885a7d205fa49ee1c7099ee800e6dbf9dc47cbaee") },
-	{ "GoogleMaps", new ExternalDownloadSource (
-		"GoogleMaps",
-		"9.2.0",
-		"33a7ac549361ab23",
-		"https://dl.google.com/dl/cpdc",
-		extractionRootName: "Maps",
-		expectedSha256: "81bbd92c2d627087ae222ae955e5f746590812d7389b9d800add15e4004b6431") },
-	{ "GooglePlaces", new ExternalDownloadSource ("GooglePlaces", "7.4.0", "3e8dc2602895d53405d075ff4eb569bff93ff1af97e69915d1e657c07ef28dd8", "https://dl.google.com/dl/geosdk") },
 };
 
 FilePath GetArchivePath (ExternalDownloadSource source, DirectoryPath externalsPath) =>
@@ -136,58 +134,6 @@ void FirebaseAnalyticsDownload ()
 				DeleteDirectory (frameworkDestination, deleteSettings);
 
 			CopyDirectory (frameworkSource, frameworkDestination);
-		});
-}
-
-void GooglePlacesDownload ()
-{
-	var source = ExternalDownloads["GooglePlaces"];
-
-	DownloadAndExtract (
-		source,
-		() => DirectoryExists (new DirectoryPath ("./externals/GooglePlaces.xcframework")),
-		(extractionRoot, externalsPath, deleteSettings) => {
-			var frameworkSource = extractionRoot.Combine ("Frameworks").Combine ("GooglePlaces.xcframework");
-			var frameworkDestination = externalsPath.Combine ("GooglePlaces.xcframework");
-
-			if (!DirectoryExists (frameworkSource))
-				throw new Exception ($"Expected GooglePlaces.xcframework at {frameworkSource} after extraction.");
-
-			if (DirectoryExists (frameworkDestination))
-				DeleteDirectory (frameworkDestination, deleteSettings);
-
-			CopyDirectory (frameworkSource, frameworkDestination);
-		});
-}
-
-void GoogleMapsDownload ()
-{
-	var source = ExternalDownloads["GoogleMaps"];
-
-	DownloadAndExtract (
-		source,
-		() => DirectoryExists (new DirectoryPath ("./externals/GoogleMaps.xcframework")) &&
-		      DirectoryExists (new DirectoryPath ("./externals/GoogleMaps.bundle")),
-		(extractionRoot, externalsPath, deleteSettings) => {
-			var frameworkSource = extractionRoot.Combine ("Frameworks").Combine ("GoogleMaps.xcframework");
-			var resourceSource = extractionRoot.Combine ("Resources").Combine ("GoogleMapsResources").Combine ("GoogleMaps.bundle");
-			var frameworkDestination = externalsPath.Combine ("GoogleMaps.xcframework");
-			var resourceDestination = externalsPath.Combine ("GoogleMaps.bundle");
-
-			if (!DirectoryExists (frameworkSource))
-				throw new Exception ($"Expected GoogleMaps.xcframework at {frameworkSource} after extraction.");
-
-			if (!DirectoryExists (resourceSource))
-				throw new Exception ($"Expected GoogleMaps.bundle at {resourceSource} after extraction.");
-
-			if (DirectoryExists (frameworkDestination))
-				DeleteDirectory (frameworkDestination, deleteSettings);
-
-			if (DirectoryExists (resourceDestination))
-				DeleteDirectory (resourceDestination, deleteSettings);
-
-			CopyDirectory (frameworkSource, frameworkDestination);
-			CopyDirectory (resourceSource, resourceDestination);
 		});
 }
 
