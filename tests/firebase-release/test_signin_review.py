@@ -441,5 +441,25 @@ class ReviewRegressionTests(unittest.TestCase):
                                  release.published_commit_requirement(manifest, package_id))
 
 
+    def test_third_party_notices_match_the_pinned_native_versions(self):
+        """The shipped notices carry native versions that nothing else gates.
+
+        `External-Dependency-Info.txt` is packed as THIRD-PARTY-NOTICES.txt and is the only
+        per-release Sign-In input with no runtime or build check, so a version bump that misses it
+        would ship notices naming the previous native SDK.
+        """
+        cake = (ROOT / 'components.cake').read_text()
+        block = re.search(r'GOOGLE_SIGN_IN_ARTIFACT\.PodSpecs = new \[\] \{(.*?)\};', cake, re.S)
+        pinned = dict(re.findall(r'PodSpec\.Create \("([^"]+)",\s*"([^"]+)"', block[1]))
+        self.assertEqual({'GoogleSignIn', 'AppAuth', 'GTMAppAuth'}, set(pinned))
+        notices = (ROOT / 'source/Google/SignIn/External-Dependency-Info.txt').read_text()
+        headline = notices.splitlines()[0]
+        self.assertEqual(pinned, dict(re.findall(r'(\w+) (\d+\.\d+\.\d+)', headline)), headline)
+        # The upstream section header and its tag URL name the same native Sign-In version.
+        native = pinned['GoogleSignIn']
+        self.assertIn('# GoogleSignIn %s\n' % native, notices)
+        self.assertIn('GoogleSignIn-iOS/tree/%s\n' % native, notices)
+
+
 if __name__ == '__main__':
     unittest.main()

@@ -20,11 +20,16 @@ After the setup PR is merged, prepare these PRs individually from refreshed main
 | `codex/signin-10.0.0` | `10.0.0.0` | `10.0.0` | `3.0.0` | `6.0.0` | `9.2.0` |
 | `codex/signin-10.1.0` | `10.1.0.0` | `10.1.0` | `3.0.0` | `6.0.0` | `10.0.0` |
 
-Wait for each preceding release to complete before marking the next version PR ready for merge. Refresh shared
-dependency versions from main, preserve upstream-compatible bounds, and rerun validation if Firebase
-12.x advances in between. The publisher rechecks the preceding Sign-In release after deployment
-approval. A new binding revision of the current native version is permitted without skipping the
-native release sequence. Tags use `google-signin-v<releaseVersion>`; Firebase tags remain separate.
+Wait for each preceding release to complete before marking the next version PR ready for merge.
+Merging is itself the ordering hazard, not just deploying: `releaseVersion` is single-valued, so
+landing the next version on main moves it off the predecessor and leaves that predecessor
+unpublishable, while the next version is still refused by the predecessor check. The predecessor
+check runs in `publish`, not `plan`, so a green PR is no evidence that the sequence is intact.
+Refresh shared dependency versions from main, preserve upstream-compatible bounds, and rerun
+validation if Firebase 12.x advances in between. The publisher rechecks the preceding Sign-In
+release after deployment approval. A new binding revision of the current native version is
+permitted without skipping the native release sequence. Tags use
+`google-signin-v<releaseVersion>`; Firebase tags remain separate.
 
 Draft validation for the next version can proceed while its predecessor's publication is being
 repaired, but keep the draft explicitly blocked. In particular, 9.2.0 must not be merged or deployed
@@ -112,8 +117,10 @@ The prepared `10.1.0.0` package binds Google Sign-In 10.1.0 with the AppAuth 3.0
 6.0.0 pins introduced for 10.0.0, so the private native dependency versions and the iOS 15.0
 deployment target are unchanged. Upstream widens its `AppCheckCore` requirement to `>= 11.0, < 13.0`
 for Swift Package Manager consumers moving to Firebase 13; this lane keeps the Firebase-12
-AppCheckCore 11.3.2 baseline, which that range still admits, and its compatible bounds. CocoaPods
-trunk carries no AppCheckCore 12.x, so the widening changes nothing at package-production time.
+AppCheckCore 11.3.2 baseline, which that range still admits, and its compatible bounds. The
+generated Podfile pins AppCheckCore to exactly 11.3.2, so the widening cannot float resolution
+onto a 12.x even once one is published, and `validate.py` fails this lane outright if the
+resolved AppCheckCore major is not 11.
 
 Upstream's public headers are identical to 10.0.0 apart from an added `GIDGoogleUser` documentation
 comment, so this release adds no managed API and the binding is unchanged. `SignIn.WrapperIdentifier`
