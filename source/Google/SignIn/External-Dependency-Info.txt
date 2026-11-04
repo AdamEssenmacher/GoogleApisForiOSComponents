@@ -1,4 +1,4 @@
-Native versions: GoogleSignIn 10.0.0; AppAuth 3.0.0; GTMAppAuth 6.0.0.
+Native versions: GoogleSignIn 10.1.0; AppAuth 3.0.0; GTMAppAuth 6.0.0.
 Shared native dependencies are supplied by their owning NuGet packages.
 
 THIRD-PARTY SOFTWARE NOTICES AND INFORMATION
@@ -433,8 +433,8 @@ whether by implication, estoppel or otherwise.
 ########################################
 
 ########################################
-# GoogleSignIn 10.0.0
-# https://github.com/google/GoogleSignIn-iOS/tree/10.0.0
+# GoogleSignIn 10.1.0
+# https://github.com/google/GoogleSignIn-iOS/tree/10.1.0
 ########################################
 
 

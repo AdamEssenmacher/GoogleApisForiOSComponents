@@ -203,7 +203,7 @@ This checkout prepares Firebase and GoogleAppMeasurement `12.19.3`. Publication 
 | --- | --- | --- |
 | `Maps` | `9.2.0.8` | `9.2.0.10` |
 | `Places` | `7.4.0.2` | `7.4.0.4` |
-| `SignIn` | `9.2.0` | `10.0.0.0` |
+| `SignIn` | `10.0.0` | `10.1.0.0` |
 
 #### Google support packages (`AdamE.Google.iOS.*`)
 
