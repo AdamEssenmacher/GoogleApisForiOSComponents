@@ -138,7 +138,9 @@ managed APIs or waive the required fallback comparison.
 ## Validation and publication limits
 
 The `Firebase 13 XBD experiment` workflow runs schema/hostile-archive/unit checks on
-PRs. An explicit branch dispatch runs the Mac producer and consumer matrix. It has
+PRs. The trusted `codex/firebase13-xbd` PR branch also runs the Mac producer and
+consumer matrix; fork PRs cannot schedule the self-hosted runner. Manual dispatch
+is available once the workflow exists on the default branch. The workflow has
 read-only repository permissions and no publication job. A failing `pod` is placed
 first on PATH. Consumer tests isolate NuGet caches, verify restore leaves XBD alone,
 perform native acquisition on the first build, block HTTP(S) for subsequent builds,

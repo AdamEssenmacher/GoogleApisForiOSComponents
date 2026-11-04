@@ -31,8 +31,13 @@ jobs:
       - run: python3 tools/firebase13/native.py native-assets-validate
 
   native:
-    # This experiment does not publish. Native validation requires an explicit branch dispatch.
-    if: github.event_name == 'workflow_dispatch'
+    # Allow this trusted experiment branch to validate before the workflow reaches main.
+    # Fork pull requests cannot schedule code on the self-hosted runner.
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'pull_request' &&
+       github.event.pull_request.head.repo.full_name == github.repository &&
+       github.head_ref == 'codex/firebase13-xbd')
     needs: schema
     runs-on: [self-hosted, macOS, ARM64, xcode-27.1]
     timeout-minutes: 180
