@@ -33,7 +33,7 @@ class ReviewRegressionTests(unittest.TestCase):
     def test_consumer_probe_matches_candidate_version_in_both_lanes(self):
         release.configure_channel('signin')
         self.addCleanup(release.configure_channel, 'firebase')
-        for version in ('9.1.0', '9.1.0.1', '9.2.0', '9.2.0.1', '10.0.0', '10.0.0.1'):
+        for version in ('9.1.0', '9.1.0.1', '9.2.0', '9.2.0.1', '10.0.0', '10.0.0.1', '10.1.0', '10.1.0.1'):
             amr = release.version(version) >= release.version('9.2.0')
             wrapper = release.version(version) >= release.version('10.0.0')
             with self.subTest(version=version), tempfile.TemporaryDirectory() as tmp:
@@ -439,6 +439,26 @@ class ReviewRegressionTests(unittest.TestCase):
             with self.subTest(channel='firebase', package=package_id):
                 self.assertEqual('signin-commit',
                                  release.published_commit_requirement(manifest, package_id))
+
+
+    def test_third_party_notices_match_the_pinned_native_versions(self):
+        """The shipped notices carry native versions that nothing else gates.
+
+        `External-Dependency-Info.txt` is packed as THIRD-PARTY-NOTICES.txt and is the only
+        per-release Sign-In input with no runtime or build check, so a version bump that misses it
+        would ship notices naming the previous native SDK.
+        """
+        cake = (ROOT / 'components.cake').read_text()
+        block = re.search(r'GOOGLE_SIGN_IN_ARTIFACT\.PodSpecs = new \[\] \{(.*?)\};', cake, re.S)
+        pinned = dict(re.findall(r'PodSpec\.Create \("([^"]+)",\s*"([^"]+)"', block[1]))
+        self.assertEqual({'GoogleSignIn', 'AppAuth', 'GTMAppAuth'}, set(pinned))
+        notices = (ROOT / 'source/Google/SignIn/External-Dependency-Info.txt').read_text()
+        headline = notices.splitlines()[0]
+        self.assertEqual(pinned, dict(re.findall(r'(\w+) (\d+\.\d+\.\d+)', headline)), headline)
+        # The upstream section header and its tag URL name the same native Sign-In version.
+        native = pinned['GoogleSignIn']
+        self.assertIn('# GoogleSignIn %s\n' % native, notices)
+        self.assertIn('GoogleSignIn-iOS/tree/%s\n' % native, notices)
 
 
 if __name__ == '__main__':
