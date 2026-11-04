@@ -1,3 +1,4 @@
+#load "legacy_production.cake"
 #load "poco.cake"
 #load "components.cake"
 #load "common.cake"
@@ -36,4 +37,7 @@ Task ("google-signin-publish-metadata").Does (() => {
     EnsureDirectoryExists (System.IO.Path.GetDirectoryName (destination));
     System.IO.File.WriteAllText (destination, JsonSerializer.Serialize (records, new JsonSerializerOptions { WriteIndented = true }));
 });
-RunTarget ("google-signin-publish-metadata");
+if (FileExists("eng/legacy-producer.json"))
+    RunLegacyProductionCommand("metadata", "", "", "legacy", "signin", Argument("metadata-output", "output/signin-metadata.json"));
+else
+    RunTarget ("google-signin-publish-metadata");

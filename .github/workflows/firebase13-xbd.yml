@@ -6,6 +6,14 @@ on:
       - 'source/Firebase/**'
       - 'source/Google/**'
       - 'tools/firebase13/**'
+      - 'tools/legacy/**'
+      - 'tests/legacy-producer/**'
+      - 'tests/fixtures/legacy-producer/**'
+      - 'legacy.cake'
+      - 'legacy_production.cake'
+      - 'eng/legacy-producer.json'
+      - 'signin_publish.cake'
+      - '.github/workflows/firebase-release.yml'
       - 'tests/firebase13/**'
       - 'tests/fixtures/firebase13/**'
       - 'firebase13.cake'
@@ -46,6 +54,8 @@ jobs:
           global-json-file: global.json
       - run: python3 -m unittest discover -s tests/firebase13 -v
       - run: python3 tools/firebase13/native.py native-assets-validate
+      - name: Locked legacy producer and published-fingerprint regressions
+        run: python3 -m unittest discover -s tests/legacy-producer -v
       - name: Binding audit and fingerprint regression tests
         env:
           MSBuildEnableWorkloadResolver: false
@@ -105,4 +115,72 @@ jobs:
             output/firebase13/*.nupkg
             output/firebase13-results/*
             output/firebase13-api-audit/**
+          retention-days: 14
+
+  legacy-signin:
+    # This validates package production/consumption only; it cannot publish or approve deployment.
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'pull_request' &&
+       github.event.pull_request.head.repo.full_name == github.repository)
+    needs: schema
+    runs-on: [self-hosted, macOS, ARM64, xcode-27.1]
+    timeout-minutes: 180
+    permissions:
+      contents: read
+      packages: read
+    env:
+      BUILD_COMMIT: ${{ github.sha }}
+      BUILD_NUMBER: ${{ github.run_number }}
+      E2E_SIMULATOR_NAME: GoogleApisCI-iPhone
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - run: tools/ci/select-xcode.sh '27.1'
+      - uses: actions/setup-dotnet@v5
+        with:
+          global-json-file: global.json
+      - run: dotnet tool restore
+      - name: Install pinned legacy CocoaPods runtime
+        run: |
+          pin=$(python3 -c 'import json; print(json.load(open("eng/signin-release.json"))["nativeBuild"]["cocoapods"])')
+          export GEM_HOME="$RUNNER_TEMP/legacy-cocoapods-$pin"
+          gem install cocoapods --version "$pin" --no-document
+          echo "GEM_HOME=$GEM_HOME" >> "$GITHUB_ENV"
+          echo "$GEM_HOME/bin" >> "$GITHUB_PATH"
+      - name: Export unchanged Sign-In baseline and plan validation
+        run: |
+          dotnet tool run dotnet-cake -- signin_publish.cake
+          dotnet tool run dotnet-cake -- --target=firebase-publish-metadata --producer=legacy
+          python3 scripts/firebase-release/release.py --channel signin plan --manual --online
+      - name: Original Sign-In production command
+        run: dotnet tool run dotnet-cake -- --target=nuget --names=Google.SignIn
+      - name: Inspect packed native delivery and exact CocoaPods resolution
+        run: |
+          python3 scripts/firebase-release/release.py --channel signin prepare --online
+          python3 scripts/signin-release/validate.py
+      - name: Standalone and transitive offline consumers
+        run: python3 scripts/signin-release/consumers.py
+      - name: Acquire matching Firebase 12 integration fixtures
+        id: fixtures
+        run: python3 scripts/signin-release/integration_feed.py --fetch-published
+      - name: Produce missing fixtures with the isolated legacy baseline
+        if: steps.fixtures.outputs.source != 'published'
+        run: dotnet tool run dotnet-cake -- --target=nuget --names=Firebase.Auth,Firebase.Analytics,Firebase.CloudFirestore --producer=legacy
+      - name: Combined Sign-In and Firebase 12 offline consumers
+        run: |
+          python3 scripts/signin-release/integration_feed.py
+          python3 scripts/signin-release/consumers.py --feed output/signin-combined --combined
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: firebase13-legacy-signin-validation
+          path: |
+            output/signin-candidate
+            output/signin-resolution
+            output/signin-results
+            output/signin-plan.json
+            output/signin-metadata.json
           retention-days: 14

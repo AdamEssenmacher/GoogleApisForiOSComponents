@@ -54,6 +54,8 @@ completion. No packages have been published by this work.
   harness supports the broader matrix but it has not all been executed for those
   two shapes locally. The full platform matrix was run for the combined
   Analytics/Auth/Firestore closure.
+- Non-Firebase producer isolation is covered by the locked-baseline tests and a
+  separate Sign-In production/consumer CI lane; see LEGACY_PRODUCTION.md.
 - Real Windows/Pair-to-Mac execution, authenticated Firebase service operations and
   the compatibility of existing non-Firebase packages with the new shared native
   baseline are not established. Current Sign-In dependency bounds are incompatible.

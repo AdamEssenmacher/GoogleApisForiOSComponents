@@ -1,0 +1,340 @@
+{
+  "schema": 1,
+  "commit": "8cee0d065459f1d98c0ac9ff27d15484c92d5afd",
+  "tree": "478647f3633b32b60bf1470e09a3271d77182b6b",
+  "artifacts": [
+    {
+      "key": "Firebase.ABTesting",
+      "id": "AdamE.Firebase.iOS.ABTesting",
+      "version": "12.19.3",
+      "project": "source/Firebase/ABTesting/ABTesting.csproj",
+      "dependencies": [
+        "Firebase.Core"
+      ],
+      "artifactId": "Firebase.ABTesting"
+    },
+    {
+      "key": "Firebase.Analytics",
+      "id": "AdamE.Firebase.iOS.Analytics",
+      "version": "12.19.3",
+      "project": "source/Firebase/Analytics/Analytics.csproj",
+      "dependencies": [
+        "Firebase.Core",
+        "Firebase.Installations",
+        "Google.GoogleAppMeasurement"
+      ],
+      "artifactId": "Firebase.Analytics"
+    },
+    {
+      "key": "Firebase.Auth",
+      "id": "AdamE.Firebase.iOS.Auth",
+      "version": "12.19.3",
+      "project": "source/Firebase/Auth/Auth.csproj",
+      "dependencies": [
+        "Firebase.Core",
+        "Google.GTMSessionFetcher"
+      ],
+      "artifactId": "Firebase.Auth"
+    },
+    {
+      "key": "Firebase.CloudFirestore",
+      "id": "AdamE.Firebase.iOS.CloudFirestore",
+      "version": "12.19.3",
+      "project": "source/Firebase/CloudFirestore/CloudFirestore.csproj",
+      "dependencies": [
+        "Firebase.Core",
+        "Firebase.Auth"
+      ],
+      "artifactId": "Firebase.CloudFirestore"
+    },
+    {
+      "key": "Firebase.CloudFunctions",
+      "id": "AdamE.Firebase.iOS.CloudFunctions",
+      "version": "12.19.3",
+      "project": "source/Firebase/CloudFunctions/CloudFunctions.csproj",
+      "dependencies": [
+        "Firebase.Core",
+        "Google.GTMSessionFetcher"
+      ],
+      "artifactId": "Firebase.CloudFunctions"
+    },
+    {
+      "key": "Firebase.CloudMessaging",
+      "id": "AdamE.Firebase.iOS.CloudMessaging",
+      "version": "12.19.3",
+      "project": "source/Firebase/CloudMessaging/CloudMessaging.csproj",
+      "dependencies": [
+        "Firebase.Core",
+        "Firebase.Installations"
+      ],
+      "artifactId": "Firebase.CloudMessaging"
+    },
+    {
+      "key": "Firebase.Core",
+      "id": "AdamE.Firebase.iOS.Core",
+      "version": "12.19.3",
+      "project": "source/Firebase/Core/Core.csproj",
+      "dependencies": [
+        "Google.GoogleDataTransport",
+        "Google.GoogleUtilities",
+        "Google.Nanopb",
+        "Google.PromisesObjC",
+        "Google.AppCheckCore"
+      ],
+      "artifactId": "Firebase.Core"
+    },
+    {
+      "key": "Firebase.Crashlytics",
+      "id": "AdamE.Firebase.iOS.Crashlytics",
+      "version": "12.19.3",
+      "project": "source/Firebase/Crashlytics/Crashlytics.csproj",
+      "dependencies": [
+        "Firebase.Core",
+        "Firebase.Installations"
+      ],
+      "artifactId": "Firebase.Crashlytics"
+    },
+    {
+      "key": "Firebase.Database",
+      "id": "AdamE.Firebase.iOS.Database",
+      "version": "12.19.3",
+      "project": "source/Firebase/Database/Database.csproj",
+      "dependencies": [
+        "Firebase.Core"
+      ],
+      "artifactId": "Firebase.Database"
+    },
+    {
+      "key": "Firebase.InAppMessaging",
+      "id": "AdamE.Firebase.iOS.InAppMessaging",
+      "version": "12.19.3",
+      "project": "source/Firebase/InAppMessaging/InAppMessaging.csproj",
+      "dependencies": [
+        "Firebase.Core",
+        "Firebase.Installations",
+        "Firebase.ABTesting"
+      ],
+      "artifactId": "Firebase.InAppMessaging"
+    },
+    {
+      "key": "Firebase.Installations",
+      "id": "AdamE.Firebase.iOS.Installations",
+      "version": "12.19.3",
+      "project": "source/Firebase/Installations/Installations.csproj",
+      "dependencies": [
+        "Firebase.Core"
+      ],
+      "artifactId": "Firebase.Installations"
+    },
+    {
+      "key": "Firebase.PerformanceMonitoring",
+      "id": "AdamE.Firebase.iOS.PerformanceMonitoring",
+      "version": "12.19.3",
+      "project": "source/Firebase/PerformanceMonitoring/PerformanceMonitoring.csproj",
+      "dependencies": [
+        "Firebase.Core",
+        "Firebase.Installations",
+        "Firebase.ABTesting",
+        "Firebase.RemoteConfig"
+      ],
+      "artifactId": "Firebase.PerformanceMonitoring"
+    },
+    {
+      "key": "Firebase.RemoteConfig",
+      "id": "AdamE.Firebase.iOS.RemoteConfig",
+      "version": "12.19.3",
+      "project": "source/Firebase/RemoteConfig/RemoteConfig.csproj",
+      "dependencies": [
+        "Firebase.Core",
+        "Firebase.Installations",
+        "Firebase.ABTesting"
+      ],
+      "artifactId": "Firebase.RemoteConfig"
+    },
+    {
+      "key": "Firebase.Storage",
+      "id": "AdamE.Firebase.iOS.Storage",
+      "version": "12.19.3",
+      "project": "source/Firebase/Storage/Storage.csproj",
+      "dependencies": [
+        "Firebase.Core",
+        "Firebase.Database",
+        "Google.GTMSessionFetcher"
+      ],
+      "artifactId": "Firebase.Storage"
+    },
+    {
+      "key": "Firebase.AppDistribution",
+      "id": "AdamE.Firebase.iOS.AppDistribution",
+      "version": "12.19.3",
+      "project": "source/Firebase/AppDistribution/AppDistribution.csproj",
+      "dependencies": [
+        "Firebase.Core",
+        "Firebase.Installations"
+      ],
+      "artifactId": "Firebase.AppDistribution"
+    },
+    {
+      "key": "Firebase.AppCheck",
+      "id": "AdamE.Firebase.iOS.AppCheck",
+      "version": "12.19.3",
+      "project": "source/Firebase/AppCheck/AppCheck.csproj",
+      "dependencies": [
+        "Firebase.Core",
+        "Firebase.Installations",
+        "Google.AppCheckCore"
+      ],
+      "artifactId": "Firebase.AppCheck"
+    },
+    {
+      "key": "Google.GoogleAppMeasurement",
+      "id": "AdamE.Google.iOS.GoogleAppMeasurement",
+      "version": "12.19.3",
+      "project": "source/Google/GoogleAppMeasurement/GoogleAppMeasurement.csproj",
+      "dependencies": [],
+      "artifactId": "Google.AppMeasurement"
+    },
+    {
+      "key": "Google.Analytics",
+      "id": "AdamE.Google.iOS.Analytics",
+      "version": "3.20.0.2",
+      "project": "source/Google/Analytics/Analytics.csproj",
+      "dependencies": [],
+      "artifactId": "Google.Analytics"
+    },
+    {
+      "key": "Google.Cast",
+      "id": "AdamE.Google.iOS.Cast",
+      "version": "4.7.0.1",
+      "project": "source/Google/Cast/Cast.csproj",
+      "dependencies": [
+        "Firebase.Core"
+      ],
+      "artifactId": "Google.Cast"
+    },
+    {
+      "key": "Google.Maps",
+      "id": "AdamE.Google.iOS.Maps",
+      "version": "9.2.0.10",
+      "project": "source/Google/Maps/Maps.csproj",
+      "dependencies": [],
+      "artifactId": "Google.Maps"
+    },
+    {
+      "key": "Google.UserMessagingPlatform",
+      "id": "AdamE.Google.iOS.UserMessagingPlatform",
+      "version": "1.1.0.1",
+      "project": "source/Google/UserMessagingPlatform/UserMessagingPlatform.csproj",
+      "dependencies": [],
+      "artifactId": "Google.UserMessagingPlatform"
+    },
+    {
+      "key": "Google.Places",
+      "id": "AdamE.Google.iOS.Places",
+      "version": "7.4.0.4",
+      "project": "source/Google/Places/Places.csproj",
+      "dependencies": [],
+      "artifactId": "Google.Places"
+    },
+    {
+      "key": "Google.SignIn",
+      "id": "AdamE.Google.iOS.SignIn",
+      "version": "10.1.0.0",
+      "project": "source/Google/SignIn/SignIn.csproj",
+      "dependencies": [
+        "Google.GTMSessionFetcher",
+        "Google.PromisesObjC",
+        "Google.GoogleUtilities",
+        "Google.AppCheckCore"
+      ],
+      "artifactId": "Google.SignIn"
+    },
+    {
+      "key": "Google.AppCheckCore",
+      "id": "AdamE.Google.iOS.AppCheckCore",
+      "version": "11.3.2",
+      "project": "source/Google/AppCheckCore/AppCheckCore.csproj",
+      "dependencies": [
+        "Google.PromisesObjC",
+        "Google.GoogleUtilities"
+      ],
+      "artifactId": "Google.AppCheckCore"
+    },
+    {
+      "key": "Google.TagManager",
+      "id": "AdamE.Google.iOS.TagManager",
+      "version": "9.2.0.0",
+      "project": "source/Google/TagManager/TagManager.csproj",
+      "dependencies": [
+        "Firebase.Core",
+        "Firebase.Installations",
+        "Firebase.Analytics"
+      ],
+      "artifactId": "Google.TagManager"
+    },
+    {
+      "key": "Google.GTMSessionFetcher",
+      "id": "AdamE.Google.iOS.GTMSessionFetcher",
+      "version": "3.5.0.8",
+      "project": "source/Google/GTMSessionFetcher/GTMSessionFetcher.csproj",
+      "dependencies": [],
+      "artifactId": "Google.GTMSessionFetcher"
+    },
+    {
+      "key": "Google.PromisesObjC",
+      "id": "AdamE.Google.iOS.PromisesObjC",
+      "version": "2.4.0.8",
+      "project": "source/Google/PromisesObjC/PromisesObjC.csproj",
+      "dependencies": [],
+      "artifactId": "Google.PromisesObjC"
+    },
+    {
+      "key": "Google.Nanopb",
+      "id": "AdamE.Google.iOS.Nanopb",
+      "version": "3.30910.0.6",
+      "project": "source/Google/Nanopb/Nanopb.csproj",
+      "dependencies": [],
+      "artifactId": "Google.Nanopb"
+    },
+    {
+      "key": "Google.GoogleUtilities",
+      "id": "AdamE.Google.iOS.GoogleUtilities",
+      "version": "8.1.5",
+      "project": "source/Google/GoogleUtilities/GoogleUtilities.csproj",
+      "dependencies": [],
+      "artifactId": "Google.GoogleUtilities"
+    },
+    {
+      "key": "Google.GoogleDataTransport",
+      "id": "AdamE.Google.iOS.GoogleDataTransport",
+      "version": "10.1.0.6",
+      "project": "source/Google/GoogleDataTransport/GoogleDataTransport.csproj",
+      "dependencies": [
+        "Google.Nanopb",
+        "Google.PromisesObjC"
+      ],
+      "artifactId": "Google.GoogleDataTransport"
+    },
+    {
+      "key": "MLKit.Core",
+      "id": "AdamE.MLKit.iOS.Core",
+      "version": "12.0.0.3",
+      "project": "source/MLKit/Core/Core.csproj",
+      "dependencies": [
+        "Firebase.Core"
+      ],
+      "artifactId": "MLKit.Core"
+    },
+    {
+      "key": "MLKit.BarcodeScanning",
+      "id": "AdamE.MLKit.iOS.BarcodeScanning",
+      "version": "6.0.0.3",
+      "project": "source/MLKit/BarcodeScanning/BarcodeScanning.csproj",
+      "dependencies": [
+        "Firebase.Core",
+        "MLKit.Core"
+      ],
+      "artifactId": "MLKit.BarcodeScanning"
+    }
+  ]
+}

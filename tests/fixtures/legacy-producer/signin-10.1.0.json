@@ -1,0 +1,337 @@
+{
+  "releaseVersion": "10.1.0",
+  "sourceCommit": "993ecb4485404d3aaba66d0431c54cfa86e14300",
+  "metadata": [
+    {
+      "key": "Google.GTMSessionFetcher",
+      "id": "AdamE.Google.iOS.GTMSessionFetcher",
+      "version": "3.5.0.8",
+      "project": "source/Google/GTMSessionFetcher/GTMSessionFetcher.csproj",
+      "firebase": false,
+      "minimumOS": "15.0",
+      "dependencies": [],
+      "pods": [
+        {
+          "Name": "GTMSessionFetcher",
+          "Version": "3.5.0",
+          "LocalPath": null,
+          "Repository": null,
+          "TargetName": "GTMSessionFetcher",
+          "FrameworkName": "GTMSessionFetcher",
+          "SubSpecs": [
+            "Full"
+          ],
+          "UseDefaultSubspecs": false,
+          "FrameworkSource": 1,
+          "CanBeBuild": true,
+          "Source": 0
+        }
+      ],
+      "extraPodfileLines": [
+        "=begin",
+        "This override the static_framework flag to false,",
+        "in order to be able to build dynamic frameworks.",
+        "=end",
+        "pre_install do |installer|",
+        "\tinstaller.pod_targets.each do |pod|",
+        "\tputs \"Forcing a static_framework to false for #{pod.name}\"",
+        "\t\tif Pod::VERSION >= \"1.7.0\"",
+        "\t\t\tif pod.build_as_static?",
+        "\t\t\t\tdef pod.build_as_static?; false end",
+        "\t\t\t\tdef pod.build_as_static_framework?; false end",
+        "\t\t\t\tdef pod.build_as_dynamic?; true end",
+        "\t\t\t\tdef pod.build_as_dynamic_framework?; true end",
+        "\t\t\tend",
+        "\t\telse",
+        "\t\t\tdef pod.static_framework?; false end",
+        "\t\tend",
+        "\tend",
+        "end",
+        "=begin",
+        "It seems that there is an issue with bundles and Xcode 14, it asks for your Team ID to sign them when building.",
+        "Here's a workaround for this: https://github.com/CocoaPods/CocoaPods/issues/8891#issuecomment-1201465446",
+        "=end",
+        "post_install do |installer|",
+        "\tinstaller.pods_project.targets.each do |target|",
+        "\t\tif target.respond_to?(:product_type) and target.product_type == \"com.apple.product-type.bundle\"",
+        "\t\t\ttarget.build_configurations.each do |config|",
+        "\t\t\t\tputs \"Setting 'CODE_SIGNING_ALLOWED' to 'NO' for #{target.name}\"",
+        "\t\t\t\tconfig.build_settings['CODE_SIGNING_ALLOWED'] = 'NO'",
+        "\t\t\tend",
+        "\t\tend",
+        "\tend",
+        "end"
+      ],
+      "downloads": {}
+    },
+    {
+      "key": "Google.PromisesObjC",
+      "id": "AdamE.Google.iOS.PromisesObjC",
+      "version": "2.4.0.8",
+      "project": "source/Google/PromisesObjC/PromisesObjC.csproj",
+      "firebase": false,
+      "minimumOS": "15.0",
+      "dependencies": [],
+      "pods": [
+        {
+          "Name": "PromisesObjC",
+          "Version": "2.4.0",
+          "LocalPath": null,
+          "Repository": null,
+          "TargetName": "PromisesObjC",
+          "FrameworkName": "FBLPromises",
+          "SubSpecs": null,
+          "UseDefaultSubspecs": false,
+          "FrameworkSource": 1,
+          "CanBeBuild": true,
+          "Source": 0
+        }
+      ],
+      "extraPodfileLines": [
+        "=begin",
+        "This override the static_framework flag to false,",
+        "in order to be able to build dynamic frameworks.",
+        "=end",
+        "pre_install do |installer|",
+        "\tinstaller.pod_targets.each do |pod|",
+        "\tputs \"Forcing a static_framework to false for #{pod.name}\"",
+        "\t\tif Pod::VERSION >= \"1.7.0\"",
+        "\t\t\tif pod.build_as_static?",
+        "\t\t\t\tdef pod.build_as_static?; false end",
+        "\t\t\t\tdef pod.build_as_static_framework?; false end",
+        "\t\t\t\tdef pod.build_as_dynamic?; true end",
+        "\t\t\t\tdef pod.build_as_dynamic_framework?; true end",
+        "\t\t\tend",
+        "\t\telse",
+        "\t\t\tdef pod.static_framework?; false end",
+        "\t\tend",
+        "\tend",
+        "end",
+        "=begin",
+        "It seems that there is an issue with bundles and Xcode 14, it asks for your Team ID to sign them when building.",
+        "Here's a workaround for this: https://github.com/CocoaPods/CocoaPods/issues/8891#issuecomment-1201465446",
+        "=end",
+        "post_install do |installer|",
+        "\tinstaller.pods_project.targets.each do |target|",
+        "\t\tif target.respond_to?(:product_type) and target.product_type == \"com.apple.product-type.bundle\"",
+        "\t\t\ttarget.build_configurations.each do |config|",
+        "\t\t\t\tputs \"Setting 'CODE_SIGNING_ALLOWED' to 'NO' for #{target.name}\"",
+        "\t\t\t\tconfig.build_settings['CODE_SIGNING_ALLOWED'] = 'NO'",
+        "\t\t\tend",
+        "\t\tend",
+        "\tend",
+        "end"
+      ],
+      "downloads": {}
+    },
+    {
+      "key": "Google.GoogleUtilities",
+      "id": "AdamE.Google.iOS.GoogleUtilities",
+      "version": "8.1.5",
+      "project": "source/Google/GoogleUtilities/GoogleUtilities.csproj",
+      "firebase": false,
+      "minimumOS": "15.0",
+      "dependencies": [],
+      "pods": [
+        {
+          "Name": "GoogleUtilities",
+          "Version": "8.1.5",
+          "LocalPath": null,
+          "Repository": null,
+          "TargetName": "GoogleUtilities",
+          "FrameworkName": "GoogleUtilities",
+          "SubSpecs": [
+            "AppDelegateSwizzler",
+            "Environment",
+            "Logger",
+            "MethodSwizzler",
+            "Network",
+            "NSData+zlib",
+            "Privacy",
+            "Reachability",
+            "UserDefaults"
+          ],
+          "UseDefaultSubspecs": false,
+          "FrameworkSource": 1,
+          "CanBeBuild": true,
+          "Source": 0
+        }
+      ],
+      "extraPodfileLines": [
+        "=begin",
+        "This override the static_framework flag to false,",
+        "in order to be able to build dynamic frameworks.",
+        "=end",
+        "pre_install do |installer|",
+        "\tinstaller.pod_targets.each do |pod|",
+        "\tputs \"Forcing a static_framework to false for #{pod.name}\"",
+        "\t\tif Pod::VERSION >= \"1.7.0\"",
+        "\t\t\tif pod.build_as_static?",
+        "\t\t\t\tdef pod.build_as_static?; false end",
+        "\t\t\t\tdef pod.build_as_static_framework?; false end",
+        "\t\t\t\tdef pod.build_as_dynamic?; true end",
+        "\t\t\t\tdef pod.build_as_dynamic_framework?; true end",
+        "\t\t\tend",
+        "\t\telse",
+        "\t\t\tdef pod.static_framework?; false end",
+        "\t\tend",
+        "\tend",
+        "end",
+        "=begin",
+        "It seems that there is an issue with bundles and Xcode 14, it asks for your Team ID to sign them when building.",
+        "Here's a workaround for this: https://github.com/CocoaPods/CocoaPods/issues/8891#issuecomment-1201465446",
+        "=end",
+        "post_install do |installer|",
+        "\tinstaller.pods_project.targets.each do |target|",
+        "\t\tif target.respond_to?(:product_type) and target.product_type == \"com.apple.product-type.bundle\"",
+        "\t\t\ttarget.build_configurations.each do |config|",
+        "\t\t\t\tputs \"Setting 'CODE_SIGNING_ALLOWED' to 'NO' for #{target.name}\"",
+        "\t\t\t\tconfig.build_settings['CODE_SIGNING_ALLOWED'] = 'NO'",
+        "\t\t\tend",
+        "\t\tend",
+        "\tend",
+        "end"
+      ],
+      "downloads": {}
+    },
+    {
+      "key": "Google.AppCheckCore",
+      "id": "AdamE.Google.iOS.AppCheckCore",
+      "version": "11.3.2",
+      "project": "source/Google/AppCheckCore/AppCheckCore.csproj",
+      "firebase": false,
+      "minimumOS": "15.0",
+      "dependencies": [
+        "AdamE.Google.iOS.PromisesObjC",
+        "AdamE.Google.iOS.GoogleUtilities"
+      ],
+      "pods": [
+        {
+          "Name": "AppCheckCore",
+          "Version": "11.3.2",
+          "LocalPath": null,
+          "Repository": null,
+          "TargetName": "AppCheckCore",
+          "FrameworkName": "AppCheckCore",
+          "SubSpecs": null,
+          "UseDefaultSubspecs": false,
+          "FrameworkSource": 1,
+          "CanBeBuild": true,
+          "Source": 0
+        },
+        {
+          "Name": "PromisesSwift",
+          "Version": "2.4.0",
+          "LocalPath": null,
+          "Repository": null,
+          "TargetName": "PromisesSwift",
+          "FrameworkName": "Promises",
+          "SubSpecs": null,
+          "UseDefaultSubspecs": false,
+          "FrameworkSource": 1,
+          "CanBeBuild": true,
+          "Source": 0
+        },
+        {
+          "Name": "RecaptchaInterop",
+          "Version": "101.0.0",
+          "LocalPath": null,
+          "Repository": null,
+          "TargetName": "RecaptchaInterop",
+          "FrameworkName": "RecaptchaInterop",
+          "SubSpecs": null,
+          "UseDefaultSubspecs": false,
+          "FrameworkSource": 1,
+          "CanBeBuild": true,
+          "Source": 0
+        }
+      ],
+      "extraPodfileLines": null,
+      "downloads": {}
+    },
+    {
+      "key": "Google.SignIn",
+      "id": "AdamE.Google.iOS.SignIn",
+      "version": "10.1.0.0",
+      "project": "source/Google/SignIn/SignIn.csproj",
+      "firebase": false,
+      "minimumOS": "15.0",
+      "dependencies": [
+        "AdamE.Google.iOS.GTMSessionFetcher",
+        "AdamE.Google.iOS.PromisesObjC",
+        "AdamE.Google.iOS.GoogleUtilities",
+        "AdamE.Google.iOS.AppCheckCore"
+      ],
+      "pods": [
+        {
+          "Name": "GoogleSignIn",
+          "Version": "10.1.0",
+          "LocalPath": null,
+          "Repository": null,
+          "TargetName": "GoogleSignIn",
+          "FrameworkName": "GoogleSignIn",
+          "SubSpecs": null,
+          "UseDefaultSubspecs": false,
+          "FrameworkSource": 1,
+          "CanBeBuild": true,
+          "Source": 0
+        },
+        {
+          "Name": "AppAuth",
+          "Version": "3.0.0",
+          "LocalPath": null,
+          "Repository": null,
+          "TargetName": "AppAuth",
+          "FrameworkName": "AppAuth",
+          "SubSpecs": null,
+          "UseDefaultSubspecs": false,
+          "FrameworkSource": 1,
+          "CanBeBuild": true,
+          "Source": 0
+        },
+        {
+          "Name": "GTMAppAuth",
+          "Version": "6.0.0",
+          "LocalPath": null,
+          "Repository": null,
+          "TargetName": "GTMAppAuth",
+          "FrameworkName": "GTMAppAuth",
+          "SubSpecs": null,
+          "UseDefaultSubspecs": false,
+          "FrameworkSource": 1,
+          "CanBeBuild": true,
+          "Source": 0
+        }
+      ],
+      "extraPodfileLines": null,
+      "downloads": {}
+    }
+  ],
+  "expected": [
+    {
+      "id": "AdamE.Google.iOS.GTMSessionFetcher",
+      "version": "3.5.0.8",
+      "fingerprint": "25115d8d920b761497cd6aa9b3c7012f3be9e58de0f9d1c4d86eddc5db292439"
+    },
+    {
+      "id": "AdamE.Google.iOS.PromisesObjC",
+      "version": "2.4.0.8",
+      "fingerprint": "ac5ba1504344939c636bc30b1b63ce206680db52eeb8168581446aca4eb3d72e"
+    },
+    {
+      "id": "AdamE.Google.iOS.GoogleUtilities",
+      "version": "8.1.5",
+      "fingerprint": "ffddb83f904a886014adf691977624c97bdf4e7d9214c2b8a839caa6c0872d1d"
+    },
+    {
+      "id": "AdamE.Google.iOS.AppCheckCore",
+      "version": "11.3.2",
+      "fingerprint": "149e7cd543d38625256ec3ef39965e7ebd4bfb82ccb8e012d70518f16b7212fb"
+    },
+    {
+      "id": "AdamE.Google.iOS.SignIn",
+      "version": "10.1.0.0",
+      "fingerprint": "43897f64400ad905755601175d44b49de47c3c88725a3532409ac3b78654ea8e"
+    }
+  ]
+}

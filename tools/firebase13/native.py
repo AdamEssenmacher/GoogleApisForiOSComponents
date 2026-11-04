@@ -216,7 +216,7 @@ def order(packages, names):
 
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('command', choices=['native-assets-validate','archive-validate','release-check','externals','nuget','packages-validate'])
+    parser.add_argument('command', choices=['native-assets-validate','archive-validate','release-check','externals','nuget','libs','packages-validate'])
     parser.add_argument('--names', default='')
     parser.add_argument('--archive', type=Path)
     parser.add_argument('--cache', type=Path)
@@ -224,7 +224,7 @@ def main():
     m=json.loads(MANIFEST.read_text());packages=validate_schema(m)
     selected=order(packages,args.names)
     cache=(args.cache or Path(os.environ.get('XamarinBuildDownloadDir',str(Path.home()/'Library/Caches/XamarinBuildDownload')))).resolve()
-    if args.command in ('externals','nuget','release-check'):
+    if args.command in ('externals','nuget','libs','release-check'):
         subprocess.run(['dotnet','restore','tools/firebase13/acquire.proj'],cwd=ROOT,check=True)
         subprocess.run(['dotnet','msbuild','tools/firebase13/acquire.proj','-t:Acquire','-p:XamarinBuildDownloadDir='+str(cache)],cwd=ROOT,check=True)
     if args.archive:archive_validate(m,args.archive)
@@ -233,7 +233,7 @@ def main():
         archive=args.archive or cache/(m['source']['id']+'.zip')
         require(archive.exists(),'Release validation requires --archive when XBD no longer retains the pinned ZIP')
         if not args.archive:archive_validate(m,archive)
-    if args.command=='nuget':
+    if args.command in ('nuget','libs'):
         # Strict producer verification uses the complete official archive before packing.
         archive=args.archive or cache/(m['source']['id']+'.zip')
         require(archive.exists(),'Producer validation requires --archive with the pinned official ZIP; warm XBD caches may discard it')
@@ -243,9 +243,12 @@ def main():
         info=ROOT/'output/firebase13-build-info.cs'
         info.write_text((ROOT/'source/AssemblyInfo.cs').read_text().replace('{BUILD_COMMIT}',commit).replace('{BUILD_NUMBER}',os.environ.get('GITHUB_RUN_NUMBER','LOCAL')).replace('{BUILD_TIMESTAMP}',datetime.now(timezone.utc).isoformat()))
         for p in selected:
-            subprocess.run(['dotnet','pack',str(ROOT/p['project']),'-c','Release','-o',str(output),'-p:UseSharedCompilation=false','-p:RepositoryCommit='+commit,'-p:Firebase13BuildInfoPath='+str(info)],cwd=ROOT,check=True)
+            command=['dotnet',('pack' if args.command=='nuget' else 'build'),str(ROOT/p['project']),'-c','Release']
+            if args.command=='nuget':command+=['-o',str(output)]
+            command+=['-p:UseSharedCompilation=false','-p:RepositoryCommit='+commit,'-p:Firebase13BuildInfoPath='+str(info)]
+            subprocess.run(command,cwd=ROOT,check=True)
             path=output/(p['package']+'.'+p['version'].removesuffix('.0')+'.nupkg')
-            inspect_package(path,p)
+            if args.command=='nuget':inspect_package(path,p)
     elif args.command=='packages-validate':
         if not args.names:
             expected={p['package']+'.'+p['version'].removesuffix('.0')+'.nupkg' for p in selected}

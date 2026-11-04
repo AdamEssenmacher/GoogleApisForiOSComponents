@@ -33,3 +33,5 @@ GoogleService-Info.plist
 
 __pycache__/
 *.pyc
+
+!tools/legacy/

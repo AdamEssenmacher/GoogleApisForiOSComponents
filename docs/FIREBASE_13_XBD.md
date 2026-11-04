@@ -125,11 +125,12 @@ ZIP: use `--archive` when a warm XBD cache no longer retains it. Acquisition use
 XBD, and archive verification occurs before packing. An absent official binary
 archive is a release blocker; there is no CocoaPods or source-build fallback.
 
-Firebase 13 production uses the dedicated `firebase13.cake` entry point. The
-shared legacy `build.cake` is preserved so unrelated product fingerprints stay
-unchanged. Scoped projects reject packing without the verified producer's build
-information; legacy mixed-product builds cannot silently pack this experiment.
-The dedicated entry point does not load CocoaPods code.
+Firebase 13 production uses `firebase13.cake` or a Firebase selection through
+`build.cake`. Existing non-Firebase commands use the isolated, locked legacy
+producer. Default/mixed requests are partitioned so a Firebase 13 failure never
+falls back to CocoaPods. Scoped projects reject unverified packing. See
+[LEGACY_PRODUCTION.md](LEGACY_PRODUCTION.md) for commands, source isolation and the
+unchanged Sign-In 10.1.0 production/validation baseline.
 
 ## Managed API updates
 
@@ -170,10 +171,9 @@ Do not bypass existing release checks or represent the experiment as released.
 The current pinned .NET Catalyst SDK requires a 17.0 deployment floor for test
 applications; binding TFMs and declared package minimums are preserved.
 Local validation evidence is summarized in `FIREBASE_13_XBD_VALIDATION.md`.
-Preserving compatible non-Firebase package-production baselines is tracked in
-[#257](https://github.com/AdamEssenmacher/GoogleApisForiOSComponents/issues/257) and
-blocks default-build cutover. Removing the mixed-build guard does not restore those
-legacy producer lanes. Existing Sign-In 10.1.0 remains unchanged.
+Non-Firebase package production uses the isolated baseline described in
+[LEGACY_PRODUCTION.md](LEGACY_PRODUCTION.md). Sign-In remains at 10.1.0 without a
+binding revision; its existing consumer dependency bounds remain unchanged.
 Real Pair-to-Mac execution and credentialed Firebase service flows are not proved
 by the simulator load probe. Windows path/remote-task behavior still needs review.
 
