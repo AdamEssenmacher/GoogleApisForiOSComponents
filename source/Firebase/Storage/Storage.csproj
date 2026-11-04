@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFrameworks>net10.0-ios;net10.0-maccatalyst</TargetFrameworks>
     <Nullable>enable</Nullable>
@@ -8,8 +8,8 @@
     <SupportedOSPlatformVersion>15.0</SupportedOSPlatformVersion>
     <RootNamespace>Firebase.Storage</RootNamespace>
     <AssemblyName>Firebase.Storage</AssemblyName>
-    <AssemblyVersion>12.19.3</AssemblyVersion>
-    <FileVersion>12.19.3</FileVersion>
+    <AssemblyVersion>13.1.1.0</AssemblyVersion>
+    <FileVersion>13.1.1.0</FileVersion>
     <IPhoneResourcePrefix>Resources</IPhoneResourcePrefix>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <CompressBindingResourcePackage>true</CompressBindingResourcePackage>
@@ -27,7 +27,7 @@
     <PackageLicenseFile>License.md</PackageLicenseFile>
     <PackageReadmeFile>NUGET_README.md</PackageReadmeFile>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-    <PackageVersion>12.19.3</PackageVersion>
+    <PackageVersion>13.1.1.0</PackageVersion>
   </PropertyGroup>
   <ItemGroup>
     <Folder Include="Resources\" />
@@ -39,22 +39,24 @@
     <None Include="../../../icons/firebaseiosstorage_128x128.png" Pack="True" PackagePath="firebaseiosstorage_128x128.png" />
   </ItemGroup>
   <ItemGroup>
-    <NativeReference Include="..\..\..\externals\FirebaseStorage.xcframework">
-      <Kind>Framework</Kind>
-      <SmartLink>True</SmartLink>
-      <ForceLoad>True</ForceLoad>
-    </NativeReference>
-  </ItemGroup>
-  <ItemGroup>
     <ObjcBindingCoreSource Include="Enums.cs" />
   </ItemGroup>
   <ItemGroup>
     <ObjcBindingApiDefinition Include="ApiDefinition.cs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="AdamE.Google.iOS.GTMSessionFetcher" Version="[3.5.0.6,5.0.0)" />
+    <PackageReference Include="Xamarin.Build.Download" Version="[0.11.6]" PrivateAssets="None" />
+    <ProjectReference Include="../Core/Core.csproj" PrivateAssets="None" />
+    <ProjectReference Include="../../Google/GTMSessionFetcher/GTMSessionFetcher.csproj" PrivateAssets="None" />
+    <None Include="../../../source/Firebase/native/AdamE.Firebase.iOS.Storage.targets" Pack="True" PackagePath="build/AdamE.Firebase.iOS.Storage.targets" />
+    <None Include="../../../source/Firebase/native/Firebase.Native.Common.targets" Pack="True" PackagePath="build/Firebase.Native.Common.targets" />
+    <None Include="../../../source/Firebase/native/AdamE.Firebase.iOS.Storage.targets" Pack="True" PackagePath="buildTransitive/AdamE.Firebase.iOS.Storage.targets" />
+    <None Include="../../../source/Firebase/native/Firebase.Native.Common.targets" Pack="True" PackagePath="buildTransitive/Firebase.Native.Common.targets" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Core\Core.csproj" PrivateAssets="None" />
+    <None Include="../../../source/Firebase/native/UPSTREAM-NOTICES.txt" Pack="True" PackagePath="UPSTREAM-NOTICES.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="$(Firebase13BuildInfoPath)" Condition="'$(Firebase13BuildInfoPath)' != ''" />
   </ItemGroup>
 </Project>

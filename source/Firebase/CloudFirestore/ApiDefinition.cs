@@ -388,14 +388,14 @@ namespace Firebase.CloudFirestore
 
 	// @interface FIRExprBridge : NSObject
 	[DisableDefaultCtor]
-	[BaseType (typeof (NSObject), Name = "FIRExprBridge")]
+	[BaseType (typeof (NSObject), Name = "__FIRExprBridge")]
 	interface ExprBridge
 	{
 	}
 
 	// @interface FIRFieldBridge : FIRExprBridge
 	[DisableDefaultCtor]
-	[BaseType (typeof (ExprBridge), Name = "FIRFieldBridge")]
+	[BaseType (typeof (ExprBridge), Name = "__FIRFieldBridge")]
 	interface FieldBridge
 	{
 		// - (id)initWithName:(NSString *)name;
@@ -413,7 +413,7 @@ namespace Firebase.CloudFirestore
 
 	// @interface FIRConstantBridge : FIRExprBridge
 	[DisableDefaultCtor]
-	[BaseType (typeof (ExprBridge), Name = "FIRConstantBridge")]
+	[BaseType (typeof (ExprBridge), Name = "__FIRConstantBridge")]
 	interface ConstantBridge
 	{
 		// - (id)init:(id)input;
@@ -423,7 +423,7 @@ namespace Firebase.CloudFirestore
 
 	// @interface FIRFunctionExprBridge : FIRExprBridge
 	[DisableDefaultCtor]
-	[BaseType (typeof (ExprBridge), Name = "FIRFunctionExprBridge")]
+	[BaseType (typeof (ExprBridge), Name = "__FIRFunctionExprBridge")]
 	interface FunctionExprBridge
 	{
 		// - (id)initWithName:(NSString *)name Args:(NSArray<FIRExprBridge *> *)args Options:(NSDictionary<NSString *, FIRExprBridge *> * _Nullable)options;
@@ -432,7 +432,7 @@ namespace Firebase.CloudFirestore
 	}
 
 	[DisableDefaultCtor]
-	[BaseType (typeof (ExprBridge), Name = "FIRVariableBridge")]
+	[BaseType (typeof (ExprBridge), Name = "__FIRVariableBridge")]
 	interface VariableBridge
 	{
 		[Export ("initWithName:")]
@@ -440,7 +440,7 @@ namespace Firebase.CloudFirestore
 	}
 
 	[DisableDefaultCtor]
-	[BaseType (typeof (ExprBridge), Name = "FIRPipelineExprBridge")]
+	[BaseType (typeof (ExprBridge), Name = "__FIRPipelineExprBridge")]
 	interface PipelineExprBridge
 	{
 		[Export ("initWithStages:")]
@@ -449,7 +449,7 @@ namespace Firebase.CloudFirestore
 
 	// @interface FIRAggregateFunctionBridge : NSObject
 	[DisableDefaultCtor]
-	[BaseType (typeof (NSObject), Name = "FIRAggregateFunctionBridge")]
+	[BaseType (typeof (NSObject), Name = "__FIRAggregateFunctionBridge")]
 	interface AggregateFunctionBridge
 	{
 		// - (id)initWithName:(NSString *)name Args:(NSArray<FIRExprBridge *> *)args;
@@ -459,7 +459,7 @@ namespace Firebase.CloudFirestore
 
 	// @interface FIROrderingBridge : NSObject
 	[DisableDefaultCtor]
-	[BaseType (typeof (NSObject), Name = "FIROrderingBridge")]
+	[BaseType (typeof (NSObject), Name = "__FIROrderingBridge")]
 	interface OrderingBridge
 	{
 		// - (id)initWithExpr:(FIRExprBridge *)expr Direction:(NSString *)direction;
@@ -469,7 +469,7 @@ namespace Firebase.CloudFirestore
 
 	// @interface FIRStageBridge : NSObject
 	[DisableDefaultCtor]
-	[BaseType (typeof (NSObject), Name = "FIRStageBridge")]
+	[BaseType (typeof (NSObject), Name = "__FIRStageBridge")]
 	interface StageBridge
 	{
 		// @property(nonatomic, readonly) NSString *name;
@@ -478,7 +478,7 @@ namespace Firebase.CloudFirestore
 	}
 
 	[DisableDefaultCtor]
-	[BaseType (typeof (StageBridge), Name = "FIRSubcollectionSourceStageBridge")]
+	[BaseType (typeof (StageBridge), Name = "__FIRSubcollectionSourceStageBridge")]
 	interface SubcollectionSourceStageBridge
 	{
 		[Export ("initWithPath:")]
@@ -486,7 +486,7 @@ namespace Firebase.CloudFirestore
 	}
 
 	[DisableDefaultCtor]
-	[BaseType (typeof (StageBridge), Name = "FIRDefineStageBridge")]
+	[BaseType (typeof (StageBridge), Name = "__FIRDefineStageBridge")]
 	interface DefineStageBridge
 	{
 		[Export ("initWithVariables:")]
@@ -494,7 +494,7 @@ namespace Firebase.CloudFirestore
 	}
 
 	[DisableDefaultCtor]
-	[BaseType (typeof (StageBridge), Name = "FIRSearchStageBridge")]
+	[BaseType (typeof (StageBridge), Name = "__FIRSearchStageBridge")]
 	interface SearchStageBridge
 	{
 		[Export ("initWithOptions:addFields:select:sort:")]
@@ -503,7 +503,7 @@ namespace Firebase.CloudFirestore
 
 	// @interface FIRCollectionSourceStageBridge : FIRStageBridge
 	[DisableDefaultCtor]
-	[BaseType (typeof (StageBridge), Name = "FIRCollectionSourceStageBridge")]
+	[BaseType (typeof (StageBridge), Name = "__FIRCollectionSourceStageBridge")]
 	interface CollectionSourceStageBridge
 	{
 		// FIRPipelineBridge.h (12.14): forceIndex is nullable.
@@ -513,7 +513,7 @@ namespace Firebase.CloudFirestore
 
 	// @interface FIRDatabaseSourceStageBridge : FIRStageBridge
 	[DisableDefaultCtor]
-	[BaseType (typeof (StageBridge), Name = "FIRDatabaseSourceStageBridge")]
+	[BaseType (typeof (StageBridge), Name = "__FIRDatabaseSourceStageBridge")]
 	interface DatabaseSourceStageBridge
 	{
 		// - (id)init;
@@ -523,7 +523,7 @@ namespace Firebase.CloudFirestore
 
 	// @interface FIRCollectionGroupSourceStageBridge : FIRStageBridge
 	[DisableDefaultCtor]
-	[BaseType (typeof (StageBridge), Name = "FIRCollectionGroupSourceStageBridge")]
+	[BaseType (typeof (StageBridge), Name = "__FIRCollectionGroupSourceStageBridge")]
 	interface CollectionGroupSourceStageBridge
 	{
 		// FIRPipelineBridge.h (12.14): forceIndex is nullable.
@@ -533,7 +533,7 @@ namespace Firebase.CloudFirestore
 
 	// @interface FIRDocumentsSourceStageBridge : FIRStageBridge
 	[DisableDefaultCtor]
-	[BaseType (typeof (StageBridge), Name = "FIRDocumentsSourceStageBridge")]
+	[BaseType (typeof (StageBridge), Name = "__FIRDocumentsSourceStageBridge")]
 	interface DocumentsSourceStageBridge
 	{
 		// - (id)initWithDocuments:(NSArray<FIRDocumentReference *> *)documents firestore:(FIRFirestore *)db;
@@ -543,7 +543,7 @@ namespace Firebase.CloudFirestore
 
 	// @interface FIRWhereStageBridge : FIRStageBridge
 	[DisableDefaultCtor]
-	[BaseType (typeof (StageBridge), Name = "FIRWhereStageBridge")]
+	[BaseType (typeof (StageBridge), Name = "__FIRWhereStageBridge")]
 	interface WhereStageBridge
 	{
 		// - (id)initWithExpr:(FIRExprBridge *)expr;
@@ -553,7 +553,7 @@ namespace Firebase.CloudFirestore
 
 	// @interface FIRLimitStageBridge : FIRStageBridge
 	[DisableDefaultCtor]
-	[BaseType (typeof (StageBridge), Name = "FIRLimitStageBridge")]
+	[BaseType (typeof (StageBridge), Name = "__FIRLimitStageBridge")]
 	interface LimitStageBridge
 	{
 		// - (id)initWithLimit:(NSInteger)value;
@@ -563,7 +563,7 @@ namespace Firebase.CloudFirestore
 
 	// @interface FIROffsetStageBridge : FIRStageBridge
 	[DisableDefaultCtor]
-	[BaseType (typeof (StageBridge), Name = "FIROffsetStageBridge")]
+	[BaseType (typeof (StageBridge), Name = "__FIROffsetStageBridge")]
 	interface OffsetStageBridge
 	{
 		// - (id)initWithOffset:(NSInteger)value;
@@ -573,7 +573,7 @@ namespace Firebase.CloudFirestore
 
 	// @interface FIRAddFieldsStageBridge : FIRStageBridge
 	[DisableDefaultCtor]
-	[BaseType (typeof (StageBridge), Name = "FIRAddFieldsStageBridge")]
+	[BaseType (typeof (StageBridge), Name = "__FIRAddFieldsStageBridge")]
 	interface AddFieldsStageBridge
 	{
 		// - (id)initWithFields:(NSDictionary<NSString *, FIRExprBridge *> *)fields;
@@ -583,7 +583,7 @@ namespace Firebase.CloudFirestore
 
 	// @interface FIRRemoveFieldsStageBridge : FIRStageBridge
 	[DisableDefaultCtor]
-	[BaseType (typeof (StageBridge), Name = "FIRRemoveFieldsStageBridge")]
+	[BaseType (typeof (StageBridge), Name = "__FIRRemoveFieldsStageBridge")]
 	interface RemoveFieldsStageBridge
 	{
 		// - (id)initWithFields:(NSArray<NSString *> *)fields;
@@ -593,7 +593,7 @@ namespace Firebase.CloudFirestore
 
 	// @interface FIRSelectStageBridge : FIRStageBridge
 	[DisableDefaultCtor]
-	[BaseType (typeof (StageBridge), Name = "FIRSelectStageBridge")]
+	[BaseType (typeof (StageBridge), Name = "__FIRSelectStageBridge")]
 	interface SelectStageBridge
 	{
 		// - (id)initWithSelections:(NSDictionary<NSString *, FIRExprBridge *> *)selections;
@@ -603,7 +603,7 @@ namespace Firebase.CloudFirestore
 
 	// @interface FIRDistinctStageBridge : FIRStageBridge
 	[DisableDefaultCtor]
-	[BaseType (typeof (StageBridge), Name = "FIRDistinctStageBridge")]
+	[BaseType (typeof (StageBridge), Name = "__FIRDistinctStageBridge")]
 	interface DistinctStageBridge
 	{
 		// - (id)initWithGroups:(NSDictionary<NSString *, FIRExprBridge *> *)groups;
@@ -613,7 +613,7 @@ namespace Firebase.CloudFirestore
 
 	// @interface FIRAggregateStageBridge : FIRStageBridge
 	[DisableDefaultCtor]
-	[BaseType (typeof (StageBridge), Name = "FIRAggregateStageBridge")]
+	[BaseType (typeof (StageBridge), Name = "__FIRAggregateStageBridge")]
 	interface AggregateStageBridge
 	{
 		// - (id)initWithAccumulators:(NSDictionary<NSString *, FIRAggregateFunctionBridge *> *)accumulators groups:(NSDictionary<NSString *, FIRExprBridge *> *)groups;
@@ -623,7 +623,7 @@ namespace Firebase.CloudFirestore
 
 	// @interface FIRFindNearestStageBridge : FIRStageBridge
 	[DisableDefaultCtor]
-	[BaseType (typeof (StageBridge), Name = "FIRFindNearestStageBridge")]
+	[BaseType (typeof (StageBridge), Name = "__FIRFindNearestStageBridge")]
 	interface FindNearestStageBridge
 	{
 		// - (id)initWithField:(FIRFieldBridge *)field vectorValue:(FIRVectorValue *)vectorValue distanceMeasure:(NSString *)distanceMeasure limit:(NSNumber * _Nullable)limit distanceField:(FIRExprBridge * _Nullable)distanceField;
@@ -633,7 +633,7 @@ namespace Firebase.CloudFirestore
 
 	// @interface FIRSorStageBridge : FIRStageBridge
 	[DisableDefaultCtor]
-	[BaseType (typeof (StageBridge), Name = "FIRSorStageBridge")]
+	[BaseType (typeof (StageBridge), Name = "__FIRSortStageBridge")]
 	interface SortStageBridge
 	{
 		// - (id)initWithOrderings:(NSArray<id> *)orderings;
@@ -643,7 +643,7 @@ namespace Firebase.CloudFirestore
 
 	// @interface FIRReplaceWithStageBridge : FIRStageBridge
 	[DisableDefaultCtor]
-	[BaseType (typeof (StageBridge), Name = "FIRReplaceWithStageBridge")]
+	[BaseType (typeof (StageBridge), Name = "__FIRReplaceWithStageBridge")]
 	interface ReplaceWithStageBridge
 	{
 		// - (id)initWithExpr:(FIRExprBridge *)expr;
@@ -653,7 +653,7 @@ namespace Firebase.CloudFirestore
 
 	// @interface FIRSampleStageBridge : FIRStageBridge
 	[DisableDefaultCtor]
-	[BaseType (typeof (StageBridge), Name = "FIRSampleStageBridge")]
+	[BaseType (typeof (StageBridge), Name = "__FIRSampleStageBridge")]
 	interface SampleStageBridge
 	{
 		// - (id)initWithCount:(int64_t)count;
@@ -667,7 +667,7 @@ namespace Firebase.CloudFirestore
 
 	// @interface FIRUnionStageBridge : FIRStageBridge
 	[DisableDefaultCtor]
-	[BaseType (typeof (StageBridge), Name = "FIRUnionStageBridge")]
+	[BaseType (typeof (StageBridge), Name = "__FIRUnionStageBridge")]
 	interface UnionStageBridge
 	{
 		// - (id)initWithOther:(FIRPipelineBridge *)other;
@@ -677,7 +677,7 @@ namespace Firebase.CloudFirestore
 
 	// @interface FIRUnnestStageBridge : FIRStageBridge
 	[DisableDefaultCtor]
-	[BaseType (typeof (StageBridge), Name = "FIRUnnestStageBridge")]
+	[BaseType (typeof (StageBridge), Name = "__FIRUnnestStageBridge")]
 	interface UnnestStageBridge
 	{
 		// - (id)initWithField:(FIRExprBridge *)field alias:(FIRExprBridge *)alias indexField:(FIRExprBridge * _Nullable)index_field;
@@ -687,7 +687,7 @@ namespace Firebase.CloudFirestore
 
 	// @interface FIRRawStageBridge : FIRStageBridge
 	[DisableDefaultCtor]
-	[BaseType (typeof (StageBridge), Name = "FIRRawStageBridge")]
+	[BaseType (typeof (StageBridge), Name = "__FIRRawStageBridge")]
 	interface RawStageBridge
 	{
 		// - (id)initWithName:(NSString *)name params:(NSArray<id> *)params options:(NSDictionary<NSString *, FIRExprBridge *> * _Nullable)options;
@@ -777,12 +777,15 @@ namespace Firebase.CloudFirestore
 
 	// @interface FIRPipelineBridge : NSObject
 	[DisableDefaultCtor]
-	[BaseType (typeof (NSObject), Name = "FIRPipelineBridge")]
+	[BaseType (typeof (NSObject), Name = "__FIRPipelineBridge")]
 	interface PipelineBridge
 	{
 		// - (id)initWithStages:(NSArray<FIRStageBridge *> *)stages db:(FIRFirestore *)db;
 		[Export ("initWithStages:db:")]
 		NativeHandle Constructor (StageBridge [] stages, Firestore db);
+
+		[Export ("initWithStages:db:atomic:")]
+		NativeHandle Constructor (StageBridge [] stages, Firestore db, bool atomic);
 
 		// - (void)executeWithCompletion:(void (^)(__FIRPipelineSnapshotBridge * _Nullable result, NSError * _Nullable error))completion;
 		[Async]
@@ -838,7 +841,7 @@ namespace Firebase.CloudFirestore
 
 	// @interface FIRRealtimePipelineBridge : NSObject
 	[DisableDefaultCtor]
-	[BaseType (typeof (NSObject), Name = "FIRRealtimePipelineBridge")]
+	[BaseType (typeof (NSObject), Name = "__FIRRealtimePipelineBridge")]
 	interface RealtimePipelineBridge
 	{
 		// - (id)initWithStages:(NSArray<FIRStageBridge *> *)stages db:(FIRFirestore *)db;
@@ -1887,4 +1890,138 @@ namespace Firebase.CloudFirestore
 		[Export ("commitWithCompletion:")]
 		void Commit ([NullAllowed] CommitCompletionHandler completion);
 	}
+	// Additional BSON value types exported by FirebaseFirestoreInternal 13.1.1.
+	[DisableDefaultCtor]
+	[BaseType (typeof (NSObject), Name = "FIRBSONObjectId")]
+	interface BsonObjectId : INSCopying
+	{
+		[Export ("initWithValue:")]
+		NativeHandle Constructor (string value);
+		[Export ("value", ArgumentSemantic.Copy)]
+		string Value { get; }
+	}
+
+	[DisableDefaultCtor]
+	[BaseType (typeof (NSObject), Name = "FIRBSONTimestamp")]
+	interface BsonTimestamp : INSCopying
+	{
+		[Export ("initWithSeconds:increment:")]
+		NativeHandle Constructor (uint seconds, uint increment);
+		[Export ("seconds")]
+		uint Seconds { get; }
+		[Export ("increment")]
+		uint Increment { get; }
+	}
+
+	[DisableDefaultCtor]
+	[BaseType (typeof (NSObject), Name = "FIRBlob")]
+	interface Blob : INSCopying
+	{
+		[Export ("subtype")]
+		byte Subtype { get; }
+		[Export ("bytes", ArgumentSemantic.Copy)]
+		NSData Bytes { get; }
+		[Static]
+		[Export ("blobWithBytes:")]
+		Blob FromBytes (NSData bytes);
+		[Static]
+		[Export ("blobWithBSONBinary:")]
+		Blob FromBsonBinary (NSData bytes);
+		[Static]
+		[Export ("blobWithBSONBinary:subtype:")]
+		Blob FromBsonBinary (NSData bytes, byte subtype);
+		[Export ("compare:")]
+		NSComparisonResult Compare (Blob other);
+	}
+
+	[DisableDefaultCtor]
+	[BaseType (typeof (NSObject), Name = "FIRDecimal128Value")]
+	interface Decimal128Value : INSCopying
+	{
+		[Export ("initWithValue:")]
+		NativeHandle Constructor (string value);
+		[Export ("value", ArgumentSemantic.Copy)]
+		string Value { get; }
+	}
+
+	[DisableDefaultCtor]
+	[BaseType (typeof (NSObject), Name = "FIRInt32Value")]
+	interface Int32Value : INSCopying
+	{
+		[Export ("initWithValue:")]
+		NativeHandle Constructor (int value);
+		[Export ("value")]
+		int Value { get; }
+	}
+
+	[DisableDefaultCtor]
+	[BaseType (typeof (NSObject), Name = "FIRMaxKey")]
+	interface MaxKey
+	{
+		[Static]
+		[Export ("shared")]
+		MaxKey SharedInstance { get; }
+	}
+
+	[DisableDefaultCtor]
+	[BaseType (typeof (NSObject), Name = "FIRMinKey")]
+	interface MinKey
+	{
+		[Static]
+		[Export ("shared")]
+		MinKey SharedInstance { get; }
+	}
+
+	[DisableDefaultCtor]
+	[BaseType (typeof (NSObject), Name = "FIRRegexValue")]
+	interface RegexValue : INSCopying
+	{
+		[Export ("initWithPattern:options:")]
+		NativeHandle Constructor (string pattern, string options);
+		[Export ("pattern", ArgumentSemantic.Copy)]
+		string Pattern { get; }
+		[Export ("options", ArgumentSemantic.Copy)]
+		string Options { get; }
+	}
+
+	[DisableDefaultCtor]
+	[BaseType (typeof (StageBridge), Name = "__FIRLiteralsSourceStageBridge")]
+	interface LiteralsSourceStageBridge
+	{
+		[Export ("initWithData:")]
+		NativeHandle Constructor (NSDictionary<NSString, NSObject> [] data);
+	}
+
+	[DisableDefaultCtor]
+	[BaseType (typeof (StageBridge), Name = "__FIRDeleteStageBridge")]
+	interface DeleteStageBridge
+	{
+		[Export ("init")]
+		NativeHandle Constructor ();
+	}
+
+	[DisableDefaultCtor]
+	[BaseType (typeof (StageBridge), Name = "__FIRUpdateStageBridge")]
+	interface UpdateStageBridge
+	{
+		[Export ("initWithFields:")]
+		NativeHandle Constructor (NSDictionary<NSString, NSObject> fields);
+	}
+
+	[DisableDefaultCtor]
+	[BaseType (typeof (StageBridge), Name = "__FIRInsertStageBridge")]
+	interface InsertStageBridge
+	{
+		[Export ("initWithCollectionPath:documentIdExpression:")]
+		NativeHandle Constructor ([NullAllowed] string collectionPath, [NullAllowed] ExprBridge documentIdExpression);
+	}
+
+	[DisableDefaultCtor]
+	[BaseType (typeof (StageBridge), Name = "__FIRUpsertStageBridge")]
+	interface UpsertStageBridge
+	{
+		[Export ("initWithAdditionalFields:collectionPath:documentIdExpression:")]
+		NativeHandle Constructor (NSDictionary<NSString, NSObject> additionalFields, [NullAllowed] string collectionPath, [NullAllowed] ExprBridge documentIdExpression);
+	}
+
 }

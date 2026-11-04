@@ -213,6 +213,17 @@ Task ("firebase-release-update")
 
 void RunFirebaseReleaseTooling (bool applyChanges)
 {
+    if (FileExists("source/Firebase/native-assets.json")) {
+        if (applyChanges)
+            throw new Exception("Firebase 13 uses the pinned official archive and native-assets.json. Automated updates and publication are disabled for this experiment; verify a new official archive/digest before updating its manifest and fixtures.");
+        var manifest = JsonDocument.Parse(System.IO.File.ReadAllText("source/Firebase/native-assets.json"));
+        var pinnedVersion = manifest.RootElement.GetProperty("releaseVersion").GetString();
+        if (!string.IsNullOrWhiteSpace(FIREBASE_RELEASE_VERSION) && FIREBASE_RELEASE_VERSION != pinnedVersion)
+            throw new Exception($"This experiment validates only Firebase {pinnedVersion}; no CocoaPods or source-build fallback is available.");
+        RunFirebaseXbd("release-check");
+        return;
+    }
+
 	var context = CreateFirebaseReleaseContext ();
 	var updates = GetFirebaseReleaseFileUpdates (context);
 	var changedUpdates = updates.Where (u => u.Changed).ToList ();

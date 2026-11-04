@@ -1,0 +1,81 @@
+name: Firebase 13 XBD experiment
+
+on:
+  pull_request:
+    paths:
+      - 'source/Firebase/**'
+      - 'source/Google/**'
+      - 'tools/firebase13/**'
+      - 'tests/firebase13/**'
+      - 'tests/fixtures/firebase13/**'
+      - 'firebase13.cake'
+      - '.github/workflows/firebase13-xbd.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: firebase13-xbd-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  schema:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-dotnet@v5
+        with:
+          global-json-file: global.json
+      - run: python3 -m unittest discover -s tests/firebase13 -v
+      - run: python3 tools/firebase13/native.py native-assets-validate
+
+  native:
+    # This experiment does not publish. Native validation requires an explicit branch dispatch.
+    if: github.event_name == 'workflow_dispatch'
+    needs: schema
+    runs-on: [self-hosted, macOS, ARM64, xcode-27.1]
+    timeout-minutes: 180
+    env:
+      E2E_SIMULATOR_NAME: GoogleApisCI-iPhone
+    steps:
+      - uses: actions/checkout@v5
+      - run: tools/ci/select-xcode.sh '27.1'
+      - uses: actions/setup-dotnet@v5
+        with:
+          global-json-file: global.json
+      - name: Install a failing pod sentinel
+        run: |
+          mkdir -p "$RUNNER_TEMP/firebase13-tools"
+          cat > "$RUNNER_TEMP/firebase13-tools/pod" <<'EOF'
+          #!/bin/sh
+          echo 'Unexpected CocoaPods invocation' >&2
+          exit 97
+          EOF
+          chmod +x "$RUNNER_TEMP/firebase13-tools/pod"
+          echo "$RUNNER_TEMP/firebase13-tools" >> "$GITHUB_PATH"
+      - name: Acquire, validate and pack exact Firebase closure
+        run: python3 tools/firebase13/native.py nuget
+      - name: Audit all Firebase Objective-C bindings
+        run: |
+          dotnet tool install Sharpie.Bind.Tool --version 26.3.0.11 --tool-path "$RUNNER_TEMP/firebase13-sharpie"
+          python3 tools/firebase13/audit.py --cache "$HOME/Library/Caches/XamarinBuildDownload" --sharpie-path "$RUNNER_TEMP/firebase13-sharpie/sharpie"
+      - name: Verify actual native binding registrations
+        run: python3 tools/firebase13/check_symbols.py --cache "$HOME/Library/Caches/XamarinBuildDownload"
+      - name: Core cold-cache and offline matrix
+        run: python3 tools/firebase13/consumers.py --scope core
+      - name: Combined Analytics Auth Firestore cold-cache and offline matrix
+        run: python3 tools/firebase13/consumers.py --scope combined
+      - name: Analytics without advertising-ID support
+        run: python3 tools/firebase13/consumers.py --scope combined --without-ad-id --quick
+      - name: All Firebase products cold-cache and offline matrix
+        run: python3 tools/firebase13/consumers.py --scope all
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: firebase13-xbd-experimental-validation
+          path: |
+            output/firebase13/*.nupkg
+            output/firebase13-results/*
+            output/firebase13-api-audit/**
+          retention-days: 14

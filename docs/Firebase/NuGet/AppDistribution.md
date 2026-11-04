@@ -55,3 +55,7 @@ Avoid mixing unrelated Firebase binding package sets or mismatched Firebase nati
 
 - Repository: https://github.com/AdamEssenmacher/GoogleApisForiOSComponents
 - Issues: https://github.com/AdamEssenmacher/GoogleApisForiOSComponents/issues
+
+## Firebase 13 native delivery
+
+Firebase 13 candidates use Xamarin.Build.Download to acquire Google’s official binary archive during the first application build. Native binaries and bundles are not included in these NuGets. Restore does not acquire the native SDK. A populated XBD cache supports offline `--no-restore` builds. See [Firebase 13 XBD delivery](https://github.com/AdamEssenmacher/GoogleApisForiOSComponents/blob/main/docs/FIREBASE_13_XBD.md) for cache configuration, compatibility limits, and validation status. These changes do not apply to published Firebase 12 packages.

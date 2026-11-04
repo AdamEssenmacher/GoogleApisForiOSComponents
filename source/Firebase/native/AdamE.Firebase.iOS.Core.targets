@@ -1,0 +1,164 @@
+<Project>
+  <Import Project="$(MSBuildThisFileDirectory)Firebase.Native.Common.targets" />
+  <Target Name="_FirebaseNative_AdamE_Firebase_iOS_Core" BeforeTargets="_BeforeCoreCompileInterfaceDefinitions" DependsOnTargets="_XamarinBuildDownload" Condition="'$(IsBindingProject)' != 'true' And '$(DesignTimeBuild)' != 'true' And '$(IsCrossTargetingBuild)' != 'true' And ('$(TargetPlatformIdentifier)' == 'ios' Or '$(TargetPlatformIdentifier)' == 'maccatalyst') And ('$(OutputType)' != 'Library' Or '$(IsAppExtension)' == 'True')">
+    <Error Condition="!Exists('$(_FirebaseNativeRoot)Firebase/FirebaseAnalytics/FirebaseCore.xcframework')" Text="Missing Firebase native asset firebase-core. $(_FirebaseNativeCleanup)" />
+    <Error Condition="'$(TargetPlatformIdentifier)' == 'ios' And !$([System.String]::Copy('$(RuntimeIdentifier)').StartsWith('iossimulator-')) And !Exists('$(_FirebaseNativeRoot)Firebase/FirebaseAnalytics/FirebaseCore.xcframework/ios-arm64/FirebaseCore.framework/FirebaseCore_Privacy.bundle')" Text="Missing Firebase native asset firebase-core-FirebaseCore_Privacy.bundle-device. $(_FirebaseNativeCleanup)" />
+    <Error Condition="'$(TargetPlatformIdentifier)' == 'ios' And $([System.String]::Copy('$(RuntimeIdentifier)').StartsWith('iossimulator-')) And !Exists('$(_FirebaseNativeRoot)Firebase/FirebaseAnalytics/FirebaseCore.xcframework/ios-arm64_x86_64-simulator/FirebaseCore.framework/FirebaseCore_Privacy.bundle')" Text="Missing Firebase native asset firebase-core-FirebaseCore_Privacy.bundle-simulator. $(_FirebaseNativeCleanup)" />
+    <Error Condition="'$(TargetPlatformIdentifier)' == 'maccatalyst' And !Exists('$(_FirebaseNativeRoot)Firebase/FirebaseAnalytics/FirebaseCore.xcframework/ios-arm64_x86_64-maccatalyst/FirebaseCore.framework/Versions/A/Resources/FirebaseCore_Privacy.bundle')" Text="Missing Firebase native asset firebase-core-FirebaseCore_Privacy.bundle-catalyst. $(_FirebaseNativeCleanup)" />
+    <Error Condition="!Exists('$(_FirebaseNativeRoot)Firebase/FirebaseAnalytics/FirebaseCoreInternal.xcframework')" Text="Missing Firebase native asset firebase-core-internal. $(_FirebaseNativeCleanup)" />
+    <Error Condition="'$(TargetPlatformIdentifier)' == 'ios' And !$([System.String]::Copy('$(RuntimeIdentifier)').StartsWith('iossimulator-')) And !Exists('$(_FirebaseNativeRoot)Firebase/FirebaseAnalytics/FirebaseCoreInternal.xcframework/ios-arm64/FirebaseCoreInternal.framework/FirebaseCoreInternal_Privacy.bundle')" Text="Missing Firebase native asset firebase-core-internal-FirebaseCoreInternal_Privacy.bundle-device. $(_FirebaseNativeCleanup)" />
+    <Error Condition="'$(TargetPlatformIdentifier)' == 'ios' And $([System.String]::Copy('$(RuntimeIdentifier)').StartsWith('iossimulator-')) And !Exists('$(_FirebaseNativeRoot)Firebase/FirebaseAnalytics/FirebaseCoreInternal.xcframework/ios-arm64_x86_64-simulator/FirebaseCoreInternal.framework/FirebaseCoreInternal_Privacy.bundle')" Text="Missing Firebase native asset firebase-core-internal-FirebaseCoreInternal_Privacy.bundle-simulator. $(_FirebaseNativeCleanup)" />
+    <Error Condition="'$(TargetPlatformIdentifier)' == 'maccatalyst' And !Exists('$(_FirebaseNativeRoot)Firebase/FirebaseAnalytics/FirebaseCoreInternal.xcframework/ios-arm64_x86_64-maccatalyst/FirebaseCoreInternal.framework/Versions/A/Resources/FirebaseCoreInternal_Privacy.bundle')" Text="Missing Firebase native asset firebase-core-internal-FirebaseCoreInternal_Privacy.bundle-catalyst. $(_FirebaseNativeCleanup)" />
+    <Error Condition="!Exists('$(_FirebaseNativeRoot)Firebase/FirebaseFirestore/leveldb.xcframework')" Text="Missing Firebase native asset firebase-leveldb. $(_FirebaseNativeCleanup)" />
+    <Error Condition="'$(TargetPlatformIdentifier)' == 'ios' And !$([System.String]::Copy('$(RuntimeIdentifier)').StartsWith('iossimulator-')) And !Exists('$(_FirebaseNativeRoot)Firebase/FirebaseFirestore/leveldb.xcframework/ios-arm64/leveldb.framework/leveldb_Privacy.bundle')" Text="Missing Firebase native asset firebase-leveldb-leveldb_Privacy.bundle-device. $(_FirebaseNativeCleanup)" />
+    <Error Condition="'$(TargetPlatformIdentifier)' == 'ios' And $([System.String]::Copy('$(RuntimeIdentifier)').StartsWith('iossimulator-')) And !Exists('$(_FirebaseNativeRoot)Firebase/FirebaseFirestore/leveldb.xcframework/ios-arm64_x86_64-simulator/leveldb.framework/leveldb_Privacy.bundle')" Text="Missing Firebase native asset firebase-leveldb-leveldb_Privacy.bundle-simulator. $(_FirebaseNativeCleanup)" />
+    <Error Condition="'$(TargetPlatformIdentifier)' == 'maccatalyst' And !Exists('$(_FirebaseNativeRoot)Firebase/FirebaseFirestore/leveldb.xcframework/ios-arm64_x86_64-maccatalyst/leveldb.framework/Versions/A/Resources/leveldb_Privacy.bundle')" Text="Missing Firebase native asset firebase-leveldb-leveldb_Privacy.bundle-catalyst. $(_FirebaseNativeCleanup)" />
+    <Error Condition="!Exists('$(_FirebaseNativeRoot)Firebase/FirebaseAppCheck/FirebaseAppCheckInterop.xcframework')" Text="Missing Firebase native asset firebase-app-check-interop. $(_FirebaseNativeCleanup)" />
+    <Error Condition="!Exists('$(_FirebaseNativeRoot)Firebase/FirebaseAuth/FirebaseAuthInterop.xcframework')" Text="Missing Firebase native asset firebase-auth-interop. $(_FirebaseNativeCleanup)" />
+    <Error Condition="!Exists('$(_FirebaseNativeRoot)Firebase/FirebaseAuth/FirebaseCoreExtension.xcframework')" Text="Missing Firebase native asset firebase-core-extension. $(_FirebaseNativeCleanup)" />
+    <Error Condition="'$(TargetPlatformIdentifier)' == 'ios' And !$([System.String]::Copy('$(RuntimeIdentifier)').StartsWith('iossimulator-')) And !Exists('$(_FirebaseNativeRoot)Firebase/FirebaseAuth/FirebaseCoreExtension.xcframework/ios-arm64/FirebaseCoreExtension.framework/FirebaseCoreExtension_Privacy.bundle')" Text="Missing Firebase native asset firebase-core-extension-FirebaseCoreExtension_Privacy.bundle-device. $(_FirebaseNativeCleanup)" />
+    <Error Condition="'$(TargetPlatformIdentifier)' == 'ios' And $([System.String]::Copy('$(RuntimeIdentifier)').StartsWith('iossimulator-')) And !Exists('$(_FirebaseNativeRoot)Firebase/FirebaseAuth/FirebaseCoreExtension.xcframework/ios-arm64_x86_64-simulator/FirebaseCoreExtension.framework/FirebaseCoreExtension_Privacy.bundle')" Text="Missing Firebase native asset firebase-core-extension-FirebaseCoreExtension_Privacy.bundle-simulator. $(_FirebaseNativeCleanup)" />
+    <Error Condition="'$(TargetPlatformIdentifier)' == 'maccatalyst' And !Exists('$(_FirebaseNativeRoot)Firebase/FirebaseAuth/FirebaseCoreExtension.xcframework/ios-arm64_x86_64-maccatalyst/FirebaseCoreExtension.framework/Versions/A/Resources/FirebaseCoreExtension_Privacy.bundle')" Text="Missing Firebase native asset firebase-core-extension-FirebaseCoreExtension_Privacy.bundle-catalyst. $(_FirebaseNativeCleanup)" />
+    <Error Condition="!Exists('$(_FirebaseNativeRoot)Firebase/FirebaseFunctions/FirebaseMessagingInterop.xcframework')" Text="Missing Firebase native asset firebase-messaging-interop. $(_FirebaseNativeCleanup)" />
+    <Error Condition="!Exists('$(_FirebaseNativeRoot)Firebase/FirebaseRemoteConfig/FirebaseRemoteConfigInterop.xcframework')" Text="Missing Firebase native asset firebase-remote-config-interop. $(_FirebaseNativeCleanup)" />
+    <Error Condition="!Exists('$(_FirebaseNativeRoot)Firebase/FirebaseFunctions/FirebaseSharedSwift.xcframework')" Text="Missing Firebase native asset firebase-shared-swift. $(_FirebaseNativeCleanup)" />
+    <ItemGroup>
+      <NativeReference Include="$(_FirebaseNativeRoot)Firebase/FirebaseAnalytics/FirebaseCore.xcframework">
+        <LinkerFlags>-ObjC -lc++</LinkerFlags>
+        <Frameworks>Foundation UIKit</Frameworks>
+        <Kind>Framework</Kind>
+        <SmartLink>True</SmartLink>
+        <ForceLoad>True</ForceLoad>
+        <LinkWithSwiftSystemLibraries>true</LinkWithSwiftSystemLibraries>
+      </NativeReference>
+      <_FirebaseBundle_firebase_core_FirebaseCore_Privacy_bundle_device Include="$(_FirebaseNativeRoot)Firebase/FirebaseAnalytics/FirebaseCore.xcframework/ios-arm64/FirebaseCore.framework/FirebaseCore_Privacy.bundle/**/*" Condition="'$(TargetPlatformIdentifier)' == 'ios' And !$([System.String]::Copy('$(RuntimeIdentifier)').StartsWith('iossimulator-'))" />
+      <_FirebaseBundle_firebase_core_FirebaseCore_Privacy_bundle_simulator Include="$(_FirebaseNativeRoot)Firebase/FirebaseAnalytics/FirebaseCore.xcframework/ios-arm64_x86_64-simulator/FirebaseCore.framework/FirebaseCore_Privacy.bundle/**/*" Condition="'$(TargetPlatformIdentifier)' == 'ios' And $([System.String]::Copy('$(RuntimeIdentifier)').StartsWith('iossimulator-'))" />
+      <_FirebaseBundle_firebase_core_FirebaseCore_Privacy_bundle_catalyst Include="$(_FirebaseNativeRoot)Firebase/FirebaseAnalytics/FirebaseCore.xcframework/ios-arm64_x86_64-maccatalyst/FirebaseCore.framework/Versions/A/Resources/FirebaseCore_Privacy.bundle/**/*" Condition="'$(TargetPlatformIdentifier)' == 'maccatalyst'" />
+      <NativeReference Include="$(_FirebaseNativeRoot)Firebase/FirebaseAnalytics/FirebaseCoreInternal.xcframework">
+        <LinkerFlags>-ObjC -lc++</LinkerFlags>
+        <Kind>Framework</Kind>
+        <SmartLink>True</SmartLink>
+        <ForceLoad>True</ForceLoad>
+        <LinkWithSwiftSystemLibraries>true</LinkWithSwiftSystemLibraries>
+      </NativeReference>
+      <_FirebaseBundle_firebase_core_internal_FirebaseCoreInternal_Privacy_bundle_device Include="$(_FirebaseNativeRoot)Firebase/FirebaseAnalytics/FirebaseCoreInternal.xcframework/ios-arm64/FirebaseCoreInternal.framework/FirebaseCoreInternal_Privacy.bundle/**/*" Condition="'$(TargetPlatformIdentifier)' == 'ios' And !$([System.String]::Copy('$(RuntimeIdentifier)').StartsWith('iossimulator-'))" />
+      <_FirebaseBundle_firebase_core_internal_FirebaseCoreInternal_Privacy_bundle_simulator Include="$(_FirebaseNativeRoot)Firebase/FirebaseAnalytics/FirebaseCoreInternal.xcframework/ios-arm64_x86_64-simulator/FirebaseCoreInternal.framework/FirebaseCoreInternal_Privacy.bundle/**/*" Condition="'$(TargetPlatformIdentifier)' == 'ios' And $([System.String]::Copy('$(RuntimeIdentifier)').StartsWith('iossimulator-'))" />
+      <_FirebaseBundle_firebase_core_internal_FirebaseCoreInternal_Privacy_bundle_catalyst Include="$(_FirebaseNativeRoot)Firebase/FirebaseAnalytics/FirebaseCoreInternal.xcframework/ios-arm64_x86_64-maccatalyst/FirebaseCoreInternal.framework/Versions/A/Resources/FirebaseCoreInternal_Privacy.bundle/**/*" Condition="'$(TargetPlatformIdentifier)' == 'maccatalyst'" />
+      <NativeReference Include="$(_FirebaseNativeRoot)Firebase/FirebaseFirestore/leveldb.xcframework">
+        <LinkerFlags>-ObjC -lc++</LinkerFlags>
+        <Kind>Framework</Kind>
+        <SmartLink>True</SmartLink>
+        <ForceLoad>True</ForceLoad>
+        <LinkWithSwiftSystemLibraries>true</LinkWithSwiftSystemLibraries>
+      </NativeReference>
+      <_FirebaseBundle_firebase_leveldb_leveldb_Privacy_bundle_device Include="$(_FirebaseNativeRoot)Firebase/FirebaseFirestore/leveldb.xcframework/ios-arm64/leveldb.framework/leveldb_Privacy.bundle/**/*" Condition="'$(TargetPlatformIdentifier)' == 'ios' And !$([System.String]::Copy('$(RuntimeIdentifier)').StartsWith('iossimulator-'))" />
+      <_FirebaseBundle_firebase_leveldb_leveldb_Privacy_bundle_simulator Include="$(_FirebaseNativeRoot)Firebase/FirebaseFirestore/leveldb.xcframework/ios-arm64_x86_64-simulator/leveldb.framework/leveldb_Privacy.bundle/**/*" Condition="'$(TargetPlatformIdentifier)' == 'ios' And $([System.String]::Copy('$(RuntimeIdentifier)').StartsWith('iossimulator-'))" />
+      <_FirebaseBundle_firebase_leveldb_leveldb_Privacy_bundle_catalyst Include="$(_FirebaseNativeRoot)Firebase/FirebaseFirestore/leveldb.xcframework/ios-arm64_x86_64-maccatalyst/leveldb.framework/Versions/A/Resources/leveldb_Privacy.bundle/**/*" Condition="'$(TargetPlatformIdentifier)' == 'maccatalyst'" />
+      <NativeReference Include="$(_FirebaseNativeRoot)Firebase/FirebaseAppCheck/FirebaseAppCheckInterop.xcframework">
+        <LinkerFlags>-ObjC -lc++</LinkerFlags>
+        <Kind>Framework</Kind>
+        <SmartLink>True</SmartLink>
+        <ForceLoad>True</ForceLoad>
+        <LinkWithSwiftSystemLibraries>true</LinkWithSwiftSystemLibraries>
+      </NativeReference>
+      <NativeReference Include="$(_FirebaseNativeRoot)Firebase/FirebaseAuth/FirebaseAuthInterop.xcframework">
+        <LinkerFlags>-ObjC -lc++</LinkerFlags>
+        <Kind>Framework</Kind>
+        <SmartLink>True</SmartLink>
+        <ForceLoad>True</ForceLoad>
+        <LinkWithSwiftSystemLibraries>true</LinkWithSwiftSystemLibraries>
+      </NativeReference>
+      <NativeReference Include="$(_FirebaseNativeRoot)Firebase/FirebaseAuth/FirebaseCoreExtension.xcframework">
+        <LinkerFlags>-ObjC -lc++</LinkerFlags>
+        <Kind>Framework</Kind>
+        <SmartLink>True</SmartLink>
+        <ForceLoad>True</ForceLoad>
+        <LinkWithSwiftSystemLibraries>true</LinkWithSwiftSystemLibraries>
+      </NativeReference>
+      <_FirebaseBundle_firebase_core_extension_FirebaseCoreExtension_Privacy_bundle_device Include="$(_FirebaseNativeRoot)Firebase/FirebaseAuth/FirebaseCoreExtension.xcframework/ios-arm64/FirebaseCoreExtension.framework/FirebaseCoreExtension_Privacy.bundle/**/*" Condition="'$(TargetPlatformIdentifier)' == 'ios' And !$([System.String]::Copy('$(RuntimeIdentifier)').StartsWith('iossimulator-'))" />
+      <_FirebaseBundle_firebase_core_extension_FirebaseCoreExtension_Privacy_bundle_simulator Include="$(_FirebaseNativeRoot)Firebase/FirebaseAuth/FirebaseCoreExtension.xcframework/ios-arm64_x86_64-simulator/FirebaseCoreExtension.framework/FirebaseCoreExtension_Privacy.bundle/**/*" Condition="'$(TargetPlatformIdentifier)' == 'ios' And $([System.String]::Copy('$(RuntimeIdentifier)').StartsWith('iossimulator-'))" />
+      <_FirebaseBundle_firebase_core_extension_FirebaseCoreExtension_Privacy_bundle_catalyst Include="$(_FirebaseNativeRoot)Firebase/FirebaseAuth/FirebaseCoreExtension.xcframework/ios-arm64_x86_64-maccatalyst/FirebaseCoreExtension.framework/Versions/A/Resources/FirebaseCoreExtension_Privacy.bundle/**/*" Condition="'$(TargetPlatformIdentifier)' == 'maccatalyst'" />
+      <NativeReference Include="$(_FirebaseNativeRoot)Firebase/FirebaseFunctions/FirebaseMessagingInterop.xcframework">
+        <LinkerFlags>-ObjC -lc++</LinkerFlags>
+        <Kind>Framework</Kind>
+        <SmartLink>True</SmartLink>
+        <ForceLoad>True</ForceLoad>
+        <LinkWithSwiftSystemLibraries>true</LinkWithSwiftSystemLibraries>
+      </NativeReference>
+      <NativeReference Include="$(_FirebaseNativeRoot)Firebase/FirebaseRemoteConfig/FirebaseRemoteConfigInterop.xcframework">
+        <LinkerFlags>-ObjC -lc++</LinkerFlags>
+        <Kind>Framework</Kind>
+        <SmartLink>True</SmartLink>
+        <ForceLoad>True</ForceLoad>
+        <LinkWithSwiftSystemLibraries>true</LinkWithSwiftSystemLibraries>
+      </NativeReference>
+      <NativeReference Include="$(_FirebaseNativeRoot)Firebase/FirebaseFunctions/FirebaseSharedSwift.xcframework">
+        <LinkerFlags>-ObjC -lc++</LinkerFlags>
+        <Kind>Framework</Kind>
+        <SmartLink>True</SmartLink>
+        <ForceLoad>True</ForceLoad>
+        <LinkWithSwiftSystemLibraries>true</LinkWithSwiftSystemLibraries>
+      </NativeReference>
+    </ItemGroup>
+    <ItemGroup>
+      <BundleResource Include="@(_FirebaseBundle_firebase_core_FirebaseCore_Privacy_bundle_device)">
+        <LogicalName>FirebaseCore_Privacy.bundle/%(_FirebaseBundle_firebase_core_FirebaseCore_Privacy_bundle_device.RecursiveDir)%(_FirebaseBundle_firebase_core_FirebaseCore_Privacy_bundle_device.Filename)%(_FirebaseBundle_firebase_core_FirebaseCore_Privacy_bundle_device.Extension)</LogicalName>
+      </BundleResource>
+    </ItemGroup>
+    <ItemGroup>
+      <BundleResource Include="@(_FirebaseBundle_firebase_core_FirebaseCore_Privacy_bundle_simulator)">
+        <LogicalName>FirebaseCore_Privacy.bundle/%(_FirebaseBundle_firebase_core_FirebaseCore_Privacy_bundle_simulator.RecursiveDir)%(_FirebaseBundle_firebase_core_FirebaseCore_Privacy_bundle_simulator.Filename)%(_FirebaseBundle_firebase_core_FirebaseCore_Privacy_bundle_simulator.Extension)</LogicalName>
+      </BundleResource>
+    </ItemGroup>
+    <ItemGroup>
+      <BundleResource Include="@(_FirebaseBundle_firebase_core_FirebaseCore_Privacy_bundle_catalyst)">
+        <LogicalName>FirebaseCore_Privacy.bundle/%(_FirebaseBundle_firebase_core_FirebaseCore_Privacy_bundle_catalyst.RecursiveDir)%(_FirebaseBundle_firebase_core_FirebaseCore_Privacy_bundle_catalyst.Filename)%(_FirebaseBundle_firebase_core_FirebaseCore_Privacy_bundle_catalyst.Extension)</LogicalName>
+      </BundleResource>
+    </ItemGroup>
+    <ItemGroup>
+      <BundleResource Include="@(_FirebaseBundle_firebase_core_internal_FirebaseCoreInternal_Privacy_bundle_device)">
+        <LogicalName>FirebaseCoreInternal_Privacy.bundle/%(_FirebaseBundle_firebase_core_internal_FirebaseCoreInternal_Privacy_bundle_device.RecursiveDir)%(_FirebaseBundle_firebase_core_internal_FirebaseCoreInternal_Privacy_bundle_device.Filename)%(_FirebaseBundle_firebase_core_internal_FirebaseCoreInternal_Privacy_bundle_device.Extension)</LogicalName>
+      </BundleResource>
+    </ItemGroup>
+    <ItemGroup>
+      <BundleResource Include="@(_FirebaseBundle_firebase_core_internal_FirebaseCoreInternal_Privacy_bundle_simulator)">
+        <LogicalName>FirebaseCoreInternal_Privacy.bundle/%(_FirebaseBundle_firebase_core_internal_FirebaseCoreInternal_Privacy_bundle_simulator.RecursiveDir)%(_FirebaseBundle_firebase_core_internal_FirebaseCoreInternal_Privacy_bundle_simulator.Filename)%(_FirebaseBundle_firebase_core_internal_FirebaseCoreInternal_Privacy_bundle_simulator.Extension)</LogicalName>
+      </BundleResource>
+    </ItemGroup>
+    <ItemGroup>
+      <BundleResource Include="@(_FirebaseBundle_firebase_core_internal_FirebaseCoreInternal_Privacy_bundle_catalyst)">
+        <LogicalName>FirebaseCoreInternal_Privacy.bundle/%(_FirebaseBundle_firebase_core_internal_FirebaseCoreInternal_Privacy_bundle_catalyst.RecursiveDir)%(_FirebaseBundle_firebase_core_internal_FirebaseCoreInternal_Privacy_bundle_catalyst.Filename)%(_FirebaseBundle_firebase_core_internal_FirebaseCoreInternal_Privacy_bundle_catalyst.Extension)</LogicalName>
+      </BundleResource>
+    </ItemGroup>
+    <ItemGroup>
+      <BundleResource Include="@(_FirebaseBundle_firebase_leveldb_leveldb_Privacy_bundle_device)">
+        <LogicalName>leveldb_Privacy.bundle/%(_FirebaseBundle_firebase_leveldb_leveldb_Privacy_bundle_device.RecursiveDir)%(_FirebaseBundle_firebase_leveldb_leveldb_Privacy_bundle_device.Filename)%(_FirebaseBundle_firebase_leveldb_leveldb_Privacy_bundle_device.Extension)</LogicalName>
+      </BundleResource>
+    </ItemGroup>
+    <ItemGroup>
+      <BundleResource Include="@(_FirebaseBundle_firebase_leveldb_leveldb_Privacy_bundle_simulator)">
+        <LogicalName>leveldb_Privacy.bundle/%(_FirebaseBundle_firebase_leveldb_leveldb_Privacy_bundle_simulator.RecursiveDir)%(_FirebaseBundle_firebase_leveldb_leveldb_Privacy_bundle_simulator.Filename)%(_FirebaseBundle_firebase_leveldb_leveldb_Privacy_bundle_simulator.Extension)</LogicalName>
+      </BundleResource>
+    </ItemGroup>
+    <ItemGroup>
+      <BundleResource Include="@(_FirebaseBundle_firebase_leveldb_leveldb_Privacy_bundle_catalyst)">
+        <LogicalName>leveldb_Privacy.bundle/%(_FirebaseBundle_firebase_leveldb_leveldb_Privacy_bundle_catalyst.RecursiveDir)%(_FirebaseBundle_firebase_leveldb_leveldb_Privacy_bundle_catalyst.Filename)%(_FirebaseBundle_firebase_leveldb_leveldb_Privacy_bundle_catalyst.Extension)</LogicalName>
+      </BundleResource>
+    </ItemGroup>
+    <ItemGroup>
+      <BundleResource Include="@(_FirebaseBundle_firebase_core_extension_FirebaseCoreExtension_Privacy_bundle_device)">
+        <LogicalName>FirebaseCoreExtension_Privacy.bundle/%(_FirebaseBundle_firebase_core_extension_FirebaseCoreExtension_Privacy_bundle_device.RecursiveDir)%(_FirebaseBundle_firebase_core_extension_FirebaseCoreExtension_Privacy_bundle_device.Filename)%(_FirebaseBundle_firebase_core_extension_FirebaseCoreExtension_Privacy_bundle_device.Extension)</LogicalName>
+      </BundleResource>
+    </ItemGroup>
+    <ItemGroup>
+      <BundleResource Include="@(_FirebaseBundle_firebase_core_extension_FirebaseCoreExtension_Privacy_bundle_simulator)">
+        <LogicalName>FirebaseCoreExtension_Privacy.bundle/%(_FirebaseBundle_firebase_core_extension_FirebaseCoreExtension_Privacy_bundle_simulator.RecursiveDir)%(_FirebaseBundle_firebase_core_extension_FirebaseCoreExtension_Privacy_bundle_simulator.Filename)%(_FirebaseBundle_firebase_core_extension_FirebaseCoreExtension_Privacy_bundle_simulator.Extension)</LogicalName>
+      </BundleResource>
+    </ItemGroup>
+    <ItemGroup>
+      <BundleResource Include="@(_FirebaseBundle_firebase_core_extension_FirebaseCoreExtension_Privacy_bundle_catalyst)">
+        <LogicalName>FirebaseCoreExtension_Privacy.bundle/%(_FirebaseBundle_firebase_core_extension_FirebaseCoreExtension_Privacy_bundle_catalyst.RecursiveDir)%(_FirebaseBundle_firebase_core_extension_FirebaseCoreExtension_Privacy_bundle_catalyst.Filename)%(_FirebaseBundle_firebase_core_extension_FirebaseCoreExtension_Privacy_bundle_catalyst.Extension)</LogicalName>
+      </BundleResource>
+    </ItemGroup>
+  </Target>
+</Project>

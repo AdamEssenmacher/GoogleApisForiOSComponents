@@ -4,6 +4,15 @@ namespace FirebaseBindingAudit.Tests;
 
 public sealed class AuditRunnerTests
 {
+    [Fact]
+    public void SwiftCompatibilityHeaderRetryUsesExplicitHeaderScopeAndInstalledSdk()
+    {
+        var args = AuditRunner.BuildSharpieHeaderArguments("/cache/Storage.framework/Headers/Storage-Swift.h", "/audit/output", "iphoneos27.1", "/audit/frameworks");
+        Assert.Equal(new[] { "bind", "--header", "/cache/Storage.framework/Headers/Storage-Swift.h", "--scope", "/cache/Storage.framework/Headers",
+            "--namespace", "Storage", "--sdk", "iphoneos27.1", "--output", "/audit/output", "-c", "-x", "objective-c", "-F", "/audit/frameworks" }, args);
+        Assert.DoesNotContain("--framework", args);
+    }
+
     [Theory]
     [InlineData(true)]
     [InlineData(false)]
@@ -263,18 +272,23 @@ public sealed class AuditRunnerTests
         }
     }
 
-    [Fact]
-    public void PrepareStagedXcframeworkForTarget_MaterializesSymlinkBeforeAddingUmbrellaImports()
+    [Theory]
+    [InlineData("FirebaseFunctions-umbrella.h")]
+    [InlineData("FirebaseFunctions.h")]
+    public void PrepareStagedXcframeworkForTarget_MaterializesSymlinkBeforeAddingUmbrellaImports(string umbrellaName)
     {
         var tempRoot = Path.Combine(Path.GetTempPath(), $"firebase-binding-audit-umbrella-{Guid.NewGuid():N}");
 
         try
         {
             var sourceXcframeworkPath = Path.Combine(tempRoot, "externals", "FirebaseFunctions.xcframework");
-            var sourceHeaderPath = Path.Combine(sourceXcframeworkPath, "ios-arm64", "FirebaseFunctions.framework", "Headers", "FirebaseFunctions-umbrella.h");
+            var sourceHeaderPath = Path.Combine(sourceXcframeworkPath, "ios-arm64", "FirebaseFunctions.framework", "Headers", umbrellaName);
             Directory.CreateDirectory(Path.GetDirectoryName(sourceHeaderPath)!);
             File.WriteAllText(sourceHeaderPath, "FOUNDATION_EXPORT double FirebaseFunctionsVersionNumber;\n");
 
+            var sourceModuleMap = Path.Combine(sourceXcframeworkPath, "ios-arm64", "FirebaseFunctions.framework", "Modules", "module.modulemap");
+            Directory.CreateDirectory(Path.GetDirectoryName(sourceModuleMap)!);
+            File.WriteAllText(sourceModuleMap, "framework module FirebaseFunctions { umbrella \".\" }\nmodule FirebaseFunctions.Swift { header \"FirebaseFunctions-Swift.h\" requires objc }");
             var stagedXcframeworkPath = Path.Combine(tempRoot, "frameworks", "FirebaseFunctions.xcframework");
             Directory.CreateDirectory(Path.GetDirectoryName(stagedXcframeworkPath)!);
             Directory.CreateSymbolicLink(stagedXcframeworkPath, sourceXcframeworkPath);
@@ -288,9 +302,12 @@ public sealed class AuditRunnerTests
                 },
                 stagedXcframeworkPath);
 
-            var stagedHeaderPath = Path.Combine(stagedXcframeworkPath, "ios-arm64", "FirebaseFunctions.framework", "Headers", "FirebaseFunctions-umbrella.h");
+            var stagedHeaderPath = Path.Combine(stagedXcframeworkPath, "ios-arm64", "FirebaseFunctions.framework", "Headers", umbrellaName);
             Assert.Contains("#import <FirebaseFunctions/FirebaseFunctions-Swift.h>", File.ReadAllText(stagedHeaderPath));
             Assert.DoesNotContain("#import <FirebaseFunctions/FirebaseFunctions-Swift.h>", File.ReadAllText(sourceHeaderPath));
+            var stagedModuleMap = Path.Combine(stagedXcframeworkPath, "ios-arm64", "FirebaseFunctions.framework", "Modules", "module.modulemap");
+            Assert.DoesNotContain("module FirebaseFunctions.Swift", File.ReadAllText(stagedModuleMap));
+            Assert.Contains("module FirebaseFunctions.Swift", File.ReadAllText(sourceModuleMap));
             Assert.False((new DirectoryInfo(stagedXcframeworkPath).Attributes & FileAttributes.ReparsePoint) != 0);
         }
         finally

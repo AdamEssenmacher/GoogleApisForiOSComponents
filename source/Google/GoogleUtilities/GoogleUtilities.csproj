@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFrameworks>net10.0-ios;net10.0-maccatalyst</TargetFrameworks>
     <Nullable>enable</Nullable>
@@ -8,8 +8,8 @@
     <SupportedOSPlatformVersion>15.0</SupportedOSPlatformVersion>
     <RootNamespace>Google.GoogleUtilities</RootNamespace>
     <AssemblyName>Google.GoogleUtilities</AssemblyName>
-    <AssemblyVersion>8.1.5</AssemblyVersion>
-    <FileVersion>8.1.5</FileVersion>
+    <AssemblyVersion>8.1.5.1</AssemblyVersion>
+    <FileVersion>8.1.5.1</FileVersion>
     <IPhoneResourcePrefix>Resources</IPhoneResourcePrefix>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <CompressBindingResourcePackage>true</CompressBindingResourcePackage>
@@ -17,8 +17,8 @@
   <PropertyGroup>
     <PackageId>AdamE.Google.iOS.GoogleUtilities</PackageId>
     <Title>GoogleUtilities</Title>
-    <Summary>GoogleUtilities packed for .NET for iOS</Summary>
-    <Description>GoogleUtilities packed for .NET for iOS</Description>
+    <Summary>GoogleUtilities managed bindings and XBD native delivery for .NET for iOS</Summary>
+    <Description>GoogleUtilities managed bindings and XBD native delivery for .NET for iOS</Description>
     <Authors>Microsoft, Adam Essenmacher</Authors>
     <Owners>Adam Essenmacher</Owners>
     <Copyright>© Microsoft Corporation. All rights reserved. © 2024, Adam Essenmacher.</Copyright>
@@ -26,24 +26,29 @@
     <PackageLicenseFile>License.md</PackageLicenseFile>
     <PackageReadmeFile>NUGET_README.md</PackageReadmeFile>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-    <PackageVersion>8.1.5</PackageVersion>
+    <PackageVersion>8.1.5.1</PackageVersion>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="..\..\AssemblyInfo.cs" />
+    <Compile Include="..\..\AssemblyInfo.cs" Condition="'$(Firebase13BuildInfoPath)' == ''" />
   </ItemGroup>
-  <ItemGroup>    
+  <ItemGroup>
     <None Include="License.md" Pack="True" PackagePath="License.md" />
     <None Include="../../../docs/NUGET_README.md" Pack="True" PackagePath="NUGET_README.md" />
   </ItemGroup>
   <ItemGroup>
-    <NativeReference Include="..\..\..\externals\GoogleUtilities.xcframework">
-      <Kind>Framework</Kind>
-      <SmartLink>True</SmartLink>
-      <ForceLoad>True</ForceLoad>
-      <Frameworks>Security SystemConfiguration</Frameworks>
-    </NativeReference>
+    <ObjcBindingApiDefinition Include="ApiDefinition.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ObjcBindingApiDefinition Include="ApiDefinition.cs" />
+    <PackageReference Include="Xamarin.Build.Download" Version="[0.11.6]" PrivateAssets="None" />
+    <None Include="../../../source/Firebase/native/AdamE.Google.iOS.GoogleUtilities.targets" Pack="True" PackagePath="build/AdamE.Google.iOS.GoogleUtilities.targets" />
+    <None Include="../../../source/Firebase/native/Firebase.Native.Common.targets" Pack="True" PackagePath="build/Firebase.Native.Common.targets" />
+    <None Include="../../../source/Firebase/native/AdamE.Google.iOS.GoogleUtilities.targets" Pack="True" PackagePath="buildTransitive/AdamE.Google.iOS.GoogleUtilities.targets" />
+    <None Include="../../../source/Firebase/native/Firebase.Native.Common.targets" Pack="True" PackagePath="buildTransitive/Firebase.Native.Common.targets" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="../../../source/Firebase/native/UPSTREAM-NOTICES.txt" Pack="True" PackagePath="UPSTREAM-NOTICES.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="$(Firebase13BuildInfoPath)" Condition="'$(Firebase13BuildInfoPath)' != ''" />
   </ItemGroup>
 </Project>

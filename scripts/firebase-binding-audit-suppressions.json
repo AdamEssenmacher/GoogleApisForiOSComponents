@@ -3985,6 +3985,507 @@
       "evidence": [
         "externals/GoogleSignIn.xcframework/ios-arm64/GoogleSignIn.framework/Headers/GIDAppCheckError.h#L29"
       ]
+    },
+    {
+      "id": "cloudmessaging-installation-notification-13-generator-omission",
+      "target": "CloudMessaging",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.CloudMessaging.Messaging",
+      "memberName": "InstallationIdUnregisteredNotification",
+      "selector": "FIRMessagingInstallationIdUnregisteredNotification",
+      "comparisonTypeKey": "FIRMessaging",
+      "comparisonMemberKey": "field|FIRMessagingInstallationIdUnregisteredNotification",
+      "reason": "The 13.1.1 public header still declares this NSNotificationName and the static binary exports its symbol. The primary generator omits this NS_SWIFT_NAME declaration; preserve the existing managed API.",
+      "evidence": [
+        "externals/FirebaseMessaging.xcframework/ios-arm64/FirebaseMessaging.framework/Headers/FIRMessaging.h#L74",
+        "tools/firebase13/check_symbols.py"
+      ]
+    },
+    {
+      "id": "firebase13-databasesourcestagebridge-explicit-init",
+      "target": "CloudFirestore",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.CloudFirestore.DatabaseSourceStageBridge",
+      "memberName": "Constructor",
+      "selector": "init",
+      "comparisonTypeKey": "__FIRDatabaseSourceStageBridge",
+      "comparisonMemberKey": "export|init",
+      "reason": "FIRPipelineBridge.h explicitly declares -init. The binding disables implicit default generation and exports that same initializer; Sharpie represents it through implicit NSObject construction. Runtime probes construct this native stage.",
+      "evidence": [
+        "externals/FirebaseFirestoreInternal.xcframework/ios-arm64/FirebaseFirestoreInternal.framework/Headers/FIRPipelineBridge.h",
+        "tools/firebase13/consumers.py"
+      ]
+    },
+    {
+      "id": "firebase13-deletestagebridge-explicit-init",
+      "target": "CloudFirestore",
+      "category": "stale-baseline-binding",
+      "typeName": "Firebase.CloudFirestore.DeleteStageBridge",
+      "memberName": "Constructor",
+      "selector": "init",
+      "comparisonTypeKey": "__FIRDeleteStageBridge",
+      "comparisonMemberKey": "export|init",
+      "reason": "FIRPipelineBridge.h explicitly declares -init. The binding disables implicit default generation and exports that same initializer; Sharpie represents it through implicit NSObject construction. Runtime probes construct this native stage.",
+      "evidence": [
+        "externals/FirebaseFirestoreInternal.xcframework/ios-arm64/FirebaseFirestoreInternal.framework/Headers/FIRPipelineBridge.h",
+        "tools/firebase13/consumers.py"
+      ]
+    },
+    {
+      "id": "firebase13-bsonobjectid-inherited-nsobject-equality",
+      "target": "CloudFirestore",
+      "category": "missing-baseline-binding",
+      "typeName": "FirebaseFirestoreInternal.FIRBSONObjectId",
+      "memberName": "IsEqual",
+      "selector": "isEqual:",
+      "comparisonTypeKey": "FIRBSONObjectId",
+      "comparisonMemberKey": "export|isEqual:",
+      "reason": "The native class overrides NSObject isEqual:. Managed NSObject.IsEqual(NSObject) already sends this selector with the same nullable object/BOOL contract, so no duplicate managed wrapper is required.",
+      "evidence": [
+        "externals/FirebaseFirestoreInternal.xcframework/ios-arm64/FirebaseFirestoreInternal.framework/Headers/FIRBSONObjectId.h",
+        "https://learn.microsoft.com/dotnet/api/foundation.nsobject.isequal"
+      ]
+    },
+    {
+      "id": "firebase13-bsontimestamp-inherited-nsobject-equality",
+      "target": "CloudFirestore",
+      "category": "missing-baseline-binding",
+      "typeName": "FirebaseFirestoreInternal.FIRBSONTimestamp",
+      "memberName": "IsEqual",
+      "selector": "isEqual:",
+      "comparisonTypeKey": "FIRBSONTimestamp",
+      "comparisonMemberKey": "export|isEqual:",
+      "reason": "The native class overrides NSObject isEqual:. Managed NSObject.IsEqual(NSObject) already sends this selector with the same nullable object/BOOL contract, so no duplicate managed wrapper is required.",
+      "evidence": [
+        "externals/FirebaseFirestoreInternal.xcframework/ios-arm64/FirebaseFirestoreInternal.framework/Headers/FIRBSONTimestamp.h",
+        "https://learn.microsoft.com/dotnet/api/foundation.nsobject.isequal"
+      ]
+    },
+    {
+      "id": "firebase13-blob-inherited-nsobject-equality",
+      "target": "CloudFirestore",
+      "category": "missing-baseline-binding",
+      "typeName": "FirebaseFirestoreInternal.FIRBlob",
+      "memberName": "IsEqual",
+      "selector": "isEqual:",
+      "comparisonTypeKey": "FIRBlob",
+      "comparisonMemberKey": "export|isEqual:",
+      "reason": "The native class overrides NSObject isEqual:. Managed NSObject.IsEqual(NSObject) already sends this selector with the same nullable object/BOOL contract, so no duplicate managed wrapper is required.",
+      "evidence": [
+        "externals/FirebaseFirestoreInternal.xcframework/ios-arm64/FirebaseFirestoreInternal.framework/Headers/FIRBlob.h",
+        "https://learn.microsoft.com/dotnet/api/foundation.nsobject.isequal"
+      ]
+    },
+    {
+      "id": "firebase13-decimal128value-inherited-nsobject-equality",
+      "target": "CloudFirestore",
+      "category": "missing-baseline-binding",
+      "typeName": "FirebaseFirestoreInternal.FIRDecimal128Value",
+      "memberName": "IsEqual",
+      "selector": "isEqual:",
+      "comparisonTypeKey": "FIRDecimal128Value",
+      "comparisonMemberKey": "export|isEqual:",
+      "reason": "The native class overrides NSObject isEqual:. Managed NSObject.IsEqual(NSObject) already sends this selector with the same nullable object/BOOL contract, so no duplicate managed wrapper is required.",
+      "evidence": [
+        "externals/FirebaseFirestoreInternal.xcframework/ios-arm64/FirebaseFirestoreInternal.framework/Headers/FIRDecimal128Value.h",
+        "https://learn.microsoft.com/dotnet/api/foundation.nsobject.isequal"
+      ]
+    },
+    {
+      "id": "firebase13-int32value-inherited-nsobject-equality",
+      "target": "CloudFirestore",
+      "category": "missing-baseline-binding",
+      "typeName": "FirebaseFirestoreInternal.FIRInt32Value",
+      "memberName": "IsEqual",
+      "selector": "isEqual:",
+      "comparisonTypeKey": "FIRInt32Value",
+      "comparisonMemberKey": "export|isEqual:",
+      "reason": "The native class overrides NSObject isEqual:. Managed NSObject.IsEqual(NSObject) already sends this selector with the same nullable object/BOOL contract, so no duplicate managed wrapper is required.",
+      "evidence": [
+        "externals/FirebaseFirestoreInternal.xcframework/ios-arm64/FirebaseFirestoreInternal.framework/Headers/FIRInt32Value.h",
+        "https://learn.microsoft.com/dotnet/api/foundation.nsobject.isequal"
+      ]
+    },
+    {
+      "id": "firebase13-maxkey-inherited-nsobject-equality",
+      "target": "CloudFirestore",
+      "category": "missing-baseline-binding",
+      "typeName": "FirebaseFirestoreInternal.FIRMaxKey",
+      "memberName": "IsEqual",
+      "selector": "isEqual:",
+      "comparisonTypeKey": "FIRMaxKey",
+      "comparisonMemberKey": "export|isEqual:",
+      "reason": "The native class overrides NSObject isEqual:. Managed NSObject.IsEqual(NSObject) already sends this selector with the same nullable object/BOOL contract, so no duplicate managed wrapper is required.",
+      "evidence": [
+        "externals/FirebaseFirestoreInternal.xcframework/ios-arm64/FirebaseFirestoreInternal.framework/Headers/FIRMaxKey.h",
+        "https://learn.microsoft.com/dotnet/api/foundation.nsobject.isequal"
+      ]
+    },
+    {
+      "id": "firebase13-minkey-inherited-nsobject-equality",
+      "target": "CloudFirestore",
+      "category": "missing-baseline-binding",
+      "typeName": "FirebaseFirestoreInternal.FIRMinKey",
+      "memberName": "IsEqual",
+      "selector": "isEqual:",
+      "comparisonTypeKey": "FIRMinKey",
+      "comparisonMemberKey": "export|isEqual:",
+      "reason": "The native class overrides NSObject isEqual:. Managed NSObject.IsEqual(NSObject) already sends this selector with the same nullable object/BOOL contract, so no duplicate managed wrapper is required.",
+      "evidence": [
+        "externals/FirebaseFirestoreInternal.xcframework/ios-arm64/FirebaseFirestoreInternal.framework/Headers/FIRMinKey.h",
+        "https://learn.microsoft.com/dotnet/api/foundation.nsobject.isequal"
+      ]
+    },
+    {
+      "id": "firebase13-regexvalue-inherited-nsobject-equality",
+      "target": "CloudFirestore",
+      "category": "missing-baseline-binding",
+      "typeName": "FirebaseFirestoreInternal.FIRRegexValue",
+      "memberName": "IsEqual",
+      "selector": "isEqual:",
+      "comparisonTypeKey": "FIRRegexValue",
+      "comparisonMemberKey": "export|isEqual:",
+      "reason": "The native class overrides NSObject isEqual:. Managed NSObject.IsEqual(NSObject) already sends this selector with the same nullable object/BOOL contract, so no duplicate managed wrapper is required.",
+      "evidence": [
+        "externals/FirebaseFirestoreInternal.xcframework/ios-arm64/FirebaseFirestoreInternal.framework/Headers/FIRRegexValue.h",
+        "https://learn.microsoft.com/dotnet/api/foundation.nsobject.isequal"
+      ]
+    },
+    {
+      "id": "firebase13-storage-firstorage-copy-existing-managed-api",
+      "target": "Storage",
+      "category": "missing-baseline-binding",
+      "typeName": "FirebaseStorage.FIRStorage",
+      "memberName": "Copy",
+      "selector": "copy",
+      "comparisonTypeKey": "FIRStorage",
+      "comparisonMemberKey": "export|copy",
+      "reason": "The baseline inherits Foundation.NSObject (and NSCopying where applicable). Its existing Copy/IsEqual/GetNativeHash/Description methods dispatch these native selectors. No duplicate managed declaration is required for the native override.",
+      "evidence": [
+        "source/Firebase/Storage/ApiDefinition.cs",
+        "externals/FirebaseStorage.xcframework/ios-arm64/FirebaseStorage.framework/Headers/FirebaseStorage-Swift.h",
+        "tools/firebase13/consumers.py"
+      ]
+    },
+    {
+      "id": "firebase13-storage-firstorage-isequal-existing-managed-api",
+      "target": "Storage",
+      "category": "missing-baseline-binding",
+      "typeName": "FirebaseStorage.FIRStorage",
+      "memberName": "IsEqual",
+      "selector": "isEqual:",
+      "comparisonTypeKey": "FIRStorage",
+      "comparisonMemberKey": "export|isEqual:",
+      "reason": "The baseline inherits Foundation.NSObject (and NSCopying where applicable). Its existing Copy/IsEqual/GetNativeHash/Description methods dispatch these native selectors. No duplicate managed declaration is required for the native override.",
+      "evidence": [
+        "source/Firebase/Storage/ApiDefinition.cs",
+        "externals/FirebaseStorage.xcframework/ios-arm64/FirebaseStorage.framework/Headers/FirebaseStorage-Swift.h",
+        "tools/firebase13/consumers.py"
+      ]
+    },
+    {
+      "id": "firebase13-storage-firstorage-hash-existing-managed-api",
+      "target": "Storage",
+      "category": "missing-baseline-binding",
+      "typeName": "FirebaseStorage.FIRStorage",
+      "memberName": "Hash",
+      "selector": "hash",
+      "comparisonTypeKey": "FIRStorage",
+      "comparisonMemberKey": "export|hash",
+      "reason": "The baseline inherits Foundation.NSObject (and NSCopying where applicable). Its existing Copy/IsEqual/GetNativeHash/Description methods dispatch these native selectors. No duplicate managed declaration is required for the native override.",
+      "evidence": [
+        "source/Firebase/Storage/ApiDefinition.cs",
+        "externals/FirebaseStorage.xcframework/ios-arm64/FirebaseStorage.framework/Headers/FirebaseStorage-Swift.h",
+        "tools/firebase13/consumers.py"
+      ]
+    },
+    {
+      "id": "firebase13-storage-firstoragedownloadtask-enqueue-existing-managed-api",
+      "target": "Storage",
+      "category": "missing-baseline-binding",
+      "typeName": "FirebaseStorage.FIRStorageDownloadTask",
+      "memberName": "Enqueue",
+      "selector": "enqueue",
+      "comparisonTypeKey": "FIRStorageDownloadTask",
+      "comparisonMemberKey": "export|enqueue",
+      "reason": "The baseline adopts StorageTaskManagement; bgen generates this exact public selector on both concrete task classes from that protocol. The generated StorageDownloadTask.g.cs and StorageUploadTask.g.cs confirm these methods already exist.",
+      "evidence": [
+        "source/Firebase/Storage/ApiDefinition.cs",
+        "externals/FirebaseStorage.xcframework/ios-arm64/FirebaseStorage.framework/Headers/FirebaseStorage-Swift.h",
+        "tools/firebase13/consumers.py"
+      ]
+    },
+    {
+      "id": "firebase13-storage-firstoragedownloadtask-pause-existing-managed-api",
+      "target": "Storage",
+      "category": "missing-baseline-binding",
+      "typeName": "FirebaseStorage.FIRStorageDownloadTask",
+      "memberName": "Pause",
+      "selector": "pause",
+      "comparisonTypeKey": "FIRStorageDownloadTask",
+      "comparisonMemberKey": "export|pause",
+      "reason": "The baseline adopts StorageTaskManagement; bgen generates this exact public selector on both concrete task classes from that protocol. The generated StorageDownloadTask.g.cs and StorageUploadTask.g.cs confirm these methods already exist.",
+      "evidence": [
+        "source/Firebase/Storage/ApiDefinition.cs",
+        "externals/FirebaseStorage.xcframework/ios-arm64/FirebaseStorage.framework/Headers/FirebaseStorage-Swift.h",
+        "tools/firebase13/consumers.py"
+      ]
+    },
+    {
+      "id": "firebase13-storage-firstoragedownloadtask-cancel-existing-managed-api",
+      "target": "Storage",
+      "category": "missing-baseline-binding",
+      "typeName": "FirebaseStorage.FIRStorageDownloadTask",
+      "memberName": "Cancel",
+      "selector": "cancel",
+      "comparisonTypeKey": "FIRStorageDownloadTask",
+      "comparisonMemberKey": "export|cancel",
+      "reason": "The baseline adopts StorageTaskManagement; bgen generates this exact public selector on both concrete task classes from that protocol. The generated StorageDownloadTask.g.cs and StorageUploadTask.g.cs confirm these methods already exist.",
+      "evidence": [
+        "source/Firebase/Storage/ApiDefinition.cs",
+        "externals/FirebaseStorage.xcframework/ios-arm64/FirebaseStorage.framework/Headers/FirebaseStorage-Swift.h",
+        "tools/firebase13/consumers.py"
+      ]
+    },
+    {
+      "id": "firebase13-storage-firstoragedownloadtask-resume-existing-managed-api",
+      "target": "Storage",
+      "category": "missing-baseline-binding",
+      "typeName": "FirebaseStorage.FIRStorageDownloadTask",
+      "memberName": "Resume",
+      "selector": "resume",
+      "comparisonTypeKey": "FIRStorageDownloadTask",
+      "comparisonMemberKey": "export|resume",
+      "reason": "The baseline adopts StorageTaskManagement; bgen generates this exact public selector on both concrete task classes from that protocol. The generated StorageDownloadTask.g.cs and StorageUploadTask.g.cs confirm these methods already exist.",
+      "evidence": [
+        "source/Firebase/Storage/ApiDefinition.cs",
+        "externals/FirebaseStorage.xcframework/ios-arm64/FirebaseStorage.framework/Headers/FirebaseStorage-Swift.h",
+        "tools/firebase13/consumers.py"
+      ]
+    },
+    {
+      "id": "firebase13-storage-firstoragelistresult-copy-existing-managed-api",
+      "target": "Storage",
+      "category": "missing-baseline-binding",
+      "typeName": "FirebaseStorage.FIRStorageListResult",
+      "memberName": "Copy",
+      "selector": "copy",
+      "comparisonTypeKey": "FIRStorageListResult",
+      "comparisonMemberKey": "export|copy",
+      "reason": "The baseline inherits Foundation.NSObject (and NSCopying where applicable). Its existing Copy/IsEqual/GetNativeHash/Description methods dispatch these native selectors. No duplicate managed declaration is required for the native override.",
+      "evidence": [
+        "source/Firebase/Storage/ApiDefinition.cs",
+        "externals/FirebaseStorage.xcframework/ios-arm64/FirebaseStorage.framework/Headers/FirebaseStorage-Swift.h",
+        "tools/firebase13/consumers.py"
+      ]
+    },
+    {
+      "id": "firebase13-storage-firstoragemetadata-copy-existing-managed-api",
+      "target": "Storage",
+      "category": "missing-baseline-binding",
+      "typeName": "FirebaseStorage.FIRStorageMetadata",
+      "memberName": "Copy",
+      "selector": "copy",
+      "comparisonTypeKey": "FIRStorageMetadata",
+      "comparisonMemberKey": "export|copy",
+      "reason": "The baseline inherits Foundation.NSObject (and NSCopying where applicable). Its existing Copy/IsEqual/GetNativeHash/Description methods dispatch these native selectors. No duplicate managed declaration is required for the native override.",
+      "evidence": [
+        "source/Firebase/Storage/ApiDefinition.cs",
+        "externals/FirebaseStorage.xcframework/ios-arm64/FirebaseStorage.framework/Headers/FirebaseStorage-Swift.h",
+        "tools/firebase13/consumers.py"
+      ]
+    },
+    {
+      "id": "firebase13-storage-firstoragemetadata-isequal-existing-managed-api",
+      "target": "Storage",
+      "category": "missing-baseline-binding",
+      "typeName": "FirebaseStorage.FIRStorageMetadata",
+      "memberName": "IsEqual",
+      "selector": "isEqual:",
+      "comparisonTypeKey": "FIRStorageMetadata",
+      "comparisonMemberKey": "export|isEqual:",
+      "reason": "The baseline inherits Foundation.NSObject (and NSCopying where applicable). Its existing Copy/IsEqual/GetNativeHash/Description methods dispatch these native selectors. No duplicate managed declaration is required for the native override.",
+      "evidence": [
+        "source/Firebase/Storage/ApiDefinition.cs",
+        "externals/FirebaseStorage.xcframework/ios-arm64/FirebaseStorage.framework/Headers/FirebaseStorage-Swift.h",
+        "tools/firebase13/consumers.py"
+      ]
+    },
+    {
+      "id": "firebase13-storage-firstoragemetadata-hash-existing-managed-api",
+      "target": "Storage",
+      "category": "missing-baseline-binding",
+      "typeName": "FirebaseStorage.FIRStorageMetadata",
+      "memberName": "Hash",
+      "selector": "hash",
+      "comparisonTypeKey": "FIRStorageMetadata",
+      "comparisonMemberKey": "export|hash",
+      "reason": "The baseline inherits Foundation.NSObject (and NSCopying where applicable). Its existing Copy/IsEqual/GetNativeHash/Description methods dispatch these native selectors. No duplicate managed declaration is required for the native override.",
+      "evidence": [
+        "source/Firebase/Storage/ApiDefinition.cs",
+        "externals/FirebaseStorage.xcframework/ios-arm64/FirebaseStorage.framework/Headers/FirebaseStorage-Swift.h",
+        "tools/firebase13/consumers.py"
+      ]
+    },
+    {
+      "id": "firebase13-storage-firstoragemetadata-description-existing-managed-api",
+      "target": "Storage",
+      "category": "missing-baseline-binding",
+      "typeName": "FirebaseStorage.FIRStorageMetadata",
+      "memberName": "Description",
+      "selector": "description",
+      "comparisonTypeKey": "FIRStorageMetadata",
+      "comparisonMemberKey": "export|description",
+      "reason": "The baseline inherits Foundation.NSObject (and NSCopying where applicable). Its existing Copy/IsEqual/GetNativeHash/Description methods dispatch these native selectors. No duplicate managed declaration is required for the native override.",
+      "evidence": [
+        "source/Firebase/Storage/ApiDefinition.cs",
+        "externals/FirebaseStorage.xcframework/ios-arm64/FirebaseStorage.framework/Headers/FirebaseStorage-Swift.h",
+        "tools/firebase13/consumers.py"
+      ]
+    },
+    {
+      "id": "firebase13-storage-firstoragereference-copy-existing-managed-api",
+      "target": "Storage",
+      "category": "missing-baseline-binding",
+      "typeName": "FirebaseStorage.FIRStorageReference",
+      "memberName": "Copy",
+      "selector": "copy",
+      "comparisonTypeKey": "FIRStorageReference",
+      "comparisonMemberKey": "export|copy",
+      "reason": "The baseline inherits Foundation.NSObject (and NSCopying where applicable). Its existing Copy/IsEqual/GetNativeHash/Description methods dispatch these native selectors. No duplicate managed declaration is required for the native override.",
+      "evidence": [
+        "source/Firebase/Storage/ApiDefinition.cs",
+        "externals/FirebaseStorage.xcframework/ios-arm64/FirebaseStorage.framework/Headers/FirebaseStorage-Swift.h",
+        "tools/firebase13/consumers.py"
+      ]
+    },
+    {
+      "id": "firebase13-storage-firstoragereference-isequal-existing-managed-api",
+      "target": "Storage",
+      "category": "missing-baseline-binding",
+      "typeName": "FirebaseStorage.FIRStorageReference",
+      "memberName": "IsEqual",
+      "selector": "isEqual:",
+      "comparisonTypeKey": "FIRStorageReference",
+      "comparisonMemberKey": "export|isEqual:",
+      "reason": "The baseline inherits Foundation.NSObject (and NSCopying where applicable). Its existing Copy/IsEqual/GetNativeHash/Description methods dispatch these native selectors. No duplicate managed declaration is required for the native override.",
+      "evidence": [
+        "source/Firebase/Storage/ApiDefinition.cs",
+        "externals/FirebaseStorage.xcframework/ios-arm64/FirebaseStorage.framework/Headers/FirebaseStorage-Swift.h",
+        "tools/firebase13/consumers.py"
+      ]
+    },
+    {
+      "id": "firebase13-storage-firstoragereference-hash-existing-managed-api",
+      "target": "Storage",
+      "category": "missing-baseline-binding",
+      "typeName": "FirebaseStorage.FIRStorageReference",
+      "memberName": "Hash",
+      "selector": "hash",
+      "comparisonTypeKey": "FIRStorageReference",
+      "comparisonMemberKey": "export|hash",
+      "reason": "The baseline inherits Foundation.NSObject (and NSCopying where applicable). Its existing Copy/IsEqual/GetNativeHash/Description methods dispatch these native selectors. No duplicate managed declaration is required for the native override.",
+      "evidence": [
+        "source/Firebase/Storage/ApiDefinition.cs",
+        "externals/FirebaseStorage.xcframework/ios-arm64/FirebaseStorage.framework/Headers/FirebaseStorage-Swift.h",
+        "tools/firebase13/consumers.py"
+      ]
+    },
+    {
+      "id": "firebase13-storage-firstoragereference-description-existing-managed-api",
+      "target": "Storage",
+      "category": "missing-baseline-binding",
+      "typeName": "FirebaseStorage.FIRStorageReference",
+      "memberName": "Description",
+      "selector": "description",
+      "comparisonTypeKey": "FIRStorageReference",
+      "comparisonMemberKey": "export|description",
+      "reason": "The baseline inherits Foundation.NSObject (and NSCopying where applicable). Its existing Copy/IsEqual/GetNativeHash/Description methods dispatch these native selectors. No duplicate managed declaration is required for the native override.",
+      "evidence": [
+        "source/Firebase/Storage/ApiDefinition.cs",
+        "externals/FirebaseStorage.xcframework/ios-arm64/FirebaseStorage.framework/Headers/FirebaseStorage-Swift.h",
+        "tools/firebase13/consumers.py"
+      ]
+    },
+    {
+      "id": "firebase13-storage-firstoragetasksnapshot-description-existing-managed-api",
+      "target": "Storage",
+      "category": "missing-baseline-binding",
+      "typeName": "FirebaseStorage.FIRStorageTaskSnapshot",
+      "memberName": "Description",
+      "selector": "description",
+      "comparisonTypeKey": "FIRStorageTaskSnapshot",
+      "comparisonMemberKey": "export|description",
+      "reason": "The baseline inherits Foundation.NSObject (and NSCopying where applicable). Its existing Copy/IsEqual/GetNativeHash/Description methods dispatch these native selectors. No duplicate managed declaration is required for the native override.",
+      "evidence": [
+        "source/Firebase/Storage/ApiDefinition.cs",
+        "externals/FirebaseStorage.xcframework/ios-arm64/FirebaseStorage.framework/Headers/FirebaseStorage-Swift.h",
+        "tools/firebase13/consumers.py"
+      ]
+    },
+    {
+      "id": "firebase13-storage-firstorageuploadtask-enqueue-existing-managed-api",
+      "target": "Storage",
+      "category": "missing-baseline-binding",
+      "typeName": "FirebaseStorage.FIRStorageUploadTask",
+      "memberName": "Enqueue",
+      "selector": "enqueue",
+      "comparisonTypeKey": "FIRStorageUploadTask",
+      "comparisonMemberKey": "export|enqueue",
+      "reason": "The baseline adopts StorageTaskManagement; bgen generates this exact public selector on both concrete task classes from that protocol. The generated StorageDownloadTask.g.cs and StorageUploadTask.g.cs confirm these methods already exist.",
+      "evidence": [
+        "source/Firebase/Storage/ApiDefinition.cs",
+        "externals/FirebaseStorage.xcframework/ios-arm64/FirebaseStorage.framework/Headers/FirebaseStorage-Swift.h",
+        "tools/firebase13/consumers.py"
+      ]
+    },
+    {
+      "id": "firebase13-storage-firstorageuploadtask-pause-existing-managed-api",
+      "target": "Storage",
+      "category": "missing-baseline-binding",
+      "typeName": "FirebaseStorage.FIRStorageUploadTask",
+      "memberName": "Pause",
+      "selector": "pause",
+      "comparisonTypeKey": "FIRStorageUploadTask",
+      "comparisonMemberKey": "export|pause",
+      "reason": "The baseline adopts StorageTaskManagement; bgen generates this exact public selector on both concrete task classes from that protocol. The generated StorageDownloadTask.g.cs and StorageUploadTask.g.cs confirm these methods already exist.",
+      "evidence": [
+        "source/Firebase/Storage/ApiDefinition.cs",
+        "externals/FirebaseStorage.xcframework/ios-arm64/FirebaseStorage.framework/Headers/FirebaseStorage-Swift.h",
+        "tools/firebase13/consumers.py"
+      ]
+    },
+    {
+      "id": "firebase13-storage-firstorageuploadtask-cancel-existing-managed-api",
+      "target": "Storage",
+      "category": "missing-baseline-binding",
+      "typeName": "FirebaseStorage.FIRStorageUploadTask",
+      "memberName": "Cancel",
+      "selector": "cancel",
+      "comparisonTypeKey": "FIRStorageUploadTask",
+      "comparisonMemberKey": "export|cancel",
+      "reason": "The baseline adopts StorageTaskManagement; bgen generates this exact public selector on both concrete task classes from that protocol. The generated StorageDownloadTask.g.cs and StorageUploadTask.g.cs confirm these methods already exist.",
+      "evidence": [
+        "source/Firebase/Storage/ApiDefinition.cs",
+        "externals/FirebaseStorage.xcframework/ios-arm64/FirebaseStorage.framework/Headers/FirebaseStorage-Swift.h",
+        "tools/firebase13/consumers.py"
+      ]
+    },
+    {
+      "id": "firebase13-storage-firstorageuploadtask-resume-existing-managed-api",
+      "target": "Storage",
+      "category": "missing-baseline-binding",
+      "typeName": "FirebaseStorage.FIRStorageUploadTask",
+      "memberName": "Resume",
+      "selector": "resume",
+      "comparisonTypeKey": "FIRStorageUploadTask",
+      "comparisonMemberKey": "export|resume",
+      "reason": "The baseline adopts StorageTaskManagement; bgen generates this exact public selector on both concrete task classes from that protocol. The generated StorageDownloadTask.g.cs and StorageUploadTask.g.cs confirm these methods already exist.",
+      "evidence": [
+        "source/Firebase/Storage/ApiDefinition.cs",
+        "externals/FirebaseStorage.xcframework/ios-arm64/FirebaseStorage.framework/Headers/FirebaseStorage-Swift.h",
+        "tools/firebase13/consumers.py"
+      ]
     }
   ]
 }

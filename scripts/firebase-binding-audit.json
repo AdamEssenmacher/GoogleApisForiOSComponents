@@ -232,7 +232,11 @@
       "helperFiles": [
         "Extension.cs"
       ],
-      "sharpieMode": "auto"
+      "sharpieMode": "forceFallback",
+      "objcUmbrellaHeaderImports": [
+        "FirebaseStorage/FirebaseStorage-Swift.h"
+      ],
+      "useSharpieComparisonFallback": true
     },
     {
       "id": "SignIn",

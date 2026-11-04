@@ -1,0 +1,15 @@
+<Project>
+  <Import Project="$(MSBuildThisFileDirectory)Firebase.Native.Common.targets" />
+  <Target Name="_FirebaseNative_AdamE_Firebase_iOS_Storage" BeforeTargets="_BeforeCoreCompileInterfaceDefinitions" DependsOnTargets="_XamarinBuildDownload" Condition="'$(IsBindingProject)' != 'true' And '$(DesignTimeBuild)' != 'true' And '$(IsCrossTargetingBuild)' != 'true' And ('$(TargetPlatformIdentifier)' == 'ios' Or '$(TargetPlatformIdentifier)' == 'maccatalyst') And ('$(OutputType)' != 'Library' Or '$(IsAppExtension)' == 'True')">
+    <Error Condition="!Exists('$(_FirebaseNativeRoot)Firebase/FirebaseStorage/FirebaseStorage.xcframework')" Text="Missing Firebase native asset firebase-storage. $(_FirebaseNativeCleanup)" />
+    <ItemGroup>
+      <NativeReference Include="$(_FirebaseNativeRoot)Firebase/FirebaseStorage/FirebaseStorage.xcframework">
+        <LinkerFlags>-ObjC -lc++</LinkerFlags>
+        <Kind>Framework</Kind>
+        <SmartLink>True</SmartLink>
+        <ForceLoad>True</ForceLoad>
+        <LinkWithSwiftSystemLibraries>true</LinkWithSwiftSystemLibraries>
+      </NativeReference>
+    </ItemGroup>
+  </Target>
+</Project>

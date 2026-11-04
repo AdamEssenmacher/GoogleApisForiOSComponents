@@ -1,0 +1,40 @@
+<Project>
+  <Import Project="$(MSBuildThisFileDirectory)Firebase.Native.Common.targets" />
+  <Target Name="_FirebaseNative_AdamE_Firebase_iOS_Crashlytics" BeforeTargets="_BeforeCoreCompileInterfaceDefinitions" DependsOnTargets="_XamarinBuildDownload" Condition="'$(IsBindingProject)' != 'true' And '$(DesignTimeBuild)' != 'true' And '$(IsCrossTargetingBuild)' != 'true' And ('$(TargetPlatformIdentifier)' == 'ios' Or '$(TargetPlatformIdentifier)' == 'maccatalyst') And ('$(OutputType)' != 'Library' Or '$(IsAppExtension)' == 'True')">
+    <Error Condition="!Exists('$(_FirebaseNativeRoot)Firebase/FirebaseCrashlytics/FirebaseCrashlytics.xcframework')" Text="Missing Firebase native asset firebase-crashlytics. $(_FirebaseNativeCleanup)" />
+    <Error Condition="'$(TargetPlatformIdentifier)' == 'ios' And !$([System.String]::Copy('$(RuntimeIdentifier)').StartsWith('iossimulator-')) And !Exists('$(_FirebaseNativeRoot)Firebase/FirebaseCrashlytics/FirebaseCrashlytics.xcframework/ios-arm64/FirebaseCrashlytics.framework/FirebaseCrashlytics_Privacy.bundle')" Text="Missing Firebase native asset firebase-crashlytics-FirebaseCrashlytics_Privacy.bundle-device. $(_FirebaseNativeCleanup)" />
+    <Error Condition="'$(TargetPlatformIdentifier)' == 'ios' And $([System.String]::Copy('$(RuntimeIdentifier)').StartsWith('iossimulator-')) And !Exists('$(_FirebaseNativeRoot)Firebase/FirebaseCrashlytics/FirebaseCrashlytics.xcframework/ios-arm64_x86_64-simulator/FirebaseCrashlytics.framework/FirebaseCrashlytics_Privacy.bundle')" Text="Missing Firebase native asset firebase-crashlytics-FirebaseCrashlytics_Privacy.bundle-simulator. $(_FirebaseNativeCleanup)" />
+    <Error Condition="'$(TargetPlatformIdentifier)' == 'maccatalyst' And !Exists('$(_FirebaseNativeRoot)Firebase/FirebaseCrashlytics/FirebaseCrashlytics.xcframework/ios-arm64_x86_64-maccatalyst/FirebaseCrashlytics.framework/Versions/A/Resources/FirebaseCrashlytics_Privacy.bundle')" Text="Missing Firebase native asset firebase-crashlytics-FirebaseCrashlytics_Privacy.bundle-catalyst. $(_FirebaseNativeCleanup)" />
+    <Error Condition="!Exists('$(_FirebaseNativeRoot)Firebase/FirebaseCrashlytics/run')" Text="Missing Firebase native asset firebase-crashlytics-run. $(_FirebaseNativeCleanup)" />
+    <Error Condition="!Exists('$(_FirebaseNativeRoot)Firebase/FirebaseCrashlytics/upload-symbols')" Text="Missing Firebase native asset firebase-crashlytics-upload-symbols. $(_FirebaseNativeCleanup)" />
+    <ItemGroup>
+      <NativeReference Include="$(_FirebaseNativeRoot)Firebase/FirebaseCrashlytics/FirebaseCrashlytics.xcframework">
+        <LinkerFlags>-ObjC -lc++ -lz</LinkerFlags>
+        <Frameworks>Security SystemConfiguration</Frameworks>
+        <Kind>Framework</Kind>
+        <SmartLink>True</SmartLink>
+        <ForceLoad>True</ForceLoad>
+        <LinkWithSwiftSystemLibraries>true</LinkWithSwiftSystemLibraries>
+      </NativeReference>
+      <_FirebaseBundle_firebase_crashlytics_FirebaseCrashlytics_Privacy_bundle_device Include="$(_FirebaseNativeRoot)Firebase/FirebaseCrashlytics/FirebaseCrashlytics.xcframework/ios-arm64/FirebaseCrashlytics.framework/FirebaseCrashlytics_Privacy.bundle/**/*" Condition="'$(TargetPlatformIdentifier)' == 'ios' And !$([System.String]::Copy('$(RuntimeIdentifier)').StartsWith('iossimulator-'))" />
+      <_FirebaseBundle_firebase_crashlytics_FirebaseCrashlytics_Privacy_bundle_simulator Include="$(_FirebaseNativeRoot)Firebase/FirebaseCrashlytics/FirebaseCrashlytics.xcframework/ios-arm64_x86_64-simulator/FirebaseCrashlytics.framework/FirebaseCrashlytics_Privacy.bundle/**/*" Condition="'$(TargetPlatformIdentifier)' == 'ios' And $([System.String]::Copy('$(RuntimeIdentifier)').StartsWith('iossimulator-'))" />
+      <_FirebaseBundle_firebase_crashlytics_FirebaseCrashlytics_Privacy_bundle_catalyst Include="$(_FirebaseNativeRoot)Firebase/FirebaseCrashlytics/FirebaseCrashlytics.xcframework/ios-arm64_x86_64-maccatalyst/FirebaseCrashlytics.framework/Versions/A/Resources/FirebaseCrashlytics_Privacy.bundle/**/*" Condition="'$(TargetPlatformIdentifier)' == 'maccatalyst'" />
+    </ItemGroup>
+    <ItemGroup>
+      <BundleResource Include="@(_FirebaseBundle_firebase_crashlytics_FirebaseCrashlytics_Privacy_bundle_device)">
+        <LogicalName>FirebaseCrashlytics_Privacy.bundle/%(_FirebaseBundle_firebase_crashlytics_FirebaseCrashlytics_Privacy_bundle_device.RecursiveDir)%(_FirebaseBundle_firebase_crashlytics_FirebaseCrashlytics_Privacy_bundle_device.Filename)%(_FirebaseBundle_firebase_crashlytics_FirebaseCrashlytics_Privacy_bundle_device.Extension)</LogicalName>
+      </BundleResource>
+    </ItemGroup>
+    <ItemGroup>
+      <BundleResource Include="@(_FirebaseBundle_firebase_crashlytics_FirebaseCrashlytics_Privacy_bundle_simulator)">
+        <LogicalName>FirebaseCrashlytics_Privacy.bundle/%(_FirebaseBundle_firebase_crashlytics_FirebaseCrashlytics_Privacy_bundle_simulator.RecursiveDir)%(_FirebaseBundle_firebase_crashlytics_FirebaseCrashlytics_Privacy_bundle_simulator.Filename)%(_FirebaseBundle_firebase_crashlytics_FirebaseCrashlytics_Privacy_bundle_simulator.Extension)</LogicalName>
+      </BundleResource>
+    </ItemGroup>
+    <ItemGroup>
+      <BundleResource Include="@(_FirebaseBundle_firebase_crashlytics_FirebaseCrashlytics_Privacy_bundle_catalyst)">
+        <LogicalName>FirebaseCrashlytics_Privacy.bundle/%(_FirebaseBundle_firebase_crashlytics_FirebaseCrashlytics_Privacy_bundle_catalyst.RecursiveDir)%(_FirebaseBundle_firebase_crashlytics_FirebaseCrashlytics_Privacy_bundle_catalyst.Filename)%(_FirebaseBundle_firebase_crashlytics_FirebaseCrashlytics_Privacy_bundle_catalyst.Extension)</LogicalName>
+      </BundleResource>
+    </ItemGroup>
+  </Target>
+  <Import Project="$(MSBuildThisFileDirectory)Firebase.Crashlytics.Upload.targets" />
+</Project>

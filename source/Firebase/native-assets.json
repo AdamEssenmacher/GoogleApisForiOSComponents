@@ -1,0 +1,1498 @@
+{
+  "schema": 1,
+  "releaseVersion": "13.1.1",
+  "publicationEnabled": false,
+  "source": {
+    "id": "FirebaseiOSSDK-13.1.1",
+    "version": "13.1.1",
+    "url": "https://github.com/firebase/firebase-ios-sdk/releases/download/13.1.1/Firebase.zip",
+    "sha256": "eab04111b6b6ebd2bbd9264b452b2eec5be13703207f32f7cf10d9040e246b70",
+    "kind": "Zip",
+    "extractionRoot": "Firebase",
+    "lockTimeout": 1800
+  },
+  "packages": [
+    {
+      "id": "Firebase.ABTesting",
+      "project": "source/Firebase/ABTesting/ABTesting.csproj",
+      "package": "AdamE.Firebase.iOS.ABTesting",
+      "assets": [
+        {
+          "id": "firebase-ab-testing",
+          "path": "Firebase/FirebaseABTesting/FirebaseABTesting.xcframework",
+          "kind": "XCFramework",
+          "owner": "Firebase.ABTesting",
+          "logical": null,
+          "condition": null,
+          "metadata": {
+            "LinkerFlags": "-ObjC -lc++ -lz",
+            "Frameworks": "Security SystemConfiguration",
+            "Kind": "Framework",
+            "SmartLink": "True",
+            "ForceLoad": "True",
+            "LinkWithSwiftSystemLibraries": "true"
+          },
+          "binaryVersion": "13.1.1"
+        },
+        {
+          "id": "firebase-ab-testing-FirebaseABTesting_Privacy.bundle-device",
+          "path": "Firebase/FirebaseABTesting/FirebaseABTesting.xcframework/ios-arm64/FirebaseABTesting.framework/FirebaseABTesting_Privacy.bundle",
+          "kind": "Bundle",
+          "owner": "Firebase.ABTesting",
+          "logical": "FirebaseABTesting_Privacy.bundle",
+          "condition": "'$(TargetPlatformIdentifier)' == 'ios' And !$([System.String]::Copy('$(RuntimeIdentifier)').StartsWith('iossimulator-'))"
+        },
+        {
+          "id": "firebase-ab-testing-FirebaseABTesting_Privacy.bundle-simulator",
+          "path": "Firebase/FirebaseABTesting/FirebaseABTesting.xcframework/ios-arm64_x86_64-simulator/FirebaseABTesting.framework/FirebaseABTesting_Privacy.bundle",
+          "kind": "Bundle",
+          "owner": "Firebase.ABTesting",
+          "logical": "FirebaseABTesting_Privacy.bundle",
+          "condition": "'$(TargetPlatformIdentifier)' == 'ios' And $([System.String]::Copy('$(RuntimeIdentifier)').StartsWith('iossimulator-'))"
+        },
+        {
+          "id": "firebase-ab-testing-FirebaseABTesting_Privacy.bundle-catalyst",
+          "path": "Firebase/FirebaseABTesting/FirebaseABTesting.xcframework/ios-arm64_x86_64-maccatalyst/FirebaseABTesting.framework/Versions/A/Resources/FirebaseABTesting_Privacy.bundle",
+          "kind": "Bundle",
+          "owner": "Firebase.ABTesting",
+          "logical": "FirebaseABTesting_Privacy.bundle",
+          "condition": "'$(TargetPlatformIdentifier)' == 'maccatalyst'"
+        }
+      ],
+      "version": "13.1.1.0",
+      "dependencies": [
+        "AdamE.Firebase.iOS.Core"
+      ]
+    },
+    {
+      "id": "Firebase.Analytics",
+      "project": "source/Firebase/Analytics/Analytics.csproj",
+      "package": "AdamE.Firebase.iOS.Analytics",
+      "assets": [
+        {
+          "id": "firebase-analytics",
+          "path": "Firebase/FirebaseAnalytics/FirebaseAnalytics.xcframework",
+          "kind": "XCFramework",
+          "owner": "Firebase.Analytics",
+          "logical": null,
+          "condition": null,
+          "metadata": {
+            "LinkerFlags": "-ObjC -lc++ -lsqlite3 -lz",
+            "Frameworks": "StoreKit",
+            "Kind": "Framework",
+            "SmartLink": "True",
+            "ForceLoad": "True",
+            "LinkWithSwiftSystemLibraries": "true"
+          },
+          "binaryVersion": "13.0.1"
+        }
+      ],
+      "version": "13.1.1.0",
+      "dependencies": [
+        "AdamE.Firebase.iOS.Core",
+        "AdamE.Firebase.iOS.Installations",
+        "AdamE.Google.iOS.GoogleAppMeasurement"
+      ]
+    },
+    {
+      "id": "Firebase.Auth",
+      "project": "source/Firebase/Auth/Auth.csproj",
+      "package": "AdamE.Firebase.iOS.Auth",
+      "assets": [
+        {
+          "id": "firebase-auth",
+          "path": "Firebase/FirebaseAuth/FirebaseAuth.xcframework",
+          "kind": "XCFramework",
+          "owner": "Firebase.Auth",
+          "logical": null,
+          "condition": null,
+          "metadata": {
+            "LinkerFlags": "-ObjC -lc++ -lsqlite3 -lz",
+            "Frameworks": "Security SafariServices",
+            "Kind": "Framework",
+            "SmartLink": "True",
+            "ForceLoad": "True",
+            "LinkWithSwiftSystemLibraries": "true"
+          },
+          "binaryVersion": "13.1.1"
+        },
+        {
+          "id": "firebase-auth-FirebaseAuth_Privacy.bundle-device",
+          "path": "Firebase/FirebaseAuth/FirebaseAuth.xcframework/ios-arm64/FirebaseAuth.framework/FirebaseAuth_Privacy.bundle",
+          "kind": "Bundle",
+          "owner": "Firebase.Auth",
+          "logical": "FirebaseAuth_Privacy.bundle",
+          "condition": "'$(TargetPlatformIdentifier)' == 'ios' And !$([System.String]::Copy('$(RuntimeIdentifier)').StartsWith('iossimulator-'))"
+        },
+        {
+          "id": "firebase-auth-FirebaseAuth_Privacy.bundle-simulator",
+          "path": "Firebase/FirebaseAuth/FirebaseAuth.xcframework/ios-arm64_x86_64-simulator/FirebaseAuth.framework/FirebaseAuth_Privacy.bundle",
+          "kind": "Bundle",
+          "owner": "Firebase.Auth",
+          "logical": "FirebaseAuth_Privacy.bundle",
+          "condition": "'$(TargetPlatformIdentifier)' == 'ios' And $([System.String]::Copy('$(RuntimeIdentifier)').StartsWith('iossimulator-'))"
+        },
+        {
+          "id": "firebase-auth-FirebaseAuth_Privacy.bundle-catalyst",
+          "path": "Firebase/FirebaseAuth/FirebaseAuth.xcframework/ios-arm64_x86_64-maccatalyst/FirebaseAuth.framework/Versions/A/Resources/FirebaseAuth_Privacy.bundle",
+          "kind": "Bundle",
+          "owner": "Firebase.Auth",
+          "logical": "FirebaseAuth_Privacy.bundle",
+          "condition": "'$(TargetPlatformIdentifier)' == 'maccatalyst'"
+        }
+      ],
+      "version": "13.1.1.0",
+      "dependencies": [
+        "AdamE.Firebase.iOS.Core",
+        "AdamE.Google.iOS.GTMSessionFetcher"
+      ]
+    },
+    {
+      "id": "Firebase.CloudFirestore",
+      "project": "source/Firebase/CloudFirestore/CloudFirestore.csproj",
+      "package": "AdamE.Firebase.iOS.CloudFirestore",
+      "assets": [
+        {
+          "id": "firebase-firestore",
+          "path": "Firebase/FirebaseFirestore/FirebaseFirestore.xcframework",
+          "kind": "XCFramework",
+          "owner": "Firebase.CloudFirestore",
+          "logical": null,
+          "condition": null,
+          "metadata": {
+            "LinkerFlags": "-ObjC -lc++",
+            "Frameworks": "MobileCoreServices SystemConfiguration",
+            "Kind": "Framework",
+            "SmartLink": "True",
+            "ForceLoad": "True",
+            "LinkWithSwiftSystemLibraries": "true"
+          },
+          "binaryVersion": "13.1.1"
+        },
+        {
+          "id": "firebase-firestore-FirebaseFirestore_Privacy.bundle-device",
+          "path": "Firebase/FirebaseFirestore/FirebaseFirestore.xcframework/ios-arm64/FirebaseFirestore.framework/FirebaseFirestore_Privacy.bundle",
+          "kind": "Bundle",
+          "owner": "Firebase.CloudFirestore",
+          "logical": "FirebaseFirestore_Privacy.bundle",
+          "condition": "'$(TargetPlatformIdentifier)' == 'ios' And !$([System.String]::Copy('$(RuntimeIdentifier)').StartsWith('iossimulator-'))"
+        },
+        {
+          "id": "firebase-firestore-FirebaseFirestore_Privacy.bundle-simulator",
+          "path": "Firebase/FirebaseFirestore/FirebaseFirestore.xcframework/ios-arm64_x86_64-simulator/FirebaseFirestore.framework/FirebaseFirestore_Privacy.bundle",
+          "kind": "Bundle",
+          "owner": "Firebase.CloudFirestore",
+          "logical": "FirebaseFirestore_Privacy.bundle",
+          "condition": "'$(TargetPlatformIdentifier)' == 'ios' And $([System.String]::Copy('$(RuntimeIdentifier)').StartsWith('iossimulator-'))"
+        },
+        {
+          "id": "firebase-firestore-FirebaseFirestore_Privacy.bundle-catalyst",
+          "path": "Firebase/FirebaseFirestore/FirebaseFirestore.xcframework/ios-arm64_x86_64-maccatalyst/FirebaseFirestore.framework/Versions/A/Resources/FirebaseFirestore_Privacy.bundle",
+          "kind": "Bundle",
+          "owner": "Firebase.CloudFirestore",
+          "logical": "FirebaseFirestore_Privacy.bundle",
+          "condition": "'$(TargetPlatformIdentifier)' == 'maccatalyst'"
+        },
+        {
+          "id": "firebase-firestore-internal",
+          "path": "Firebase/FirebaseFirestore/FirebaseFirestoreInternal.xcframework",
+          "kind": "XCFramework",
+          "owner": "Firebase.CloudFirestore",
+          "logical": null,
+          "condition": null,
+          "metadata": {
+            "LinkerFlags": "-ObjC -lc++",
+            "Frameworks": "MobileCoreServices SystemConfiguration UIKit Network",
+            "Kind": "Framework",
+            "SmartLink": "True",
+            "ForceLoad": "True",
+            "LinkWithSwiftSystemLibraries": "true"
+          },
+          "binaryVersion": "13.1.1"
+        },
+        {
+          "id": "firebase-firestore-internal-FirebaseFirestoreInternal_Privacy.bundle-device",
+          "path": "Firebase/FirebaseFirestore/FirebaseFirestoreInternal.xcframework/ios-arm64/FirebaseFirestoreInternal.framework/FirebaseFirestoreInternal_Privacy.bundle",
+          "kind": "Bundle",
+          "owner": "Firebase.CloudFirestore",
+          "logical": "FirebaseFirestoreInternal_Privacy.bundle",
+          "condition": "'$(TargetPlatformIdentifier)' == 'ios' And !$([System.String]::Copy('$(RuntimeIdentifier)').StartsWith('iossimulator-'))"
+        },
+        {
+          "id": "firebase-firestore-internal-FirebaseFirestoreInternal_Privacy.bundle-simulator",
+          "path": "Firebase/FirebaseFirestore/FirebaseFirestoreInternal.xcframework/ios-arm64_x86_64-simulator/FirebaseFirestoreInternal.framework/FirebaseFirestoreInternal_Privacy.bundle",
+          "kind": "Bundle",
+          "owner": "Firebase.CloudFirestore",
+          "logical": "FirebaseFirestoreInternal_Privacy.bundle",
+          "condition": "'$(TargetPlatformIdentifier)' == 'ios' And $([System.String]::Copy('$(RuntimeIdentifier)').StartsWith('iossimulator-'))"
+        },
+        {
+          "id": "firebase-firestore-internal-FirebaseFirestoreInternal_Privacy.bundle-catalyst",
+          "path": "Firebase/FirebaseFirestore/FirebaseFirestoreInternal.xcframework/ios-arm64_x86_64-maccatalyst/FirebaseFirestoreInternal.framework/Versions/A/Resources/FirebaseFirestoreInternal_Privacy.bundle",
+          "kind": "Bundle",
+          "owner": "Firebase.CloudFirestore",
+          "logical": "FirebaseFirestoreInternal_Privacy.bundle",
+          "condition": "'$(TargetPlatformIdentifier)' == 'maccatalyst'"
+        },
+        {
+          "id": "firebase-firestore-absl",
+          "path": "Firebase/FirebaseFirestore/absl.xcframework",
+          "kind": "XCFramework",
+          "owner": "Firebase.CloudFirestore",
+          "logical": null,
+          "condition": null,
+          "metadata": {
+            "LinkerFlags": "-ObjC -lc++",
+            "Kind": "Framework",
+            "SmartLink": "True",
+            "ForceLoad": "True",
+            "LinkWithSwiftSystemLibraries": "true"
+          },
+          "binaryVersion": "1.20250512.2"
+        },
+        {
+          "id": "firebase-firestore-absl-xcprivacy.bundle-device",
+          "path": "Firebase/FirebaseFirestore/absl.xcframework/ios-arm64/absl.framework/xcprivacy.bundle",
+          "kind": "Bundle",
+          "owner": "Firebase.CloudFirestore",
+          "logical": "xcprivacy.bundle",
+          "condition": "'$(TargetPlatformIdentifier)' == 'ios' And !$([System.String]::Copy('$(RuntimeIdentifier)').StartsWith('iossimulator-'))"
+        },
+        {
+          "id": "firebase-firestore-absl-xcprivacy.bundle-simulator",
+          "path": "Firebase/FirebaseFirestore/absl.xcframework/ios-arm64_x86_64-simulator/absl.framework/xcprivacy.bundle",
+          "kind": "Bundle",
+          "owner": "Firebase.CloudFirestore",
+          "logical": "xcprivacy.bundle",
+          "condition": "'$(TargetPlatformIdentifier)' == 'ios' And $([System.String]::Copy('$(RuntimeIdentifier)').StartsWith('iossimulator-'))"
+        },
+        {
+          "id": "firebase-firestore-absl-xcprivacy.bundle-catalyst",
+          "path": "Firebase/FirebaseFirestore/absl.xcframework/ios-arm64_x86_64-maccatalyst/absl.framework/Versions/A/Resources/xcprivacy.bundle",
+          "kind": "Bundle",
+          "owner": "Firebase.CloudFirestore",
+          "logical": "xcprivacy.bundle",
+          "condition": "'$(TargetPlatformIdentifier)' == 'maccatalyst'"
+        },
+        {
+          "id": "firebase-firestore-grpc",
+          "path": "Firebase/FirebaseFirestore/grpc.xcframework",
+          "kind": "XCFramework",
+          "owner": "Firebase.CloudFirestore",
+          "logical": null,
+          "condition": null,
+          "metadata": {
+            "LinkerFlags": "-ObjC -lc++ -lz",
+            "Kind": "Framework",
+            "SmartLink": "True",
+            "ForceLoad": "True",
+            "LinkWithSwiftSystemLibraries": "true"
+          },
+          "binaryVersion": "1.83.1"
+        },
+        {
+          "id": "firebase-firestore-grpc-grpc.bundle-device",
+          "path": "Firebase/FirebaseFirestore/grpc.xcframework/ios-arm64/grpc.framework/grpc.bundle",
+          "kind": "Bundle",
+          "owner": "Firebase.CloudFirestore",
+          "logical": "grpc.bundle",
+          "condition": "'$(TargetPlatformIdentifier)' == 'ios' And !$([System.String]::Copy('$(RuntimeIdentifier)').StartsWith('iossimulator-'))"
+        },
+        {
+          "id": "firebase-firestore-grpc-grpc.bundle-simulator",
+          "path": "Firebase/FirebaseFirestore/grpc.xcframework/ios-arm64_x86_64-simulator/grpc.framework/grpc.bundle",
+          "kind": "Bundle",
+          "owner": "Firebase.CloudFirestore",
+          "logical": "grpc.bundle",
+          "condition": "'$(TargetPlatformIdentifier)' == 'ios' And $([System.String]::Copy('$(RuntimeIdentifier)').StartsWith('iossimulator-'))"
+        },
+        {
+          "id": "firebase-firestore-grpc-grpc.bundle-catalyst",
+          "path": "Firebase/FirebaseFirestore/grpc.xcframework/ios-arm64_x86_64-maccatalyst/grpc.framework/Versions/A/Resources/grpc.bundle",
+          "kind": "Bundle",
+          "owner": "Firebase.CloudFirestore",
+          "logical": "grpc.bundle",
+          "condition": "'$(TargetPlatformIdentifier)' == 'maccatalyst'"
+        },
+        {
+          "id": "firebase-firestore-grpcpp",
+          "path": "Firebase/FirebaseFirestore/grpcpp.xcframework",
+          "kind": "XCFramework",
+          "owner": "Firebase.CloudFirestore",
+          "logical": null,
+          "condition": null,
+          "metadata": {
+            "LinkerFlags": "-ObjC -lc++",
+            "Kind": "Framework",
+            "SmartLink": "True",
+            "ForceLoad": "True",
+            "LinkWithSwiftSystemLibraries": "true"
+          },
+          "binaryVersion": "1.83.1"
+        },
+        {
+          "id": "firebase-firestore-grpcpp-grpcpp.bundle-device",
+          "path": "Firebase/FirebaseFirestore/grpcpp.xcframework/ios-arm64/grpcpp.framework/grpcpp.bundle",
+          "kind": "Bundle",
+          "owner": "Firebase.CloudFirestore",
+          "logical": "grpcpp.bundle",
+          "condition": "'$(TargetPlatformIdentifier)' == 'ios' And !$([System.String]::Copy('$(RuntimeIdentifier)').StartsWith('iossimulator-'))"
+        },
+        {
+          "id": "firebase-firestore-grpcpp-grpcpp.bundle-simulator",
+          "path": "Firebase/FirebaseFirestore/grpcpp.xcframework/ios-arm64_x86_64-simulator/grpcpp.framework/grpcpp.bundle",
+          "kind": "Bundle",
+          "owner": "Firebase.CloudFirestore",
+          "logical": "grpcpp.bundle",
+          "condition": "'$(TargetPlatformIdentifier)' == 'ios' And $([System.String]::Copy('$(RuntimeIdentifier)').StartsWith('iossimulator-'))"
+        },
+        {
+          "id": "firebase-firestore-grpcpp-grpcpp.bundle-catalyst",
+          "path": "Firebase/FirebaseFirestore/grpcpp.xcframework/ios-arm64_x86_64-maccatalyst/grpcpp.framework/Versions/A/Resources/grpcpp.bundle",
+          "kind": "Bundle",
+          "owner": "Firebase.CloudFirestore",
+          "logical": "grpcpp.bundle",
+          "condition": "'$(TargetPlatformIdentifier)' == 'maccatalyst'"
+        },
+        {
+          "id": "firebase-firestore-openssl-grpc",
+          "path": "Firebase/FirebaseFirestore/openssl_grpc.xcframework",
+          "kind": "XCFramework",
+          "owner": "Firebase.CloudFirestore",
+          "logical": null,
+          "condition": null,
+          "metadata": {
+            "LinkerFlags": "-ObjC -lc++",
+            "Kind": "Framework",
+            "SmartLink": "True",
+            "ForceLoad": "True",
+            "LinkWithSwiftSystemLibraries": "true"
+          },
+          "binaryVersion": "0.0.42"
+        },
+        {
+          "id": "firebase-firestore-openssl-grpc-openssl_grpc.bundle-device",
+          "path": "Firebase/FirebaseFirestore/openssl_grpc.xcframework/ios-arm64/openssl_grpc.framework/openssl_grpc.bundle",
+          "kind": "Bundle",
+          "owner": "Firebase.CloudFirestore",
+          "logical": "openssl_grpc.bundle",
+          "condition": "'$(TargetPlatformIdentifier)' == 'ios' And !$([System.String]::Copy('$(RuntimeIdentifier)').StartsWith('iossimulator-'))"
+        },
+        {
+          "id": "firebase-firestore-openssl-grpc-openssl_grpc.bundle-simulator",
+          "path": "Firebase/FirebaseFirestore/openssl_grpc.xcframework/ios-arm64_x86_64-simulator/openssl_grpc.framework/openssl_grpc.bundle",
+          "kind": "Bundle",
+          "owner": "Firebase.CloudFirestore",
+          "logical": "openssl_grpc.bundle",
+          "condition": "'$(TargetPlatformIdentifier)' == 'ios' And $([System.String]::Copy('$(RuntimeIdentifier)').StartsWith('iossimulator-'))"
+        },
+        {
+          "id": "firebase-firestore-openssl-grpc-openssl_grpc.bundle-catalyst",
+          "path": "Firebase/FirebaseFirestore/openssl_grpc.xcframework/ios-arm64_x86_64-maccatalyst/openssl_grpc.framework/Versions/A/Resources/openssl_grpc.bundle",
+          "kind": "Bundle",
+          "owner": "Firebase.CloudFirestore",
+          "logical": "openssl_grpc.bundle",
+          "condition": "'$(TargetPlatformIdentifier)' == 'maccatalyst'"
+        }
+      ],
+      "version": "13.1.1.0",
+      "dependencies": [
+        "AdamE.Firebase.iOS.Core"
+      ]
+    },
+    {
+      "id": "Firebase.CloudFunctions",
+      "project": "source/Firebase/CloudFunctions/CloudFunctions.csproj",
+      "package": "AdamE.Firebase.iOS.CloudFunctions",
+      "assets": [
+        {
+          "id": "firebase-functions",
+          "path": "Firebase/FirebaseFunctions/FirebaseFunctions.xcframework",
+          "kind": "XCFramework",
+          "owner": "Firebase.CloudFunctions",
+          "logical": null,
+          "condition": null,
+          "metadata": {
+            "LinkerFlags": "-ObjC -lc++",
+            "Kind": "Framework",
+            "SmartLink": "True",
+            "ForceLoad": "True",
+            "LinkWithSwiftSystemLibraries": "true"
+          },
+          "binaryVersion": "13.1.1"
+        }
+      ],
+      "version": "13.1.1.0",
+      "dependencies": [
+        "AdamE.Firebase.iOS.Core",
+        "AdamE.Google.iOS.GTMSessionFetcher"
+      ]
+    },
+    {
+      "id": "Firebase.CloudMessaging",
+      "project": "source/Firebase/CloudMessaging/CloudMessaging.csproj",
+      "package": "AdamE.Firebase.iOS.CloudMessaging",
+      "assets": [
+        {
+          "id": "firebase-messaging",
+          "path": "Firebase/FirebaseMessaging/FirebaseMessaging.xcframework",
+          "kind": "XCFramework",
+          "owner": "Firebase.CloudMessaging",
+          "logical": null,
+          "condition": null,
+          "metadata": {
+            "LinkerFlags": "-ObjC -lc++ -lsqlite3",
+            "Frameworks": "SystemConfiguration",
+            "WeakFrameworks": "UserNotifications",
+            "Kind": "Framework",
+            "SmartLink": "True",
+            "ForceLoad": "True",
+            "LinkWithSwiftSystemLibraries": "true"
+          },
+          "binaryVersion": "13.1.1"
+        },
+        {
+          "id": "firebase-messaging-FirebaseMessaging_Privacy.bundle-device",
+          "path": "Firebase/FirebaseMessaging/FirebaseMessaging.xcframework/ios-arm64/FirebaseMessaging.framework/FirebaseMessaging_Privacy.bundle",
+          "kind": "Bundle",
+          "owner": "Firebase.CloudMessaging",
+          "logical": "FirebaseMessaging_Privacy.bundle",
+          "condition": "'$(TargetPlatformIdentifier)' == 'ios' And !$([System.String]::Copy('$(RuntimeIdentifier)').StartsWith('iossimulator-'))"
+        },
+        {
+          "id": "firebase-messaging-FirebaseMessaging_Privacy.bundle-simulator",
+          "path": "Firebase/FirebaseMessaging/FirebaseMessaging.xcframework/ios-arm64_x86_64-simulator/FirebaseMessaging.framework/FirebaseMessaging_Privacy.bundle",
+          "kind": "Bundle",
+          "owner": "Firebase.CloudMessaging",
+          "logical": "FirebaseMessaging_Privacy.bundle",
+          "condition": "'$(TargetPlatformIdentifier)' == 'ios' And $([System.String]::Copy('$(RuntimeIdentifier)').StartsWith('iossimulator-'))"
+        },
+        {
+          "id": "firebase-messaging-FirebaseMessaging_Privacy.bundle-catalyst",
+          "path": "Firebase/FirebaseMessaging/FirebaseMessaging.xcframework/ios-arm64_x86_64-maccatalyst/FirebaseMessaging.framework/Versions/A/Resources/FirebaseMessaging_Privacy.bundle",
+          "kind": "Bundle",
+          "owner": "Firebase.CloudMessaging",
+          "logical": "FirebaseMessaging_Privacy.bundle",
+          "condition": "'$(TargetPlatformIdentifier)' == 'maccatalyst'"
+        }
+      ],
+      "version": "13.1.1.0",
+      "dependencies": [
+        "AdamE.Firebase.iOS.Core",
+        "AdamE.Firebase.iOS.Installations"
+      ]
+    },
+    {
+      "id": "Firebase.Core",
+      "project": "source/Firebase/Core/Core.csproj",
+      "package": "AdamE.Firebase.iOS.Core",
+      "assets": [
+        {
+          "id": "firebase-core",
+          "path": "Firebase/FirebaseAnalytics/FirebaseCore.xcframework",
+          "kind": "XCFramework",
+          "owner": "Firebase.Core",
+          "logical": null,
+          "condition": null,
+          "metadata": {
+            "LinkerFlags": "-ObjC -lc++",
+            "Frameworks": "Foundation UIKit",
+            "Kind": "Framework",
+            "SmartLink": "True",
+            "ForceLoad": "True",
+            "LinkWithSwiftSystemLibraries": "true"
+          },
+          "binaryVersion": "13.1.1"
+        },
+        {
+          "id": "firebase-core-FirebaseCore_Privacy.bundle-device",
+          "path": "Firebase/FirebaseAnalytics/FirebaseCore.xcframework/ios-arm64/FirebaseCore.framework/FirebaseCore_Privacy.bundle",
+          "kind": "Bundle",
+          "owner": "Firebase.Core",
+          "logical": "FirebaseCore_Privacy.bundle",
+          "condition": "'$(TargetPlatformIdentifier)' == 'ios' And !$([System.String]::Copy('$(RuntimeIdentifier)').StartsWith('iossimulator-'))"
+        },
+        {
+          "id": "firebase-core-FirebaseCore_Privacy.bundle-simulator",
+          "path": "Firebase/FirebaseAnalytics/FirebaseCore.xcframework/ios-arm64_x86_64-simulator/FirebaseCore.framework/FirebaseCore_Privacy.bundle",
+          "kind": "Bundle",
+          "owner": "Firebase.Core",
+          "logical": "FirebaseCore_Privacy.bundle",
+          "condition": "'$(TargetPlatformIdentifier)' == 'ios' And $([System.String]::Copy('$(RuntimeIdentifier)').StartsWith('iossimulator-'))"
+        },
+        {
+          "id": "firebase-core-FirebaseCore_Privacy.bundle-catalyst",
+          "path": "Firebase/FirebaseAnalytics/FirebaseCore.xcframework/ios-arm64_x86_64-maccatalyst/FirebaseCore.framework/Versions/A/Resources/FirebaseCore_Privacy.bundle",
+          "kind": "Bundle",
+          "owner": "Firebase.Core",
+          "logical": "FirebaseCore_Privacy.bundle",
+          "condition": "'$(TargetPlatformIdentifier)' == 'maccatalyst'"
+        },
+        {
+          "id": "firebase-core-internal",
+          "path": "Firebase/FirebaseAnalytics/FirebaseCoreInternal.xcframework",
+          "kind": "XCFramework",
+          "owner": "Firebase.Core",
+          "logical": null,
+          "condition": null,
+          "metadata": {
+            "LinkerFlags": "-ObjC -lc++",
+            "Kind": "Framework",
+            "SmartLink": "True",
+            "ForceLoad": "True",
+            "LinkWithSwiftSystemLibraries": "true"
+          },
+          "binaryVersion": "13.1.1"
+        },
+        {
+          "id": "firebase-core-internal-FirebaseCoreInternal_Privacy.bundle-device",
+          "path": "Firebase/FirebaseAnalytics/FirebaseCoreInternal.xcframework/ios-arm64/FirebaseCoreInternal.framework/FirebaseCoreInternal_Privacy.bundle",
+          "kind": "Bundle",
+          "owner": "Firebase.Core",
+          "logical": "FirebaseCoreInternal_Privacy.bundle",
+          "condition": "'$(TargetPlatformIdentifier)' == 'ios' And !$([System.String]::Copy('$(RuntimeIdentifier)').StartsWith('iossimulator-'))"
+        },
+        {
+          "id": "firebase-core-internal-FirebaseCoreInternal_Privacy.bundle-simulator",
+          "path": "Firebase/FirebaseAnalytics/FirebaseCoreInternal.xcframework/ios-arm64_x86_64-simulator/FirebaseCoreInternal.framework/FirebaseCoreInternal_Privacy.bundle",
+          "kind": "Bundle",
+          "owner": "Firebase.Core",
+          "logical": "FirebaseCoreInternal_Privacy.bundle",
+          "condition": "'$(TargetPlatformIdentifier)' == 'ios' And $([System.String]::Copy('$(RuntimeIdentifier)').StartsWith('iossimulator-'))"
+        },
+        {
+          "id": "firebase-core-internal-FirebaseCoreInternal_Privacy.bundle-catalyst",
+          "path": "Firebase/FirebaseAnalytics/FirebaseCoreInternal.xcframework/ios-arm64_x86_64-maccatalyst/FirebaseCoreInternal.framework/Versions/A/Resources/FirebaseCoreInternal_Privacy.bundle",
+          "kind": "Bundle",
+          "owner": "Firebase.Core",
+          "logical": "FirebaseCoreInternal_Privacy.bundle",
+          "condition": "'$(TargetPlatformIdentifier)' == 'maccatalyst'"
+        },
+        {
+          "id": "firebase-leveldb",
+          "path": "Firebase/FirebaseFirestore/leveldb.xcframework",
+          "kind": "XCFramework",
+          "owner": "Firebase.Core",
+          "logical": null,
+          "condition": null,
+          "metadata": {
+            "LinkerFlags": "-ObjC -lc++",
+            "Kind": "Framework",
+            "SmartLink": "True",
+            "ForceLoad": "True",
+            "LinkWithSwiftSystemLibraries": "true"
+          },
+          "binaryVersion": "1.22.6"
+        },
+        {
+          "id": "firebase-leveldb-leveldb_Privacy.bundle-device",
+          "path": "Firebase/FirebaseFirestore/leveldb.xcframework/ios-arm64/leveldb.framework/leveldb_Privacy.bundle",
+          "kind": "Bundle",
+          "owner": "Firebase.Core",
+          "logical": "leveldb_Privacy.bundle",
+          "condition": "'$(TargetPlatformIdentifier)' == 'ios' And !$([System.String]::Copy('$(RuntimeIdentifier)').StartsWith('iossimulator-'))"
+        },
+        {
+          "id": "firebase-leveldb-leveldb_Privacy.bundle-simulator",
+          "path": "Firebase/FirebaseFirestore/leveldb.xcframework/ios-arm64_x86_64-simulator/leveldb.framework/leveldb_Privacy.bundle",
+          "kind": "Bundle",
+          "owner": "Firebase.Core",
+          "logical": "leveldb_Privacy.bundle",
+          "condition": "'$(TargetPlatformIdentifier)' == 'ios' And $([System.String]::Copy('$(RuntimeIdentifier)').StartsWith('iossimulator-'))"
+        },
+        {
+          "id": "firebase-leveldb-leveldb_Privacy.bundle-catalyst",
+          "path": "Firebase/FirebaseFirestore/leveldb.xcframework/ios-arm64_x86_64-maccatalyst/leveldb.framework/Versions/A/Resources/leveldb_Privacy.bundle",
+          "kind": "Bundle",
+          "owner": "Firebase.Core",
+          "logical": "leveldb_Privacy.bundle",
+          "condition": "'$(TargetPlatformIdentifier)' == 'maccatalyst'"
+        },
+        {
+          "id": "firebase-app-check-interop",
+          "path": "Firebase/FirebaseAppCheck/FirebaseAppCheckInterop.xcframework",
+          "kind": "XCFramework",
+          "owner": "Firebase.Core",
+          "logical": null,
+          "condition": null,
+          "metadata": {
+            "LinkerFlags": "-ObjC -lc++",
+            "Kind": "Framework",
+            "SmartLink": "True",
+            "ForceLoad": "True",
+            "LinkWithSwiftSystemLibraries": "true"
+          },
+          "binaryVersion": "13.1.1"
+        },
+        {
+          "id": "firebase-auth-interop",
+          "path": "Firebase/FirebaseAuth/FirebaseAuthInterop.xcframework",
+          "kind": "XCFramework",
+          "owner": "Firebase.Core",
+          "logical": null,
+          "condition": null,
+          "metadata": {
+            "LinkerFlags": "-ObjC -lc++",
+            "Kind": "Framework",
+            "SmartLink": "True",
+            "ForceLoad": "True",
+            "LinkWithSwiftSystemLibraries": "true"
+          },
+          "binaryVersion": "13.1.1"
+        },
+        {
+          "id": "firebase-core-extension",
+          "path": "Firebase/FirebaseAuth/FirebaseCoreExtension.xcframework",
+          "kind": "XCFramework",
+          "owner": "Firebase.Core",
+          "logical": null,
+          "condition": null,
+          "metadata": {
+            "LinkerFlags": "-ObjC -lc++",
+            "Kind": "Framework",
+            "SmartLink": "True",
+            "ForceLoad": "True",
+            "LinkWithSwiftSystemLibraries": "true"
+          },
+          "binaryVersion": "13.1.1"
+        },
+        {
+          "id": "firebase-core-extension-FirebaseCoreExtension_Privacy.bundle-device",
+          "path": "Firebase/FirebaseAuth/FirebaseCoreExtension.xcframework/ios-arm64/FirebaseCoreExtension.framework/FirebaseCoreExtension_Privacy.bundle",
+          "kind": "Bundle",
+          "owner": "Firebase.Core",
+          "logical": "FirebaseCoreExtension_Privacy.bundle",
+          "condition": "'$(TargetPlatformIdentifier)' == 'ios' And !$([System.String]::Copy('$(RuntimeIdentifier)').StartsWith('iossimulator-'))"
+        },
+        {
+          "id": "firebase-core-extension-FirebaseCoreExtension_Privacy.bundle-simulator",
+          "path": "Firebase/FirebaseAuth/FirebaseCoreExtension.xcframework/ios-arm64_x86_64-simulator/FirebaseCoreExtension.framework/FirebaseCoreExtension_Privacy.bundle",
+          "kind": "Bundle",
+          "owner": "Firebase.Core",
+          "logical": "FirebaseCoreExtension_Privacy.bundle",
+          "condition": "'$(TargetPlatformIdentifier)' == 'ios' And $([System.String]::Copy('$(RuntimeIdentifier)').StartsWith('iossimulator-'))"
+        },
+        {
+          "id": "firebase-core-extension-FirebaseCoreExtension_Privacy.bundle-catalyst",
+          "path": "Firebase/FirebaseAuth/FirebaseCoreExtension.xcframework/ios-arm64_x86_64-maccatalyst/FirebaseCoreExtension.framework/Versions/A/Resources/FirebaseCoreExtension_Privacy.bundle",
+          "kind": "Bundle",
+          "owner": "Firebase.Core",
+          "logical": "FirebaseCoreExtension_Privacy.bundle",
+          "condition": "'$(TargetPlatformIdentifier)' == 'maccatalyst'"
+        },
+        {
+          "id": "firebase-messaging-interop",
+          "path": "Firebase/FirebaseFunctions/FirebaseMessagingInterop.xcframework",
+          "kind": "XCFramework",
+          "owner": "Firebase.Core",
+          "logical": null,
+          "condition": null,
+          "metadata": {
+            "LinkerFlags": "-ObjC -lc++",
+            "Kind": "Framework",
+            "SmartLink": "True",
+            "ForceLoad": "True",
+            "LinkWithSwiftSystemLibraries": "true"
+          },
+          "binaryVersion": "13.1.1"
+        },
+        {
+          "id": "firebase-remote-config-interop",
+          "path": "Firebase/FirebaseRemoteConfig/FirebaseRemoteConfigInterop.xcframework",
+          "kind": "XCFramework",
+          "owner": "Firebase.Core",
+          "logical": null,
+          "condition": null,
+          "metadata": {
+            "LinkerFlags": "-ObjC -lc++",
+            "Kind": "Framework",
+            "SmartLink": "True",
+            "ForceLoad": "True",
+            "LinkWithSwiftSystemLibraries": "true"
+          },
+          "binaryVersion": "13.1.1"
+        },
+        {
+          "id": "firebase-shared-swift",
+          "path": "Firebase/FirebaseFunctions/FirebaseSharedSwift.xcframework",
+          "kind": "XCFramework",
+          "owner": "Firebase.Core",
+          "logical": null,
+          "condition": null,
+          "metadata": {
+            "LinkerFlags": "-ObjC -lc++",
+            "Kind": "Framework",
+            "SmartLink": "True",
+            "ForceLoad": "True",
+            "LinkWithSwiftSystemLibraries": "true"
+          },
+          "binaryVersion": "13.1.1"
+        }
+      ],
+      "version": "13.1.1.0",
+      "dependencies": [
+        "AdamE.Google.iOS.AppCheckCore",
+        "AdamE.Google.iOS.GoogleDataTransport",
+        "AdamE.Google.iOS.GoogleUtilities",
+        "AdamE.Google.iOS.Nanopb",
+        "AdamE.Google.iOS.PromisesObjC"
+      ]
+    },
+    {
+      "id": "Firebase.Crashlytics",
+      "project": "source/Firebase/Crashlytics/Crashlytics.csproj",
+      "package": "AdamE.Firebase.iOS.Crashlytics",
+      "assets": [
+        {
+          "id": "firebase-crashlytics",
+          "path": "Firebase/FirebaseCrashlytics/FirebaseCrashlytics.xcframework",
+          "kind": "XCFramework",
+          "owner": "Firebase.Crashlytics",
+          "logical": null,
+          "condition": null,
+          "metadata": {
+            "LinkerFlags": "-ObjC -lc++ -lz",
+            "Frameworks": "Security SystemConfiguration",
+            "Kind": "Framework",
+            "SmartLink": "True",
+            "ForceLoad": "True",
+            "LinkWithSwiftSystemLibraries": "true"
+          },
+          "binaryVersion": "13.1.1"
+        },
+        {
+          "id": "firebase-crashlytics-FirebaseCrashlytics_Privacy.bundle-device",
+          "path": "Firebase/FirebaseCrashlytics/FirebaseCrashlytics.xcframework/ios-arm64/FirebaseCrashlytics.framework/FirebaseCrashlytics_Privacy.bundle",
+          "kind": "Bundle",
+          "owner": "Firebase.Crashlytics",
+          "logical": "FirebaseCrashlytics_Privacy.bundle",
+          "condition": "'$(TargetPlatformIdentifier)' == 'ios' And !$([System.String]::Copy('$(RuntimeIdentifier)').StartsWith('iossimulator-'))"
+        },
+        {
+          "id": "firebase-crashlytics-FirebaseCrashlytics_Privacy.bundle-simulator",
+          "path": "Firebase/FirebaseCrashlytics/FirebaseCrashlytics.xcframework/ios-arm64_x86_64-simulator/FirebaseCrashlytics.framework/FirebaseCrashlytics_Privacy.bundle",
+          "kind": "Bundle",
+          "owner": "Firebase.Crashlytics",
+          "logical": "FirebaseCrashlytics_Privacy.bundle",
+          "condition": "'$(TargetPlatformIdentifier)' == 'ios' And $([System.String]::Copy('$(RuntimeIdentifier)').StartsWith('iossimulator-'))"
+        },
+        {
+          "id": "firebase-crashlytics-FirebaseCrashlytics_Privacy.bundle-catalyst",
+          "path": "Firebase/FirebaseCrashlytics/FirebaseCrashlytics.xcframework/ios-arm64_x86_64-maccatalyst/FirebaseCrashlytics.framework/Versions/A/Resources/FirebaseCrashlytics_Privacy.bundle",
+          "kind": "Bundle",
+          "owner": "Firebase.Crashlytics",
+          "logical": "FirebaseCrashlytics_Privacy.bundle",
+          "condition": "'$(TargetPlatformIdentifier)' == 'maccatalyst'"
+        },
+        {
+          "id": "firebase-crashlytics-run",
+          "path": "Firebase/FirebaseCrashlytics/run",
+          "kind": "Tool",
+          "owner": "Firebase.Crashlytics",
+          "logical": null,
+          "condition": null,
+          "sha256": "dda60b841d76e71a0c05afbbd2691fb80ec614565960a14df2b85b31065e531d"
+        },
+        {
+          "id": "firebase-crashlytics-upload-symbols",
+          "path": "Firebase/FirebaseCrashlytics/upload-symbols",
+          "kind": "Tool",
+          "owner": "Firebase.Crashlytics",
+          "logical": null,
+          "condition": null,
+          "sha256": "ad9cd5816b9abe1f746ff37b073d3b3cf3a2dc835f1a1476bc30ba5bf66e2822"
+        }
+      ],
+      "version": "13.1.1.0",
+      "dependencies": [
+        "AdamE.Firebase.iOS.Core",
+        "AdamE.Firebase.iOS.Installations",
+        "AdamE.Firebase.iOS.Installations"
+      ]
+    },
+    {
+      "id": "Firebase.Database",
+      "project": "source/Firebase/Database/Database.csproj",
+      "package": "AdamE.Firebase.iOS.Database",
+      "assets": [
+        {
+          "id": "firebase-database",
+          "path": "Firebase/FirebaseDatabase/FirebaseDatabase.xcframework",
+          "kind": "XCFramework",
+          "owner": "Firebase.Database",
+          "logical": null,
+          "condition": null,
+          "metadata": {
+            "LinkerFlags": "-ObjC -lc++ -licucore",
+            "Frameworks": "CFNetwork Security SystemConfiguration",
+            "Kind": "Framework",
+            "SmartLink": "True",
+            "ForceLoad": "True",
+            "LinkWithSwiftSystemLibraries": "true"
+          },
+          "binaryVersion": "13.1.1"
+        }
+      ],
+      "version": "13.1.1.0",
+      "dependencies": [
+        "AdamE.Firebase.iOS.Core"
+      ]
+    },
+    {
+      "id": "Firebase.InAppMessaging",
+      "project": "source/Firebase/InAppMessaging/InAppMessaging.csproj",
+      "package": "AdamE.Firebase.iOS.InAppMessaging",
+      "assets": [
+        {
+          "id": "firebase-in-app-messaging",
+          "path": "Firebase/FirebaseInAppMessaging/FirebaseInAppMessaging.xcframework",
+          "kind": "XCFramework",
+          "owner": "Firebase.InAppMessaging",
+          "logical": null,
+          "condition": null,
+          "metadata": {
+            "LinkerFlags": "-ObjC -lc++",
+            "Frameworks": "CoreTelephony QuartzCore SystemConfiguration UIKit",
+            "Kind": "Framework",
+            "SmartLink": "True",
+            "ForceLoad": "True",
+            "LinkWithSwiftSystemLibraries": "true"
+          },
+          "binaryVersion": "13.1.1"
+        },
+        {
+          "id": "firebase-in-app-messaging-InAppMessagingDisplayResources.bundle-device",
+          "path": "Firebase/FirebaseInAppMessaging/FirebaseInAppMessaging.xcframework/ios-arm64/FirebaseInAppMessaging.framework/InAppMessagingDisplayResources.bundle",
+          "kind": "Bundle",
+          "owner": "Firebase.InAppMessaging",
+          "logical": "InAppMessagingDisplayResources.bundle",
+          "condition": "'$(TargetPlatformIdentifier)' == 'ios' And !$([System.String]::Copy('$(RuntimeIdentifier)').StartsWith('iossimulator-'))"
+        },
+        {
+          "id": "firebase-in-app-messaging-InAppMessagingDisplayResources.bundle-simulator",
+          "path": "Firebase/FirebaseInAppMessaging/FirebaseInAppMessaging.xcframework/ios-arm64_x86_64-simulator/FirebaseInAppMessaging.framework/InAppMessagingDisplayResources.bundle",
+          "kind": "Bundle",
+          "owner": "Firebase.InAppMessaging",
+          "logical": "InAppMessagingDisplayResources.bundle",
+          "condition": "'$(TargetPlatformIdentifier)' == 'ios' And $([System.String]::Copy('$(RuntimeIdentifier)').StartsWith('iossimulator-'))"
+        },
+        {
+          "id": "firebase-in-app-messaging-InAppMessagingDisplayResources.bundle-catalyst",
+          "path": "Firebase/FirebaseInAppMessaging/FirebaseInAppMessaging.xcframework/ios-arm64_x86_64-maccatalyst/FirebaseInAppMessaging.framework/Versions/A/Resources/InAppMessagingDisplayResources.bundle",
+          "kind": "Bundle",
+          "owner": "Firebase.InAppMessaging",
+          "logical": "InAppMessagingDisplayResources.bundle",
+          "condition": "'$(TargetPlatformIdentifier)' == 'maccatalyst'"
+        }
+      ],
+      "version": "13.1.1.0",
+      "dependencies": [
+        "AdamE.Firebase.iOS.ABTesting",
+        "AdamE.Firebase.iOS.Core",
+        "AdamE.Firebase.iOS.Installations"
+      ]
+    },
+    {
+      "id": "Firebase.Installations",
+      "project": "source/Firebase/Installations/Installations.csproj",
+      "package": "AdamE.Firebase.iOS.Installations",
+      "assets": [
+        {
+          "id": "firebase-installations",
+          "path": "Firebase/FirebaseAnalytics/FirebaseInstallations.xcframework",
+          "kind": "XCFramework",
+          "owner": "Firebase.Installations",
+          "logical": null,
+          "condition": null,
+          "metadata": {
+            "LinkerFlags": "-ObjC -lc++",
+            "Frameworks": "Security",
+            "Kind": "Framework",
+            "SmartLink": "True",
+            "ForceLoad": "True",
+            "LinkWithSwiftSystemLibraries": "true"
+          },
+          "binaryVersion": "13.1.1"
+        },
+        {
+          "id": "firebase-installations-FirebaseInstallations_Privacy.bundle-device",
+          "path": "Firebase/FirebaseAnalytics/FirebaseInstallations.xcframework/ios-arm64/FirebaseInstallations.framework/FirebaseInstallations_Privacy.bundle",
+          "kind": "Bundle",
+          "owner": "Firebase.Installations",
+          "logical": "FirebaseInstallations_Privacy.bundle",
+          "condition": "'$(TargetPlatformIdentifier)' == 'ios' And !$([System.String]::Copy('$(RuntimeIdentifier)').StartsWith('iossimulator-'))"
+        },
+        {
+          "id": "firebase-installations-FirebaseInstallations_Privacy.bundle-simulator",
+          "path": "Firebase/FirebaseAnalytics/FirebaseInstallations.xcframework/ios-arm64_x86_64-simulator/FirebaseInstallations.framework/FirebaseInstallations_Privacy.bundle",
+          "kind": "Bundle",
+          "owner": "Firebase.Installations",
+          "logical": "FirebaseInstallations_Privacy.bundle",
+          "condition": "'$(TargetPlatformIdentifier)' == 'ios' And $([System.String]::Copy('$(RuntimeIdentifier)').StartsWith('iossimulator-'))"
+        },
+        {
+          "id": "firebase-installations-FirebaseInstallations_Privacy.bundle-catalyst",
+          "path": "Firebase/FirebaseAnalytics/FirebaseInstallations.xcframework/ios-arm64_x86_64-maccatalyst/FirebaseInstallations.framework/Versions/A/Resources/FirebaseInstallations_Privacy.bundle",
+          "kind": "Bundle",
+          "owner": "Firebase.Installations",
+          "logical": "FirebaseInstallations_Privacy.bundle",
+          "condition": "'$(TargetPlatformIdentifier)' == 'maccatalyst'"
+        },
+        {
+          "id": "firebase-sessions",
+          "path": "Firebase/FirebaseCrashlytics/FirebaseSessions.xcframework",
+          "kind": "XCFramework",
+          "owner": "Firebase.Installations",
+          "logical": null,
+          "condition": null,
+          "metadata": {
+            "LinkerFlags": "-ObjC -lc++",
+            "Kind": "Framework",
+            "SmartLink": "True",
+            "ForceLoad": "True",
+            "LinkWithSwiftSystemLibraries": "true"
+          },
+          "binaryVersion": "13.1.1"
+        }
+      ],
+      "version": "13.1.1.0",
+      "dependencies": [
+        "AdamE.Firebase.iOS.Core"
+      ]
+    },
+    {
+      "id": "Firebase.PerformanceMonitoring",
+      "project": "source/Firebase/PerformanceMonitoring/PerformanceMonitoring.csproj",
+      "package": "AdamE.Firebase.iOS.PerformanceMonitoring",
+      "assets": [
+        {
+          "id": "firebase-performance",
+          "path": "Firebase/FirebasePerformance/FirebasePerformance.xcframework",
+          "kind": "XCFramework",
+          "owner": "Firebase.PerformanceMonitoring",
+          "logical": null,
+          "condition": null,
+          "metadata": {
+            "LinkerFlags": "-ObjC -lc++",
+            "Frameworks": "CoreTelephony QuartzCore SystemConfiguration",
+            "Kind": "Framework",
+            "SmartLink": "True",
+            "ForceLoad": "True",
+            "LinkWithSwiftSystemLibraries": "true"
+          },
+          "binaryVersion": "13.1.1"
+        }
+      ],
+      "version": "13.1.1.0",
+      "dependencies": [
+        "AdamE.Firebase.iOS.ABTesting",
+        "AdamE.Firebase.iOS.Core",
+        "AdamE.Firebase.iOS.Installations",
+        "AdamE.Firebase.iOS.RemoteConfig"
+      ]
+    },
+    {
+      "id": "Firebase.RemoteConfig",
+      "project": "source/Firebase/RemoteConfig/RemoteConfig.csproj",
+      "package": "AdamE.Firebase.iOS.RemoteConfig",
+      "assets": [
+        {
+          "id": "firebase-remote-config",
+          "path": "Firebase/FirebaseRemoteConfig/FirebaseRemoteConfig.xcframework",
+          "kind": "XCFramework",
+          "owner": "Firebase.RemoteConfig",
+          "logical": null,
+          "condition": null,
+          "metadata": {
+            "LinkerFlags": "-ObjC -lc++ -lsqlite3 -lz",
+            "Frameworks": "Security StoreKit SystemConfiguration",
+            "Kind": "Framework",
+            "SmartLink": "True",
+            "ForceLoad": "True",
+            "LinkWithSwiftSystemLibraries": "true"
+          },
+          "binaryVersion": "13.1.1"
+        },
+        {
+          "id": "firebase-remote-config-FirebaseRemoteConfig_Privacy.bundle-device",
+          "path": "Firebase/FirebaseRemoteConfig/FirebaseRemoteConfig.xcframework/ios-arm64/FirebaseRemoteConfig.framework/FirebaseRemoteConfig_Privacy.bundle",
+          "kind": "Bundle",
+          "owner": "Firebase.RemoteConfig",
+          "logical": "FirebaseRemoteConfig_Privacy.bundle",
+          "condition": "'$(TargetPlatformIdentifier)' == 'ios' And !$([System.String]::Copy('$(RuntimeIdentifier)').StartsWith('iossimulator-'))"
+        },
+        {
+          "id": "firebase-remote-config-FirebaseRemoteConfig_Privacy.bundle-simulator",
+          "path": "Firebase/FirebaseRemoteConfig/FirebaseRemoteConfig.xcframework/ios-arm64_x86_64-simulator/FirebaseRemoteConfig.framework/FirebaseRemoteConfig_Privacy.bundle",
+          "kind": "Bundle",
+          "owner": "Firebase.RemoteConfig",
+          "logical": "FirebaseRemoteConfig_Privacy.bundle",
+          "condition": "'$(TargetPlatformIdentifier)' == 'ios' And $([System.String]::Copy('$(RuntimeIdentifier)').StartsWith('iossimulator-'))"
+        },
+        {
+          "id": "firebase-remote-config-FirebaseRemoteConfig_Privacy.bundle-catalyst",
+          "path": "Firebase/FirebaseRemoteConfig/FirebaseRemoteConfig.xcframework/ios-arm64_x86_64-maccatalyst/FirebaseRemoteConfig.framework/Versions/A/Resources/FirebaseRemoteConfig_Privacy.bundle",
+          "kind": "Bundle",
+          "owner": "Firebase.RemoteConfig",
+          "logical": "FirebaseRemoteConfig_Privacy.bundle",
+          "condition": "'$(TargetPlatformIdentifier)' == 'maccatalyst'"
+        }
+      ],
+      "version": "13.1.1.0",
+      "dependencies": [
+        "AdamE.Firebase.iOS.ABTesting",
+        "AdamE.Firebase.iOS.Core",
+        "AdamE.Firebase.iOS.Installations"
+      ]
+    },
+    {
+      "id": "Firebase.Storage",
+      "project": "source/Firebase/Storage/Storage.csproj",
+      "package": "AdamE.Firebase.iOS.Storage",
+      "assets": [
+        {
+          "id": "firebase-storage",
+          "path": "Firebase/FirebaseStorage/FirebaseStorage.xcframework",
+          "kind": "XCFramework",
+          "owner": "Firebase.Storage",
+          "logical": null,
+          "condition": null,
+          "metadata": {
+            "LinkerFlags": "-ObjC -lc++",
+            "Kind": "Framework",
+            "SmartLink": "True",
+            "ForceLoad": "True",
+            "LinkWithSwiftSystemLibraries": "true"
+          },
+          "binaryVersion": "13.1.1"
+        }
+      ],
+      "version": "13.1.1.0",
+      "dependencies": [
+        "AdamE.Firebase.iOS.Core",
+        "AdamE.Google.iOS.GTMSessionFetcher"
+      ]
+    },
+    {
+      "id": "Firebase.AppDistribution",
+      "project": "source/Firebase/AppDistribution/AppDistribution.csproj",
+      "package": "AdamE.Firebase.iOS.AppDistribution",
+      "assets": [
+        {
+          "id": "firebase-app-distribution",
+          "path": "Firebase/FirebaseAppDistribution/FirebaseAppDistribution.xcframework",
+          "kind": "XCFramework",
+          "owner": "Firebase.AppDistribution",
+          "logical": null,
+          "condition": null,
+          "metadata": {
+            "LinkerFlags": "-ObjC -lc++",
+            "Frameworks": "UIKit",
+            "Kind": "Framework",
+            "SmartLink": "True",
+            "ForceLoad": "True",
+            "LinkWithSwiftSystemLibraries": "true"
+          },
+          "binaryVersion": "13.1.1"
+        }
+      ],
+      "version": "13.1.1.0",
+      "dependencies": [
+        "AdamE.Firebase.iOS.Core",
+        "AdamE.Firebase.iOS.Installations"
+      ]
+    },
+    {
+      "id": "Firebase.AppCheck",
+      "project": "source/Firebase/AppCheck/AppCheck.csproj",
+      "package": "AdamE.Firebase.iOS.AppCheck",
+      "assets": [
+        {
+          "id": "firebase-app-check",
+          "path": "Firebase/FirebaseAppCheck/FirebaseAppCheck.xcframework",
+          "kind": "XCFramework",
+          "owner": "Firebase.AppCheck",
+          "logical": null,
+          "condition": null,
+          "metadata": {
+            "LinkerFlags": "-ObjC -lc++",
+            "WeakFrameworks": "DeviceCheck",
+            "Kind": "Framework",
+            "SmartLink": "True",
+            "ForceLoad": "True",
+            "LinkWithSwiftSystemLibraries": "true"
+          },
+          "binaryVersion": "13.1.1"
+        }
+      ],
+      "version": "13.1.1.0",
+      "dependencies": [
+        "AdamE.Firebase.iOS.Core",
+        "AdamE.Google.iOS.AppCheckCore"
+      ]
+    },
+    {
+      "id": "Google.AppCheckCore",
+      "project": "source/Google/AppCheckCore/AppCheckCore.csproj",
+      "package": "AdamE.Google.iOS.AppCheckCore",
+      "assets": [
+        {
+          "id": "app-check-core",
+          "path": "Firebase/FirebaseAppCheck/AppCheckCore.xcframework",
+          "kind": "XCFramework",
+          "owner": "Google.AppCheckCore",
+          "logical": null,
+          "condition": null,
+          "metadata": {
+            "Kind": "Framework",
+            "SmartLink": "True",
+            "ForceLoad": "True",
+            "IsCxx": "True",
+            "LinkWithSwiftSystemLibraries": "true",
+            "LinkerFlags": "-ObjC -lc++",
+            "WeakFrameworks": "DeviceCheck"
+          },
+          "binaryVersion": "12.0.0"
+        },
+        {
+          "id": "recaptcha-interop",
+          "path": "Firebase/FirebaseAuth/RecaptchaInterop.xcframework",
+          "kind": "XCFramework",
+          "owner": "Google.AppCheckCore",
+          "logical": null,
+          "condition": null,
+          "metadata": {
+            "LinkerFlags": "-ObjC -lc++",
+            "Kind": "Framework",
+            "SmartLink": "True",
+            "ForceLoad": "True",
+            "LinkWithSwiftSystemLibraries": "true"
+          },
+          "binaryVersion": "101.0.0"
+        }
+      ],
+      "version": "12.0.0.0",
+      "dependencies": [
+        "AdamE.Google.iOS.GoogleUtilities",
+        "AdamE.Google.iOS.PromisesObjC"
+      ]
+    },
+    {
+      "id": "Google.AppMeasurement",
+      "project": "source/Google/GoogleAppMeasurement/GoogleAppMeasurement.csproj",
+      "package": "AdamE.Google.iOS.GoogleAppMeasurement",
+      "assets": [
+        {
+          "id": "google-app-measurement",
+          "path": "Firebase/FirebaseAnalytics/GoogleAppMeasurement.xcframework",
+          "kind": "XCFramework",
+          "owner": "Google.AppMeasurement",
+          "logical": null,
+          "condition": null,
+          "metadata": {
+            "Kind": "Framework",
+            "SmartLink": "True",
+            "ForceLoad": "True",
+            "IsCxx": "True",
+            "LinkWithSwiftSystemLibraries": "true",
+            "LinkerFlags": "-ObjC -lc++ -lsqlite3 -lz",
+            "Frameworks": "StoreKit"
+          },
+          "binaryVersion": "13.0.1"
+        },
+        {
+          "id": "google-app-measurement-identity",
+          "path": "Firebase/FirebaseAnalytics/GoogleAppMeasurementIdentitySupport.xcframework",
+          "kind": "XCFramework",
+          "owner": "Google.AppMeasurement",
+          "logical": null,
+          "condition": "'$(FirebaseWithoutAdIdSupport)' != 'True'",
+          "metadata": {
+            "Kind": "Framework",
+            "SmartLink": "True",
+            "ForceLoad": "True",
+            "IsCxx": "True",
+            "LinkWithSwiftSystemLibraries": "true",
+            "LinkerFlags": "-ObjC -lc++ -lsqlite3 -lz",
+            "Frameworks": "StoreKit"
+          },
+          "binaryVersion": "13.0.1"
+        },
+        {
+          "id": "google-ads-on-device-conversion",
+          "path": "Firebase/FirebaseAnalytics/GoogleAdsOnDeviceConversion.xcframework",
+          "kind": "XCFramework",
+          "owner": "Google.AppMeasurement",
+          "logical": null,
+          "condition": "'$(TargetPlatformIdentifier)' == 'ios' And '$(FirebaseWithoutAdIdSupport)' != 'True'",
+          "metadata": {
+            "Kind": "Framework",
+            "SmartLink": "True",
+            "ForceLoad": "True",
+            "IsCxx": "True",
+            "LinkWithSwiftSystemLibraries": "true",
+            "LinkerFlags": "-ObjC -lc++"
+          },
+          "binaryVersion": "3.7.0"
+        }
+      ],
+      "version": "13.1.1.0",
+      "dependencies": []
+    },
+    {
+      "id": "Google.PromisesObjC",
+      "project": "source/Google/PromisesObjC/PromisesObjC.csproj",
+      "package": "AdamE.Google.iOS.PromisesObjC",
+      "assets": [
+        {
+          "id": "fbl-promises",
+          "path": "Firebase/FirebaseAnalytics/FBLPromises.xcframework",
+          "kind": "XCFramework",
+          "owner": "Google.PromisesObjC",
+          "logical": null,
+          "condition": null,
+          "metadata": {
+            "Kind": "Framework",
+            "SmartLink": "True",
+            "ForceLoad": "True",
+            "IsCxx": "True",
+            "LinkWithSwiftSystemLibraries": "true",
+            "LinkerFlags": "-ObjC -lc++"
+          },
+          "binaryVersion": "2.4.1"
+        },
+        {
+          "id": "fbl-promises-FBLPromises_Privacy.bundle-device",
+          "path": "Firebase/FirebaseAnalytics/FBLPromises.xcframework/ios-arm64/FBLPromises.framework/FBLPromises_Privacy.bundle",
+          "kind": "Bundle",
+          "owner": "Google.PromisesObjC",
+          "logical": "FBLPromises_Privacy.bundle",
+          "condition": "'$(TargetPlatformIdentifier)' == 'ios' And !$([System.String]::Copy('$(RuntimeIdentifier)').StartsWith('iossimulator-'))"
+        },
+        {
+          "id": "fbl-promises-FBLPromises_Privacy.bundle-simulator",
+          "path": "Firebase/FirebaseAnalytics/FBLPromises.xcframework/ios-arm64_x86_64-simulator/FBLPromises.framework/FBLPromises_Privacy.bundle",
+          "kind": "Bundle",
+          "owner": "Google.PromisesObjC",
+          "logical": "FBLPromises_Privacy.bundle",
+          "condition": "'$(TargetPlatformIdentifier)' == 'ios' And $([System.String]::Copy('$(RuntimeIdentifier)').StartsWith('iossimulator-'))"
+        },
+        {
+          "id": "fbl-promises-FBLPromises_Privacy.bundle-catalyst",
+          "path": "Firebase/FirebaseAnalytics/FBLPromises.xcframework/ios-arm64_x86_64-maccatalyst/FBLPromises.framework/Versions/A/Resources/FBLPromises_Privacy.bundle",
+          "kind": "Bundle",
+          "owner": "Google.PromisesObjC",
+          "logical": "FBLPromises_Privacy.bundle",
+          "condition": "'$(TargetPlatformIdentifier)' == 'maccatalyst'"
+        }
+      ],
+      "version": "2.4.1.0",
+      "dependencies": []
+    },
+    {
+      "id": "Google.GTMSessionFetcher",
+      "project": "source/Google/GTMSessionFetcher/GTMSessionFetcher.csproj",
+      "package": "AdamE.Google.iOS.GTMSessionFetcher",
+      "assets": [
+        {
+          "id": "gtm-session-fetcher",
+          "path": "Firebase/FirebaseAuth/GTMSessionFetcher.xcframework",
+          "kind": "XCFramework",
+          "owner": "Google.GTMSessionFetcher",
+          "logical": null,
+          "condition": null,
+          "metadata": {
+            "Kind": "Framework",
+            "SmartLink": "True",
+            "ForceLoad": "True",
+            "IsCxx": "True",
+            "LinkWithSwiftSystemLibraries": "true",
+            "LinkerFlags": "-ObjC -lc++"
+          },
+          "binaryVersion": "5.3.1"
+        },
+        {
+          "id": "gtm-session-fetcher-GTMSessionFetcher_Core_Privacy.bundle-device",
+          "path": "Firebase/FirebaseAuth/GTMSessionFetcher.xcframework/ios-arm64/GTMSessionFetcher.framework/GTMSessionFetcher_Core_Privacy.bundle",
+          "kind": "Bundle",
+          "owner": "Google.GTMSessionFetcher",
+          "logical": "GTMSessionFetcher_Core_Privacy.bundle",
+          "condition": "'$(TargetPlatformIdentifier)' == 'ios' And !$([System.String]::Copy('$(RuntimeIdentifier)').StartsWith('iossimulator-'))"
+        },
+        {
+          "id": "gtm-session-fetcher-GTMSessionFetcher_Core_Privacy.bundle-simulator",
+          "path": "Firebase/FirebaseAuth/GTMSessionFetcher.xcframework/ios-arm64_x86_64-simulator/GTMSessionFetcher.framework/GTMSessionFetcher_Core_Privacy.bundle",
+          "kind": "Bundle",
+          "owner": "Google.GTMSessionFetcher",
+          "logical": "GTMSessionFetcher_Core_Privacy.bundle",
+          "condition": "'$(TargetPlatformIdentifier)' == 'ios' And $([System.String]::Copy('$(RuntimeIdentifier)').StartsWith('iossimulator-'))"
+        },
+        {
+          "id": "gtm-session-fetcher-GTMSessionFetcher_Core_Privacy.bundle-catalyst",
+          "path": "Firebase/FirebaseAuth/GTMSessionFetcher.xcframework/ios-arm64_x86_64-maccatalyst/GTMSessionFetcher.framework/Versions/A/Resources/GTMSessionFetcher_Core_Privacy.bundle",
+          "kind": "Bundle",
+          "owner": "Google.GTMSessionFetcher",
+          "logical": "GTMSessionFetcher_Core_Privacy.bundle",
+          "condition": "'$(TargetPlatformIdentifier)' == 'maccatalyst'"
+        }
+      ],
+      "version": "5.3.1.0",
+      "dependencies": []
+    },
+    {
+      "id": "Google.Nanopb",
+      "project": "source/Google/Nanopb/Nanopb.csproj",
+      "package": "AdamE.Google.iOS.Nanopb",
+      "assets": [
+        {
+          "id": "nanopb",
+          "path": "Firebase/FirebaseAnalytics/nanopb.xcframework",
+          "kind": "XCFramework",
+          "owner": "Google.Nanopb",
+          "logical": null,
+          "condition": null,
+          "metadata": {
+            "Kind": "Framework",
+            "SmartLink": "True",
+            "ForceLoad": "True",
+            "IsCxx": "True",
+            "LinkWithSwiftSystemLibraries": "true",
+            "LinkerFlags": "-ObjC -lc++"
+          },
+          "binaryVersion": "3.30910.0"
+        },
+        {
+          "id": "nanopb-nanopb_Privacy.bundle-device",
+          "path": "Firebase/FirebaseAnalytics/nanopb.xcframework/ios-arm64/nanopb.framework/nanopb_Privacy.bundle",
+          "kind": "Bundle",
+          "owner": "Google.Nanopb",
+          "logical": "nanopb_Privacy.bundle",
+          "condition": "'$(TargetPlatformIdentifier)' == 'ios' And !$([System.String]::Copy('$(RuntimeIdentifier)').StartsWith('iossimulator-'))"
+        },
+        {
+          "id": "nanopb-nanopb_Privacy.bundle-simulator",
+          "path": "Firebase/FirebaseAnalytics/nanopb.xcframework/ios-arm64_x86_64-simulator/nanopb.framework/nanopb_Privacy.bundle",
+          "kind": "Bundle",
+          "owner": "Google.Nanopb",
+          "logical": "nanopb_Privacy.bundle",
+          "condition": "'$(TargetPlatformIdentifier)' == 'ios' And $([System.String]::Copy('$(RuntimeIdentifier)').StartsWith('iossimulator-'))"
+        },
+        {
+          "id": "nanopb-nanopb_Privacy.bundle-catalyst",
+          "path": "Firebase/FirebaseAnalytics/nanopb.xcframework/ios-arm64_x86_64-maccatalyst/nanopb.framework/Versions/A/Resources/nanopb_Privacy.bundle",
+          "kind": "Bundle",
+          "owner": "Google.Nanopb",
+          "logical": "nanopb_Privacy.bundle",
+          "condition": "'$(TargetPlatformIdentifier)' == 'maccatalyst'"
+        }
+      ],
+      "version": "3.30910.0.7",
+      "dependencies": []
+    },
+    {
+      "id": "Google.GoogleUtilities",
+      "project": "source/Google/GoogleUtilities/GoogleUtilities.csproj",
+      "package": "AdamE.Google.iOS.GoogleUtilities",
+      "assets": [
+        {
+          "id": "google-utilities",
+          "path": "Firebase/FirebaseAnalytics/GoogleUtilities.xcframework",
+          "kind": "XCFramework",
+          "owner": "Google.GoogleUtilities",
+          "logical": null,
+          "condition": null,
+          "metadata": {
+            "Kind": "Framework",
+            "SmartLink": "True",
+            "ForceLoad": "True",
+            "IsCxx": "True",
+            "LinkWithSwiftSystemLibraries": "true",
+            "LinkerFlags": "-ObjC -lc++",
+            "Frameworks": "Security SystemConfiguration"
+          },
+          "binaryVersion": "8.1.5"
+        },
+        {
+          "id": "google-utilities-GoogleUtilities_Privacy.bundle-device",
+          "path": "Firebase/FirebaseAnalytics/GoogleUtilities.xcframework/ios-arm64/GoogleUtilities.framework/GoogleUtilities_Privacy.bundle",
+          "kind": "Bundle",
+          "owner": "Google.GoogleUtilities",
+          "logical": "GoogleUtilities_Privacy.bundle",
+          "condition": "'$(TargetPlatformIdentifier)' == 'ios' And !$([System.String]::Copy('$(RuntimeIdentifier)').StartsWith('iossimulator-'))"
+        },
+        {
+          "id": "google-utilities-GoogleUtilities_Privacy.bundle-simulator",
+          "path": "Firebase/FirebaseAnalytics/GoogleUtilities.xcframework/ios-arm64_x86_64-simulator/GoogleUtilities.framework/GoogleUtilities_Privacy.bundle",
+          "kind": "Bundle",
+          "owner": "Google.GoogleUtilities",
+          "logical": "GoogleUtilities_Privacy.bundle",
+          "condition": "'$(TargetPlatformIdentifier)' == 'ios' And $([System.String]::Copy('$(RuntimeIdentifier)').StartsWith('iossimulator-'))"
+        },
+        {
+          "id": "google-utilities-GoogleUtilities_Privacy.bundle-catalyst",
+          "path": "Firebase/FirebaseAnalytics/GoogleUtilities.xcframework/ios-arm64_x86_64-maccatalyst/GoogleUtilities.framework/Versions/A/Resources/GoogleUtilities_Privacy.bundle",
+          "kind": "Bundle",
+          "owner": "Google.GoogleUtilities",
+          "logical": "GoogleUtilities_Privacy.bundle",
+          "condition": "'$(TargetPlatformIdentifier)' == 'maccatalyst'"
+        }
+      ],
+      "version": "8.1.5.1",
+      "dependencies": []
+    },
+    {
+      "id": "Google.GoogleDataTransport",
+      "project": "source/Google/GoogleDataTransport/GoogleDataTransport.csproj",
+      "package": "AdamE.Google.iOS.GoogleDataTransport",
+      "assets": [
+        {
+          "id": "google-data-transport",
+          "path": "Firebase/FirebaseCrashlytics/GoogleDataTransport.xcframework",
+          "kind": "XCFramework",
+          "owner": "Google.GoogleDataTransport",
+          "logical": null,
+          "condition": null,
+          "metadata": {
+            "Kind": "Framework",
+            "SmartLink": "True",
+            "ForceLoad": "True",
+            "IsCxx": "True",
+            "LinkWithSwiftSystemLibraries": "true",
+            "LinkerFlags": "-ObjC -lc++",
+            "Frameworks": "SystemConfiguration CoreTelephony"
+          },
+          "binaryVersion": "10.1.1"
+        },
+        {
+          "id": "google-data-transport-GoogleDataTransport_Privacy.bundle-device",
+          "path": "Firebase/FirebaseCrashlytics/GoogleDataTransport.xcframework/ios-arm64/GoogleDataTransport.framework/GoogleDataTransport_Privacy.bundle",
+          "kind": "Bundle",
+          "owner": "Google.GoogleDataTransport",
+          "logical": "GoogleDataTransport_Privacy.bundle",
+          "condition": "'$(TargetPlatformIdentifier)' == 'ios' And !$([System.String]::Copy('$(RuntimeIdentifier)').StartsWith('iossimulator-'))"
+        },
+        {
+          "id": "google-data-transport-GoogleDataTransport_Privacy.bundle-simulator",
+          "path": "Firebase/FirebaseCrashlytics/GoogleDataTransport.xcframework/ios-arm64_x86_64-simulator/GoogleDataTransport.framework/GoogleDataTransport_Privacy.bundle",
+          "kind": "Bundle",
+          "owner": "Google.GoogleDataTransport",
+          "logical": "GoogleDataTransport_Privacy.bundle",
+          "condition": "'$(TargetPlatformIdentifier)' == 'ios' And $([System.String]::Copy('$(RuntimeIdentifier)').StartsWith('iossimulator-'))"
+        },
+        {
+          "id": "google-data-transport-GoogleDataTransport_Privacy.bundle-catalyst",
+          "path": "Firebase/FirebaseCrashlytics/GoogleDataTransport.xcframework/ios-arm64_x86_64-maccatalyst/GoogleDataTransport.framework/Versions/A/Resources/GoogleDataTransport_Privacy.bundle",
+          "kind": "Bundle",
+          "owner": "Google.GoogleDataTransport",
+          "logical": "GoogleDataTransport_Privacy.bundle",
+          "condition": "'$(TargetPlatformIdentifier)' == 'maccatalyst'"
+        }
+      ],
+      "version": "10.1.1.0",
+      "dependencies": [
+        "AdamE.Google.iOS.Nanopb",
+        "AdamE.Google.iOS.PromisesObjC"
+      ]
+    }
+  ]
+}
