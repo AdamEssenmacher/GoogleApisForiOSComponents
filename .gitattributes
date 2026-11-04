@@ -1,0 +1,3 @@
+# Preserve byte-for-byte upstream files checked against the official archive.
+source/Firebase/native/UPSTREAM-NOTICES.txt -text whitespace=-trailing-space
+tests/fixtures/firebase13/13.1.1/METADATA.md -text whitespace=-trailing-space

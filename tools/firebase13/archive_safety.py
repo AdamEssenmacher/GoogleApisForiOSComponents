@@ -46,4 +46,3 @@ def preflight(archive):
             # Never extract actual entries through a link declared by the archive.
             if any(other != name and other.startswith(name + '/') for other in source.namelist()):
                 raise ValueError(f'Archive writes through a link: {name}')
-
