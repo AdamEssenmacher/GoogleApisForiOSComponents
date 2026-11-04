@@ -33,7 +33,7 @@ class ReviewRegressionTests(unittest.TestCase):
     def test_consumer_probe_matches_candidate_version_in_both_lanes(self):
         release.configure_channel('signin')
         self.addCleanup(release.configure_channel, 'firebase')
-        for version in ('9.1.0', '9.1.0.1', '9.2.0', '9.2.0.1', '10.0.0', '10.0.0.1'):
+        for version in ('9.1.0', '9.1.0.1', '9.2.0', '9.2.0.1', '10.0.0', '10.0.0.1', '10.1.0', '10.1.0.1'):
             amr = release.version(version) >= release.version('9.2.0')
             wrapper = release.version(version) >= release.version('10.0.0')
             with self.subTest(version=version), tempfile.TemporaryDirectory() as tmp:

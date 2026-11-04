@@ -106,6 +106,36 @@ annotations change only Swift names, so the existing managed claim selectors are
 The secret-free probe sets and reads back a fixture wrapper identifier and requires at least 73
 selectors. Evidence for 10.0 must include `wrapper=wrapperIdentifier`; 9.2-only evidence is rejected.
 
+### 10.1.0 binding update
+
+The prepared `10.1.0.0` package binds Google Sign-In 10.1.0 with the AppAuth 3.0.0 and GTMAppAuth
+6.0.0 pins introduced for 10.0.0, so the private native dependency versions and the iOS 15.0
+deployment target are unchanged. Upstream widens its `AppCheckCore` requirement to `>= 11.0, < 13.0`
+for Swift Package Manager consumers moving to Firebase 13; this lane keeps the Firebase-12
+AppCheckCore 11.3.2 baseline, which that range still admits, and its compatible bounds. CocoaPods
+trunk carries no AppCheckCore 12.x, so the widening changes nothing at package-production time.
+
+Upstream's public headers are identical to 10.0.0 apart from an added `GIDGoogleUser` documentation
+comment, so this release adds no managed API and the binding is unchanged. `SignIn.WrapperIdentifier`
+and the claims APIs carry over. The release is native-only: concurrency fixes in `GIDGoogleUser`
+publish `accessToken`, `refreshToken`, `idToken` and `profile` together so key-value observers never
+read a half-updated user, fix `grantedScopes` and `accessToken` reverting when scopes were added
+during an in-flight refresh, and fix readers seeing a mix of old and new tokens. Observers are now
+notified while the user holds its internal lock: an observer may call back into the same user, but
+must not synchronously wait on another thread that is updating it. It also fixes a custom `nonce`
+and requested `claims` being dropped when sign-in resumes after a Device Policy app restart, EMM
+remediation dialogs staying suppressed after an error arrived with no key window, and a crash when
+a server error response carries a non-string value under its `error` key.
+
+The probe and evidence requirements are those of 10.0: the fixture wrapper identifier is set and
+read back, at least 73 selectors are required, and evidence must include `wrapper=wrapperIdentifier`.
+No selector floor increase applies, because no public API was added.
+
+Google deprecates CocoaPods distribution with this release: 10.1.0 is the last Google Sign-In version
+published to CocoaPods, which becomes read-only on December 2, 2026. This preparation is unaffected,
+since 10.1.0 is on trunk and production still resolves pods. Sourcing any later native version needs
+a different acquisition path, which is a build-input change rather than a binding change.
+
 All four releases use CocoaPods at package-production time and retain packed native frameworks and
 resources. The producer's CocoaPods/Xcode pins are recorded in the Sign-In configuration. Exact
 resolved native versions and Podfile.lock are retained as build evidence. Neither CocoaPods nor
