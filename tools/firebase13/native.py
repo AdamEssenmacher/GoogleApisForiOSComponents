@@ -30,6 +30,20 @@ def digest(path):
     return h.hexdigest()
 
 
+def validate_cake_graph(m, text):
+    symbols={symbol:identity for symbol,identity in re.findall(r'Artifact\s+(\w+)\s*=\s*new Artifact\s*\("([^"]+)"',text)}
+    declared={}
+    for symbol,expression in re.findall(r'(\w+)\.Dependencies\s*=\s*([^;]+);',text):
+        if symbol not in symbols: continue
+        refs=[] if expression.strip()=='null' else re.findall(r'\b\w+_ARTIFACT\b',expression)
+        require(expression.strip()=='null' or expression.strip().startswith('new [] {'), 'Unrecognized Cake dependency declaration')
+        require(len(refs)==len(set(refs)), 'Duplicate Cake dependency')
+        declared[symbols[symbol]]={symbols[r] for r in refs}
+    bypackage={p['package']:p['id'] for p in m['packages']}
+    for package in m['packages']:
+        require(package['id'] in declared and declared[package['id']]=={bypackage[d] for d in package['dependencies']}, 'Cake dependency graph differs from ownership manifest: '+package['id'])
+
+
 def validate_schema(m):
     require(m['schema'] == 1 and m['publicationEnabled'] is False, 'Experimental publication must remain disabled')
     s = m['source']
@@ -41,6 +55,7 @@ def validate_schema(m):
     packages = {p['package']: p for p in m['packages']}
     require(len(packages) == len(m['packages']) == 23, 'Unexpected Firebase package closure')
     for p in m['packages']:
+        require(len(p['dependencies']) == len(set(p['dependencies'])), 'Duplicate manifest dependency')
         require(all(n in packages for n in p['dependencies']), 'Dependency outside Firebase closure')
         project = ET.parse(ROOT / p['project']).getroot()
         require(project.findtext('PropertyGroup/PackageId') == p['package'], 'Package owner/project mismatch')
@@ -50,7 +65,11 @@ def validate_schema(m):
         require(not list(project.iter('NativeReference')) and not list(project.iter('BundleResource')), 'Producer project embeds native payloads')
         xbd = [n for n in project.iter('PackageReference') if n.get('Include') == 'Xamarin.Build.Download']
         require(len(xbd) == 1 and xbd[0].get('Version') == '[0.11.6]' and xbd[0].get('PrivateAssets') == 'None', 'Exact public XBD dependency required')
+        references=list(project.iter('ProjectReference'))
+        require(len(references)==len({n.get('Include') for n in references}), 'Duplicate project reference')
+        require(any(n.get('Project','').endswith('Firebase.Native.Pack.targets') for n in project.iter('Import')), 'Exact dependency pack targets required')
         refs = {str((ROOT / p['project']).parent.joinpath(n.get('Include').replace('\\', '/')).resolve()) for n in project.iter('ProjectReference')}
+        require(len(refs)==len(references), 'Duplicate resolved project reference')
         require(refs == {str((ROOT / packages[n]['project']).resolve()) for n in p['dependencies']}, 'Dependency consumption differs from ownership manifest')
         for a in p['assets']:
             require(a['id'] not in ids, 'Duplicate asset ID'); ids.add(a['id'])
@@ -62,6 +81,7 @@ def validate_schema(m):
             if a['kind'] == 'Bundle':
                 key = (a['logical'], a.get('condition'))
                 require(key not in destinations, 'Duplicate logical bundle'); destinations.add(key)
+    validate_cake_graph(m,(ROOT/'components.cake').read_text())
     for name, content in generate(m).items():
         require((ROOT / 'source/Firebase/native' / name).read_text() == content, 'Stale generated target: ' + name)
     acquisition=ET.parse(ROOT/'tools/firebase13/acquire.proj').find('.//XamarinBuildDownload')
@@ -163,6 +183,11 @@ def inspect_package(path, p):
             require(any(n.startswith('lib/net10.0-'+platform) and n.endswith('/'+assembly) for n in names), 'Missing managed platform assembly')
         deps = [n for n in nuspec.iter() if n.tag.split('}')[-1]=='dependency']
         require({n.get('id') for n in deps} == set(p['dependencies']) | {'Xamarin.Build.Download'}, 'Unexpected package dependency closure')
+        versions={n['package']:version(n['version']) for n in json.loads(MANIFEST.read_text())['packages']}
+        require(all(n.get('version')=='['+versions[n.get('id')]+']' for n in deps if n.get('id')!='Xamarin.Build.Download'), 'Native dependency must have an exact bounded version')
+        for group in (n for n in nuspec.iter() if n.tag.split('}')[-1]=='group'):
+            declared=[n.get('id') for n in group if n.tag.split('}')[-1]=='dependency']
+            require(len(declared)==len(set(declared)) and set(declared)==set(p['dependencies'])|{'Xamarin.Build.Download'}, 'Missing/duplicate dependency in target framework group')
         require(z.read('UPSTREAM-NOTICES.txt') == (ROOT/'source/Firebase/native/UPSTREAM-NOTICES.txt').read_bytes(), 'Missing/upstream notices differ')
         xbd = [n for n in deps if n.get('id')=='Xamarin.Build.Download']
         require(xbd and all(n.get('version')=='[0.11.6]' for n in xbd), 'Missing exact XBD dependency in NuGet')

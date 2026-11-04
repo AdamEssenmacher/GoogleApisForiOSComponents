@@ -17,6 +17,10 @@ ML Kit product is migrated here.
 closure, native framework paths, linker metadata, actual binary versions, resource
 slices, and tool digests. `tools/firebase13/generate.py` produces the checked-in
 `build`/`buildTransitive` targets; schema validation rejects stale generated files.
+Repository-owned NuGet dependencies use exact bounded versions for the verified
+archive closure. Schema validation checks Cake, project references and the ownership
+manifest together, including duplicate dependencies; package inspection checks the
+actual nuspec ranges for every target framework.
 RecaptchaInterop retains its AppCheckCore NuGet owner. Firestore native bridge
 registrations use the actual `__FIR…` names while retaining managed class names.
 
@@ -149,7 +153,7 @@ managed APIs or waive the required fallback comparison.
 ## Validation and publication limits
 
 The `Firebase 13 XBD experiment` workflow runs schema/hostile-archive/unit checks on
-PRs. The trusted `codex/firebase13-xbd` PR branch also runs the Mac producer and
+PRs. Same-repository PR branches also run the Mac producer and
 consumer matrix; fork PRs cannot schedule the self-hosted runner. Manual dispatch
 is available once the workflow exists on the default branch. The workflow has
 read-only repository permissions and no publication job. A failing `pod` is placed
@@ -166,6 +170,10 @@ Do not bypass existing release checks or represent the experiment as released.
 The current pinned .NET Catalyst SDK requires a 17.0 deployment floor for test
 applications; binding TFMs and declared package minimums are preserved.
 Local validation evidence is summarized in `FIREBASE_13_XBD_VALIDATION.md`.
+Preserving compatible non-Firebase package-production baselines is tracked in
+[#257](https://github.com/AdamEssenmacher/GoogleApisForiOSComponents/issues/257) and
+blocks default-build cutover. Removing the mixed-build guard does not restore those
+legacy producer lanes. Existing Sign-In 10.1.0 remains unchanged.
 Real Pair-to-Mac execution and credentialed Firebase service flows are not proved
 by the simulator load probe. Windows path/remote-task behavior still needs review.
 

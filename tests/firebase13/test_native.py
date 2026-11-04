@@ -53,6 +53,40 @@ class NativeTests(unittest.TestCase):
                 elif fault=='dependency':m['packages'][0]['dependencies'].append('AdamE.Google.iOS.SignIn')
                 with self.assertRaisesRegex(ValueError,message):native.validate_schema(m)
 
+    def test_dependency_duplicates_and_cake_graph_drift_are_rejected(self):
+        m=copy.deepcopy(self.manifest)
+        m['packages'][0]['dependencies'].append(m['packages'][0]['dependencies'][0])
+        with self.assertRaisesRegex(ValueError,'Duplicate manifest dependency'):native.validate_schema(m)
+        text=(ROOT/'components.cake').read_text()
+        wrong=text.replace('FIREBASE_CORE_ARTIFACT };','FIREBASE_CORE_ARTIFACT, FIREBASE_AUTH_ARTIFACT };',1)
+        with self.assertRaisesRegex(ValueError,'Cake dependency graph'):native.validate_cake_graph(self.manifest,wrong)
+
+    def test_package_dependency_ranges_cannot_be_open_ended(self):
+        p=self.manifest['packages'][0]
+        versions={n['package']:n['version'].removesuffix('.0') for n in self.manifest['packages']}
+        assembly=ET.parse(ROOT/p['project']).findtext('PropertyGroup/AssemblyName')
+        with tempfile.TemporaryDirectory() as tmp:
+            for bounded in (True,False):
+                archive=Path(tmp)/'package.nupkg'
+                spec=ET.Element('package');meta=ET.SubElement(spec,'metadata')
+                ET.SubElement(meta,'id').text=p['package'];ET.SubElement(meta,'version').text=p['version']
+                deps=ET.SubElement(meta,'dependencies')
+                with zipfile.ZipFile(archive,'w') as z:
+                    for platform in ('ios','maccatalyst'):
+                        group=ET.SubElement(deps,'group',targetFramework='net10.0-'+platform)
+                        for dep in p['dependencies']:
+                            ET.SubElement(group,'dependency',id=dep,version=('['+versions[dep]+']') if bounded else versions[dep])
+                        ET.SubElement(group,'dependency',id='Xamarin.Build.Download',version='[0.11.6]')
+                        z.writestr('lib/net10.0-'+platform+'/'+assembly+'.dll',b'managed fixture')
+                    z.writestr('package.nuspec',ET.tostring(spec))
+                    z.writestr('UPSTREAM-NOTICES.txt',(ROOT/'source/Firebase/native/UPSTREAM-NOTICES.txt').read_bytes())
+                    for folder in ('build','buildTransitive'):
+                        for name in ('Firebase.Native.Common.targets',p['package']+'.targets'):
+                            z.writestr(folder+'/'+name,generate(self.manifest)[name])
+                if bounded:native.inspect_package(archive,p)
+                else:
+                    with self.assertRaisesRegex(ValueError,'exact bounded version'):native.inspect_package(archive,p)
+
     def test_hostile_archive_paths_and_links(self):
         for fault in ('traversal','absolute','escaping-link','cycle','write-through','case-collision','file-parent'):
             with self.subTest(fault=fault), tempfile.TemporaryDirectory() as tmp:

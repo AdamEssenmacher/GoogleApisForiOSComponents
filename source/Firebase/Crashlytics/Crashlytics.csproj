@@ -53,7 +53,6 @@
     <PackageReference Include="Xamarin.Build.Download" Version="[0.11.6]" PrivateAssets="None" />
     <ProjectReference Include="../Core/Core.csproj" PrivateAssets="None" />
     <ProjectReference Include="../Installations/Installations.csproj" PrivateAssets="None" />
-    <ProjectReference Include="../Installations/Installations.csproj" PrivateAssets="None" />
     <None Include="../../../source/Firebase/native/AdamE.Firebase.iOS.Crashlytics.targets" Pack="True" PackagePath="build/AdamE.Firebase.iOS.Crashlytics.targets" />
     <None Include="../../../source/Firebase/native/Firebase.Native.Common.targets" Pack="True" PackagePath="build/Firebase.Native.Common.targets" />
     <None Include="../../../source/Firebase/native/AdamE.Firebase.iOS.Crashlytics.targets" Pack="True" PackagePath="buildTransitive/AdamE.Firebase.iOS.Crashlytics.targets" />
@@ -71,4 +70,5 @@
   <Target Name="_RequireVerifiedFirebase13Producer" BeforeTargets="GenerateNuspec" Condition="'$(Firebase13BuildInfoPath)' == ''">
     <Error Text="Use dotnet tool run dotnet-cake firebase13.cake --target=nuget to verify the official Firebase archive before packing this package." />
   </Target>
+  <Import Project="../native/Firebase.Native.Pack.targets" />
 </Project>

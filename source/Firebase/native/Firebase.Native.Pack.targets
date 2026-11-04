@@ -1,0 +1,10 @@
+<Project>
+  <!-- Pack's project-reference versions otherwise become open-ended lower bounds. -->
+  <Target Name="_PinFirebaseProjectDependencies" AfterTargets="_GetProjectReferenceVersions">
+    <ItemGroup>
+      <_ProjectReferencesWithVersions>
+        <ProjectVersion>[%(_ProjectReferencesWithVersions.ProjectVersion)]</ProjectVersion>
+      </_ProjectReferencesWithVersions>
+    </ItemGroup>
+  </Target>
+</Project>

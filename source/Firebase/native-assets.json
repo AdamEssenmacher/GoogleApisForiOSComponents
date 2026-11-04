@@ -806,7 +806,6 @@
       "version": "13.1.1.0",
       "dependencies": [
         "AdamE.Firebase.iOS.Core",
-        "AdamE.Firebase.iOS.Installations",
         "AdamE.Firebase.iOS.Installations"
       ]
     },

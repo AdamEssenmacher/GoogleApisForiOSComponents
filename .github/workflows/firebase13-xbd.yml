@@ -9,6 +9,23 @@ on:
       - 'tests/firebase13/**'
       - 'tests/fixtures/firebase13/**'
       - 'firebase13.cake'
+      - 'firebase13_common.cake'
+      - 'common.cake'
+      - 'poco.cake'
+      - '.config/dotnet-tools.json'
+      - 'docs/Firebase/NuGet/**'
+      - 'docs/Google/NuGet/**'
+      - 'build.cake'
+      - 'components.cake'
+      - 'firebase_release.cake'
+      - 'global.json'
+      - 'Directory.Build.props'
+      - 'source/AssemblyInfo.cs'
+      - 'scripts/FirebaseBindingAudit/**'
+      - 'scripts/FirebaseBindingAudit.Tests/**'
+      - 'scripts/firebase-binding-audit*.json'
+      - 'tests/crashlytics/**'
+      - 'tools/e2e/select-simulator.sh'
       - '.github/workflows/firebase13-xbd.yml'
   workflow_dispatch:
 
@@ -29,17 +46,18 @@ jobs:
           global-json-file: global.json
       - run: python3 -m unittest discover -s tests/firebase13 -v
       - run: python3 tools/firebase13/native.py native-assets-validate
+      - name: Binding audit and fingerprint regression tests
+        run: dotnet test scripts/FirebaseBindingAudit.Tests
       - name: Crashlytics upload integrity and stock XBD ZIP cache tests
         run: python3 -m unittest discover -s tests/crashlytics -v
 
   native:
-    # Allow this trusted experiment branch to validate before the workflow reaches main.
+    # Trusted same-repository PRs validate the full experiment, including follow-up branches.
     # Fork pull requests cannot schedule code on the self-hosted runner.
     if: >-
       github.event_name == 'workflow_dispatch' ||
       (github.event_name == 'pull_request' &&
-       github.event.pull_request.head.repo.full_name == github.repository &&
-       github.head_ref == 'codex/firebase13-xbd')
+       github.event.pull_request.head.repo.full_name == github.repository)
     needs: schema
     runs-on: [self-hosted, macOS, ARM64, xcode-27.1]
     timeout-minutes: 180
