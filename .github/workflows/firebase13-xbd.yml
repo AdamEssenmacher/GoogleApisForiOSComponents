@@ -47,6 +47,8 @@ jobs:
       - run: python3 -m unittest discover -s tests/firebase13 -v
       - run: python3 tools/firebase13/native.py native-assets-validate
       - name: Binding audit and fingerprint regression tests
+        env:
+          MSBuildEnableWorkloadResolver: false
         run: dotnet test scripts/FirebaseBindingAudit.Tests
       - name: Crashlytics upload integrity and stock XBD ZIP cache tests
         run: python3 -m unittest discover -s tests/crashlytics -v
