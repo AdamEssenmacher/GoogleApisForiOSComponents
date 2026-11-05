@@ -714,7 +714,10 @@ void BuildXcodeXcframework (FilePath xcodeProject, PodSpec [] podSpecs, Platform
 				DeleteDirectory (archiveDirectory, new DeleteDirectorySettings { Recursive = true, Force = true });
 			XCodeBuild (xcodeBuildSettings);
 			var frameworkPath = archiveFrameworksDirectory.Combine ($"{podSpec.FrameworkName}.framework");
-			if (!FileExists (frameworkPath.CombineWithFilePath ("Info.plist")) ||
+			// Catalyst uses a versioned framework with its plist under Resources.
+			var hasInfoPlist = FileExists (frameworkPath.CombineWithFilePath ("Info.plist")) ||
+				FileExists (frameworkPath.CombineWithFilePath ("Resources/Info.plist"));
+			if (!hasInfoPlist ||
 				!FileExists (frameworkPath.CombineWithFilePath (podSpec.FrameworkName)))
 				throw new Exception ($"Incomplete native archive: {archiveDirectory}");
 			if (cacheable)

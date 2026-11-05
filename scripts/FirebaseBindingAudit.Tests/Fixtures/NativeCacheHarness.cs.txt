@@ -25,7 +25,7 @@ class PodSpec {
 public class Harness {
     public string Version = "1.0", Key = "key", Hash = "", UrlPrefix = "https://example.test";
     public string Settings = "default", Architectures = "arm64", XcodeId = "Xcode 1", CopyFailure = "", BuildFailure = "";
-    public bool Local;
+    public bool Local, Catalyst;
     public int Downloads, Copies, Builds, Creates;
     string Root;
     Dictionary<string, ExternalDownloadSource> ExternalDownloads = new Dictionary<string, ExternalDownloadSource>();
@@ -64,6 +64,8 @@ public class Harness {
         if (BuildFailure == "throw") throw new IOException("Interrupted build");
         if (BuildFailure == "partial") return;
         Framework(path, "Widget");
+        if (Catalyst)
+            File.Move(Path.Combine(path, "Info.plist"), Path.Combine(path, "Resources/Info.plist"));
         Write(Path.Combine(path, "Widget"), Version);
     }
     void DownloadArchive(ExternalDownloadSource source, FilePath path) { Downloads++; Write(MakeAbsolute(path).FullPath, "archive"); }
@@ -98,5 +100,5 @@ public class Harness {
     public void Analytics() { SetDownload("FirebaseAnalytics"); FirebaseAnalyticsDownload(); }
     public void Build() => BuildXcodeXcframework("Pods/Pods.xcodeproj",
         new[] { new PodSpec { Version = Version, Source = Local ? PodSpec.PodSource.LocalPath : PodSpec.PodSource.PodVersion } },
-        new[] { PlatformV2.Create(Sdk.iPhoneOS, new[] { Architectures == "arm64" ? Arch.Arm64 : Arch.x86_64 }) },
+        new[] { PlatformV2.Create(Catalyst ? Sdk.macCatalyst : Sdk.iPhoneOS, new[] { Architectures == "arm64" ? Arch.Arm64 : Arch.x86_64 }) },
         new DirectoryPath(Path.Combine(Root, "build")), new Dictionary<string, string> { ["CUSTOM"] = Settings });

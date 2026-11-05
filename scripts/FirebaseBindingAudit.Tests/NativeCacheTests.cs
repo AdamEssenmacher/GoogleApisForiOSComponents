@@ -117,6 +117,19 @@ public class NativeCacheTests : IDisposable
         Assert.Equal(1, Count("Builds")); Assert.Equal(2, Count("Creates"));
     }
 
+    [Fact]
+    public void Archive_CatalystResourcesPlistIsRequiredAndCanBeCached()
+    {
+        Set("Catalyst", true);
+        Run("Build");
+        Run("Build");
+        Assert.Equal(1, Count("Builds"));
+
+        File.Delete(Path.Combine(root, "build/Widget/maccatalyst.xcarchive/Products/Library/Frameworks/Widget.framework/Resources/Info.plist"));
+        Run("Build");
+        Assert.Equal(2, Count("Builds"));
+    }
+
     [Theory]
     [InlineData("Version")]
     [InlineData("Settings")]
