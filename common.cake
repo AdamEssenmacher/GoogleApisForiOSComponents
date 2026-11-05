@@ -572,16 +572,30 @@ class NativeCacheRecord
 	{
 		var entries = new List<string> ();
 		foreach (var root in roots) {
-			var files = System.IO.Directory.GetFiles (root, "*", System.IO.SearchOption.AllDirectories);
-			if (files.Length == 0)
-				throw new System.IO.IOException ($"Native cache output is empty: {root}");
 			entries.Add ("root");
-			foreach (var file in files.OrderBy (p => p, StringComparer.Ordinal)) {
-				var relative = System.IO.Path.GetRelativePath (root, file).Replace ('\\', '/');
-				entries.Add (Convert.ToBase64String (System.Text.Encoding.UTF8.GetBytes (relative)) + ":" + FileHash (file));
-			}
+			var firstEntry = entries.Count;
+			InventoryDirectory (root, new System.IO.DirectoryInfo (root), entries);
+			if (entries.Count == firstEntry)
+				throw new System.IO.IOException ($"Native cache output is empty: {root}");
 		}
 		return Hash (string.Join ("\n", entries));
+	}
+
+	static void InventoryDirectory (string root, System.IO.DirectoryInfo directory, List<string> entries)
+	{
+		foreach (var entry in directory.EnumerateFileSystemInfos ().OrderBy (p => p.Name, StringComparer.Ordinal)) {
+			var relative = System.IO.Path.GetRelativePath (root, entry.FullName).Replace ('\\', '/');
+			var pathKey = Convert.ToBase64String (System.Text.Encoding.UTF8.GetBytes (relative));
+			// Frameworks may contain directory aliases or dangling links in nested dependencies.
+			// Record each link without walking through it or opening its target.
+			var linkTarget = entry.LinkTarget;
+			if (linkTarget != null)
+				entries.Add (pathKey + ":link:" + Hash (linkTarget));
+			else if (entry is System.IO.DirectoryInfo child)
+				InventoryDirectory (root, child, entries);
+			else
+				entries.Add (pathKey + ":" + FileHash (entry.FullName));
+		}
 	}
 
 	public static bool Matches (string stamp, string identity, string[] roots)

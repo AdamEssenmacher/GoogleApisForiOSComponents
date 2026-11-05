@@ -130,6 +130,22 @@ public class NativeCacheTests : IDisposable
         Assert.Equal(2, Count("Builds"));
     }
 
+    [Fact]
+    public void Archive_RecordsFrameworkLinksWithoutFollowingThem()
+    {
+        if (OperatingSystem.IsWindows()) return;
+        Set("FrameworkLinks", true);
+        Run("Build");
+        Run("Build");
+        Assert.Equal(1, Count("Builds"));
+
+        var link = Path.Combine(Archive, "Products/Library/Frameworks/Widget.framework/Headers");
+        File.Delete(link);
+        File.CreateSymbolicLink(link, "ChangedHeaders");
+        Run("Build");
+        Assert.Equal(2, Count("Builds"));
+    }
+
     [Theory]
     [InlineData("Version")]
     [InlineData("Settings")]

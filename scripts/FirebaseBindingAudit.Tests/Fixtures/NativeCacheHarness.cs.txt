@@ -25,7 +25,7 @@ class PodSpec {
 public class Harness {
     public string Version = "1.0", Key = "key", Hash = "", UrlPrefix = "https://example.test";
     public string Settings = "default", Architectures = "arm64", XcodeId = "Xcode 1", CopyFailure = "", BuildFailure = "";
-    public bool Local, Catalyst;
+    public bool Local, Catalyst, FrameworkLinks;
     public int Downloads, Copies, Builds, Creates;
     string Root;
     Dictionary<string, ExternalDownloadSource> ExternalDownloads = new Dictionary<string, ExternalDownloadSource>();
@@ -66,6 +66,10 @@ public class Harness {
         Framework(path, "Widget");
         if (Catalyst)
             File.Move(Path.Combine(path, "Info.plist"), Path.Combine(path, "Resources/Info.plist"));
+        if (FrameworkLinks) {
+            System.IO.Directory.CreateSymbolicLink(Path.Combine(path, "ResourceAlias"), "Resources");
+            File.CreateSymbolicLink(Path.Combine(path, "Headers"), "MissingHeaders");
+        }
         Write(Path.Combine(path, "Widget"), Version);
     }
     void DownloadArchive(ExternalDownloadSource source, FilePath path) { Downloads++; Write(MakeAbsolute(path).FullPath, "archive"); }
