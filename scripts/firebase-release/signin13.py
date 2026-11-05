@@ -48,6 +48,11 @@ def metadata(release):
     return records
 
 
+def integration_metadata(release):
+    records = release.read(ROOT / 'source/Firebase/native-assets.json')['packages']
+    return [{**p, 'id': p['package']} for p in records]
+
+
 def snapshot(release, packages):
     release.require(packages == metadata(release), 'Sign-In 13 metadata differs from repository inputs')
     tracked = release.run('git', 'ls-files').splitlines()
@@ -200,8 +205,7 @@ def validate_consumer(release, result, manifest, lane):
     release.require(all(hashes.get(k) == v for k, v in expected.items()), 'Consumer evidence has wrong Sign-In package bytes')
     fixtures = {}
     if lane == 'combined':
-        records = release.read(ROOT / 'source/Firebase/native-assets.json')['packages']
-        versions = release.fixture_packages([{**p, 'id': p['package']} for p in records])
+        versions = release.fixture_packages(integration_metadata(release))
         for package_id, version in versions.items():
             name = f"{package_id}.{release.normalized(version)}.nupkg"
             fixtures[package_id] = release.digest((ROOT / 'output/firebase13' / name).read_bytes())

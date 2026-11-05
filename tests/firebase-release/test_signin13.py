@@ -54,6 +54,13 @@ class SignIn13Tests(unittest.TestCase):
             self.assertTrue(plan['relevant'])
             self.assertFalse(plan['eligible'])
 
+    def test_static_planning_classifies_firebase13_fixture_changes(self):
+        integration = adapter.integration_metadata(release)
+        fixtures = release.fixture_packages(integration)
+        self.assertEqual(release.normalized(fixtures['AdamE.Firebase.iOS.CloudFirestore']), '13.1.1')
+        path = 'source/Firebase/CloudFirestore/ApiDefinition.cs'
+        self.assertEqual(release.validation_reasons([path], [], 'signin', integration), [path])
+
     def test_consumer_evidence_requires_exact_hashes_matrix_and_runtime(self):
         package = {'id': release.SIGNIN_ROOT_ID, 'sha256': 'sealed'}
         manifest = {'sourceCommit': 'abc', 'packages': [package]}

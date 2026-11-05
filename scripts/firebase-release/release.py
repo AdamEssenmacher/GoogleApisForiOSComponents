@@ -437,7 +437,10 @@ def plan(args):
         reasons.append('missing comparison history')
     if not reasons:
         files = run('git', 'diff', '--name-only', args.base, 'HEAD').splitlines()
-        integration = read(args.integration_metadata) if CHANNEL == 'signin' and not signin13_mode(config['nativeBuild']) else ()
+        integration = ()
+        if CHANNEL == 'signin':
+            integration = (signin13().integration_metadata(sys.modules[__name__])
+                           if signin13_mode(config['nativeBuild']) else read(args.integration_metadata))
         reasons = validation_reasons(files, packages, CHANNEL, integration)
     old_config = git_file(args.base, CONFIG) if args.base else None
     triggered = args.manual or old_config is None or old_config.get('releaseVersion') != release_version
