@@ -1,0 +1,52 @@
+<Project>
+  <!-- SPM-named bundles match the accessors compiled into the packed static libraries. -->
+  <PropertyGroup><_AdamESignInPackedRoot>$(MSBuildThisFileDirectory)</_AdamESignInPackedRoot></PropertyGroup>
+  <Target Name="_AdamESignInPackedResources" BeforeTargets="_BeforeCoreCompileInterfaceDefinitions"
+          Condition="'$(DesignTimeBuild)' != 'true' And '$(IsCrossTargetingBuild)' != 'true' And ('$(TargetPlatformIdentifier)' == 'ios' Or '$(TargetPlatformIdentifier)' == 'maccatalyst') And ('$(OutputType)' != 'Library' Or '$(IsAppExtension)' == 'true')">
+    <PropertyGroup>
+      <_AdamESignInPlatform>ios</_AdamESignInPlatform>
+      <_AdamESignInPlatform Condition="$([System.String]::Copy('$(RuntimeIdentifier)').StartsWith('iossimulator-'))">simulator</_AdamESignInPlatform>
+      <_AdamESignInPlatform Condition="'$(TargetPlatformIdentifier)' == 'maccatalyst'">maccatalyst</_AdamESignInPlatform>
+    </PropertyGroup>
+    <Error Condition="!Exists('$(_AdamESignInPackedRoot)native-resources/$(_AdamESignInPlatform)/GoogleSignIn_GoogleSignIn.bundle')" Text="Missing packed Sign-In resource GoogleSignIn_GoogleSignIn.bundle. Clear and restore AdamE.Google.iOS.SignIn." />
+    <ItemGroup>
+      <_AdamESignInBundle0 Remove="@(_AdamESignInBundle0)" />
+      <_AdamESignInBundle0 Include="$(_AdamESignInPackedRoot)native-resources/$(_AdamESignInPlatform)/GoogleSignIn_GoogleSignIn.bundle/**/*" />
+      <BundleResource Remove="@(_AdamESignInBundle0)" />
+      <BundleResource Include="@(_AdamESignInBundle0)" Visible="False">
+        <LogicalName>GoogleSignIn_GoogleSignIn.bundle/%(_AdamESignInBundle0.RecursiveDir)%(_AdamESignInBundle0.Filename)%(_AdamESignInBundle0.Extension)</LogicalName>
+        <Optimize>False</Optimize>
+      </BundleResource>
+    </ItemGroup>
+    <Error Condition="!Exists('$(_AdamESignInPackedRoot)native-resources/$(_AdamESignInPlatform)/AppAuth_AppAuth.bundle')" Text="Missing packed Sign-In resource AppAuth_AppAuth.bundle. Clear and restore AdamE.Google.iOS.SignIn." />
+    <ItemGroup>
+      <_AdamESignInBundle1 Remove="@(_AdamESignInBundle1)" />
+      <_AdamESignInBundle1 Include="$(_AdamESignInPackedRoot)native-resources/$(_AdamESignInPlatform)/AppAuth_AppAuth.bundle/**/*" />
+      <BundleResource Remove="@(_AdamESignInBundle1)" />
+      <BundleResource Include="@(_AdamESignInBundle1)" Visible="False">
+        <LogicalName>AppAuth_AppAuth.bundle/%(_AdamESignInBundle1.RecursiveDir)%(_AdamESignInBundle1.Filename)%(_AdamESignInBundle1.Extension)</LogicalName>
+        <Optimize>False</Optimize>
+      </BundleResource>
+    </ItemGroup>
+    <Error Condition="!Exists('$(_AdamESignInPackedRoot)native-resources/$(_AdamESignInPlatform)/AppAuth_AppAuthCore.bundle')" Text="Missing packed Sign-In resource AppAuth_AppAuthCore.bundle. Clear and restore AdamE.Google.iOS.SignIn." />
+    <ItemGroup>
+      <_AdamESignInBundle2 Remove="@(_AdamESignInBundle2)" />
+      <_AdamESignInBundle2 Include="$(_AdamESignInPackedRoot)native-resources/$(_AdamESignInPlatform)/AppAuth_AppAuthCore.bundle/**/*" />
+      <BundleResource Remove="@(_AdamESignInBundle2)" />
+      <BundleResource Include="@(_AdamESignInBundle2)" Visible="False">
+        <LogicalName>AppAuth_AppAuthCore.bundle/%(_AdamESignInBundle2.RecursiveDir)%(_AdamESignInBundle2.Filename)%(_AdamESignInBundle2.Extension)</LogicalName>
+        <Optimize>False</Optimize>
+      </BundleResource>
+    </ItemGroup>
+    <Error Condition="!Exists('$(_AdamESignInPackedRoot)native-resources/$(_AdamESignInPlatform)/GTMAppAuth_GTMAppAuth.bundle')" Text="Missing packed Sign-In resource GTMAppAuth_GTMAppAuth.bundle. Clear and restore AdamE.Google.iOS.SignIn." />
+    <ItemGroup>
+      <_AdamESignInBundle3 Remove="@(_AdamESignInBundle3)" />
+      <_AdamESignInBundle3 Include="$(_AdamESignInPackedRoot)native-resources/$(_AdamESignInPlatform)/GTMAppAuth_GTMAppAuth.bundle/**/*" />
+      <BundleResource Remove="@(_AdamESignInBundle3)" />
+      <BundleResource Include="@(_AdamESignInBundle3)" Visible="False">
+        <LogicalName>GTMAppAuth_GTMAppAuth.bundle/%(_AdamESignInBundle3.RecursiveDir)%(_AdamESignInBundle3.Filename)%(_AdamESignInBundle3.Extension)</LogicalName>
+        <Optimize>False</Optimize>
+      </BundleResource>
+    </ItemGroup>
+  </Target>
+</Project>

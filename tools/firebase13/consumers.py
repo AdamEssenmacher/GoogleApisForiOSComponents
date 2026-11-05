@@ -43,9 +43,16 @@ def main():
     parser.add_argument('--without-ad-id',action='store_true')
     parser.add_argument('--quick',action='store_true',help='Direct iOS simulator only; the default includes device/Catalyst/transitive shapes')
     parser.add_argument('--cache',type=Path,help='Reuse an existing XBD cache instead of testing a fresh acquisition')
+    parser.add_argument('--with-signin', action='store_true', help='Include the Firebase 13 compatible Sign-In binding revision')
     args=parser.parse_args()
+    if args.with_signin and args.scope != 'combined':
+        parser.error('--with-signin requires --scope combined')
     m=json.loads(MANIFEST.read_text());feed=ROOT/'output/firebase13'
     label=args.scope+('-without-ad-id' if args.without_ad_id else '')
+    if args.with_signin:
+        label += '-signin'
+    signin_package = 'AdamE.Google.iOS.SignIn'
+    signin_version = '10.1.0.1'
     roots={'core':['Core'],'combined':['Analytics','Auth','CloudFirestore'],'all':[p['id'].split('.',1)[1] for p in m['packages'] if p['id'].startswith('Firebase.')]}[args.scope]
     work=(args.resume or Path(tempfile.mkdtemp(prefix='firebase13-consumer-'))).resolve();print('WORKSPACE',work,flush=True)
     results=ROOT/'output/firebase13-results';results.mkdir(parents=True,exist_ok=True)
@@ -68,6 +75,8 @@ def main():
             project=work/(platform+('-transitive' if transitive else '-direct'));project.mkdir(exist_ok=True)
             versions={p['id'].split('.',1)[1]:p['version'] for p in m['packages'] if p['id'].startswith('Firebase.')}
             refs=''.join(f'<PackageReference Include="AdamE.Firebase.iOS.{name}" Version="[{versions[name]}]"/>' for name in roots)
+            if args.with_signin:
+                refs += f'<PackageReference Include="{signin_package}" Version="[{signin_version}]"/>'
             if transitive:
                 lib=project/'Library';lib.mkdir(exist_ok=True)
                 (lib/'Library.csproj').write_text(f'<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><TargetFramework>net10.0-{platform}</TargetFramework></PropertyGroup><ItemGroup>{refs}</ItemGroup></Project>')
@@ -110,6 +119,16 @@ def main():
                 Action<Firebase.Storage.StorageUploadTask> uploadApi=task=>{task.Enqueue();task.Pause();task.Cancel();task.Resume();};
                 GC.KeepAlive(downloadApi); GC.KeepAlive(uploadApi);
                 """
+            if args.with_signin:
+                classes += ['GIDSignIn', 'GIDConfiguration', 'GIDSignInButton', 'GIDClaim']
+                extra += '''
+                using var signinConfig = new Google.SignIn.Configuration("fixture-client-id");
+                using var signinButton = new Google.SignIn.SignInButton();
+                using var signinClaim = Google.SignIn.Claim.CreateAuthTimeClaim();
+                if (signinConfig.ClientId != "fixture-client-id" ||
+                    Google.SignIn.SignIn.SharedInstance is null || signinClaim.Name != "auth_time")
+                    throw new Exception("Google Sign-In native probe failed");
+                '''
             (project/'Main.cs').write_text(PROBE.replace('EXPECTED_FIREBASE_VERSION',m['releaseVersion']).replace('CLASS_NAMES',','.join('"'+n+'"' for n in classes)).replace('EXTRA_PROBE',extra))
             bundle='com.googleapisforioscomponents.firebase13.'+work.name.split('-')[-1]+'.'+platform+('.transitive' if transitive else '.direct')
             (project/'Info.plist').write_text(f'<plist version="1.0"><dict><key>CFBundleIdentifier</key><string>{bundle}</string><key>CFBundleShortVersionString</key><string>1.0</string><key>CFBundleVersion</key><string>1</string><key>UIApplicationSceneManifest</key><dict><key>UIApplicationSupportsMultipleScenes</key><false/><key>UISceneConfigurations</key><dict><key>UIWindowSceneSessionRoleApplication</key><array><dict><key>UISceneConfigurationName</key><string>Default Configuration</string><key>UISceneDelegateClassName</key><string>SceneDelegate</string></dict></array></dict></dict></dict></plist>')
@@ -122,6 +141,9 @@ def main():
         restored=work/'nuget'/p['package'].lower()/version/(p['package'].lower()+'.'+version+'.nupkg')
         if restored.exists():
             assert digest(restored)==digest(feed/(p['package']+'.'+version+'.nupkg')), 'Restored package differs from current candidate; rerun in a fresh workspace: '+p['package']
+    if args.with_signin:
+        restored = work/'nuget'/signin_package.lower()/signin_version/(signin_package.lower()+'.'+signin_version+'.nupkg')
+        assert digest(restored) == digest(feed/(signin_package+'.'+signin_version+'.nupkg')), 'Restored Sign-In package differs from candidate'
     restored_packages=snapshot(work/'nuget')
     first=True;simulator=None
     for project,platform,bundle in projects:
@@ -143,6 +165,13 @@ def main():
                     assert any(p.exists() and digest(p)==digest(Path(source)) for p in candidates), 'Missing/altered privacy resource: '+logical
             bundles=[p.name for p in app.rglob('*.bundle')]
             assert len(bundles)==len(set(bundles)),'Duplicate logical bundles'
+            if args.with_signin:
+                expected = {'GoogleSignIn_GoogleSignIn.bundle', 'AppAuth_AppAuth.bundle',
+                            'AppAuth_AppAuthCore.bundle', 'GTMAppAuth_GTMAppAuth.bundle'}
+                assert expected <= set(bundles), 'Missing packed Sign-In resource bundle(s): ' + str(expected - set(bundles))
+                assert not any(p.is_dir() and p.name in {'GoogleSignIn.framework', 'AppAuth.framework',
+                            'AppAuthCore.framework', 'GTMAppAuth.framework', 'AppCheckCore.framework',
+                            'GTMSessionFetcher.framework'} for p in app.rglob('*.framework')), 'Unexpected dynamic framework'
             if args.scope!='core':assert ('GoogleAdsOnDeviceConversion.xcframework' in '\n'.join(assets)) == (platform=='ios' and not args.without_ad_id)
             if args.without_ad_id:assert 'GoogleAppMeasurementIdentitySupport.xcframework' not in '\n'.join(assets)
             if first:simulator=(app,bundle)

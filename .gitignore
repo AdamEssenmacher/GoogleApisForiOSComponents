@@ -35,3 +35,8 @@ __pycache__/
 *.pyc
 
 !tools/legacy/
+
+!tools/signin-native/
+!tools/SignInNative/
+tools/SignInNative/.build/
+tools/SignInNative/.swiftpm/

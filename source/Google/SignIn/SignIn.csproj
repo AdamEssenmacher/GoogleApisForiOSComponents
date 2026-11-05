@@ -8,8 +8,8 @@
     <SupportedOSPlatformVersion>15.0</SupportedOSPlatformVersion>
     <RootNamespace>Google.SignIn</RootNamespace>
     <AssemblyName>Google.SignIn</AssemblyName>
-    <AssemblyVersion>10.1.0.0</AssemblyVersion>
-    <FileVersion>10.1.0.0</FileVersion>
+    <AssemblyVersion>10.1.0.1</AssemblyVersion>
+    <FileVersion>10.1.0.1</FileVersion>
     <IPhoneResourcePrefix>Resources</IPhoneResourcePrefix>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
@@ -26,7 +26,7 @@
     <PackageLicenseFile>License.md</PackageLicenseFile>
     <PackageReadmeFile>NUGET_README.md</PackageReadmeFile>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-    <PackageVersion>10.1.0.0</PackageVersion>
+    <PackageVersion>10.1.0.1</PackageVersion>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="..\..\AssemblyInfo.cs" />
@@ -35,33 +35,12 @@
     <Folder Include="Resources\" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="SignIn.targets" Pack="True" PackagePath="build/$(PackageId).targets" />
+    <None Include="SignIn.buildTransitive.targets" Pack="True" PackagePath="buildTransitive/$(PackageId).targets" />
     <None Include="External-Dependency-Info.txt" Pack="True" PackagePath="THIRD-PARTY-NOTICES.txt" />
     <None Include="License.md" Pack="True" PackagePath="License.md" />
     <None Include="../../../docs/NUGET_README.md" Pack="True" PackagePath="NUGET_README.md" />
     <None Include="../../../icons/googleiossignin_128x128.png" Pack="True" PackagePath="googleiossignin_128x128.png" />
-  </ItemGroup>
-  <ItemGroup>
-      <NativeReference Include="..\..\..\externals\AppAuth.xcframework">
-          <Kind>Framework</Kind>
-          <SmartLink>True</SmartLink>
-          <ForceLoad>True</ForceLoad>
-          <Frameworks>SafariServices</Frameworks>
-          <WeakFrameworks>AuthenticationServices</WeakFrameworks>
-      </NativeReference>
-      <NativeReference Include="..\..\..\externals\GTMAppAuth.xcframework">
-          <Kind>Framework</Kind>
-          <SmartLink>True</SmartLink>
-          <ForceLoad>True</ForceLoad>
-          <Frameworks>Security SystemConfiguration SafariServices</Frameworks>
-      </NativeReference>
-      <NativeReference Include="..\..\..\externals\GoogleSignIn.xcframework">
-          <Kind>Framework</Kind>
-          <SmartLink>True</SmartLink>
-          <ForceLoad>True</ForceLoad>
-          <LinkerFlags>-ObjC -lsqlite3</LinkerFlags>
-          <Frameworks>CoreGraphics CoreText Foundation LocalAuthentication Security UIKit</Frameworks>
-          <WeakFrameworks>SafariServices</WeakFrameworks>
-      </NativeReference>
   </ItemGroup>
   <ItemGroup>
     <ObjcBindingCoreSource Include="Enums.cs" />
@@ -70,9 +49,10 @@
     <ObjcBindingApiDefinition Include="ApiDefinition.cs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="AdamE.Google.iOS.GTMSessionFetcher" Version="[3.5.0.6,4.0.0)" />
-    <PackageReference Include="AdamE.Google.iOS.PromisesObjC" Version="[2.4.0.6,3.0.0)" />
-    <PackageReference Include="AdamE.Google.iOS.GoogleUtilities" Version="[8.1.0.4,9.0.0)" />
-    <PackageReference Include="AdamE.Google.iOS.AppCheckCore" Version="[11.2.0.1,12.0.0)" />
+    <PackageReference Include="AdamE.Google.iOS.GTMSessionFetcher" Version="[5.3.1]" />
+    <PackageReference Include="AdamE.Google.iOS.PromisesObjC" Version="[2.4.1]" />
+    <PackageReference Include="AdamE.Google.iOS.GoogleUtilities" Version="[8.1.5.1]" />
+    <PackageReference Include="AdamE.Google.iOS.AppCheckCore" Version="[12.0.0]" />
   </ItemGroup>
+  <Import Project="SignIn.PackedNative.props" />
 </Project>
