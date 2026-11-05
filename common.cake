@@ -551,6 +551,87 @@ void BuildXcodeFatFramework (FilePath xcodeProject, PodSpec [] podSpecs, Platfor
 	}
 }
 
+// A completion record binds the requested inputs to every output file. Rechecking the
+// inventory rejects deleted/truncated binaries and bundles, not just missing directories.
+class NativeCacheRecord
+{
+	public static string Hash (string text)
+	{
+		using (var sha = System.Security.Cryptography.SHA256.Create ())
+			return Convert.ToBase64String (sha.ComputeHash (System.Text.Encoding.UTF8.GetBytes (text)));
+	}
+
+	public static string FileHash (string path)
+	{
+		using (var stream = System.IO.File.OpenRead (path))
+		using (var sha = System.Security.Cryptography.SHA256.Create ())
+			return Convert.ToBase64String (sha.ComputeHash (stream));
+	}
+
+	public static string Inventory (string[] roots)
+	{
+		var entries = new List<string> ();
+		foreach (var root in roots) {
+			entries.Add ("root");
+			var firstEntry = entries.Count;
+			InventoryDirectory (root, new System.IO.DirectoryInfo (root), entries);
+			if (entries.Count == firstEntry)
+				throw new System.IO.IOException ($"Native cache output is empty: {root}");
+		}
+		return Hash (string.Join ("\n", entries));
+	}
+
+	static void InventoryDirectory (string root, System.IO.DirectoryInfo directory, List<string> entries)
+	{
+		foreach (var entry in directory.EnumerateFileSystemInfos ().OrderBy (p => p.Name, StringComparer.Ordinal)) {
+			var relative = System.IO.Path.GetRelativePath (root, entry.FullName).Replace ('\\', '/');
+			var pathKey = Convert.ToBase64String (System.Text.Encoding.UTF8.GetBytes (relative));
+			// Frameworks may contain directory aliases or dangling links in nested dependencies.
+			// Record each link without walking through it or opening its target.
+			var linkTarget = entry.LinkTarget;
+			if (linkTarget != null)
+				entries.Add (pathKey + ":link:" + Hash (linkTarget));
+			else if (entry is System.IO.DirectoryInfo child)
+				InventoryDirectory (root, child, entries);
+			else
+				entries.Add (pathKey + ":" + FileHash (entry.FullName));
+		}
+	}
+
+	public static bool Matches (string stamp, string identity, string[] roots)
+	{
+		if (!System.IO.File.Exists (stamp))
+			return false;
+		try {
+			return System.IO.File.ReadAllText (stamp) == Hash (identity) + "\n" + Inventory (roots);
+		} catch (System.IO.IOException) {
+			return false;
+		} catch (UnauthorizedAccessException) {
+			return false;
+		}
+	}
+
+	public static void Complete (string stamp, string identity, string inventory)
+	{
+		var temporary = stamp + ".tmp";
+		System.IO.File.WriteAllText (temporary, Hash (identity) + "\n" + inventory);
+		System.IO.File.Move (temporary, stamp, true);
+	}
+}
+
+string NativeXcodeIdentity ()
+{
+	var args = new ProcessArgumentBuilder ();
+	args.Append ("-version");
+	var settings = new ProcessSettings { Arguments = args, RedirectStandardOutput = true };
+	using (var process = StartAndReturnProcess ("xcodebuild", settings)) {
+		var output = string.Join ("\n", process.GetStandardOutput ());
+		process.WaitForExit ();
+		ThrowIfProcessFailed ("xcodebuild -version", process.GetExitCode ());
+		return output + "\n" + EnvironmentVariable ("DEVELOPER_DIR");
+	}
+}
+
 void BuildXcodeXcframework (FilePath xcodeProject, PodSpec [] podSpecs, PlatformV2 [] platforms, DirectoryPath workingDirectory = null, Dictionary<string, string> buildSettings = null)
 {
 	if (!IsRunningOnUnix ()) {
@@ -558,6 +639,9 @@ void BuildXcodeXcframework (FilePath xcodeProject, PodSpec [] podSpecs, Platform
 		return;
 	}
 	
+	if (podSpecs.Length == 0)
+		return;
+
 	Information ("Building the following frameworks:");
 	Information (string.Join (",\n", podSpecs.Select (ps => ps.FrameworkName).ToArray ()));
 
@@ -572,6 +656,7 @@ void BuildXcodeXcframework (FilePath xcodeProject, PodSpec [] podSpecs, Platform
 	if (!buildSettings.ContainsKey("EXPANDED_CODE_SIGN_IDENTITY"))
 		buildSettings["EXPANDED_CODE_SIGN_IDENTITY"] = "";
 
+	var xcodeIdentity = NativeXcodeIdentity ();
 	foreach (var podSpec in podSpecs) {
 		Information ($"Building the following framework: {podSpec.FrameworkName}...");
 
@@ -590,9 +675,6 @@ void BuildXcodeXcframework (FilePath xcodeProject, PodSpec [] podSpecs, Platform
 			var archiveDirectory = buildDirectory.Combine ($"{platform.Sdk}.xcarchive");
 			var archiveFrameworksDirectory = archiveDirectory.Combine ("Products/Library/Frameworks");
 			xcodeBuildArgs.Append ($"-framework {archiveFrameworksDirectory}/{podSpec.FrameworkName}.framework");
-
-			if (DirectoryExists (archiveDirectory))
-				continue;
 
 			var buildSettingsCopy = new Dictionary<string, string> (buildSettings);
 			buildSettingsCopy ["SKIP_INSTALL"] = "NO";
@@ -613,28 +695,52 @@ void BuildXcodeXcframework (FilePath xcodeProject, PodSpec [] podSpecs, Platform
 			if (archs != null)
 				xcodeBuildSettings.Arch = string.Join (',', archs.Select (a => a.Value).ToArray ());
 
+			var archivePath = MakeAbsolute (archiveDirectory).FullPath;
+			var stamp = archivePath + ".cache";
+			var projectPath = MakeAbsolute (workingDirectory.CombineWithFilePath (xcodeProject)).FullPath;
+			var lockPath = MakeAbsolute (workingDirectory.CombineWithFilePath ("Podfile.lock")).FullPath;
+			var manifestPath = MakeAbsolute (workingDirectory.CombineWithFilePath ("Pods/Manifest.lock")).FullPath;
+			// Unlocked and local source builds cannot safely reuse archives.
+			var supportPath = MakeAbsolute (workingDirectory.Combine ("Pods/Target Support Files")).FullPath;
+			var podfilePath = MakeAbsolute (workingDirectory.CombineWithFilePath ("Podfile")).FullPath;
+			var cacheable = DirectoryExists (supportPath) && FileExists (podfilePath) && FileExists (lockPath) && FileExists (manifestPath) &&
+				podSpecs.All (p => p.Source != PodSpec.PodSource.LocalPath);
+			var identity = string.Join ("\n", new [] {
+				"native-archive-v1", xcodeIdentity, projectPath,
+				NativeCacheRecord.Inventory (new [] { projectPath }),
+				cacheable ? NativeCacheRecord.Inventory (new [] { supportPath }) : "unlocked",
+				cacheable ? NativeCacheRecord.FileHash (podfilePath) : "unlocked",
+				cacheable ? NativeCacheRecord.FileHash (lockPath) : "unlocked",
+				cacheable ? NativeCacheRecord.FileHash (manifestPath) : "unlocked",
+				string.Join ("\n", podSpecs.SelectMany (p => p.BuildPodLines ())),
+				target, podSpec.FrameworkName, platform.Sdk.ToString (), sdk.ToString (),
+				xcodeBuildSettings.Arch ?? "default",
+				string.Join ("\n", buildSettingsCopy.OrderBy (p => p.Key, StringComparer.Ordinal).Select (p => p.Key + "=" + p.Value))
+			});
+			var roots = new [] { archivePath };
+			if (cacheable && NativeCacheRecord.Matches (stamp, identity, roots))
+				continue;
+
+			// Invalidate before any destructive work. An interrupted build never leaves a hit.
+			if (System.IO.File.Exists (stamp))
+				System.IO.File.Delete (stamp);
+			if (DirectoryExists (archiveDirectory))
+				DeleteDirectory (archiveDirectory, new DeleteDirectorySettings { Recursive = true, Force = true });
 			XCodeBuild (xcodeBuildSettings);
+			var frameworkPath = archiveFrameworksDirectory.Combine ($"{podSpec.FrameworkName}.framework");
+			// Catalyst uses a versioned framework with its plist under Resources.
+			var hasInfoPlist = FileExists (frameworkPath.CombineWithFilePath ("Info.plist")) ||
+				FileExists (frameworkPath.CombineWithFilePath ("Resources/Info.plist"));
+			if (!hasInfoPlist ||
+				!FileExists (frameworkPath.CombineWithFilePath (podSpec.FrameworkName)))
+				throw new Exception ($"Incomplete native archive: {archiveDirectory}");
+			if (cacheable)
+				NativeCacheRecord.Complete (stamp, identity, NativeCacheRecord.Inventory (roots));
 
 			Information ($"Done building {podSpec.FrameworkName} framework with {platform.Sdk} platform SDK...");
 
-			var builtFrameworkDirectories = GetDirectories (archiveFrameworksDirectory.Combine ("*.framework").ToString ());
-			
-			Information ($"Copying the following built frameworks to its respective archives:");
-			Information (string.Join (",\n", builtFrameworkDirectories.Select (b => b.ToString ()).ToArray ()));
-
-			foreach (var directory in builtFrameworkDirectories) {
-				var builtFrameworkName = directory.GetDirectoryName ().Replace (".framework", "");
-
-				if (string.Equals (builtFrameworkName, podSpec.FrameworkName))
-					continue;
-
-				DirectoryPath destinationDirectory = Directory (archiveFrameworksDirectory.ToString ().Replace ($"{podSpec.FrameworkName}", $"{builtFrameworkName}"));
-				destinationDirectory = destinationDirectory.Combine ($"{builtFrameworkName}.framework");
-
-				Information ($"Copying {directory} to {destinationDirectory}");
-
-					CopyDirectoryWithSymlinks (directory, destinationDirectory);
-			}
+			// Each scheme owns its archive and completion record. Do not copy dependency
+			// frameworks into another scheme's archive behind that record's back.
 		}
 
 		Information ($"Building {podSpec.FrameworkName} xcframework...");
