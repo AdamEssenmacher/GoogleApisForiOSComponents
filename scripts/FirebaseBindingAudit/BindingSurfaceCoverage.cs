@@ -10,7 +10,7 @@ namespace FirebaseBindingAudit;
 
 internal static class FirebasePackageVersions
 {
-    public const string DefaultFirebasePackageVersion = "12.19.3";
+    public const string DefaultFirebasePackageVersion = "12.19.3.1";
 }
 
 internal sealed class BindingSurfaceCoverageManifest

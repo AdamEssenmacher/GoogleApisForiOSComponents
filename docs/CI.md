@@ -43,3 +43,6 @@ Run the planner and fingerprint regressions with:
 python3 -m unittest discover -s tests/ci -v
 dotnet test scripts/FirebaseBindingAudit.Tests/FirebaseBindingAudit.Tests.csproj
 ```
+
+Native cache behavior and fixture regression coverage are documented in
+[NATIVE_CACHES.md](NATIVE_CACHES.md).

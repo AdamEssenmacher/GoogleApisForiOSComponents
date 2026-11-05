@@ -53,16 +53,22 @@ FilePath GetArchivePath (ExternalDownloadSource source, DirectoryPath externalsP
 DirectoryPath GetExtractionRoot (ExternalDownloadSource source, DirectoryPath externalsPath) =>
 	externalsPath.Combine (source.ExtractionRootName);
 
-void DownloadAndExtract (ExternalDownloadSource source, Func<bool> artifactsAlreadyPresent, Action<DirectoryPath, DirectoryPath, DeleteDirectorySettings> copyArtifacts)
+void DownloadAndExtract (ExternalDownloadSource source, string[] outputNames, Action<DirectoryPath, DirectoryPath, DeleteDirectorySettings> copyArtifacts)
 {
-	var externalsPath = new DirectoryPath ("./externals");
+	var externalsPath = MakeAbsolute (new DirectoryPath ("./externals"));
 
-	if (artifactsAlreadyPresent ()) {
+	var outputs = outputNames.Select (name => MakeAbsolute (externalsPath.Combine (name)).FullPath).ToArray ();
+	var stamp = MakeAbsolute (externalsPath.CombineWithFilePath (source.Id + ".download-cache")).FullPath;
+	var identity = string.Join ("\n", new [] { "native-download-v1", source.Id, source.Version,
+		source.ArchiveKey, source.Url, source.ExpectedSha256, source.ExtractionRootName,
+		string.Join ("\n", outputNames) });
+	if (NativeCacheRecord.Matches (stamp, identity, outputs)) {
 		Information ($"{source.Id} artifacts already available in externals. Skipping download.");
 		return;
 	}
 
 	EnsureDirectoryExists (externalsPath);
+	System.IO.File.Delete (stamp);
 
 	var archivePath = GetArchivePath (source, externalsPath);
 	var extractionRoot = GetExtractionRoot (source, externalsPath);
@@ -82,10 +88,17 @@ void DownloadAndExtract (ExternalDownloadSource source, Func<bool> artifactsAlre
 	if (exitCode != 0)
 		throw new Exception ($"tar failed with exit code {exitCode} while extracting {archivePath.GetFilename ()}.");
 
+	// Compare the entire verified extraction with the copy, including all framework
+	// slices and resource bundles. A partial copy must never publish a completion record.
+	var expected = NativeCacheRecord.Inventory (outputNames.Select (name =>
+		MakeAbsolute (extractionRoot.Combine ("Frameworks").Combine (name)).FullPath).ToArray ());
 	copyArtifacts (extractionRoot, externalsPath, deleteSettings);
+	if (NativeCacheRecord.Inventory (outputs) != expected)
+		throw new Exception ($"Incomplete native copy for {source.Id}.");
 
 	DeleteDirectory (extractionRoot, deleteSettings);
 	DeleteFile (archivePath);
+	NativeCacheRecord.Complete (stamp, identity, expected);
 }
 
 int ExtractArchive (ExternalDownloadSource source, DirectoryPath externalsPath, FilePath archivePath)
@@ -122,7 +135,7 @@ void FirebaseAnalyticsDownload ()
 
 	DownloadAndExtract (
 		source,
-		() => DirectoryExists (new DirectoryPath ("./externals/FirebaseAnalytics.xcframework")),
+		new [] { "FirebaseAnalytics.xcframework" },
 		(extractionRoot, externalsPath, deleteSettings) => {
 			var frameworkSource = extractionRoot.Combine ("Frameworks").Combine ("FirebaseAnalytics.xcframework");
 			var frameworkDestination = externalsPath.Combine ("FirebaseAnalytics.xcframework");
@@ -143,8 +156,7 @@ void GoogleAppMeasurementDownload ()
 
 	DownloadAndExtract (
 		source,
-		() => DirectoryExists (new DirectoryPath ("./externals/GoogleAppMeasurementIdentitySupport.xcframework")) &&
-		      DirectoryExists (new DirectoryPath ("./externals/GoogleAppMeasurement.xcframework")),
+		new [] { "GoogleAppMeasurementIdentitySupport.xcframework", "GoogleAppMeasurement.xcframework" },
 		(extractionRoot, externalsPath, deleteSettings) => {
 			var frameworkSource = extractionRoot.Combine ("Frameworks");
 			var identitySupportSource = frameworkSource.Combine ("GoogleAppMeasurementIdentitySupport.xcframework");

@@ -25,7 +25,7 @@
       "packages": [
         {
           "id": "AdamE.Firebase.iOS.AppCheck",
-          "version": "12.19.3"
+          "version": "12.19.3.1"
         }
       ]
     },
@@ -36,11 +36,11 @@
       "packages": [
         {
           "id": "AdamE.Firebase.iOS.RemoteConfig",
-          "version": "12.19.3"
+          "version": "12.19.3.1"
         },
         {
           "id": "AdamE.Firebase.iOS.ABTesting",
-          "version": "12.19.3"
+          "version": "12.19.3.1"
         }
       ]
     },
@@ -51,7 +51,7 @@
       "packages": [
         {
           "id": "AdamE.Firebase.iOS.Database",
-          "version": "12.19.3"
+          "version": "12.19.3.1"
         }
       ]
     },
@@ -62,7 +62,7 @@
       "packages": [
         {
           "id": "AdamE.Firebase.iOS.Database",
-          "version": "12.19.3"
+          "version": "12.19.3.1"
         }
       ]
     },
@@ -73,7 +73,7 @@
       "packages": [
         {
           "id": "AdamE.Firebase.iOS.ABTesting",
-          "version": "12.19.3"
+          "version": "12.19.3.1"
         }
       ]
     },
@@ -84,7 +84,7 @@
       "packages": [
         {
           "id": "AdamE.Firebase.iOS.ABTesting",
-          "version": "12.19.3"
+          "version": "12.19.3.1"
         }
       ]
     },
@@ -95,7 +95,7 @@
       "packages": [
         {
           "id": "AdamE.Firebase.iOS.ABTesting",
-          "version": "12.19.3"
+          "version": "12.19.3.1"
         }
       ]
     },
@@ -106,7 +106,7 @@
       "packages": [
         {
           "id": "AdamE.Firebase.iOS.CloudFirestore",
-          "version": "12.19.3"
+          "version": "12.19.3.1"
         }
       ]
     },
@@ -117,7 +117,7 @@
       "packages": [
         {
           "id": "AdamE.Firebase.iOS.CloudFirestore",
-          "version": "12.19.3"
+          "version": "12.19.3.1"
         }
       ]
     },
@@ -128,7 +128,7 @@
       "packages": [
         {
           "id": "AdamE.Firebase.iOS.CloudFirestore",
-          "version": "12.19.3"
+          "version": "12.19.3.1"
         }
       ]
     },
@@ -139,7 +139,7 @@
       "packages": [
         {
           "id": "AdamE.Firebase.iOS.CloudFirestore",
-          "version": "12.19.3"
+          "version": "12.19.3.1"
         }
       ]
     },
@@ -150,7 +150,7 @@
       "packages": [
         {
           "id": "AdamE.Firebase.iOS.CloudFirestore",
-          "version": "12.19.3"
+          "version": "12.19.3.1"
         }
       ]
     },
@@ -161,7 +161,7 @@
       "packages": [
         {
           "id": "AdamE.Firebase.iOS.CloudFirestore",
-          "version": "12.19.3"
+          "version": "12.19.3.1"
         }
       ]
     },
@@ -172,7 +172,7 @@
       "packages": [
         {
           "id": "AdamE.Firebase.iOS.CloudFirestore",
-          "version": "12.19.3"
+          "version": "12.19.3.1"
         }
       ]
     },
@@ -183,7 +183,7 @@
       "packages": [
         {
           "id": "AdamE.Firebase.iOS.CloudFirestore",
-          "version": "12.19.3"
+          "version": "12.19.3.1"
         }
       ]
     },
@@ -194,7 +194,7 @@
       "packages": [
         {
           "id": "AdamE.Firebase.iOS.CloudFirestore",
-          "version": "12.19.3"
+          "version": "12.19.3.1"
         }
       ]
     },
@@ -205,7 +205,7 @@
       "packages": [
         {
           "id": "AdamE.Firebase.iOS.CloudFunctions",
-          "version": "12.19.3"
+          "version": "12.19.3.1"
         }
       ]
     },
@@ -216,7 +216,7 @@
       "packages": [
         {
           "id": "AdamE.Firebase.iOS.Crashlytics",
-          "version": "12.19.3"
+          "version": "12.19.3.1"
         }
       ]
     },
@@ -227,7 +227,7 @@
       "packages": [
         {
           "id": "AdamE.Firebase.iOS.Crashlytics",
-          "version": "12.19.3"
+          "version": "12.19.3.1"
         }
       ]
     }

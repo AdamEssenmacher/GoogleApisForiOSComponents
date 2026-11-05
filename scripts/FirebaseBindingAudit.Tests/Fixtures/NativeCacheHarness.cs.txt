@@ -1,0 +1,102 @@
+// Only Cake aliases and external download/Xcode operations are simulated. The cache
+// decisions, identity generation, copy callbacks and completion writes come from production.
+class FilePath {
+    public string FullPath; public FilePath(string path) { FullPath = path; }
+    public string GetFilename() => Path.GetFileName(FullPath);
+    public static implicit operator FilePath(string path) => new FilePath(path);
+    public override string ToString() => FullPath;
+}
+class DirectoryPath {
+    public string FullPath; public DirectoryPath(string path) { FullPath = path; }
+    public DirectoryPath Combine(string path) => new DirectoryPath(Path.Combine(FullPath, path));
+    public FilePath CombineWithFilePath(FilePath path) => new FilePath(Path.Combine(FullPath, path.FullPath));
+    public static implicit operator DirectoryPath(string path) => new DirectoryPath(path);
+    public override string ToString() => FullPath;
+}
+class DeleteDirectorySettings { public bool Recursive; public bool Force; }
+class ProcessArgumentBuilder { public string Text = ""; public void Append(string text) { Text += text; } }
+class ProcessSettings { public ProcessArgumentBuilder Arguments; }
+class PodSpec {
+    public enum PodSource { PodVersion, LocalPath }
+    public string TargetName = "Widget", FrameworkName = "Widget", Version;
+    public PodSource Source;
+    public string[] BuildPodLines() => new[] { "pod 'Widget', '" + Version + "'" };
+}
+public class Harness {
+    public string Version = "1.0", Key = "key", Hash = "", UrlPrefix = "https://example.test";
+    public string Settings = "default", Architectures = "arm64", XcodeId = "Xcode 1", CopyFailure = "", BuildFailure = "";
+    public bool Local;
+    public int Downloads, Copies, Builds, Creates;
+    string Root;
+    Dictionary<string, ExternalDownloadSource> ExternalDownloads = new Dictionary<string, ExternalDownloadSource>();
+    public Harness(string root) {
+        Root = root;
+        Write(Path.Combine(root, "build/Podfile.lock"), "lock");
+        Write(Path.Combine(root, "build/Podfile"), "podfile");
+        Write(Path.Combine(root, "build/Pods/Target Support Files/Widget/Widget.xcconfig"), "settings");
+        Write(Path.Combine(root, "build/Pods/Manifest.lock"), "lock");
+        Write(Path.Combine(root, "build/Pods/Pods.xcodeproj/project.pbxproj"), "project");
+    }
+    static void Write(string path, string text) { System.IO.Directory.CreateDirectory(Path.GetDirectoryName(path)); File.WriteAllText(path, text); }
+    static void Framework(string root, string name) {
+        Write(Path.Combine(root, "Info.plist"), "plist"); Write(Path.Combine(root, name), "binary");
+        Write(Path.Combine(root, "Resources/Privacy.bundle/Info.plist"), "bundle");
+    }
+    DirectoryPath Directory(string path) => new DirectoryPath(path);
+    FilePath MakeAbsolute(FilePath path) => new FilePath(Path.GetFullPath(path.FullPath, Root));
+    DirectoryPath MakeAbsolute(DirectoryPath path) => new DirectoryPath(Path.GetFullPath(path.FullPath, Root));
+    bool FileExists(FilePath path) => File.Exists(MakeAbsolute(path).FullPath);
+    bool DirectoryExists(DirectoryPath path) => System.IO.Directory.Exists(MakeAbsolute(path).FullPath);
+    void EnsureDirectoryExists(DirectoryPath path) => System.IO.Directory.CreateDirectory(MakeAbsolute(path).FullPath);
+    void DeleteDirectory(DirectoryPath path, DeleteDirectorySettings settings) => System.IO.Directory.Delete(MakeAbsolute(path).FullPath, true);
+    void DeleteFile(FilePath path) => File.Delete(MakeAbsolute(path).FullPath);
+    bool IsRunningOnUnix() => true;
+    void Information(string message) { }
+    void Warning(string message, string value) { }
+    string NativeXcodeIdentity() => XcodeId;
+    void ThrowIfProcessFailed(string tool, int exit) { if (exit != 0) throw new Exception(tool); }
+    int StartProcess(string tool, ProcessSettings settings) { Creates++; return 0; }
+    void XCodeBuild(XCodeBuildSettings settings) {
+        Builds++; var path = Path.Combine(settings.ArchivePath, "Products/Library/Frameworks/Widget.framework");
+        // A retry must start clean rather than accepting remnants of a failed build.
+        if (System.IO.Directory.Exists(settings.ArchivePath)) throw new Exception("Archive was not cleaned");
+        Write(Path.Combine(path, "Info.plist"), "plist");
+        if (BuildFailure == "throw") throw new IOException("Interrupted build");
+        if (BuildFailure == "partial") return;
+        Framework(path, "Widget");
+        Write(Path.Combine(path, "Widget"), Version);
+    }
+    void DownloadArchive(ExternalDownloadSource source, FilePath path) { Downloads++; Write(MakeAbsolute(path).FullPath, "archive"); }
+    int ExtractArchive(ExternalDownloadSource source, DirectoryPath externals, FilePath archive) {
+        var root = MakeAbsolute(GetExtractionRoot(source, externals)).Combine("Frameworks").FullPath;
+        var names = source.Id == "FirebaseAnalytics" ? new[] { "FirebaseAnalytics" } : new[] { "GoogleAppMeasurementIdentitySupport", "GoogleAppMeasurement" };
+        foreach (var name in names) {
+            var output = Path.Combine(root, name + ".xcframework"); Write(Path.Combine(output, "Info.plist"), "xcframework");
+            var framework = name == "FirebaseAnalytics" ? "Analytics" : "Measurement";
+            Framework(Path.Combine(output, "ios", framework + ".framework"), framework);
+        }
+        return 0;
+    }
+    void CopyDirectory(DirectoryPath source, DirectoryPath dest) {
+        Copies++; var from = MakeAbsolute(source).FullPath; var to = MakeAbsolute(dest).FullPath;
+        System.IO.Directory.CreateDirectory(to);
+        foreach (var file in System.IO.Directory.GetFiles(from, "*", SearchOption.AllDirectories).OrderBy(p => p, StringComparer.Ordinal)) {
+            var target = Path.Combine(to, Path.GetRelativePath(from, file));
+            System.IO.Directory.CreateDirectory(Path.GetDirectoryName(target)); File.Copy(file, target, true);
+            if (CopyFailure == "throw" || (CopyFailure == "second" && Copies % 2 == 0)) throw new IOException("Interrupted copy");
+            if (CopyFailure == "partial") return;
+        }
+    }
+    void SetDownload(string id) {
+        var hash = NativeCacheRecord.FileHash(CreateArchiveFixture());
+        ExternalDownloads[id] = new ExternalDownloadSource(id, Version, Key, UrlPrefix,
+            expectedSha256: Hash == "uppercase" ? Convert.ToHexString(Convert.FromBase64String(hash)) :
+                Hash == "wrong" ? new string('0', 64) : Convert.ToHexString(Convert.FromBase64String(hash)).ToLowerInvariant());
+    }
+    string CreateArchiveFixture() { var path = Path.Combine(Root, "archive-fixture"); Write(path, "archive"); return path; }
+    public void Download() { SetDownload("GoogleAppMeasurement"); GoogleAppMeasurementDownload(); }
+    public void Analytics() { SetDownload("FirebaseAnalytics"); FirebaseAnalyticsDownload(); }
+    public void Build() => BuildXcodeXcframework("Pods/Pods.xcodeproj",
+        new[] { new PodSpec { Version = Version, Source = Local ? PodSpec.PodSource.LocalPath : PodSpec.PodSource.PodVersion } },
+        new[] { PlatformV2.Create(Sdk.iPhoneOS, new[] { Architectures == "arm64" ? Arch.Arm64 : Arch.x86_64 }) },
+        new DirectoryPath(Path.Combine(Root, "build")), new Dictionary<string, string> { ["CUSTOM"] = Settings });

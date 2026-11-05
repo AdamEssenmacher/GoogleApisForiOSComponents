@@ -1,5 +1,5 @@
 {
-  "releaseVersion": "12.19.3",
+  "releaseVersion": "12.19.3.1",
   "minimumFirebaseVersion": "12.12.0",
   "nativeBuild": {
     "runner": "xcode-27.1",
