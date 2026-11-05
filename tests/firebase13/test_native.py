@@ -1,0 +1,182 @@
+import copy
+import importlib.util
+import json
+from pathlib import Path
+import stat
+import subprocess
+import xml.etree.ElementTree as ET
+import sys
+import tempfile
+import unittest
+import zipfile
+
+ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT / 'tools/firebase13'))
+import native
+from archive_safety import preflight
+from generate import generate
+
+
+class NativeTests(unittest.TestCase):
+    def setUp(self):
+        self.manifest = json.loads(native.MANIFEST.read_text())
+
+    def test_committed_schema_and_generation(self):
+        self.assertEqual(len(native.validate_schema(self.manifest)), 23)
+
+    def test_unverified_pack_fails_before_package_emission(self):
+        guard=ET.parse(ROOT/self.manifest['packages'][0]['project']).find("Target[@Name='_RequireVerifiedFirebase13Producer']")
+        with tempfile.TemporaryDirectory() as tmp:
+            work=Path(tmp);project=work/'fixture.proj';output=work/'packed'
+            project.write_text('<Project>'+ET.tostring(guard,encoding='unicode')+'<Target Name="GenerateNuspec"><WriteLinesToFile File="'+str(output)+'" Lines="packed" /></Target></Project>')
+            command=['dotnet','msbuild',str(project),'-t:GenerateNuspec','-nologo']
+            result=subprocess.run(command,capture_output=True,text=True)
+            self.assertNotEqual(0,result.returncode)
+            self.assertIn('firebase13.cake',result.stdout+result.stderr)
+            self.assertFalse(output.exists())
+            result=subprocess.run(command+['-p:Firebase13BuildInfoPath=producer-info.cs'],capture_output=True,text=True)
+            self.assertEqual(0,result.returncode,result.stdout+result.stderr)
+            self.assertTrue(output.exists())
+
+    def test_conflicting_declarations_are_rejected(self):
+        for fault, message in [('url','source URL'),('hash','digest'),('id','asset ID'),
+                               ('owner','owner'),('path','Unsafe asset'),('native-owner','framework ownership'),
+                               ('dependency','outside Firebase')]:
+            m=copy.deepcopy(self.manifest)
+            with self.subTest(fault=fault):
+                if fault=='url':m['source']['url']='https://github.com/firebase/firebase-ios-sdk/releases/latest/download/Firebase.zip'
+                elif fault=='hash':m['source']['sha256']='bad'
+                elif fault=='id':m['packages'][1]['assets'][0]['id']=m['packages'][0]['assets'][0]['id']
+                elif fault=='owner':m['packages'][0]['assets'][0]['owner']='Firebase.Auth'
+                elif fault=='path':m['packages'][0]['assets'][0]['path']='Firebase/../escape'
+                elif fault=='native-owner':m['packages'][1]['assets'][0]['path']=m['packages'][0]['assets'][0]['path']
+                elif fault=='dependency':m['packages'][0]['dependencies'].append('AdamE.Google.iOS.SignIn')
+                with self.assertRaisesRegex(ValueError,message):native.validate_schema(m)
+
+    def test_dependency_duplicates_and_cake_graph_drift_are_rejected(self):
+        m=copy.deepcopy(self.manifest)
+        m['packages'][0]['dependencies'].append(m['packages'][0]['dependencies'][0])
+        with self.assertRaisesRegex(ValueError,'Duplicate manifest dependency'):native.validate_schema(m)
+        text=(ROOT/'components.cake').read_text()
+        wrong=text.replace('FIREBASE_CORE_ARTIFACT };','FIREBASE_CORE_ARTIFACT, FIREBASE_AUTH_ARTIFACT };',1)
+        with self.assertRaisesRegex(ValueError,'Cake dependency graph'):native.validate_cake_graph(self.manifest,wrong)
+
+    def test_package_dependency_ranges_cannot_be_open_ended(self):
+        p=self.manifest['packages'][0]
+        versions={n['package']:n['version'].removesuffix('.0') for n in self.manifest['packages']}
+        assembly=ET.parse(ROOT/p['project']).findtext('PropertyGroup/AssemblyName')
+        with tempfile.TemporaryDirectory() as tmp:
+            for bounded in (True,False):
+                archive=Path(tmp)/'package.nupkg'
+                spec=ET.Element('package');meta=ET.SubElement(spec,'metadata')
+                ET.SubElement(meta,'id').text=p['package'];ET.SubElement(meta,'version').text=p['version']
+                deps=ET.SubElement(meta,'dependencies')
+                with zipfile.ZipFile(archive,'w') as z:
+                    for platform in ('ios','maccatalyst'):
+                        group=ET.SubElement(deps,'group',targetFramework='net10.0-'+platform)
+                        for dep in p['dependencies']:
+                            ET.SubElement(group,'dependency',id=dep,version=('['+versions[dep]+']') if bounded else versions[dep])
+                        ET.SubElement(group,'dependency',id='Xamarin.Build.Download',version='[0.11.6]')
+                        z.writestr('lib/net10.0-'+platform+'/'+assembly+'.dll',b'managed fixture')
+                    z.writestr('package.nuspec',ET.tostring(spec))
+                    z.writestr('UPSTREAM-NOTICES.txt',(ROOT/'source/Firebase/native/UPSTREAM-NOTICES.txt').read_bytes())
+                    for folder in ('build','buildTransitive'):
+                        for name in ('Firebase.Native.Common.targets',p['package']+'.targets'):
+                            z.writestr(folder+'/'+name,generate(self.manifest)[name])
+                if bounded:native.inspect_package(archive,p)
+                else:
+                    with self.assertRaisesRegex(ValueError,'exact bounded version'):native.inspect_package(archive,p)
+
+    def test_hostile_archive_paths_and_links(self):
+        for fault in ('traversal','absolute','escaping-link','cycle','write-through','case-collision','file-parent'):
+            with self.subTest(fault=fault), tempfile.TemporaryDirectory() as tmp:
+                path=Path(tmp)/'input.zip'
+                with zipfile.ZipFile(path,'w') as z:
+                    def link(name,target):
+                        item=zipfile.ZipInfo(name);item.external_attr=(stat.S_IFLNK | 0o777)<<16;z.writestr(item,target)
+                    if fault=='traversal':z.writestr('Firebase/../escape','x')
+                    elif fault=='absolute':z.writestr('/escape','x')
+                    elif fault=='escaping-link':link('Firebase/link','../../escape')
+                    elif fault=='cycle':link('Firebase/a','b');link('Firebase/b','a')
+                    elif fault=='write-through':link('Firebase/link','other');z.writestr('Firebase/link/payload','x')
+                    elif fault=='case-collision':z.writestr('Firebase/a','x');z.writestr('Firebase/A','y')
+                    elif fault=='file-parent':z.writestr('Firebase/a','x');z.writestr('Firebase/a/payload','y')
+                with self.assertRaises(ValueError):preflight(path)
+
+    def test_safe_internal_symlink_is_accepted(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path=Path(tmp)/'input.zip'
+            with zipfile.ZipFile(path,'w') as z:
+                z.writestr('Firebase/F.framework/Versions/A/payload','x')
+                item=zipfile.ZipInfo('Firebase/F.framework/Current');item.external_attr=(stat.S_IFLNK|0o777)<<16
+                z.writestr(item,'Versions/A')
+            preflight(path)
+
+    def test_checksum_mismatch_fails_before_archive_is_opened(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path=Path(tmp)/'bad.zip';path.write_bytes(b'not an archive')
+            with self.assertRaisesRegex(ValueError,'SHA-256 mismatch'):native.archive_validate(self.manifest,path)
+
+    def test_msbuild_resource_metadata_survives_two_import_paths(self):
+        m=self.manifest
+        p=next(p for p in m['packages'] if p['id']=='Firebase.Core')
+        with tempfile.TemporaryDirectory() as tmp:
+            work=Path(tmp);cache=work/'cache';source=cache/m['source']['id']
+            for a in p['assets']:
+                target=source/a['path'];target.mkdir(parents=True,exist_ok=True)
+                if a['kind']=='Bundle':
+                    (target/'Info.plist').write_text('metadata')
+                    (target/'PrivacyInfo.xcprivacy').write_text('privacy')
+            imports=''
+            for folder in ('build','buildTransitive'):
+                directory=work/folder;directory.mkdir()
+                targets=generate(m)
+                for name in ('Firebase.Native.Common.targets',p['package']+'.targets'):
+                    (directory/name).write_text(targets[name])
+                imports+='<Import Project="'+str(directory/(p['package']+'.targets'))+'"/>'
+            project=work/'probe.proj'
+            project.write_text('<Project><PropertyGroup><XamarinBuildDownloadDir>'+str(cache)+'/</XamarinBuildDownloadDir><TargetPlatformIdentifier>ios</TargetPlatformIdentifier><RuntimeIdentifier>iossimulator-arm64</RuntimeIdentifier><OutputType>Exe</OutputType></PropertyGroup>'+imports+'<Target Name="_XamarinBuildDownload"/><Target Name="Test" DependsOnTargets="_FirebaseNative_AdamE_Firebase_iOS_Core"><WriteLinesToFile File="'+str(work/'resources.txt')+'" Lines="@(BundleResource -&gt; &apos;%(LogicalName)&apos;)" Overwrite="true"/><WriteLinesToFile File="'+str(work/'downloads.txt')+'" Lines="@(XamarinBuildDownload)" Overwrite="true"/></Target></Project>')
+            for label, properties, active, variant in (
+                ('application', [], True, '-simulator'),
+                ('extension', ['-p:OutputType=Library','-p:IsAppExtension=True'], True, '-simulator'),
+                ('library', ['-p:OutputType=Library'], False, '-simulator'),
+                ('binding', ['-p:IsBindingProject=true'], False, '-simulator'),
+                ('design', ['-p:DesignTimeBuild=true'], False, '-simulator'),
+                ('outer', ['-p:IsCrossTargetingBuild=true'], False, '-simulator'),
+                ('catalyst', ['-p:TargetPlatformIdentifier=maccatalyst','-p:RuntimeIdentifier=maccatalyst-arm64'], True, '-catalyst')):
+                with self.subTest(shape=label):
+                    for name in ('resources.txt','downloads.txt'):(work/name).unlink(missing_ok=True)
+                    result=subprocess.run(['dotnet','msbuild',str(project),'-t:Test','-nologo']+properties,capture_output=True,text=True)
+                    self.assertEqual(result.returncode,0,result.stdout+result.stderr)
+                    resources=(work/'resources.txt').read_text().splitlines() if (work/'resources.txt').exists() else []
+                    expected={a['logical']+'/'+name for a in p['assets'] if a['kind']=='Bundle' and variant in a['id'] for name in ('Info.plist','PrivacyInfo.xcprivacy')} if active else set()
+                    self.assertEqual(set(resources),expected)
+                    self.assertEqual(len(resources),len(expected))
+                    downloads=(work/'downloads.txt').read_text().splitlines() if (work/'downloads.txt').exists() else []
+                    self.assertEqual(downloads,[m['source']['id']] if active else [])
+
+    def test_missing_declared_payload_is_rejected(self):
+        m=copy.deepcopy(self.manifest)
+        with tempfile.TemporaryDirectory() as tmp:
+            path=Path(tmp)/'missing.zip'
+            with zipfile.ZipFile(path,'w') as z:
+                z.writestr('Firebase/NOTICES',(ROOT/'source/Firebase/native/UPSTREAM-NOTICES.txt').read_bytes())
+                z.writestr('Firebase/METADATA.md',(ROOT/'tests/fixtures/firebase13/13.1.1/METADATA.md').read_bytes())
+            m['source']['sha256']=native.digest(path)
+            with self.assertRaisesRegex(ValueError,'Missing payload'):
+                native.archive_validate(m,path)
+
+    def test_both_import_paths_use_identical_shared_acquisition(self):
+        targets=generate(self.manifest)
+        self.assertEqual(sum('XamarinBuildDownload Include=' in t for t in targets.values()),1)
+        for p in self.manifest['packages']:
+            text=targets[p['package']+'.targets']
+            self.assertIn('DependsOnTargets="_XamarinBuildDownload"',text)
+            self.assertIn('maccatalyst',text)
+            self.assertIn('DesignTimeBuild',text)
+            self.assertIn('IsAppExtension',text)
+        gam=targets['AdamE.Google.iOS.GoogleAppMeasurement.targets']
+        self.assertIn('FirebaseWithoutAdIdSupport',gam)
+
+
+if __name__=='__main__':unittest.main()

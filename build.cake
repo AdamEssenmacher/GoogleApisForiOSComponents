@@ -1,3 +1,4 @@
+#load "legacy_production.cake"
 #load "poco.cake"
 #load "components.cake"
 #load "common.cake"
@@ -281,4 +282,9 @@ Teardown (context =>
 		Information ("{0}", a);
 });
 
-RunTarget (TARGET);
+if (new [] { "externals", "libs", "nuget", "build", "ci" }.Contains(TARGET))
+    RunLegacyProductionCommand("build", TARGET, NAMES, Argument("producer", "auto"));
+else if (TARGET == "firebase-publish-metadata" && Argument("producer", "auto") == "legacy")
+    RunLegacyProductionCommand("metadata", "", "", "legacy", "firebase", Argument("metadata-output", "output/firebase-metadata.json"));
+else
+    RunTarget (TARGET);

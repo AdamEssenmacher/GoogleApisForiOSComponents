@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFrameworks>net10.0-ios;net10.0-maccatalyst</TargetFrameworks>
     <Nullable>enable</Nullable>
@@ -8,56 +8,57 @@
     <SupportedOSPlatformVersion>15.0</SupportedOSPlatformVersion>
     <RootNamespace>Google.AppCheckCore</RootNamespace>
     <AssemblyName>Google.AppCheckCore</AssemblyName>
-    <AssemblyVersion>11.3.2</AssemblyVersion>
-    <FileVersion>11.3.2</FileVersion>
+    <AssemblyVersion>12.0.0.0</AssemblyVersion>
+    <FileVersion>12.0.0.0</FileVersion>
     <IPhoneResourcePrefix>Resources</IPhoneResourcePrefix>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <CompressBindingResourcePackage>true</CompressBindingResourcePackage>
     <NoWarn>$(NoWarn);NU1603</NoWarn>
+    <PackageReadmeFile>NUGET_README.md</PackageReadmeFile>
   </PropertyGroup>
   <PropertyGroup>
     <PackageId>AdamE.Google.iOS.AppCheckCore</PackageId>
     <Title>AppCheckCore</Title>
-    <Summary>AppCheckCore packed for .NET for iOS</Summary>
-    <Description>AppCheckCore packed for .NET for iOS</Description>
+    <Summary>AppCheckCore managed bindings and XBD native delivery for .NET for iOS</Summary>
+    <Description>AppCheckCore managed bindings and XBD native delivery for .NET for iOS</Description>
     <Authors>Microsoft, Adam Essenmacher, Jean-Emmanuel Baillat</Authors>
     <Owners>Adam Essenmacher</Owners>
     <Copyright>© Microsoft Corporation. All rights reserved. © 2026, Adam Essenmacher.</Copyright>
     <PackageProjectUrl>https://github.com/AdamEssenmacher/GoogleApisForiOSComponents</PackageProjectUrl>
     <PackageLicenseFile>License.md</PackageLicenseFile>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-    <PackageVersion>11.3.2</PackageVersion>
+    <PackageVersion>12.0.0.0</PackageVersion>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="..\..\AssemblyInfo.cs" />
+    <Compile Include="..\..\AssemblyInfo.cs" Condition="'$(Firebase13BuildInfoPath)' == ''" />
   </ItemGroup>
   <ItemGroup>
     <None Include="THIRD-PARTY-NOTICES.txt" Pack="True" PackagePath="THIRD-PARTY-NOTICES.txt" />
     <None Include="License.md" Pack="True" PackagePath="License.md" />
   </ItemGroup>
   <ItemGroup>
-    <NativeReference Include="..\..\..\externals\AppCheckCore.xcframework">
-      <Kind>Framework</Kind>
-      <SmartLink>True</SmartLink>
-      <ForceLoad>True</ForceLoad>
-      <WeakFrameworks>DeviceCheck</WeakFrameworks>
-    </NativeReference>
-    <NativeReference Include="..\..\..\externals\Promises.xcframework">
-      <Kind>Framework</Kind>
-      <SmartLink>True</SmartLink>
-      <ForceLoad>True</ForceLoad>
-    </NativeReference>
-    <NativeReference Include="..\..\..\externals\RecaptchaInterop.xcframework">
-      <Kind>Framework</Kind>
-      <SmartLink>True</SmartLink>
-      <ForceLoad>True</ForceLoad>
-    </NativeReference>
-  </ItemGroup>
-  <ItemGroup>
     <ObjcBindingApiDefinition Include="ApiDefinition.cs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="AdamE.Google.iOS.PromisesObjC" Version="[2.4.0,3.0.0)" />
-    <PackageReference Include="AdamE.Google.iOS.GoogleUtilities" Version="[8.0.0,9.0.0)" />
+    <PackageReference Include="Xamarin.Build.Download" Version="[0.11.6]" PrivateAssets="None" />
+    <ProjectReference Include="../GoogleUtilities/GoogleUtilities.csproj" PrivateAssets="None" />
+    <ProjectReference Include="../PromisesObjC/PromisesObjC.csproj" PrivateAssets="None" />
+    <None Include="../../../source/Firebase/native/AdamE.Google.iOS.AppCheckCore.targets" Pack="True" PackagePath="build/AdamE.Google.iOS.AppCheckCore.targets" />
+    <None Include="../../../source/Firebase/native/Firebase.Native.Common.targets" Pack="True" PackagePath="build/Firebase.Native.Common.targets" />
+    <None Include="../../../source/Firebase/native/AdamE.Google.iOS.AppCheckCore.targets" Pack="True" PackagePath="buildTransitive/AdamE.Google.iOS.AppCheckCore.targets" />
+    <None Include="../../../source/Firebase/native/Firebase.Native.Common.targets" Pack="True" PackagePath="buildTransitive/Firebase.Native.Common.targets" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="../../../source/Firebase/native/UPSTREAM-NOTICES.txt" Pack="True" PackagePath="UPSTREAM-NOTICES.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="../../../docs/FIREBASE_13_XBD.md" Pack="True" PackagePath="NUGET_README.md" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="$(Firebase13BuildInfoPath)" Condition="'$(Firebase13BuildInfoPath)' != ''" />
+  </ItemGroup>
+  <Target Name="_RequireVerifiedFirebase13Producer" BeforeTargets="GenerateNuspec" Condition="'$(Firebase13BuildInfoPath)' == ''">
+    <Error Text="Use dotnet tool run dotnet-cake firebase13.cake --target=nuget to verify the official Firebase archive before packing this package." />
+  </Target>
+  <Import Project="../../Firebase/native/Firebase.Native.Pack.targets" />
 </Project>

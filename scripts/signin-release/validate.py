@@ -114,7 +114,7 @@ def signin_bundle(data, platform, rid):
 
 
 def inspect(data, package):
-    project = ET.parse(ROOT / package['project'])
+    project = release.effective_project_tree(package,ROOT)
     expected = {Path(e.attrib['Include'].replace('\\', '/')).name for e in project.iter()
                 if e.tag in ('NativeReference', '_NativeReference')}
     versions = {p['FrameworkName'] + '.xcframework': p['Version'] for p in package['pods']}

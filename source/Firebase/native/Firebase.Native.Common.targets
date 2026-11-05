@@ -1,0 +1,18 @@
+<Project>
+  <PropertyGroup>
+    <_FirebaseNativeSourceId Condition="'$(_FirebaseNativeSourceId)' == ''">FirebaseiOSSDK-13.1.1</_FirebaseNativeSourceId>
+    <_FirebaseNativeRoot>$(XamarinBuildDownloadDir)FirebaseiOSSDK-13.1.1/</_FirebaseNativeRoot>
+    <_FirebaseNativeCleanup>Remove FirebaseiOSSDK-13.1.1, FirebaseiOSSDK-13.1.1.unpacked, and any FirebaseiOSSDK-13.1.1.zip from $(XamarinBuildDownloadDir), then rebuild online.</_FirebaseNativeCleanup>
+  </PropertyGroup>
+  <ItemGroup Condition="'$(IsBindingProject)' != 'true' And '$(DesignTimeBuild)' != 'true' And '$(IsCrossTargetingBuild)' != 'true' And ('$(TargetPlatformIdentifier)' == 'ios' Or '$(TargetPlatformIdentifier)' == 'maccatalyst') And ('$(OutputType)' != 'Library' Or '$(IsAppExtension)' == 'True')">
+    <XamarinBuildDownload Include="FirebaseiOSSDK-13.1.1" Exclude="@(XamarinBuildDownload)">
+      <Url>https://github.com/firebase/firebase-ios-sdk/releases/download/13.1.1/Firebase.zip</Url>
+      <Kind>Zip</Kind>
+      <Sha256>eab04111b6b6ebd2bbd9264b452b2eec5be13703207f32f7cf10d9040e246b70</Sha256>
+      <ExclusiveLockTimeout>1800</ExclusiveLockTimeout>
+    </XamarinBuildDownload>
+  </ItemGroup>
+  <Target Name="_FirebaseNativeSourceCheck_FirebaseiOSSDK_13_1_1" BeforeTargets="_XamarinBuildDownload;_BeforeCoreCompileInterfaceDefinitions" Condition="'$(IsBindingProject)' != 'true' And '$(DesignTimeBuild)' != 'true' And '$(IsCrossTargetingBuild)' != 'true' And ('$(TargetPlatformIdentifier)' == 'ios' Or '$(TargetPlatformIdentifier)' == 'maccatalyst') And ('$(OutputType)' != 'Library' Or '$(IsAppExtension)' == 'True')">
+    <Error Condition="'$(_FirebaseNativeSourceId)' != 'FirebaseiOSSDK-13.1.1'" Text="Conflicting Firebase binary archive versions. Align Firebase and shared dependency package versions." />
+  </Target>
+</Project>

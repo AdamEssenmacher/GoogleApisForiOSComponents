@@ -71,6 +71,19 @@ class ReviewRegressionTests(unittest.TestCase):
                     release.collect_validation(types.SimpleNamespace(results_dir=folder, package_dir=folder))
 
     def test_shared_native_frameworks_have_one_owner_in_combined_consumers(self):
+        native_manifest = ROOT / 'source/Firebase/native-assets.json'
+        if native_manifest.exists():
+            # Firebase 13 uses Google's prebuilt closure. Swift Promises is no longer
+            # a separate archive payload; RecaptchaInterop retains its AppCheckCore owner.
+            manifest = json.loads(native_manifest.read_text())
+            frameworks = [(p['id'], Path(a['path']).name) for p in manifest['packages']
+                          for a in p['assets'] if a['kind'] == 'XCFramework']
+            self.assertEqual([('Google.AppCheckCore', 'RecaptchaInterop.xcframework')],
+                             [x for x in frameworks if x[1] == 'RecaptchaInterop.xcframework'])
+            self.assertFalse(any(n == 'Promises.xcframework' for _, n in frameworks))
+            core = next(p for p in manifest['packages'] if p['id'] == 'Firebase.Core')
+            self.assertIn('AdamE.Google.iOS.AppCheckCore', core['dependencies'])
+            return
         projects = {name: ET.parse(ROOT / path) for name, path in {
             'AppCheckCore': 'source/Google/AppCheckCore/AppCheckCore.csproj',
             'Core': 'source/Firebase/Core/Core.csproj',

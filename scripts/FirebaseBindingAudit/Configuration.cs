@@ -36,6 +36,8 @@ internal sealed class AuditTargetDefinition
 
     public string[] ObjcUmbrellaHeaderImports { get; set; } = [];
 
+    public bool UsePrebuiltFrameworkLayout { get; set; }
+
     public string[] SharpieFrameworkDependencies { get; set; } = [];
 
     public string? SharpieMode { get; set; }

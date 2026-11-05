@@ -199,14 +199,15 @@ def previous_release():
     return manifest
 
 
-def build_fingerprint(metadata):
+def build_fingerprint(metadata, input_root=None):
+    input_root = input_root or ROOT
     with tempfile.TemporaryDirectory() as temp:
         selected = Path(temp) / 'selected.json'
         output = Path(temp) / 'normalized.json'
         write(selected, [p['key'] for p in metadata])
         # The result is a file; stream build output so compiler/restore errors reach CI logs.
         subprocess.run(['dotnet', 'run', '--project', str(ROOT / 'scripts/FirebaseReleaseFingerprint'),
-                        '--verbosity', 'minimal', '--', str(ROOT), str(selected), str(output)],
+                        '--verbosity', 'minimal', '--', str(input_root), str(selected), str(output)],
                        cwd=ROOT, check=True,
                        # This net10.0 console tool does not consume Apple workloads. Keep the
                        # repository SDK pin, but do not require its Apple workload set on Linux.
@@ -214,13 +215,33 @@ def build_fingerprint(metadata):
         return digest(output.read_bytes())
 
 
+def legacy_inputs(root=None):
+    root=root or ROOT
+    if not (root/'eng/legacy-producer.json').exists():return None
+    import importlib.util
+    spec=importlib.util.spec_from_file_location('legacy_producer_inputs',root/'tools/legacy/producer.py')
+    legacy=importlib.util.module_from_spec(spec);spec.loader.exec_module(legacy)
+    return legacy
+
+
 def snapshot(metadata):
+    """Fingerprint the source tree actually used for production, including legacy inputs."""
+    legacy=legacy_inputs()
+    if legacy and legacy.matches_metadata(metadata,ROOT):
+        with legacy.source_tree(ROOT) as source:
+            manifest=read(ROOT/'source/Firebase/native-assets.json')
+            legacy.verify_nonfirebase_inputs(ROOT,source,legacy.lock(ROOT),manifest)
+            tracked=set(subprocess.check_output(['git','ls-tree','-r','--name-only',legacy.lock(ROOT)['commit']],cwd=ROOT,text=True).splitlines())
+            return snapshot_at(metadata,source,tracked)
+    return snapshot_at(metadata,ROOT,set(run('git','ls-files').splitlines()))
+
+
+def snapshot_at(metadata, input_root, tracked):
     """Fingerprint tracked inputs, not generated outputs or archive timestamps."""
-    tracked = set(run('git', 'ls-files').splitlines())
     shared = ['Directory.Build.props', 'global.json', '.config/dotnet-tools.json', 'source/AssemblyInfo.cs']
-    shared_data = {p: digest((ROOT / p).read_bytes()) for p in shared}
-    shared_data['cakeBuild'] = build_fingerprint(metadata)
-    shared_data['nativeBuild'] = native_build(read(ROOT / CONFIG))
+    shared_data = {p: digest((input_root / p).read_bytes()) for p in shared}
+    shared_data['cakeBuild'] = build_fingerprint(metadata, input_root)
+    shared_data['nativeBuild'] = native_build(read(input_root / CONFIG))
     ids = {p['id']: p for p in metadata}
     require(len(ids) == len(metadata), 'Duplicate package IDs')
     records = []
@@ -229,20 +250,20 @@ def snapshot(metadata):
         require(package['id'].startswith(('AdamE.Firebase.iOS.', 'AdamE.Google.iOS.')), 'Unexpected package scope')
         require(set(package['dependencies']) <= seen, 'Metadata is not in dependency order')
         seen.add(package['id'])
-        project = ROOT / package['project']
+        project = input_root / package['project']
         xml = ET.parse(project)
         require(xml.findtext('.//PackageId') == package['id'], 'Package ID differs from Cake export')
         require(version(xml.findtext('.//PackageVersion')) == version(package['version']),
                 f"Project/Cake versions differ: {package['id']}")
-        files = {p for p in tracked if p.startswith(project.parent.relative_to(ROOT).as_posix() + '/')}
+        files = {p for p in tracked if p.startswith(project.parent.relative_to(input_root).as_posix() + '/')}
         for element in xml.iter():
             if element.get('Pack', '').lower() == 'true' or element.tag in ('Compile', 'Import'):
                 include = element.get('Include') or element.get('Project')
                 if include and '$(' not in include and '*' not in include:
                     path = (project.parent / include.replace('\\', '/')).resolve()
-                    require(path.is_relative_to(ROOT), f'Input outside repository: {include}')
+                    require(path.is_relative_to(input_root), f'Input outside repository: {include}')
                     if path.is_file():
-                        files.add(path.relative_to(ROOT).as_posix())
+                        files.add(path.relative_to(input_root).as_posix())
         references = {}
         for element in xml.findall('.//ProjectReference'):
             path = (project.parent / element.attrib['Include'].replace('\\', '/')).resolve()
@@ -250,7 +271,7 @@ def snapshot(metadata):
             require(dependency_id in ids, f'Out-of-scope project reference: {dependency_id}')
             references[dependency_id] = ids[dependency_id]['version']
         inputs = {'metadata': package, 'shared': shared_data, 'projectReferences': references,
-                  'files': {p: digest((ROOT / p).read_bytes()) for p in sorted(files)}}
+                  'files': {p: digest((input_root / p).read_bytes()) for p in sorted(files)}}
         records.append({**package, 'fingerprint': digest(json.dumps(inputs, sort_keys=True).encode())})
     return records
 
@@ -327,10 +348,10 @@ def validation_reasons(files, packages, channel, integration_metadata=()):
         'source/AssemblyInfo.cs', '.github/workflows/firebase-release.yml', 'tools/ci/select-xcode.sh',
         'tools/e2e/select-simulator.sh',
         'build.cake', 'common.cake', 'poco.cake', 'custom_externals_download.cake', 'components.cake',
-        'firebase_publish.cake', 'firebase_release.cake',
+        'firebase_publish.cake', 'firebase_release.cake', 'legacy.cake', 'legacy_production.cake', 'eng/legacy-producer.json',
         f'eng/{channel}-release.json', f'eng/{channel}-release-baseline.json',
     }
-    prefixes = ['scripts/firebase-release/', 'scripts/FirebaseReleaseFingerprint/', 'tests/firebase-release/']
+    prefixes = ['tools/legacy/', 'tests/legacy-producer/', 'scripts/firebase-release/', 'scripts/FirebaseReleaseFingerprint/', 'tests/firebase-release/']
     if channel == 'firebase':
         exact.update(('tools/e2e/run-firebase-foundation.sh',
                       'scripts/firebase-binding-audit.json', 'scripts/firebase-binding-audit-suppressions.json'))
@@ -349,6 +370,13 @@ def validation_reasons(files, packages, channel, integration_metadata=()):
                     if path.is_relative_to(ROOT):
                         exact.add(path.relative_to(ROOT).as_posix())
     return sorted({p for p in files if p in exact or p.startswith(directories + tuple(prefixes))})
+
+
+
+def requires_new_channel_release(changed):
+    # Shared dependencies have their own package versions and may advance through
+    # Firebase while the published Sign-In root is reused byte-for-byte.
+    return bool(changed) if CHANNEL == 'firebase' else 'AdamE.Google.iOS.SignIn' in changed
 
 
 def plan(args):
@@ -378,7 +406,7 @@ def plan(args):
                 require(version(p['version']) >= version(config['minimumFirebaseVersion']), 'Firebase package predates 12.12')
         if latest:
             require(version(release_version) >= version(latest['releaseVersion']), 'Release version went backwards')
-            require(not changed or version(release_version) > version(latest['releaseVersion']),
+            require(not requires_new_channel_release(changed) or version(release_version) > version(latest['releaseVersion']),
                     'Package changes require a new release version')
     reasons = []
     if args.manual:
@@ -397,6 +425,9 @@ def plan(args):
     result = {'schemaVersion': 1, 'sourceCommit': run('git', 'rev-parse', 'HEAD'),
               'releaseVersion': release_version, 'packages': packages, 'changed': changed,
               'eligible': eligible, 'relevant': bool(reasons), 'reasons': reasons, 'nativeBuild': native_build(config)}
+    legacy=legacy_inputs()
+    if legacy and legacy.matches_metadata(packages,ROOT):
+        result['legacyProducerBaseline']=legacy.lock(ROOT)['commit']
     if CHANNEL == 'signin':
         result['channel'] = CHANNEL
     write(args.output, result)
@@ -513,6 +544,14 @@ def contains_version(spec, value):
             and (not high or v < bound(high) or (spec[-1] == ']' and v == bound(high))))
 
 
+def effective_project_tree(package, root=None):
+    root=root or ROOT
+    legacy=legacy_inputs(root)
+    if legacy and legacy.matches_metadata([package],root):
+        with legacy.source_tree(root) as source:return ET.parse(source/package['project'])
+    return ET.parse(root/package['project'])
+
+
 def inspect_package(data, package, packages, new_commit=None):
     info = package_info(data)
     require(info['id'] == package['id'] and version(info['version']) == version(package['version']), 'Package identity mismatch')
@@ -546,7 +585,7 @@ def inspect_package(data, package, packages, new_commit=None):
                             prefix = framework + '/' + lib['LibraryIdentifier'] + '/' + lib['LibraryPath']
                             require(any(n.startswith(prefix + '/') for n in native.namelist()), f'Missing native library: {prefix}')
                     if new_commit and package.get('project'):
-                        project = ET.parse(ROOT / package['project'])
+                        project = effective_project_tree(package)
                         expected = {Path(e.attrib['Include'].replace('\\', '/')).name: e for e in project.iter()
                                     if e.tag in ('NativeReference', '_NativeReference')}
                         actual_names = {r.attrib['Name'] for r in references}

@@ -1,0 +1,25 @@
+<Project>
+  <Import Project="$(MSBuildThisFileDirectory)Firebase.Native.Common.targets" />
+  <Target Name="_FirebaseNative_AdamE_Google_iOS_AppCheckCore" BeforeTargets="_BeforeCoreCompileInterfaceDefinitions" DependsOnTargets="_XamarinBuildDownload" Condition="'$(IsBindingProject)' != 'true' And '$(DesignTimeBuild)' != 'true' And '$(IsCrossTargetingBuild)' != 'true' And ('$(TargetPlatformIdentifier)' == 'ios' Or '$(TargetPlatformIdentifier)' == 'maccatalyst') And ('$(OutputType)' != 'Library' Or '$(IsAppExtension)' == 'True')">
+    <Error Condition="!Exists('$(_FirebaseNativeRoot)Firebase/FirebaseAppCheck/AppCheckCore.xcframework')" Text="Missing Firebase native asset app-check-core. $(_FirebaseNativeCleanup)" />
+    <Error Condition="!Exists('$(_FirebaseNativeRoot)Firebase/FirebaseAuth/RecaptchaInterop.xcframework')" Text="Missing Firebase native asset recaptcha-interop. $(_FirebaseNativeCleanup)" />
+    <ItemGroup>
+      <NativeReference Include="$(_FirebaseNativeRoot)Firebase/FirebaseAppCheck/AppCheckCore.xcframework">
+        <Kind>Framework</Kind>
+        <SmartLink>True</SmartLink>
+        <ForceLoad>True</ForceLoad>
+        <IsCxx>True</IsCxx>
+        <LinkWithSwiftSystemLibraries>true</LinkWithSwiftSystemLibraries>
+        <LinkerFlags>-ObjC -lc++</LinkerFlags>
+        <WeakFrameworks>DeviceCheck</WeakFrameworks>
+      </NativeReference>
+      <NativeReference Include="$(_FirebaseNativeRoot)Firebase/FirebaseAuth/RecaptchaInterop.xcframework">
+        <LinkerFlags>-ObjC -lc++</LinkerFlags>
+        <Kind>Framework</Kind>
+        <SmartLink>True</SmartLink>
+        <ForceLoad>True</ForceLoad>
+        <LinkWithSwiftSystemLibraries>true</LinkWithSwiftSystemLibraries>
+      </NativeReference>
+    </ItemGroup>
+  </Target>
+</Project>

@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFrameworks>net10.0-ios;net10.0-maccatalyst</TargetFrameworks>
     <Nullable>enable</Nullable>
@@ -8,8 +8,8 @@
     <SupportedOSPlatformVersion>15.0</SupportedOSPlatformVersion>
     <RootNamespace>Google.GTMSessionFetcher</RootNamespace>
     <AssemblyName>Google.GTMSessionFetcher</AssemblyName>
-    <AssemblyVersion>3.5.0.8</AssemblyVersion>
-    <FileVersion>3.5.0.8</FileVersion>
+    <AssemblyVersion>5.3.1.0</AssemblyVersion>
+    <FileVersion>5.3.1.0</FileVersion>
     <IPhoneResourcePrefix>Resources</IPhoneResourcePrefix>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <CompressBindingResourcePackage>true</CompressBindingResourcePackage>
@@ -17,8 +17,8 @@
   <PropertyGroup>
     <PackageId>AdamE.Google.iOS.GTMSessionFetcher</PackageId>
     <Title>GTMSessionFetcher</Title>
-    <Summary>GTMSessionFetcher packed for .NET for iOS</Summary>
-    <Description>GTMSessionFetcher packed for .NET for iOS</Description>
+    <Summary>GTMSessionFetcher managed bindings and XBD native delivery for .NET for iOS</Summary>
+    <Description>GTMSessionFetcher managed bindings and XBD native delivery for .NET for iOS</Description>
     <Authors>Microsoft, Adam Essenmacher</Authors>
     <Owners>Adam Essenmacher</Owners>
     <Copyright>© Microsoft Corporation. All rights reserved. © 2024, Adam Essenmacher.</Copyright>
@@ -26,23 +26,33 @@
     <PackageLicenseFile>License.md</PackageLicenseFile>
     <PackageReadmeFile>NUGET_README.md</PackageReadmeFile>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-    <PackageVersion>3.5.0.8</PackageVersion>
+    <PackageVersion>5.3.1.0</PackageVersion>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="..\..\AssemblyInfo.cs" />
+    <Compile Include="..\..\AssemblyInfo.cs" Condition="'$(Firebase13BuildInfoPath)' == ''" />
   </ItemGroup>
-  <ItemGroup>    
+  <ItemGroup>
     <None Include="License.md" Pack="True" PackagePath="License.md" />
     <None Include="../../../docs/NUGET_README.md" Pack="True" PackagePath="NUGET_README.md" />
   </ItemGroup>
   <ItemGroup>
-    <NativeReference Include="..\..\..\externals\GTMSessionFetcher.xcframework">
-      <Kind>Framework</Kind>
-      <SmartLink>True</SmartLink>
-      <ForceLoad>True</ForceLoad>
-    </NativeReference>
-  </ItemGroup>
-  <ItemGroup>
     <ObjcBindingApiDefinition Include="ApiDefinition.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Xamarin.Build.Download" Version="[0.11.6]" PrivateAssets="None" />
+    <None Include="../../../source/Firebase/native/AdamE.Google.iOS.GTMSessionFetcher.targets" Pack="True" PackagePath="build/AdamE.Google.iOS.GTMSessionFetcher.targets" />
+    <None Include="../../../source/Firebase/native/Firebase.Native.Common.targets" Pack="True" PackagePath="build/Firebase.Native.Common.targets" />
+    <None Include="../../../source/Firebase/native/AdamE.Google.iOS.GTMSessionFetcher.targets" Pack="True" PackagePath="buildTransitive/AdamE.Google.iOS.GTMSessionFetcher.targets" />
+    <None Include="../../../source/Firebase/native/Firebase.Native.Common.targets" Pack="True" PackagePath="buildTransitive/Firebase.Native.Common.targets" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="../../../source/Firebase/native/UPSTREAM-NOTICES.txt" Pack="True" PackagePath="UPSTREAM-NOTICES.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="$(Firebase13BuildInfoPath)" Condition="'$(Firebase13BuildInfoPath)' != ''" />
+  </ItemGroup>
+  <Target Name="_RequireVerifiedFirebase13Producer" BeforeTargets="GenerateNuspec" Condition="'$(Firebase13BuildInfoPath)' == ''">
+    <Error Text="Use dotnet tool run dotnet-cake firebase13.cake --target=nuget to verify the official Firebase archive before packing this package." />
+  </Target>
+  <Import Project="../../Firebase/native/Firebase.Native.Pack.targets" />
 </Project>

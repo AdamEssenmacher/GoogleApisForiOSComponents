@@ -1,0 +1,36 @@
+<Project>
+  <Import Project="$(MSBuildThisFileDirectory)Firebase.Native.Common.targets" />
+  <Target Name="_FirebaseNative_AdamE_Google_iOS_GoogleAppMeasurement" BeforeTargets="_BeforeCoreCompileInterfaceDefinitions" DependsOnTargets="_XamarinBuildDownload" Condition="'$(IsBindingProject)' != 'true' And '$(DesignTimeBuild)' != 'true' And '$(IsCrossTargetingBuild)' != 'true' And ('$(TargetPlatformIdentifier)' == 'ios' Or '$(TargetPlatformIdentifier)' == 'maccatalyst') And ('$(OutputType)' != 'Library' Or '$(IsAppExtension)' == 'True')">
+    <Error Condition="!Exists('$(_FirebaseNativeRoot)Firebase/FirebaseAnalytics/GoogleAppMeasurement.xcframework')" Text="Missing Firebase native asset google-app-measurement. $(_FirebaseNativeCleanup)" />
+    <Error Condition="'$(FirebaseWithoutAdIdSupport)' != 'True' And !Exists('$(_FirebaseNativeRoot)Firebase/FirebaseAnalytics/GoogleAppMeasurementIdentitySupport.xcframework')" Text="Missing Firebase native asset google-app-measurement-identity. $(_FirebaseNativeCleanup)" />
+    <Error Condition="'$(TargetPlatformIdentifier)' == 'ios' And '$(FirebaseWithoutAdIdSupport)' != 'True' And !Exists('$(_FirebaseNativeRoot)Firebase/FirebaseAnalytics/GoogleAdsOnDeviceConversion.xcframework')" Text="Missing Firebase native asset google-ads-on-device-conversion. $(_FirebaseNativeCleanup)" />
+    <ItemGroup>
+      <NativeReference Include="$(_FirebaseNativeRoot)Firebase/FirebaseAnalytics/GoogleAppMeasurement.xcframework">
+        <Kind>Framework</Kind>
+        <SmartLink>True</SmartLink>
+        <ForceLoad>True</ForceLoad>
+        <IsCxx>True</IsCxx>
+        <LinkWithSwiftSystemLibraries>true</LinkWithSwiftSystemLibraries>
+        <LinkerFlags>-ObjC -lc++ -lsqlite3 -lz</LinkerFlags>
+        <Frameworks>StoreKit</Frameworks>
+      </NativeReference>
+      <NativeReference Include="$(_FirebaseNativeRoot)Firebase/FirebaseAnalytics/GoogleAppMeasurementIdentitySupport.xcframework" Condition="'$(FirebaseWithoutAdIdSupport)' != 'True'">
+        <Kind>Framework</Kind>
+        <SmartLink>True</SmartLink>
+        <ForceLoad>True</ForceLoad>
+        <IsCxx>True</IsCxx>
+        <LinkWithSwiftSystemLibraries>true</LinkWithSwiftSystemLibraries>
+        <LinkerFlags>-ObjC -lc++ -lsqlite3 -lz</LinkerFlags>
+        <Frameworks>StoreKit</Frameworks>
+      </NativeReference>
+      <NativeReference Include="$(_FirebaseNativeRoot)Firebase/FirebaseAnalytics/GoogleAdsOnDeviceConversion.xcframework" Condition="'$(TargetPlatformIdentifier)' == 'ios' And '$(FirebaseWithoutAdIdSupport)' != 'True'">
+        <Kind>Framework</Kind>
+        <SmartLink>True</SmartLink>
+        <ForceLoad>True</ForceLoad>
+        <IsCxx>True</IsCxx>
+        <LinkWithSwiftSystemLibraries>true</LinkWithSwiftSystemLibraries>
+        <LinkerFlags>-ObjC -lc++</LinkerFlags>
+      </NativeReference>
+    </ItemGroup>
+  </Target>
+</Project>

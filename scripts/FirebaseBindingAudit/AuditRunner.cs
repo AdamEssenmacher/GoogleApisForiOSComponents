@@ -723,6 +723,28 @@ internal sealed class AuditRunner
             generatedFiles = FindSharpieBindingFiles(sharpieDirectory);
         }
 
+        // Framework discovery can miss Objective-C declarations in a Swift compatibility
+        // header. Retry that explicit public header against the installed device SDK.
+        var swiftHeader = UsesPrebuiltFrameworkLayout(target, attemptedFrameworkPath) ? target.ObjcUmbrellaHeaderImports
+            .Select(import => Path.Combine(attemptedFrameworkPath, "Headers", Path.GetFileName(import)))
+            .FirstOrDefault(path => path.EndsWith("-Swift.h", StringComparison.Ordinal) && File.Exists(path)) : null;
+        if (swiftHeader is not null &&
+            (generatedFiles.Count == 0 || CountComparableSurface(parser.Parse(generatedFiles, [])) == 0))
+        {
+            var sdk = await RunProcessAsync("/usr/bin/xcrun", ["--sdk", "iphoneos", "--show-sdk-version"], tempRoot, null, cancellationToken);
+            if (sdk.ExitCode != 0)
+                throw new InvalidOperationException("Cannot resolve the installed iOS SDK for the Swift compatibility-header audit.");
+            ResetDirectory(sharpieDirectory);
+            var arguments = BuildSharpieHeaderArguments(swiftHeader, sharpieDirectory,
+                "iphoneos" + sdk.StandardOutput.Trim(), sharpieFrameworkSearchDirectory);
+            var result = await RunProcessAsync(sharpieResolution.CommandPath ?? "sharpie", arguments, tempRoot, null, cancellationToken);
+            WriteLogs(logsDirectory, $"{target.Id}-sharpie-header", result);
+            warningFindings.AddRange(BuildProcessWarningFindings(result, target, "sharpie public compatibility header", "sharpie-warning"));
+            if (result.ExitCode != 0)
+                throw new InvalidOperationException($"Sharpie public compatibility-header audit failed for {target.Id}: {result.StandardError}");
+            generatedFiles = FindSharpieBindingFiles(sharpieDirectory);
+        }
+
         if (generatedFiles.Count == 0)
         {
             return new SharpieRunResult(
@@ -789,6 +811,11 @@ internal sealed class AuditRunner
         WriteLogs(logsDirectory, logPrefix, processResult);
         return (processResult, BuildProcessWarningFindings(processResult, target, "sharpie bind", "sharpie-warning"));
     }
+
+    internal static IReadOnlyList<string> BuildSharpieHeaderArguments(string header, string output, string sdk, string frameworkSearchDirectory) =>
+        ["bind", "--header", header, "--scope", Path.GetDirectoryName(header)!,
+         "--namespace", Path.GetFileNameWithoutExtension(Path.GetDirectoryName(Path.GetDirectoryName(header)))!,
+         "--sdk", sdk, "--output", output, "-c", "-x", "objective-c", "-F", frameworkSearchDirectory];
 
     internal static bool TryResolveSharpieCompanionFrameworkPath(string frameworkPath, string stagedFrameworksDirectory, out string companionFrameworkPath)
     {
@@ -1226,7 +1253,7 @@ internal sealed class AuditRunner
         }
 
         MaterializeStagedDirectory(stagedXcframeworkPath);
-        AddObjcUmbrellaHeaderImports(stagedXcframeworkPath, target.ObjcUmbrellaHeaderImports);
+        AddObjcUmbrellaHeaderImports(stagedXcframeworkPath, target.ObjcUmbrellaHeaderImports, UsesPrebuiltFrameworkLayout(target, stagedXcframeworkPath));
     }
 
     private static void MaterializeStagedDirectory(string stagedDirectoryPath)
@@ -1255,7 +1282,31 @@ internal sealed class AuditRunner
         CopyDirectory(sourcePath, stagedDirectoryPath);
     }
 
-    private static void AddObjcUmbrellaHeaderImports(string xcframeworkPath, IReadOnlyList<string> imports)
+    internal static bool UsesPrebuiltFrameworkLayout(AuditTargetDefinition target, string path) =>
+        target.UsePrebuiltFrameworkLayout && !Directory.EnumerateFiles(path, "*-umbrella.h", SearchOption.AllDirectories).Any();
+
+    internal static string FlattenSwiftSubmodules(string content)
+    {
+        // Tokenize comments and strings first so their braces cannot delimit modules.
+        var syntax = new Regex("""//[^\r\n]*|/\*[\s\S]*?\*/|"(?:\\.|[^"\\])*"|(?<module>\bmodule\s+[A-Za-z0-9_]+\.Swift\s*\{)|[{}]""");
+        while (true)
+        {
+            var match = syntax.Matches(content).Cast<Match>().FirstOrDefault(m => m.Groups["module"].Success);
+            if (match is null) break;
+            var depth = 1;
+            var end = -1;
+            foreach (Match token in syntax.Matches(content, match.Index + match.Length))
+            {
+                if (token.Value == "{" || token.Groups["module"].Success) depth++;
+                else if (token.Value == "}" && --depth == 0) { end = token.Index + 1; break; }
+            }
+            if (end < 0) throw new InvalidOperationException("Unbalanced Swift submodule in audit module map.");
+            content = content.Remove(match.Index, end - match.Index);
+        }
+        return content;
+    }
+
+    private static void AddObjcUmbrellaHeaderImports(string xcframeworkPath, IReadOnlyList<string> imports, bool prebuiltLayout)
     {
         var importLines = imports
             .Select(NormalizeObjcImportLine)
@@ -1266,7 +1317,35 @@ internal sealed class AuditRunner
             return;
         }
 
-        foreach (var umbrellaHeaderPath in Directory.EnumerateFiles(xcframeworkPath, "*-umbrella.h", SearchOption.AllDirectories))
+        // Swift compatibility headers assigned to a separate .Swift submodule are
+        // otherwise excluded from a root-framework Sharpie comparison. The audit
+        // copy exposes them through its umbrella; original module maps stay intact.
+        foreach (var moduleMap in prebuiltLayout ? Directory.EnumerateFiles(xcframeworkPath, "module.modulemap", SearchOption.AllDirectories) : [])
+        {
+            var content = File.ReadAllText(moduleMap);
+            var flattened = FlattenSwiftSubmodules(content);
+            if (flattened != content)
+                File.WriteAllText(moduleMap, flattened);
+        }
+        var umbrellaHeaders = Directory.EnumerateFiles(xcframeworkPath, "*-umbrella.h", SearchOption.AllDirectories).ToList();
+        // Official Firebase ZIPs use FrameworkName.h instead of CocoaPods' -umbrella.h.
+        // Modify only the materialized audit copy, never the shared XBD cache.
+        if (prebuiltLayout && umbrellaHeaders.Count == 0)
+        {
+            foreach (var headersDirectory in Directory.EnumerateDirectories(xcframeworkPath, "Headers", SearchOption.AllDirectories))
+            {
+                var frameworkDirectory = new DirectoryInfo(headersDirectory).Parent;
+                while (frameworkDirectory is not null && !frameworkDirectory.Name.EndsWith(".framework", StringComparison.Ordinal))
+                    frameworkDirectory = frameworkDirectory.Parent;
+                if (frameworkDirectory is null)
+                    continue;
+                var header = Path.Combine(headersDirectory, Path.GetFileNameWithoutExtension(frameworkDirectory.Name) + ".h");
+                if (!File.Exists(header))
+                    File.WriteAllText(header, "// Audit-only umbrella for Google's prebuilt Swift framework.\n");
+                umbrellaHeaders.Add(header);
+            }
+        }
+        foreach (var umbrellaHeaderPath in umbrellaHeaders)
         {
             var content = File.ReadAllText(umbrellaHeaderPath);
             var additions = importLines

@@ -47,11 +47,11 @@ class UploadIntegrityTests(unittest.TestCase):
     def assertRecoveryStepsNamed(self, log):
         """Guard the recovery steps themselves, which only live in the error text.
 
-        test_download_cache_recovery.py proves what the cache does; nothing but this
-        checks that the messages tell a consumer to do it.
+        The real XBD archive fixture checks cache recovery separately; this checks
+        that the error messages explain removal of the archive and completion marker.
         """
         folder = targets_property('_FirebaseCrashlyticsItemsFolder')
-        suffix = Path(targets_property('_FirebaseScriptName')).suffix
+        suffix = '.zip'  # The tool now comes from the shared official Firebase archive.
         # The marker is what makes deleting the directory alone a no-op.
         self.assertIn(folder + '.unpacked', log)
         # The download cache restores its bytes instead of re-downloading.
@@ -64,12 +64,12 @@ class UploadIntegrityTests(unittest.TestCase):
             root = Path(tmp).resolve()
             (root / 'global.json').write_bytes((ROOT / 'global.json').read_bytes())
             cache_name = targets_property('_FirebaseCrashlyticsItemsFolder')
-            cache = root / 'cache' / cache_name; cache.mkdir(parents=True)
-            script = cache / 'upload-symbols.sh'
+            cache = root / 'cache' / cache_name / 'Firebase/FirebaseCrashlytics'; cache.mkdir(parents=True)
+            script = cache / targets_property('_FirebaseScriptName')
             if content is not None: script.write_bytes(content)
             marker = root / 'executed'
             project = root / 'fixture.proj'
-            project.write_text('<Project>' + SHIMS + '<Import Project="' + str(ROOT / 'source/Firebase/Crashlytics/Crashlytics.targets') + '"/></Project>')
+            project.write_text('<Project>' + SHIMS + '<Import Project="' + str(ROOT / 'source/Firebase/native/Firebase.Native.Common.targets') + '"/><Import Project="' + str(TARGETS) + '"/><Target Name="_XamarinBuildDownload"/></Project>')
             env = dict(os.environ, TEST_UPLOAD_MARKER=str(marker), TEST_REMOTE_ROOT=str(root / 'remote'), TEST_TAMPER_REMOTE=str(tamper).lower())
             name = '_FirebaseCrashlyticsUploadDSymToFirebaseOn' + ('Windows' if remote else 'Mac')
             command = ['dotnet', 'msbuild', str(project), '-nologo', '-t:' + name,

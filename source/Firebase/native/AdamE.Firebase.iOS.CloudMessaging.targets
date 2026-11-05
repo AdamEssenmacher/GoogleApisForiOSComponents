@@ -1,0 +1,38 @@
+<Project>
+  <Import Project="$(MSBuildThisFileDirectory)Firebase.Native.Common.targets" />
+  <Target Name="_FirebaseNative_AdamE_Firebase_iOS_CloudMessaging" BeforeTargets="_BeforeCoreCompileInterfaceDefinitions" DependsOnTargets="_XamarinBuildDownload" Condition="'$(IsBindingProject)' != 'true' And '$(DesignTimeBuild)' != 'true' And '$(IsCrossTargetingBuild)' != 'true' And ('$(TargetPlatformIdentifier)' == 'ios' Or '$(TargetPlatformIdentifier)' == 'maccatalyst') And ('$(OutputType)' != 'Library' Or '$(IsAppExtension)' == 'True')">
+    <Error Condition="!Exists('$(_FirebaseNativeRoot)Firebase/FirebaseMessaging/FirebaseMessaging.xcframework')" Text="Missing Firebase native asset firebase-messaging. $(_FirebaseNativeCleanup)" />
+    <Error Condition="'$(TargetPlatformIdentifier)' == 'ios' And !$([System.String]::Copy('$(RuntimeIdentifier)').StartsWith('iossimulator-')) And !Exists('$(_FirebaseNativeRoot)Firebase/FirebaseMessaging/FirebaseMessaging.xcframework/ios-arm64/FirebaseMessaging.framework/FirebaseMessaging_Privacy.bundle')" Text="Missing Firebase native asset firebase-messaging-FirebaseMessaging_Privacy.bundle-device. $(_FirebaseNativeCleanup)" />
+    <Error Condition="'$(TargetPlatformIdentifier)' == 'ios' And $([System.String]::Copy('$(RuntimeIdentifier)').StartsWith('iossimulator-')) And !Exists('$(_FirebaseNativeRoot)Firebase/FirebaseMessaging/FirebaseMessaging.xcframework/ios-arm64_x86_64-simulator/FirebaseMessaging.framework/FirebaseMessaging_Privacy.bundle')" Text="Missing Firebase native asset firebase-messaging-FirebaseMessaging_Privacy.bundle-simulator. $(_FirebaseNativeCleanup)" />
+    <Error Condition="'$(TargetPlatformIdentifier)' == 'maccatalyst' And !Exists('$(_FirebaseNativeRoot)Firebase/FirebaseMessaging/FirebaseMessaging.xcframework/ios-arm64_x86_64-maccatalyst/FirebaseMessaging.framework/Versions/A/Resources/FirebaseMessaging_Privacy.bundle')" Text="Missing Firebase native asset firebase-messaging-FirebaseMessaging_Privacy.bundle-catalyst. $(_FirebaseNativeCleanup)" />
+    <ItemGroup>
+      <NativeReference Include="$(_FirebaseNativeRoot)Firebase/FirebaseMessaging/FirebaseMessaging.xcframework">
+        <LinkerFlags>-ObjC -lc++ -lsqlite3</LinkerFlags>
+        <Frameworks>SystemConfiguration</Frameworks>
+        <WeakFrameworks>UserNotifications</WeakFrameworks>
+        <Kind>Framework</Kind>
+        <SmartLink>True</SmartLink>
+        <ForceLoad>True</ForceLoad>
+        <LinkWithSwiftSystemLibraries>true</LinkWithSwiftSystemLibraries>
+      </NativeReference>
+      <_FirebaseBundle_firebase_messaging_FirebaseMessaging_Privacy_bundle_device Include="$(_FirebaseNativeRoot)Firebase/FirebaseMessaging/FirebaseMessaging.xcframework/ios-arm64/FirebaseMessaging.framework/FirebaseMessaging_Privacy.bundle/**/*" Condition="'$(TargetPlatformIdentifier)' == 'ios' And !$([System.String]::Copy('$(RuntimeIdentifier)').StartsWith('iossimulator-'))" />
+      <_FirebaseBundle_firebase_messaging_FirebaseMessaging_Privacy_bundle_simulator Include="$(_FirebaseNativeRoot)Firebase/FirebaseMessaging/FirebaseMessaging.xcframework/ios-arm64_x86_64-simulator/FirebaseMessaging.framework/FirebaseMessaging_Privacy.bundle/**/*" Condition="'$(TargetPlatformIdentifier)' == 'ios' And $([System.String]::Copy('$(RuntimeIdentifier)').StartsWith('iossimulator-'))" />
+      <_FirebaseBundle_firebase_messaging_FirebaseMessaging_Privacy_bundle_catalyst Include="$(_FirebaseNativeRoot)Firebase/FirebaseMessaging/FirebaseMessaging.xcframework/ios-arm64_x86_64-maccatalyst/FirebaseMessaging.framework/Versions/A/Resources/FirebaseMessaging_Privacy.bundle/**/*" Condition="'$(TargetPlatformIdentifier)' == 'maccatalyst'" />
+    </ItemGroup>
+    <ItemGroup>
+      <BundleResource Include="@(_FirebaseBundle_firebase_messaging_FirebaseMessaging_Privacy_bundle_device)">
+        <LogicalName>FirebaseMessaging_Privacy.bundle/%(_FirebaseBundle_firebase_messaging_FirebaseMessaging_Privacy_bundle_device.RecursiveDir)%(_FirebaseBundle_firebase_messaging_FirebaseMessaging_Privacy_bundle_device.Filename)%(_FirebaseBundle_firebase_messaging_FirebaseMessaging_Privacy_bundle_device.Extension)</LogicalName>
+      </BundleResource>
+    </ItemGroup>
+    <ItemGroup>
+      <BundleResource Include="@(_FirebaseBundle_firebase_messaging_FirebaseMessaging_Privacy_bundle_simulator)">
+        <LogicalName>FirebaseMessaging_Privacy.bundle/%(_FirebaseBundle_firebase_messaging_FirebaseMessaging_Privacy_bundle_simulator.RecursiveDir)%(_FirebaseBundle_firebase_messaging_FirebaseMessaging_Privacy_bundle_simulator.Filename)%(_FirebaseBundle_firebase_messaging_FirebaseMessaging_Privacy_bundle_simulator.Extension)</LogicalName>
+      </BundleResource>
+    </ItemGroup>
+    <ItemGroup>
+      <BundleResource Include="@(_FirebaseBundle_firebase_messaging_FirebaseMessaging_Privacy_bundle_catalyst)">
+        <LogicalName>FirebaseMessaging_Privacy.bundle/%(_FirebaseBundle_firebase_messaging_FirebaseMessaging_Privacy_bundle_catalyst.RecursiveDir)%(_FirebaseBundle_firebase_messaging_FirebaseMessaging_Privacy_bundle_catalyst.Filename)%(_FirebaseBundle_firebase_messaging_FirebaseMessaging_Privacy_bundle_catalyst.Extension)</LogicalName>
+      </BundleResource>
+    </ItemGroup>
+  </Target>
+</Project>

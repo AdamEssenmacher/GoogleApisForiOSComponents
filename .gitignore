@@ -28,3 +28,10 @@ artifacts
 *.user
 GoogleService-Info.plist
 !tests/E2E/Firebase.Foundation/FirebaseFoundationE2E/GoogleService-Info.plist
+
+!tools/firebase13/
+
+__pycache__/
+*.pyc
+
+!tools/legacy/

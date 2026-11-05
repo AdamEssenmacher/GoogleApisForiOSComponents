@@ -124,7 +124,8 @@
       "objcUmbrellaHeaderImports": [
         "FirebaseFunctions/FirebaseFunctions-Swift.h"
       ],
-      "sharpieMode": "auto"
+      "sharpieMode": "auto",
+      "usePrebuiltFrameworkLayout": true
     },
     {
       "id": "CloudMessaging",
@@ -232,7 +233,12 @@
       "helperFiles": [
         "Extension.cs"
       ],
-      "sharpieMode": "auto"
+      "sharpieMode": "forceFallback",
+      "objcUmbrellaHeaderImports": [
+        "FirebaseStorage/FirebaseStorage-Swift.h"
+      ],
+      "useSharpieComparisonFallback": true,
+      "usePrebuiltFrameworkLayout": true
     },
     {
       "id": "SignIn",

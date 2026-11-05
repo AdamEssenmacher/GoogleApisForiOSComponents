@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFrameworks>net10.0-ios;net10.0-maccatalyst</TargetFrameworks>
     <Nullable>enable</Nullable>
@@ -8,8 +8,8 @@
     <SupportedOSPlatformVersion>15.0</SupportedOSPlatformVersion>
     <RootNamespace>Firebase.Core</RootNamespace>
     <AssemblyName>Firebase.Core</AssemblyName>
-    <AssemblyVersion>12.19.3</AssemblyVersion>
-    <FileVersion>12.19.3</FileVersion>
+    <AssemblyVersion>13.1.1.0</AssemblyVersion>
+    <FileVersion>13.1.1.0</FileVersion>
     <IPhoneResourcePrefix>Resources</IPhoneResourcePrefix>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <CompressBindingResourcePackage>true</CompressBindingResourcePackage>
@@ -27,78 +27,44 @@
     <PackageLicenseFile>License.md</PackageLicenseFile>
     <PackageReadmeFile>NUGET_README.md</PackageReadmeFile>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-    <PackageVersion>12.19.3</PackageVersion>
+    <PackageVersion>13.1.1.0</PackageVersion>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="..\..\AssemblyInfo.cs" />
+    <Compile Include="..\..\AssemblyInfo.cs" Condition="'$(Firebase13BuildInfoPath)' == ''" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Resources\" />
   </ItemGroup>
-  <ItemGroup>    
+  <ItemGroup>
     <None Include="External-Dependency-Info.txt" Pack="True" PackagePath="THIRD-PARTY-NOTICES.txt" />
     <None Include="License.md" Pack="True" PackagePath="License.md" />
     <None Include="../../../docs/Firebase/NuGet/Core.md" Pack="True" PackagePath="NUGET_README.md" />
     <None Include="../../../icons/firebaseioscore_128x128.png" Pack="True" PackagePath="firebaseioscore_128x128.png" />
   </ItemGroup>
   <ItemGroup>
-    <NativeReference Include="..\..\..\externals\FirebaseCore.xcframework">
-      <Kind>Framework</Kind>
-      <SmartLink>True</SmartLink>
-      <ForceLoad>True</ForceLoad>
-      <Frameworks>Foundation UIKit</Frameworks>
-    </NativeReference>
-    <NativeReference Include="..\..\..\externals\leveldb.xcframework">
-      <Kind>Framework</Kind>
-      <SmartLink>True</SmartLink>
-      <ForceLoad>True</ForceLoad>
-      <LinkerFlags>-lc++</LinkerFlags>
-    </NativeReference>
-    <NativeReference Include="..\..\..\externals\FirebaseAppCheckInterop.xcframework">
-      <Kind>Framework</Kind>
-      <SmartLink>True</SmartLink>
-      <ForceLoad>True</ForceLoad>
-    </NativeReference>
-    <NativeReference Include="..\..\..\externals\FirebaseAuthInterop.xcframework">
-      <Kind>Framework</Kind>
-      <SmartLink>True</SmartLink>
-      <ForceLoad>True</ForceLoad>
-    </NativeReference>
-    <NativeReference Include="..\..\..\externals\FirebaseCoreExtension.xcframework">
-      <Kind>Framework</Kind>
-      <SmartLink>True</SmartLink>
-      <ForceLoad>True</ForceLoad>
-    </NativeReference>
-    <NativeReference Include="..\..\..\externals\FirebaseCoreInternal.xcframework">
-      <Kind>Framework</Kind>
-      <SmartLink>True</SmartLink>
-      <ForceLoad>True</ForceLoad>
-    </NativeReference>
-    <NativeReference Include="..\..\..\externals\FirebaseMessagingInterop.xcframework">
-      <Kind>Framework</Kind>
-      <SmartLink>True</SmartLink>
-      <ForceLoad>True</ForceLoad>
-    </NativeReference>
-    <NativeReference Include="..\..\..\externals\FirebaseRemoteConfigInterop.xcframework">
-      <Kind>Framework</Kind>
-      <SmartLink>True</SmartLink>
-      <ForceLoad>True</ForceLoad>
-    </NativeReference>
-    <NativeReference Include="..\..\..\externals\FirebaseSharedSwift.xcframework">
-      <Kind>Framework</Kind>
-      <SmartLink>True</SmartLink>
-      <ForceLoad>True</ForceLoad>
-    </NativeReference>
-  </ItemGroup>
-  <ItemGroup>
     <ObjcBindingCoreSource Include="Enums.cs" />
     <ObjcBindingApiDefinition Include="ApiDefinition.cs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="AdamE.Google.iOS.AppCheckCore" Version="[11.3.2,12.0.0)" />
-    <PackageReference Include="AdamE.Google.iOS.GoogleDataTransport" Version="[10.1.0,11.0.0)" />
-    <PackageReference Include="AdamE.Google.iOS.GoogleUtilities" Version="[8.1.0.4,9.0.0)" />
-    <PackageReference Include="AdamE.Google.iOS.Nanopb" Version="[3.30910.0,4.0.0)" />
-    <PackageReference Include="AdamE.Google.iOS.PromisesObjC" Version="[2.4.0.6,3.0.0)" />
+    <PackageReference Include="Xamarin.Build.Download" Version="[0.11.6]" PrivateAssets="None" />
+    <ProjectReference Include="../../Google/AppCheckCore/AppCheckCore.csproj" PrivateAssets="None" />
+    <ProjectReference Include="../../Google/GoogleDataTransport/GoogleDataTransport.csproj" PrivateAssets="None" />
+    <ProjectReference Include="../../Google/GoogleUtilities/GoogleUtilities.csproj" PrivateAssets="None" />
+    <ProjectReference Include="../../Google/Nanopb/Nanopb.csproj" PrivateAssets="None" />
+    <ProjectReference Include="../../Google/PromisesObjC/PromisesObjC.csproj" PrivateAssets="None" />
+    <None Include="../../../source/Firebase/native/AdamE.Firebase.iOS.Core.targets" Pack="True" PackagePath="build/AdamE.Firebase.iOS.Core.targets" />
+    <None Include="../../../source/Firebase/native/Firebase.Native.Common.targets" Pack="True" PackagePath="build/Firebase.Native.Common.targets" />
+    <None Include="../../../source/Firebase/native/AdamE.Firebase.iOS.Core.targets" Pack="True" PackagePath="buildTransitive/AdamE.Firebase.iOS.Core.targets" />
+    <None Include="../../../source/Firebase/native/Firebase.Native.Common.targets" Pack="True" PackagePath="buildTransitive/Firebase.Native.Common.targets" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="../../../source/Firebase/native/UPSTREAM-NOTICES.txt" Pack="True" PackagePath="UPSTREAM-NOTICES.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="$(Firebase13BuildInfoPath)" Condition="'$(Firebase13BuildInfoPath)' != ''" />
+  </ItemGroup>
+  <Target Name="_RequireVerifiedFirebase13Producer" BeforeTargets="GenerateNuspec" Condition="'$(Firebase13BuildInfoPath)' == ''">
+    <Error Text="Use dotnet tool run dotnet-cake firebase13.cake --target=nuget to verify the official Firebase archive before packing this package." />
+  </Target>
+  <Import Project="../native/Firebase.Native.Pack.targets" />
 </Project>

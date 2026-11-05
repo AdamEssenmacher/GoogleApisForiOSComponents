@@ -1,13 +1,11 @@
 <Project>
   <PropertyGroup>
-    <_FirebaseCrashlyticsAssemblyName>Firebase.Crashlytics, Version=12.19.3, Culture=neutral, PublicKeyToken=null</_FirebaseCrashlyticsAssemblyName>
-    <_FirebaseCrashlyticsItemsFolder>FCrshlytcs-12.19.3</_FirebaseCrashlyticsItemsFolder>
-    <_FirebaseCrashlyticsSDKBaseFolder>$(XamarinBuildDownloadDir)$(_FirebaseCrashlyticsItemsFolder)\</_FirebaseCrashlyticsSDKBaseFolder>
-    <!-- Requires a file extension, otherwise XDB will complain  -->
-    <_FirebaseScriptName>upload-symbols.sh</_FirebaseScriptName>
+    <_FirebaseCrashlyticsAssemblyName>Firebase.Crashlytics, Version=13.1.1.0, Culture=neutral, PublicKeyToken=null</_FirebaseCrashlyticsAssemblyName>
+    <_FirebaseCrashlyticsItemsFolder>FirebaseiOSSDK-13.1.1</_FirebaseCrashlyticsItemsFolder>
+    <_FirebaseCrashlyticsSDKBaseFolder>$(_FirebaseNativeRoot)Firebase/FirebaseCrashlytics/</_FirebaseCrashlyticsSDKBaseFolder>
+    <_FirebaseScriptName>upload-symbols</_FirebaseScriptName>
     <_FirebaseCrashlyticsScriptSha256>ad9cd5816b9abe1f746ff37b073d3b3cf3a2dc835f1a1476bc30ba5bf66e2822</_FirebaseCrashlyticsScriptSha256>
-    <!-- Xamarin.Build.Download names its download cache after the item plus the ToFile extension. -->
-    <_FirebaseCrashlyticsDownloadCache>$(_FirebaseCrashlyticsItemsFolder)$([System.IO.Path]::GetExtension('$(_FirebaseScriptName)'))</_FirebaseCrashlyticsDownloadCache>
+
     
     <_FirebaseCrashlyticsUploadSymbolsContinueOnError Condition="'$(FirebaseCrashlyticsUploadSymbolsContinueOnError)'=='True'">True</_FirebaseCrashlyticsUploadSymbolsContinueOnError>
     <_FirebaseCrashlyticsUploadSymbolsContinueOnError Condition="'$(FirebaseCrashlyticsUploadSymbolsContinueOnError)'!='True'">False</_FirebaseCrashlyticsUploadSymbolsContinueOnError>
@@ -22,14 +20,6 @@
     <_FirebaseCrashlyticsUploadDSymToFirebaseMasterBeforeTargets Condition="'$(OS)'!='Unix'">_SayGoodbye</_FirebaseCrashlyticsUploadDSymToFirebaseMasterBeforeTargets>
     <_FirebaseCrashlyticsUploadDSymToFirebaseMasterDependsOnTargets Condition="'$(OS)'!='Unix'">_FirebaseCrashlyticsUploadDSymToFirebaseOnWindows</_FirebaseCrashlyticsUploadDSymToFirebaseMasterDependsOnTargets>
   </PropertyGroup>
-  <ItemGroup Condition="('$(OutputType)'!='Library' OR '$(IsAppExtension)'=='True') AND '$(FirebaseCrashlyticsUploadSymbolsEnabled)'=='True'">
-    <XamarinBuildDownload Include="$(_FirebaseCrashlyticsItemsFolder)">
-      <!-- To upgrade, change commit id from the appropriate tag: https://github.com/firebase/firebase-ios-sdk/tags-->
-      <Url>https://raw.githubusercontent.com/firebase/firebase-ios-sdk/42cf1417c51c5e3bfbae5d3ab89b778f8fdc4bb8/Crashlytics/upload-symbols</Url>
-      <ToFile>$(_FirebaseCrashlyticsSDKBaseFolder)$(_FirebaseScriptName)</ToFile>
-      <Kind>Uncompressed</Kind>
-    </XamarinBuildDownload>
-  </ItemGroup>
   <Target Name="_FirebaseCrashlyticsUploadDSymToFirebaseMasterTarget"
     Condition="'$(_FirebaseCrashlyticsUploadDSymToFirebaseMasterDependsOnTargets)'!='' AND '$(FirebaseCrashlyticsUploadSymbolsEnabled)'=='True'"
     AfterTargets="$(_FirebaseCrashlyticsUploadDSymToFirebaseMasterAfterTargets)"
@@ -38,17 +28,17 @@
   <Target Name="_FirebaseCrashlyticsVerifyUploadTool"
     Condition="('$(OutputType)'!='Library' OR '$(IsAppExtension)'=='True') AND '$(FirebaseCrashlyticsUploadSymbolsEnabled)'=='True'">
     <Error Condition="!Exists('$(_FirebaseCrashlyticsSDKBaseFolder)$(_FirebaseScriptName)')"
-      Text="Crashlytics upload tool is missing. From $(XamarinBuildDownloadDir), delete both the $(_FirebaseCrashlyticsItemsFolder) directory and the $(_FirebaseCrashlyticsItemsFolder).unpacked marker beside it, then rebuild to download the pinned tool again. The marker records the download as complete, so deleting the directory on its own restores nothing. Delete $(_FirebaseCrashlyticsDownloadCache) as well if an earlier failed attempt left it there, because its bytes are restored in place of a fresh download." />
+      Text="Crashlytics upload tool is missing. $(_FirebaseNativeCleanup)" />
     <GetFileHash Files="$(_FirebaseCrashlyticsSDKBaseFolder)$(_FirebaseScriptName)" Algorithm="SHA256">
       <Output TaskParameter="Items" ItemName="_FirebaseCrashlyticsHashedTool" />
     </GetFileHash>
     <Error Condition="'%(_FirebaseCrashlyticsHashedTool.FileHash)'!='$(_FirebaseCrashlyticsScriptSha256)'"
-      Text="Crashlytics upload tool SHA-256 mismatch. The tool was not executed. From $(XamarinBuildDownloadDir), delete both the $(_FirebaseCrashlyticsItemsFolder) directory and the $(_FirebaseCrashlyticsItemsFolder).unpacked marker beside it, then rebuild to download the pinned tool again. The marker records the download as complete, so deleting the directory on its own leaves the rejected bytes in place. Delete $(_FirebaseCrashlyticsDownloadCache) as well if an earlier failed attempt left it there, because its bytes are restored in place of a fresh download." />
+      Text="Crashlytics upload tool SHA-256 mismatch; it was not executed. $(_FirebaseNativeCleanup)" />
   </Target>
 <!-- Target to upload dSYM symbols to Firebase when using Visual Studio for Mac -->
   <Target Name="_FirebaseCrashlyticsUploadDSymToFirebaseOnMac"
     Condition="('$(OutputType)'!='Library' OR '$(IsAppExtension)'=='True') AND '$(FirebaseCrashlyticsUploadSymbolsEnabled)'=='True'"
-    DependsOnTargets="_FirebaseCrashlyticsVerifyUploadTool">
+    DependsOnTargets="_XamarinBuildDownload;_FirebaseCrashlyticsVerifyUploadTool">
     <!-- Make file executable -->
     <Exec Command="chmod +x '$(_FirebaseCrashlyticsSDKBaseFolder)$(_FirebaseScriptName)'" ContinueOnError="true" />
     
@@ -60,7 +50,7 @@
   <!-- Target to upload dSYM symbols to Firebase when using Visual Studio for Windows -->
   <Target Name="_FirebaseCrashlyticsUploadDSymToFirebaseOnWindows"
     Condition="('$(OutputType)'!='Library' OR '$(IsAppExtension)'=='True') AND '$(IsMacEnabled)'=='true' AND '$(FirebaseCrashlyticsUploadSymbolsEnabled)'=='True'"
-    DependsOnTargets="_FirebaseCrashlyticsVerifyUploadTool">
+    DependsOnTargets="_XamarinBuildDownload;_FirebaseCrashlyticsVerifyUploadTool">
     <ItemGroup>
       <_CopyFilesToMacOutput Include="$(_FirebaseCrashlyticsSDKBaseFolder)$(_FirebaseScriptName)">
         <TargetPath>$(_FirebaseScriptName)</TargetPath>

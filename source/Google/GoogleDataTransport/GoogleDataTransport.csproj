@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFrameworks>net10.0-ios;net10.0-maccatalyst</TargetFrameworks>
     <Nullable>enable</Nullable>
@@ -8,44 +8,55 @@
     <SupportedOSPlatformVersion>15.0</SupportedOSPlatformVersion>
     <RootNamespace>Google.GoogleDataTransport</RootNamespace>
     <AssemblyName>Google.GoogleDataTransport</AssemblyName>
-    <AssemblyVersion>10.1.0.6</AssemblyVersion>
-    <FileVersion>10.1.0.6</FileVersion>
+    <AssemblyVersion>10.1.1.0</AssemblyVersion>
+    <FileVersion>10.1.1.0</FileVersion>
     <IPhoneResourcePrefix>Resources</IPhoneResourcePrefix>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <CompressBindingResourcePackage>true</CompressBindingResourcePackage>
+    <PackageReadmeFile>NUGET_README.md</PackageReadmeFile>
   </PropertyGroup>
   <PropertyGroup>
     <PackageId>AdamE.Google.iOS.GoogleDataTransport</PackageId>
     <Title>GoogleDataTransport</Title>
-    <Summary>GoogleDataTransport packed for .NET for iOS</Summary>
-    <Description>GoogleDataTransport packed for .NET for iOS</Description>
+    <Summary>GoogleDataTransport managed bindings and XBD native delivery for .NET for iOS</Summary>
+    <Description>GoogleDataTransport managed bindings and XBD native delivery for .NET for iOS</Description>
     <Authors>Microsoft, Adam Essenmacher</Authors>
     <Owners>Adam Essenmacher</Owners>
     <Copyright>© Microsoft Corporation. All rights reserved. © 2024, Adam Essenmacher.</Copyright>
     <PackageProjectUrl>https://github.com/AdamEssenmacher/GoogleApisForiOSComponents</PackageProjectUrl>
     <PackageLicenseFile>License.md</PackageLicenseFile>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-    <PackageVersion>10.1.0.6</PackageVersion>
+    <PackageVersion>10.1.1.0</PackageVersion>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="..\..\AssemblyInfo.cs" />
-  </ItemGroup>
-  <ItemGroup>    
-    <None Include="License.md" Pack="True" PackagePath="License.md" />
+    <Compile Include="..\..\AssemblyInfo.cs" Condition="'$(Firebase13BuildInfoPath)' == ''" />
   </ItemGroup>
   <ItemGroup>
-    <NativeReference Include="..\..\..\externals\GoogleDataTransport.xcframework">
-      <Kind>Framework</Kind>
-      <SmartLink>True</SmartLink>
-      <ForceLoad>True</ForceLoad>
-      <Frameworks>SystemConfiguration CoreTelephony</Frameworks>
-    </NativeReference>
+    <None Include="License.md" Pack="True" PackagePath="License.md" />
   </ItemGroup>
   <ItemGroup>
     <ObjcBindingApiDefinition Include="ApiDefinition.cs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="AdamE.Google.iOS.Nanopb" Version="[3.30910.0,4.0)" />
-    <PackageReference Include="AdamE.Google.iOS.PromisesObjC" Version="[2.4,3.0)" />
+    <PackageReference Include="Xamarin.Build.Download" Version="[0.11.6]" PrivateAssets="None" />
+    <ProjectReference Include="../Nanopb/Nanopb.csproj" PrivateAssets="None" />
+    <ProjectReference Include="../PromisesObjC/PromisesObjC.csproj" PrivateAssets="None" />
+    <None Include="../../../source/Firebase/native/AdamE.Google.iOS.GoogleDataTransport.targets" Pack="True" PackagePath="build/AdamE.Google.iOS.GoogleDataTransport.targets" />
+    <None Include="../../../source/Firebase/native/Firebase.Native.Common.targets" Pack="True" PackagePath="build/Firebase.Native.Common.targets" />
+    <None Include="../../../source/Firebase/native/AdamE.Google.iOS.GoogleDataTransport.targets" Pack="True" PackagePath="buildTransitive/AdamE.Google.iOS.GoogleDataTransport.targets" />
+    <None Include="../../../source/Firebase/native/Firebase.Native.Common.targets" Pack="True" PackagePath="buildTransitive/Firebase.Native.Common.targets" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="../../../source/Firebase/native/UPSTREAM-NOTICES.txt" Pack="True" PackagePath="UPSTREAM-NOTICES.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="../../../docs/FIREBASE_13_XBD.md" Pack="True" PackagePath="NUGET_README.md" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="$(Firebase13BuildInfoPath)" Condition="'$(Firebase13BuildInfoPath)' != ''" />
+  </ItemGroup>
+  <Target Name="_RequireVerifiedFirebase13Producer" BeforeTargets="GenerateNuspec" Condition="'$(Firebase13BuildInfoPath)' == ''">
+    <Error Text="Use dotnet tool run dotnet-cake firebase13.cake --target=nuget to verify the official Firebase archive before packing this package." />
+  </Target>
+  <Import Project="../../Firebase/native/Firebase.Native.Pack.targets" />
 </Project>

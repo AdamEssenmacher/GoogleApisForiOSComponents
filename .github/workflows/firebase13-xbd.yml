@@ -1,0 +1,186 @@
+name: Firebase 13 XBD experiment
+
+on:
+  pull_request:
+    paths:
+      - 'source/Firebase/**'
+      - 'source/Google/**'
+      - 'tools/firebase13/**'
+      - 'tools/legacy/**'
+      - 'tests/legacy-producer/**'
+      - 'tests/fixtures/legacy-producer/**'
+      - 'legacy.cake'
+      - 'legacy_production.cake'
+      - 'eng/legacy-producer.json'
+      - 'signin_publish.cake'
+      - '.github/workflows/firebase-release.yml'
+      - 'tests/firebase13/**'
+      - 'tests/fixtures/firebase13/**'
+      - 'firebase13.cake'
+      - 'firebase13_common.cake'
+      - 'common.cake'
+      - 'poco.cake'
+      - '.config/dotnet-tools.json'
+      - 'docs/Firebase/NuGet/**'
+      - 'docs/Google/NuGet/**'
+      - 'build.cake'
+      - 'components.cake'
+      - 'firebase_release.cake'
+      - 'global.json'
+      - 'Directory.Build.props'
+      - 'source/AssemblyInfo.cs'
+      - 'scripts/FirebaseBindingAudit/**'
+      - 'scripts/FirebaseBindingAudit.Tests/**'
+      - 'scripts/firebase-binding-audit*.json'
+      - 'tests/crashlytics/**'
+      - 'tools/e2e/select-simulator.sh'
+      - '.github/workflows/firebase13-xbd.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: firebase13-xbd-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  schema:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-dotnet@v5
+        with:
+          global-json-file: global.json
+      - run: python3 -m unittest discover -s tests/firebase13 -v
+      - run: python3 tools/firebase13/native.py native-assets-validate
+      - name: Locked legacy producer and published-fingerprint regressions
+        run: python3 -m unittest discover -s tests/legacy-producer -v
+      - name: Binding audit and fingerprint regression tests
+        env:
+          MSBuildEnableWorkloadResolver: false
+        run: dotnet test scripts/FirebaseBindingAudit.Tests
+      - name: Crashlytics upload integrity and stock XBD ZIP cache tests
+        run: python3 -m unittest discover -s tests/crashlytics -v
+
+  native:
+    # Trusted same-repository PRs validate the full experiment, including follow-up branches.
+    # Fork pull requests cannot schedule code on the self-hosted runner.
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'pull_request' &&
+       github.event.pull_request.head.repo.full_name == github.repository)
+    needs: schema
+    runs-on: [self-hosted, macOS, ARM64, xcode-27.1]
+    timeout-minutes: 180
+    env:
+      E2E_SIMULATOR_NAME: GoogleApisCI-iPhone
+    steps:
+      - uses: actions/checkout@v5
+      - run: tools/ci/select-xcode.sh '27.1'
+      - uses: actions/setup-dotnet@v5
+        with:
+          global-json-file: global.json
+      - name: Install a failing pod sentinel
+        run: |
+          mkdir -p "$RUNNER_TEMP/firebase13-tools"
+          cat > "$RUNNER_TEMP/firebase13-tools/pod" <<'EOF'
+          #!/bin/sh
+          echo 'Unexpected CocoaPods invocation' >&2
+          exit 97
+          EOF
+          chmod +x "$RUNNER_TEMP/firebase13-tools/pod"
+          echo "$RUNNER_TEMP/firebase13-tools" >> "$GITHUB_PATH"
+      - name: Acquire, validate and pack exact Firebase closure
+        run: python3 tools/firebase13/native.py nuget
+      - name: Audit all Firebase Objective-C bindings
+        run: |
+          dotnet tool install Sharpie.Bind.Tool --version 26.3.0.11 --tool-path "$RUNNER_TEMP/firebase13-sharpie"
+          python3 tools/firebase13/audit.py --cache "$HOME/Library/Caches/XamarinBuildDownload" --sharpie-path "$RUNNER_TEMP/firebase13-sharpie/sharpie"
+      - name: Verify actual native binding registrations
+        run: python3 tools/firebase13/check_symbols.py --cache "$HOME/Library/Caches/XamarinBuildDownload"
+      - name: Core cold-cache and offline matrix
+        run: python3 tools/firebase13/consumers.py --scope core
+      - name: Combined Analytics Auth Firestore cold-cache and offline matrix
+        run: python3 tools/firebase13/consumers.py --scope combined
+      - name: Analytics without advertising-ID support
+        run: python3 tools/firebase13/consumers.py --scope combined --without-ad-id --quick
+      - name: All Firebase products cold-cache and offline matrix
+        run: python3 tools/firebase13/consumers.py --scope all
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: firebase13-xbd-experimental-validation
+          path: |
+            output/firebase13/*.nupkg
+            output/firebase13-results/*
+            output/firebase13-api-audit/**
+          retention-days: 14
+
+  legacy-signin:
+    # This validates package production/consumption only; it cannot publish or approve deployment.
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'pull_request' &&
+       github.event.pull_request.head.repo.full_name == github.repository)
+    needs: schema
+    runs-on: [self-hosted, macOS, ARM64, xcode-27.1]
+    timeout-minutes: 180
+    permissions:
+      contents: read
+      packages: read
+    env:
+      BUILD_COMMIT: ${{ github.sha }}
+      BUILD_NUMBER: ${{ github.run_number }}
+      E2E_SIMULATOR_NAME: GoogleApisCI-iPhone
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - run: tools/ci/select-xcode.sh '27.1'
+      - uses: actions/setup-dotnet@v5
+        with:
+          global-json-file: global.json
+      - run: dotnet tool restore
+      - name: Install pinned legacy CocoaPods runtime
+        run: |
+          pin=$(python3 -c 'import json; print(json.load(open("eng/signin-release.json"))["nativeBuild"]["cocoapods"])')
+          export GEM_HOME="$RUNNER_TEMP/legacy-cocoapods-$pin"
+          gem install cocoapods --version "$pin" --no-document
+          echo "GEM_HOME=$GEM_HOME" >> "$GITHUB_ENV"
+          echo "$GEM_HOME/bin" >> "$GITHUB_PATH"
+      - name: Export unchanged Sign-In baseline and plan validation
+        run: |
+          dotnet tool run dotnet-cake -- signin_publish.cake
+          dotnet tool run dotnet-cake -- --target=firebase-publish-metadata --producer=legacy
+          python3 scripts/firebase-release/release.py --channel signin plan --manual --online
+      - name: Original Sign-In production command
+        run: dotnet tool run dotnet-cake -- --target=nuget --names=Google.SignIn
+      - name: Inspect packed native delivery and exact CocoaPods resolution
+        run: |
+          python3 scripts/firebase-release/release.py --channel signin prepare --online
+          python3 scripts/signin-release/validate.py
+      - name: Standalone and transitive offline consumers
+        run: python3 scripts/signin-release/consumers.py
+      - name: Acquire matching Firebase 12 integration fixtures
+        id: fixtures
+        run: python3 scripts/signin-release/integration_feed.py --fetch-published
+      - name: Produce missing fixtures with the isolated legacy baseline
+        if: steps.fixtures.outputs.source != 'published'
+        run: dotnet tool run dotnet-cake -- --target=nuget --names=Firebase.Auth,Firebase.Analytics,Firebase.CloudFirestore --producer=legacy
+      - name: Combined Sign-In and Firebase 12 offline consumers
+        run: |
+          python3 scripts/signin-release/integration_feed.py
+          python3 scripts/signin-release/consumers.py --feed output/signin-combined --combined
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: firebase13-legacy-signin-validation
+          path: |
+            output/signin-candidate
+            output/signin-resolution
+            output/signin-results
+            output/signin-plan.json
+            output/signin-metadata.json
+          retention-days: 14

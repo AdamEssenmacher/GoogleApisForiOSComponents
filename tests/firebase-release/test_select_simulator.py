@@ -55,6 +55,11 @@ class SelectSimulatorTests(unittest.TestCase):
         result = self.select(E2E_SIMULATOR_NAME='GoogleApisCI-iPhone')
         self.assertEqual((result.returncode, result.stdout), (0, DEDICATED + '\n'))
 
+    def test_dedicated_name_works_without_any_fallback_iphone(self):
+        result = self.select({'runtime': [{'name':'GoogleApisCI-iPhone','udid':DEDICATED}]},
+                             E2E_SIMULATOR_NAME='GoogleApisCI-iPhone')
+        self.assertEqual((result.returncode,result.stdout),(0,DEDICATED+'\n'))
+
     def test_missing_name_fails_with_create_command(self):
         result = self.select(E2E_SIMULATOR_NAME='Missing-iPhone')
         self.assertEqual((result.returncode, result.stdout), (1, ''))
