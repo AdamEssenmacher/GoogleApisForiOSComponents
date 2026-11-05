@@ -64,8 +64,10 @@ completion. No packages have been published by this work.
   script download. The ZIP fixture confirms that a fresh download with deliberately
   mismatched digest metadata succeeds in XBD 0.11.6; it is explicitly **not** a
   consumer-time digest guarantee. Producer verification still rejects mismatches.
-- This accepts stock XBD cache/extraction semantics. Producer archive safety and
-  digest tests do not establish additional consumer-time protections beyond XBD.
+- Production will retain stock XBD 0.11.6 and document its consumer checksum and
+  cache limits. Producer archive safety and digest verification remain mandatory.
+  Teams requiring pre-extraction verification can use the isolated, verified
+  cache procedure in FIREBASE_13_XBD.md.
 - Analytics/App Measurement licensing, package acceptance wording and downstream
   notice obligations remain open before publication; direct acquisition is not a
   legal conclusion. See FIREBASE_13_XBD.md.

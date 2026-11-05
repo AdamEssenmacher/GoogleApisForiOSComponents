@@ -65,13 +65,23 @@ Producer/release validation independently enforces the complete ZIP digest.
 A real stock-XBD fixture proves that 0.11.6 does **not** enforce that digest after
 a fresh ZIP download: its hash check only applies to an existing archive before
 downloading. Passing `Sha256` metadata therefore does not guarantee consumer-time
-integrity of freshly downloaded frameworks. This experiment accepts the stock
-behavior and does not add a replacement downloader or extraction path. Any stronger
-consumer integrity requirement must be resolved before production promotion.
-These targets do
-not add consumer-time rehashing of completed caches, hostile-archive protection,
-atomic extraction, or warm-cache corruption detection beyond standard XBD. Crashlytics upload-symbols is independently hashed
-before execution, including after copying it to a paired Mac.
+integrity of freshly downloaded frameworks. Production will retain stock XBD
+0.11.6 with this limitation. On a cold cache, the build relies on HTTPS and the
+official versioned release asset for the bytes it receives. XBD can reuse the
+extracted files on later builds without rechecking them.
+
+Teams that require checksum enforcement can verify the official ZIP against the
+pinned SHA-256 above before using it to populate a fresh, isolated cache. Run those
+builds with native download access blocked so an absent or invalid cache cannot
+fall back to automatic acquisition. For Pair to Mac, this applies wherever native
+acquisition runs. This is an optional build policy; the NuGets keep the stock
+first-build behavior.
+
+If an official XBD release fixes fresh-download verification, rerun the
+wrong-digest, retry, and cache-reuse tests before adopting it. Use a fresh cache
+identity or invalidate old entries so the verified path does not reuse files
+extracted by 0.11.6. Crashlytics upload-symbols is independently hashed before
+execution, including after copying it to a paired Mac.
 
 ## Native details and compatibility
 
@@ -97,8 +107,12 @@ new package payloads with new package versions, including binding revisions when
 upstream native versions did not change. Previously published versions are not
 replaced. Non-Firebase product source/native pins remain untouched. Existing
 Sign-In packages with AppCheckCore `<12` or GTMSessionFetcher `<4` bounds cannot be
-represented as compatible with this Firebase closure. Resolving those combinations
-is a separate product upgrade; this experiment does not relax their bounds.
+represented as compatible with this Firebase closure. Google's native Sign-In
+10.1.0 allows AppCheckCore 11.x/12.x and GTMSessionFetcher 3.3 through 5.x.
+Supporting that combination here would require a separately validated NuGet
+binding revision with compatible dependency ranges. The native Sign-In version
+can stay at 10.1.0. The existing published NuGet stays on the Firebase 12
+compatibility path.
 
 ## Commands
 
