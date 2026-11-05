@@ -101,11 +101,18 @@ def matches_metadata(metadata, root=ROOT):
     return all(p['id'] in versions and norm(p['version'])==norm(versions[p['id']]) for p in metadata)
 
 
+def static_signin_enabled(root):
+    config = root / 'eng/signin-release.json'
+    return config.exists() and json.loads(config.read_text())['nativeBuild'].get('delivery') == 'firebase13-static'
+
+
 def verify_nonfirebase_inputs(root, stage, data, manifest):
     """Never silently ignore a later product edit while using a frozen baseline."""
     root=root.resolve();stage=stage.resolve()
     migrated_ids={p['id'] for p in manifest['packages']}
     migrated={p['key'] for p in data['artifacts'] if p['artifactId'] in migrated_ids}
+    if static_signin_enabled(root):
+        migrated.add('Google.SignIn')
     tracked=set(subprocess.check_output(['git','ls-files'],cwd=root,text=True).splitlines())
     for p in data['artifacts']:
         if p['key'] in migrated:continue
@@ -212,6 +219,9 @@ def main():
     args=parser.parse_args();data=lock();manifest=json.loads((ROOT/'source/Firebase/native-assets.json').read_text())
     selection=plan(data,manifest,args.names,args.mode)
     if args.command=='plan':print(json.dumps(selection,indent=2));return
+    if static_signin_enabled(ROOT) and (args.command=='metadata' and args.channel=='signin'
+                                      or args.command=='build' and 'Google.SignIn' in selection['legacy']):
+        raise ValueError('Use the Sign-In release channel signin13-metadata or signin13-produce command for static Sign-In.')
     if args.command=='metadata' or selection['legacy']:
         with source_tree() as source:
             verify_nonfirebase_inputs(ROOT,source,data,manifest)

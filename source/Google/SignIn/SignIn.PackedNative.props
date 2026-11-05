@@ -1,0 +1,38 @@
+<Project>
+  <!-- Producer-only paths. These props are not shipped to consumers. -->
+  <PropertyGroup>
+    <SignInNativeAssetsRoot>$(MSBuildThisFileDirectory)..\..\..\externals\signin-native\</SignInNativeAssetsRoot>
+    <SignInNativeFrameworkRoot>$(SignInNativeAssetsRoot)ios\</SignInNativeFrameworkRoot>
+    <SignInNativeFrameworkRoot Condition="$([System.String]::Copy('$(TargetFramework)').Contains('-maccatalyst'))">$(SignInNativeAssetsRoot)maccatalyst\</SignInNativeFrameworkRoot>
+    <CompressBindingResourcePackage>true</CompressBindingResourcePackage>
+  </PropertyGroup>
+  <ItemGroup>
+    <NativeReference Include="$(SignInNativeFrameworkRoot)GoogleSignIn.xcframework">
+      <Kind>Framework</Kind><SmartLink>True</SmartLink><ForceLoad>True</ForceLoad>
+      <IsCxx>True</IsCxx><LinkWithSwiftSystemLibraries>True</LinkWithSwiftSystemLibraries>
+      <LinkerFlags>-ObjC -lc++ -lsqlite3</LinkerFlags>
+      <Frameworks>CoreGraphics CoreText Foundation LocalAuthentication Security UIKit</Frameworks><WeakFrameworks>SafariServices</WeakFrameworks>
+    </NativeReference>
+    <NativeReference Include="$(SignInNativeFrameworkRoot)AppAuth.xcframework">
+      <Kind>Framework</Kind><SmartLink>True</SmartLink><ForceLoad>True</ForceLoad>
+      <IsCxx>True</IsCxx><LinkWithSwiftSystemLibraries>True</LinkWithSwiftSystemLibraries>
+      <LinkerFlags>-ObjC -lc++ -lsqlite3</LinkerFlags>
+      <Frameworks>SafariServices</Frameworks><WeakFrameworks>AuthenticationServices</WeakFrameworks>
+    </NativeReference>
+    <NativeReference Include="$(SignInNativeFrameworkRoot)AppAuthCore.xcframework">
+      <Kind>Framework</Kind><SmartLink>True</SmartLink><ForceLoad>True</ForceLoad>
+      <IsCxx>True</IsCxx><LinkWithSwiftSystemLibraries>True</LinkWithSwiftSystemLibraries>
+      <LinkerFlags>-ObjC -lc++ -lsqlite3</LinkerFlags>
+      <Frameworks>Foundation Security</Frameworks><WeakFrameworks></WeakFrameworks>
+    </NativeReference>
+    <NativeReference Include="$(SignInNativeFrameworkRoot)GTMAppAuth.xcframework">
+      <Kind>Framework</Kind><SmartLink>True</SmartLink><ForceLoad>True</ForceLoad>
+      <IsCxx>True</IsCxx><LinkWithSwiftSystemLibraries>True</LinkWithSwiftSystemLibraries>
+      <LinkerFlags>-ObjC -lc++ -lsqlite3</LinkerFlags>
+      <Frameworks>Security SystemConfiguration SafariServices</Frameworks><WeakFrameworks></WeakFrameworks>
+    </NativeReference>
+    <None Include="$(SignInNativeAssetsRoot)resources\**\*" Pack="True" PackagePath="build/native-resources/%(RecursiveDir)%(Filename)%(Extension)" />
+    <None Include="$(SignInNativeAssetsRoot)native-notices\**\*" Pack="True" PackagePath="native-notices/%(RecursiveDir)" />
+    <None Include="$(SignInNativeAssetsRoot)NATIVE-BUILD.json" Pack="True" PackagePath="native-provenance/NATIVE-BUILD.json" />
+  </ItemGroup>
+</Project>

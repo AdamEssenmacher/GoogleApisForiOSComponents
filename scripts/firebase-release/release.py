@@ -57,6 +57,21 @@ def configure_channel(channel):
                     'firestore-pipeline', 'firestore-aggregate', 'firestore-filters'])
 
 
+def signin13_mode(settings):
+    return CHANNEL == 'signin' and settings.get('delivery') == 'firebase13-static'
+
+
+def signin13():
+    import importlib.util
+    path = str(ROOT / 'tools/firebase13')
+    if path not in sys.path:
+        sys.path.insert(0, path)
+    spec = importlib.util.spec_from_file_location('signin13_release', ROOT / 'scripts/firebase-release/signin13.py')
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
 def validate_scope(packages):
     if CHANNEL == 'signin':
         require({p['id'] for p in packages} == SIGNIN_IDS and len(packages) == len(SIGNIN_IDS),
@@ -95,6 +110,9 @@ def validate_manifest_channel(manifest):
 def require_signin_predecessor(release_version, latest):
     native = '.'.join(map(str, version(release_version)[:3]))
     require(native in SIGNIN_VERSIONS, 'Unexpected Sign-In release version')
+    if version(release_version) == version('10.1.0.1'):
+        require(latest and version(latest['releaseVersion']) in (version('10.1.0'), version(release_version)),
+                'Missing preceding Sign-In release: expected 10.1.0')
     if latest and version(latest['releaseVersion']) == version(release_version):
         return  # The caller separately verifies the source commit for completed retries.
     previous = None if latest is None else '.'.join(map(str, version(latest['releaseVersion'])[:3]))
@@ -148,7 +166,7 @@ def native_build(config):
     # Native builds run on the self-hosted Mac labelled with its pinned Xcode (docs/SELF_HOSTED_MACOS_RUNNER.md).
     require(bool(re.fullmatch(r'xcode-\d+(?:\.\d+){1,2}', settings['runner'])), 'Expected a pinned self-hosted runner label')
     require(bool(re.fullmatch(r'\d+(?:\.\d+){1,2}', settings['xcode'])), 'Expected a pinned stable Xcode version')
-    if CHANNEL == 'signin':
+    if CHANNEL == 'signin' and not signin13_mode(settings):
         require(version('1.12.0') <= version(settings['cocoapods']) < version('2.0.0'), 'Unsupported CocoaPods runtime')
     return settings
 
@@ -226,6 +244,8 @@ def legacy_inputs(root=None):
 
 def snapshot(metadata):
     """Fingerprint the source tree actually used for production, including legacy inputs."""
+    if CHANNEL == 'signin' and any(p.get('delivery') == 'firebase13-static' for p in metadata):
+        return signin13().snapshot(sys.modules[__name__], metadata)
     legacy=legacy_inputs()
     if legacy and legacy.matches_metadata(metadata,ROOT):
         with legacy.source_tree(ROOT) as source:
@@ -359,7 +379,9 @@ def validation_reasons(files, packages, channel, integration_metadata=()):
                          'tests/E2E/Firebase.Foundation/', 'tests/crashlytics/'))
     else:
         exact.add('signin_publish.cake')
-        prefixes.append('scripts/signin-release/')
+        prefixes.extend(('scripts/signin-release/', 'tools/SignInNative/', 'tools/signin-native/',
+                         'tools/firebase13/', 'source/Firebase/native/'))
+        exact.add('source/Firebase/native-assets.json')
     for package in packages:
         project = ROOT / package['project']
         for element in ET.parse(project).iter():
@@ -415,11 +437,19 @@ def plan(args):
         reasons.append('missing comparison history')
     if not reasons:
         files = run('git', 'diff', '--name-only', args.base, 'HEAD').splitlines()
-        integration = read(args.integration_metadata) if CHANNEL == 'signin' else ()
+        integration = ()
+        if CHANNEL == 'signin':
+            integration = (signin13().integration_metadata(sys.modules[__name__])
+                           if signin13_mode(config['nativeBuild']) else read(args.integration_metadata))
         reasons = validation_reasons(files, packages, CHANNEL, integration)
     old_config = git_file(args.base, CONFIG) if args.base else None
     triggered = args.manual or old_config is None or old_config.get('releaseVersion') != release_version
     eligible = bool(release_version and triggered and (not latest or version(release_version) > version(latest['releaseVersion'])))
+    if signin13_mode(config['nativeBuild']):
+        if release_version:
+            require(version(release_version) == version('10.1.0.1'), 'Unexpected static Sign-In binding revision')
+        if os.environ.get('GITHUB_EVENT_NAME') == 'pull_request':
+            eligible = False
     if eligible:
         reasons.append('eligible release')
     result = {'schemaVersion': 1, 'sourceCommit': run('git', 'rev-parse', 'HEAD'),
@@ -434,6 +464,7 @@ def plan(args):
     if os.environ.get('GITHUB_OUTPUT'):
         with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
             output.write(f"relevant={str(result['relevant']).lower()}\neligible={str(eligible).lower()}\n")
+            output.write(f"delivery={result['nativeBuild'].get('delivery', 'legacy')}\n")
             output.write(f"runner={result['nativeBuild']['runner']}\nxcode={result['nativeBuild']['xcode']}\n")
     print(f"{LABEL} validation required: {result['relevant']}; release eligible: {eligible}; changed packages: {len(changed)}")
     print('Validation reasons: ' + (', '.join(reasons) if reasons else 'no matching inputs changed'))
@@ -518,6 +549,8 @@ def check_feeds(args):
                 inspect_package(data, p, packages, published_commit_requirement(manifest, p['id']))
             except ValueError as error:
                 row['errors'].append(f'{feed.name}: {error}')
+        if signin13_mode(manifest.get('nativeBuild', {})) and p['id'] in SIGNIN_SHARED_IDS and len(available) != len(registries):
+            row['errors'].append('Requires the Firebase 13 package on both feeds')
         if len({payload_hash(data) for data in available}) > 1:
             row['errors'].append('Feeds disagree')
         report.append(row)
@@ -557,6 +590,9 @@ def inspect_package(data, package, packages, new_commit=None):
     require(info['id'] == package['id'] and version(info['version']) == version(package['version']), 'Package identity mismatch')
     if new_commit:
         require(info['commit'] == new_commit, f"Wrong repository commit: {info['id']}")
+    if CHANNEL == 'signin' and package.get('delivery') in ('firebase13-static', 'firebase-xbd'):
+        signin13().inspect(sys.modules[__name__], data, package, packages)
+        return info['dependencies']
     for dependency in info['dependencies']:
         if dependency['id'].startswith('AdamE.'):
             require(dependency['id'] in packages, f"Out-of-scope dependency: {dependency['id']}")
@@ -621,6 +657,10 @@ def prepare(args):
     for p in manifest['packages']:
         existing = {f.name: f.fetch(p) for f in registries}
         available = [data for data in existing.values() if data is not None]
+        if registries and signin13_mode(manifest.get('nativeBuild', {})) and p['id'] in SIGNIN_SHARED_IDS:
+            require(len(available) == len(registries), f"Requires Firebase 13 support package on both feeds: {p['id']}")
+            require(payload_hash(candidates[p['id']].read_bytes()) == payload_hash(available[0]),
+                    f"Firebase integration fixture differs from the feeds: {p['id']}")
         if available:
             require(len({payload_hash(data) for data in available}) == 1, f"Feeds disagree: {p['id']}")
         data = available[0] if available else candidates[p['id']].read_bytes()
@@ -656,7 +696,9 @@ def finalize(args):
         label = f"[{p['id']}](https://www.nuget.org/packages/{p['id']}/{normalized(p['version'])})"
         lines.append(f"| {label} | {p['version']} | {', '.join(p['destinations']) or 'none'} | {p['reused']} |")
     lines += ['', f'[GitHub Packages](https://github.com/{REPO.split("/")[0]}?tab=packages&repo_name={REPO.split("/")[1]})']
-    if CHANNEL == 'signin':
+    if signin13_mode(manifest.get('nativeBuild', {})):
+        lines += ['', 'Native Sign-In 10.1.0, statically linked against the Firebase 13 support packages.']
+    elif CHANNEL == 'signin':
         pods = sorted({(pod['Name'], pod['Version']) for p in manifest['packages'] for pod in p['pods']})
         lines += ['', 'Native CocoaPods versions: ' + ', '.join(f'{name} {value}' for name, value in pods)]
     (folder / 'release-notes.md').write_text('\n'.join(lines) + '\n')
@@ -676,10 +718,14 @@ def collect_validation(args):
         cases = result.get('Cases', [])
         require(cases and all(c.get('Success') is True for c in cases), f'{name} has missing or failed cases')
         if CHANNEL == 'signin':
-            require(result.get('sourceCommit') == os.environ.get('BUILD_COMMIT'), 'Consumer evidence has wrong source commit')
-            require(result.get('packageHashes') and result.get('Checks'), 'Missing Sign-In consumer evidence')
             manifest = read(Path(args.package_dir) / 'manifest.json')
             validate_manifest_channel(manifest)
+            if signin13_mode(manifest.get('nativeBuild', {})):
+                signin13().validate_consumer(sys.modules[__name__], result, manifest, name)
+                results[name] = 'passed'
+                continue
+            require(result.get('sourceCommit') == os.environ.get('BUILD_COMMIT'), 'Consumer evidence has wrong source commit')
+            require(result.get('packageHashes') and result.get('Checks'), 'Missing Sign-In consumer evidence')
             require(result['packageHashes'] == {p['id']: p['sha256'] for p in manifest['packages']}, 'Consumer evidence has wrong packages')
             require(result.get('Lane') == name, 'Consumer evidence has wrong lane')
             require(signin_checks(result.get('RuntimeArchitecture', 'arm64')) <= set(result['Checks']) and any(c.startswith('PASS classes=') for c in result['Checks']),
@@ -708,7 +754,7 @@ def collect_validation(args):
     write(Path(args.results_dir) / 'validation.json', results)
 
 
-def publish_packages(folder, packages, registries, wait_seconds=1800, poll_seconds=15):
+def publish_packages(folder, packages, registries, wait_seconds=1800, poll_seconds=15, reuse_only=()):
     # Cache verified identities, not package bytes. Existing immutable versions need one download.
     verified = set()
     pending = []
@@ -716,6 +762,7 @@ def publish_packages(folder, packages, registries, wait_seconds=1800, poll_secon
         for feed in registries:
             data = feed.fetch(p)
             require(data is None or payload_hash(data) == p['payloadHash'], f"Existing package conflict: {feed.name}/{p['id']}")
+            require(data is not None or p['id'] not in reuse_only, f"Required dependency missing: {feed.name}/{p['id']}")
             if data is not None:
                 verified.add((feed.name, p['id'], p['version']))
     # Submit the entire dependency-ordered set before waiting for registry indexing.
@@ -782,7 +829,11 @@ def publish(args):
         expected_commit = manifest['sourceCommit'] if not p['reused'] else published_commit_requirement(manifest, p['id'])
         inspect_package(data, allowed[p['id']], allowed, expected_commit)
     registries = feeds()
-    publish_packages(folder, manifest['packages'], registries)
+    if signin13_mode(read(ROOT / CONFIG)['nativeBuild']):
+        require(signin13_mode(manifest['nativeBuild']), 'Wrong Sign-In delivery evidence')
+        publish_packages(folder, manifest['packages'], registries, reuse_only=SIGNIN_SHARED_IDS)
+    else:
+        publish_packages(folder, manifest['packages'], registries)
     tag = TAG_PREFIX + manifest['releaseVersion']
     # gh creates the tag at the exact tested SHA. Existing tags must never be moved.
     tags = github('git/matching-refs/tags/' + urllib.parse.quote(tag, safe=''))
@@ -847,11 +898,23 @@ def main():
     p.add_argument('--package-dir', default=f'output/{CHANNEL}-candidate')
     p.add_argument('--metadata', default=f'output/{CHANNEL}-metadata.json')
     sub.add_parser('probe-feeds')
+    sub.add_parser('signin13-metadata')
+    sub.add_parser('signin13-produce')
     sub.add_parser('last-validated')
     args = parser.parse_args()
     if args.command == 'snapshot':
         packages = [{k: p[k] for k in ('id', 'version', 'fingerprint')} for p in snapshot(read(args.metadata))]
         write(args.output, {'schemaVersion': 1, 'published': False, 'packages': packages})
+    elif args.command in ('signin13-metadata', 'signin13-produce'):
+        require(signin13_mode(read(ROOT / CONFIG)['nativeBuild']), 'Firebase 13 Sign-In mode is required')
+        adapter = signin13()
+        release = sys.modules[__name__]
+        if args.command == 'signin13-metadata':
+            write(ROOT / 'output/signin-metadata.json', adapter.metadata(release))
+        else:
+            plan = read(ROOT / 'output/signin-plan.json')
+            require(plan['sourceCommit'] == run('git', 'rev-parse', 'HEAD'), 'Sign-In plan is for another commit')
+            adapter.produce(release, plan, ROOT / 'output/firebase13', ROOT / 'output/signin-packages')
     elif args.command == 'probe-feeds':
         # Small existing dependency exercises actual download authorization, not just the public index.
         for feed in feeds():

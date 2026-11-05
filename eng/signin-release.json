@@ -1,8 +1,8 @@
 {
-  "releaseVersion": "10.1.0",
+  "releaseVersion": null,
   "nativeBuild": {
+    "delivery": "firebase13-static",
     "runner": "xcode-27.1",
-    "xcode": "27.1",
-    "cocoapods": "1.17.0"
+    "xcode": "27.1"
   }
 }

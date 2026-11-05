@@ -46,12 +46,16 @@ concurrency:
 
 jobs:
   schema:
+    outputs:
+      signin-delivery: ${{ steps.signin-delivery.outputs.mode }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-dotnet@v5
         with:
           global-json-file: global.json
+      - id: signin-delivery
+        run: python3 -c 'import json; print("mode=" + json.load(open("eng/signin-release.json"))["nativeBuild"].get("delivery", "legacy"))' >> "$GITHUB_OUTPUT"
       - run: python3 -m unittest discover -s tests/firebase13 -v
       - run: python3 tools/firebase13/native.py native-assets-validate
       - name: Locked legacy producer and published-fingerprint regressions
@@ -120,9 +124,10 @@ jobs:
   legacy-signin:
     # This validates package production/consumption only; it cannot publish or approve deployment.
     if: >-
-      github.event_name == 'workflow_dispatch' ||
-      (github.event_name == 'pull_request' &&
-       github.event.pull_request.head.repo.full_name == github.repository)
+      needs.schema.outputs.signin-delivery != 'firebase13-static' &&
+      (github.event_name == 'workflow_dispatch' ||
+       (github.event_name == 'pull_request' &&
+        github.event.pull_request.head.repo.full_name == github.repository))
     needs: schema
     runs-on: [self-hosted, macOS, ARM64, xcode-27.1]
     timeout-minutes: 180

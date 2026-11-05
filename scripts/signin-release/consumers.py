@@ -136,7 +136,7 @@ WRAPPER_PROBE = """   // The native property is write-once and reported only on 
 """
 
 
-def probe_source(combined, transitive, package_version):
+def probe_source(combined, transitive, package_version, firebase_major=12):
     amr = release.version(package_version) >= release.version('9.2.0')
     wrapper = release.version(package_version) >= release.version('10.0.0')
     claims_probe = AMR_PROBE if amr else 'using var claims = new NSSet<Google.SignIn.Claim>(claim, essentialClaim);'
@@ -148,7 +148,10 @@ def probe_source(combined, transitive, package_version):
             if (objc_getClass(n) == IntPtr.Zero) throw new Exception("Missing Firebase class " + n);
             if (!Firebase.Core.App.FirebaseVersion.StartsWith("12.", StringComparison.Ordinal))
                 throw new Exception("Expected Firebase 12 runtime");'''
-    marker = ' firebase12=FIRAuth,FIRAnalytics,FIRFirestore' if combined else ''
+    if combined and firebase_major != 12:
+        extra = extra.replace('StartsWith("12."', f'StartsWith("{firebase_major}."')
+        extra = extra.replace('Expected Firebase 12 runtime', f'Expected Firebase {firebase_major} runtime')
+    marker = f' firebase{firebase_major}=FIRAuth,FIRAnalytics,FIRFirestore' if combined else ''
     return (PROBE.replace('CLAIMS_PROBE', claims_probe)
             .replace('SELECTOR_FLOOR', '73' if wrapper else '71' if amr else '67')
             .replace('CLAIM_NAMES', ('auth_time,amr' if amr else 'auth_time') + (' wrapper=wrapperIdentifier' if wrapper else ''))
