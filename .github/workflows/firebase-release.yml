@@ -269,6 +269,7 @@ jobs:
       packages: read
     outputs:
       relevant: ${{ steps.plan.outputs.relevant }}
+      delivery: ${{ steps.plan.outputs.delivery }}
       eligible: ${{ steps.plan.outputs.eligible }}
       runner: ${{ steps.plan.outputs.runner }}
       xcode: ${{ steps.plan.outputs.xcode }}
@@ -282,8 +283,12 @@ jobs:
       - run: dotnet tool restore
       - name: Export Sign-In and integration dependency closures
         run: |
-          dotnet tool run dotnet-cake -- signin_publish.cake
-          dotnet tool run dotnet-cake -- --target=firebase-publish-metadata --producer=legacy
+          if python3 -c 'import json,sys; sys.exit(json.load(open("eng/signin-release.json"))["nativeBuild"].get("delivery") != "firebase13-static")'; then
+            python3 scripts/firebase-release/release.py --channel signin signin13-metadata
+          else
+            dotnet tool run dotnet-cake -- signin_publish.cake
+            dotnet tool run dotnet-cake -- --target=firebase-publish-metadata --producer=legacy
+          fi
       - name: Release tooling tests
         run: python3 -m unittest discover -s tests/firebase-release -v
       - name: Plan Sign-In validation and release
@@ -323,7 +328,11 @@ jobs:
 
   signin-validate:
     needs: signin-plan
-    if: needs.signin-plan.outputs.relevant == 'true' && github.event_name != 'pull_request'
+    if: >-
+      needs.signin-plan.outputs.relevant == 'true' &&
+      (github.event_name != 'pull_request' ||
+       (needs.signin-plan.outputs.delivery == 'firebase13-static' &&
+        github.event.pull_request.head.repo.full_name == github.repository))
     # Native builds run only on the maintainers' self-hosted Mac (docs/SELF_HOSTED_MACOS_RUNNER.md).
     runs-on: [self-hosted, macOS, ARM64, '${{ needs.signin-plan.outputs.runner }}']
     timeout-minutes: 360
@@ -334,6 +343,7 @@ jobs:
       BUILD_COMMIT: ${{ github.sha }}
       BUILD_NUMBER: ${{ github.run_number }}
       XCODE_VERSION: ${{ needs.signin-plan.outputs.xcode }}
+      SIGNIN_DELIVERY: ${{ needs.signin-plan.outputs.delivery }}
     steps:
       - uses: actions/checkout@v5
       - uses: actions/download-artifact@v7
@@ -345,10 +355,12 @@ jobs:
       - uses: actions/setup-dotnet@v5
         with:
           global-json-file: global.json
+      - name: Install Apple workloads
+        run: dotnet workload install ios maccatalyst
       - name: Install pinned producer tools
+        if: env.SIGNIN_DELIVERY != 'firebase13-static'
         run: |
           dotnet tool restore
-          dotnet workload install ios maccatalyst
           pin=$(python3 -c 'import json; print(json.load(open("eng/signin-release.json"))["nativeBuild"]["cocoapods"])')
           # Install the pinned CocoaPods into a job-local gem home so the Mac's own gems are untouched.
           export GEM_HOME="$RUNNER_TEMP/gems"
@@ -360,8 +372,10 @@ jobs:
         id: unit-tests
         run: python3 -m unittest discover -s tests/firebase-release -v
       - name: Build and pack Sign-In closure
+        if: env.SIGNIN_DELIVERY != 'firebase13-static'
         run: dotnet tool run dotnet-cake -- --target=nuget --names=Google.SignIn
       - name: Inspect and stage Sign-In candidate
+        if: env.SIGNIN_DELIVERY != 'firebase13-static'
         id: package-inspection
         env:
           GH_TOKEN: ${{ github.token }}
@@ -369,8 +383,10 @@ jobs:
           python3 scripts/firebase-release/release.py --channel signin prepare --online
           python3 scripts/signin-release/validate.py
       - name: Standalone and transitive offline consumers
+        if: env.SIGNIN_DELIVERY != 'firebase13-static'
         run: python3 scripts/signin-release/consumers.py
       - name: Reuse published Firebase 12 integration fixtures
+        if: env.SIGNIN_DELIVERY != 'firebase13-static'
         id: fixtures
         env:
           # GitHub Packages reads need a repository token; fork pull requests use nuget.org alone.
@@ -379,16 +395,40 @@ jobs:
           dotnet tool run dotnet-cake -- --target=firebase-publish-metadata --producer=legacy
           python3 scripts/signin-release/integration_feed.py --fetch-published
       - name: Build Firebase 12 integration fixtures only
-        if: steps.fixtures.outputs.source != 'published'
+        if: env.SIGNIN_DELIVERY != 'firebase13-static' && steps.fixtures.outputs.source != 'published'
         run: dotnet tool run dotnet-cake -- --target=nuget --names=Firebase.Auth,Firebase.Analytics,Firebase.CloudFirestore --producer=legacy
       - name: Stage Firebase 12 integration feed
+        if: env.SIGNIN_DELIVERY != 'firebase13-static'
         run: python3 scripts/signin-release/integration_feed.py
       - name: Combined Sign-In and Firebase 12 consumers
+        if: env.SIGNIN_DELIVERY != 'firebase13-static'
         run: python3 scripts/signin-release/consumers.py --feed output/signin-combined --combined
+      - name: Build static Sign-In and acquire Firebase 13 fixtures
+        if: env.SIGNIN_DELIVERY == 'firebase13-static'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          rm -rf output/firebase13 output/signin-packages output/signin-candidate output/signin-results
+          mkdir -p "$RUNNER_TEMP/signin-no-pod"
+          printf '#!/bin/sh\necho Unexpected producer CocoaPods invocation >&2\nexit 97\n' > "$RUNNER_TEMP/signin-no-pod/pod"
+          chmod +x "$RUNNER_TEMP/signin-no-pod/pod"
+          PATH="$RUNNER_TEMP/signin-no-pod:$PATH" python3 scripts/firebase-release/release.py --channel signin signin13-produce
+      - name: Inspect and stage static Sign-In candidate
+        if: env.SIGNIN_DELIVERY == 'firebase13-static'
+        id: static-package-inspection
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/firebase-release/release.py --channel signin prepare --online --package-dir output/signin-packages
+      - name: Standalone and transitive static Sign-In consumers
+        if: env.SIGNIN_DELIVERY == 'firebase13-static'
+        run: python3 tools/firebase13/consumers.py --scope signin --signin-candidate output/signin-candidate
+      - name: Combined Sign-In and Firebase 13 consumers
+        if: env.SIGNIN_DELIVERY == 'firebase13-static'
+        run: python3 tools/firebase13/consumers.py --scope combined --with-signin --signin-candidate output/signin-candidate
       - name: Seal Sign-In validation evidence and approval summary
         env:
           UNIT_TEST_OUTCOME: ${{ steps.unit-tests.outcome }}
-          PACKAGE_INSPECTION_OUTCOME: ${{ steps.package-inspection.outcome }}
+          PACKAGE_INSPECTION_OUTCOME: ${{ steps.static-package-inspection.outcome == 'success' && steps.static-package-inspection.outcome || steps.package-inspection.outcome }}
         run: |
           python3 scripts/firebase-release/release.py --channel signin collect_validation --results-dir output/signin-results
           python3 scripts/firebase-release/release.py --channel signin finalize --results output/signin-results/validation.json
@@ -405,6 +445,7 @@ jobs:
           path: |
             output/signin-results
             output/signin-resolution
+            output/firebase13-results/*signin*
           retention-days: 90
 
   signin-validation:
@@ -418,9 +459,11 @@ jobs:
           RELEVANT: ${{ needs.signin-plan.outputs.relevant }}
           VALIDATE_RESULT: ${{ needs.signin-validate.result }}
           EVENT_NAME: ${{ github.event_name }}
+          DELIVERY: ${{ needs.signin-plan.outputs.delivery }}
+          TRUSTED_PR: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
         run: |
           test "$PLAN_RESULT" = success
-          if [ "$RELEVANT" = true ] && [ "$EVENT_NAME" != pull_request ]; then
+          if [ "$RELEVANT" = true ] && { [ "$EVENT_NAME" != pull_request ] || { [ "$DELIVERY" = firebase13-static ] && [ "$TRUSTED_PR" = true ]; }; }; then
             test "$VALIDATE_RESULT" = success
           elif [ "$RELEVANT" = true ]; then
             test "$VALIDATE_RESULT" = skipped
@@ -457,8 +500,12 @@ jobs:
           path: output/signin-candidate
       - name: Re-export allowed Sign-In scope
         run: |
-          dotnet tool restore
-          dotnet tool run dotnet-cake -- signin_publish.cake
+          if python3 -c 'import json,sys; sys.exit(json.load(open("eng/signin-release.json"))["nativeBuild"].get("delivery") != "firebase13-static")'; then
+            python3 scripts/firebase-release/release.py --channel signin signin13-metadata
+          else
+            dotnet tool restore
+            dotnet tool run dotnet-cake -- signin_publish.cake
+          fi
       - name: Configure authenticated GitHub Packages source
         env:
           GH_TOKEN: ${{ github.token }}

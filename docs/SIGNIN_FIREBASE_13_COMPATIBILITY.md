@@ -30,8 +30,19 @@ builds, required resource bundles, absence of embedded dynamic copies of the
 static frameworks, and secret-free simulator calls. A credentialed Sign-In,
 token refresh, and Firebase Auth exchange on a device remain separate validation.
 
-The companion candidate uses the explicit producer commands above while the
-release pipeline remains on its published Sign-In baseline. Release integration
-needs to recognize the binding revision, validate and seal its exact package,
-and verify the required Firebase 13 support packages on both feeds before any
-Sign-In deployment can become eligible.
+The existing Firebase CI and release workflow runs this static producer and
+both consumer lanes on trusted pull requests. It stages the five-package
+Sign-In closure and seals its hashes and checks. Firebase products used for
+the combined consumer stay outside the Sign-In publication scope.
+
+The companion configuration leaves release eligibility disabled. After Firebase
+13.1.1 is released, the maintainer can enable Sign-In 10.1.0.1 in
+`eng/signin-release.json`. Eligible validation uses the published Firebase
+release manifest and checks matching fixture payloads on both registries.
+The existing protected deployment job rechecks the four support packages on
+both feeds, so only the new Sign-In package can be pushed by this channel.
+The publisher uses the sealed package files from validation.
+
+The legacy producer rejects requests to build the static Sign-In revision from
+its frozen CocoaPods baseline. Use the Sign-In release workflow or the explicit
+commands above for that revision.

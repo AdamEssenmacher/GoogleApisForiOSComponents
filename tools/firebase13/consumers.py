@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Exercise direct/transitive Firebase native acquisition and warm-cache offline builds."""
 import argparse
+import importlib.util
 import json
 import os
 from pathlib import Path
@@ -39,21 +40,34 @@ def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--resume',type=Path)
     parser.add_argument('--platform',choices=['ios','maccatalyst'])
-    parser.add_argument('--scope',choices=['core','combined','all'],default='combined')
+    parser.add_argument('--scope',choices=['core','combined','all','signin'],default='combined')
     parser.add_argument('--without-ad-id',action='store_true')
     parser.add_argument('--quick',action='store_true',help='Direct iOS simulator only; the default includes device/Catalyst/transitive shapes')
     parser.add_argument('--cache',type=Path,help='Reuse an existing XBD cache instead of testing a fresh acquisition')
     parser.add_argument('--with-signin', action='store_true', help='Include the Firebase 13 compatible Sign-In binding revision')
+    parser.add_argument('--signin-candidate', type=Path)
     args=parser.parse_args()
     if args.with_signin and args.scope != 'combined':
         parser.error('--with-signin requires --scope combined')
     m=json.loads(MANIFEST.read_text());feed=ROOT/'output/firebase13'
     label=args.scope+('-without-ad-id' if args.without_ad_id else '')
+    signin = args.with_signin or args.scope == 'signin'
     if args.with_signin:
         label += '-signin'
+    if args.signin_candidate and (not signin or args.quick or args.platform):
+        parser.error('Sealed Sign-In evidence requires the full platform matrix')
+    checks = []
+    if args.signin_candidate:
+        lane = 'combined' if args.with_signin else 'consumers'
+        evidence = ROOT/'output/signin-results'/f'{lane}.json'
+        evidence.unlink(missing_ok=True)
+    if signin:
+        spec = importlib.util.spec_from_file_location('signin_consumers', ROOT/'scripts/signin-release/consumers.py')
+        signin_consumers = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(signin_consumers)
     signin_package = 'AdamE.Google.iOS.SignIn'
     signin_version = '10.1.0.1'
-    roots={'core':['Core'],'combined':['Analytics','Auth','CloudFirestore'],'all':[p['id'].split('.',1)[1] for p in m['packages'] if p['id'].startswith('Firebase.')]}[args.scope]
+    roots={'signin':[],'core':['Core'],'combined':['Analytics','Auth','CloudFirestore'],'all':[p['id'].split('.',1)[1] for p in m['packages'] if p['id'].startswith('Firebase.')]}[args.scope]
     work=(args.resume or Path(tempfile.mkdtemp(prefix='firebase13-consumer-'))).resolve();print('WORKSPACE',work,flush=True)
     results=ROOT/'output/firebase13-results';results.mkdir(parents=True,exist_ok=True)
     (results/(label+'-workspace.txt')).write_text(str(work))
@@ -69,24 +83,26 @@ def main():
         with (results/(label+'-'+name+'.log')).open('w') as output:
             p=subprocess.run(cmd,cwd=work,env=offline if blocked else env,stdout=output,stderr=subprocess.STDOUT)
         if p.returncode:raise RuntimeError((results/(label+'-'+name+'.log')).read_text()[-10000:])
+        checks.append(name)
     projects=[]
     for platform in ([args.platform] if args.platform else ['ios'] if args.quick else ['ios','maccatalyst']):
         for transitive in ([False] if args.quick else [False,True]):
             project=work/(platform+('-transitive' if transitive else '-direct'));project.mkdir(exist_ok=True)
             versions={p['id'].split('.',1)[1]:p['version'] for p in m['packages'] if p['id'].startswith('Firebase.')}
             refs=''.join(f'<PackageReference Include="AdamE.Firebase.iOS.{name}" Version="[{versions[name]}]"/>' for name in roots)
-            if args.with_signin:
+            if signin:
                 refs += f'<PackageReference Include="{signin_package}" Version="[{signin_version}]"/>'
             if transitive:
                 lib=project/'Library';lib.mkdir(exist_ok=True)
                 (lib/'Library.csproj').write_text(f'<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><TargetFramework>net10.0-{platform}</TargetFramework></PropertyGroup><ItemGroup>{refs}</ItemGroup></Project>')
-                (lib/'Class.cs').write_text('public class BindingConsumer { public static string Version => Firebase.Core.App.FirebaseVersion; }')
+                (lib/'Class.cs').write_text('public static class BindingProbe { public static string Describe() => typeof(Google.SignIn.SignIn).FullName; }'
+                                             if signin else 'public class BindingConsumer { public static string Version => Firebase.Core.App.FirebaseVersion; }')
                 refs='<ProjectReference Include="Library/Library.csproj"/>'
             minimum_os='17.0' if platform=='maccatalyst' else '15.0'
             (project/'Probe.csproj').write_text(f'<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><TargetFramework>net10.0-{platform}</TargetFramework><RuntimeIdentifiers Condition="&apos;$(RuntimeIdentifier)&apos; == &apos;&apos;">{"iossimulator-arm64;ios-arm64" if platform=="ios" else "maccatalyst-arm64"}</RuntimeIdentifiers><OutputType>Exe</OutputType><SupportedOSPlatformVersion>{minimum_os}</SupportedOSPlatformVersion><EnableCodeSigning>false</EnableCodeSigning><EnableDefaultCompileItems>false</EnableDefaultCompileItems><MtouchLink>None</MtouchLink></PropertyGroup><ItemGroup>{refs}<Compile Include="Main.cs"/></ItemGroup><Target Name="ReportFirebaseAssets" AfterTargets="_BeforeCoreCompileInterfaceDefinitions"><WriteLinesToFile File="$(MSBuildProjectDirectory)/native-assets.txt" Lines="@(NativeReference)" Overwrite="true"/><WriteLinesToFile File="$(MSBuildProjectDirectory)/bundle-assets.txt" Lines="@(BundleResource -&gt; &apos;%(Identity)|%(LogicalName)&apos;)" Overwrite="true"/></Target></Project>')
             classes=['FIRApp']+([] if args.scope=='core' else ['FIRAnalytics','FIRAuth','FIRFirestore','__FIRExprBridge','__FIRSortStageBridge'])
             extra=''
-            if args.scope!='core':
+            if args.scope not in ('core','signin'):
                 extra='''var sortType=typeof(Firebase.CloudFirestore.SortStageBridge);
                 if(sortType==null) throw new Exception("Missing managed Firestore bridge");
                 using var field=new Firebase.CloudFirestore.FieldBridge("field"); if(field.FieldName!="field") throw new Exception("Firestore bridge roundtrip failed");
@@ -119,31 +135,32 @@ def main():
                 Action<Firebase.Storage.StorageUploadTask> uploadApi=task=>{task.Enqueue();task.Pause();task.Cancel();task.Resume();};
                 GC.KeepAlive(downloadApi); GC.KeepAlive(uploadApi);
                 """
-            if args.with_signin:
-                classes += ['GIDSignIn', 'GIDConfiguration', 'GIDSignInButton', 'GIDClaim']
-                extra += '''
-                using var signinConfig = new Google.SignIn.Configuration("fixture-client-id");
-                using var signinButton = new Google.SignIn.SignInButton();
-                using var signinClaim = Google.SignIn.Claim.CreateAuthTimeClaim();
-                if (signinConfig.ClientId != "fixture-client-id" ||
-                    Google.SignIn.SignIn.SharedInstance is null || signinClaim.Name != "auth_time")
-                    throw new Exception("Google Sign-In native probe failed");
-                '''
-            (project/'Main.cs').write_text(PROBE.replace('EXPECTED_FIREBASE_VERSION',m['releaseVersion']).replace('CLASS_NAMES',','.join('"'+n+'"' for n in classes)).replace('EXTRA_PROBE',extra))
+            source = (signin_consumers.probe_source(args.with_signin, transitive, signin_version, firebase_major=13)
+                      if signin else PROBE.replace('EXPECTED_FIREBASE_VERSION',m['releaseVersion'])
+                      .replace('CLASS_NAMES',','.join('"'+n+'"' for n in classes)).replace('EXTRA_PROBE',extra))
+            (project/'Main.cs').write_text(source)
             bundle='com.googleapisforioscomponents.firebase13.'+work.name.split('-')[-1]+'.'+platform+('.transitive' if transitive else '.direct')
             (project/'Info.plist').write_text(f'<plist version="1.0"><dict><key>CFBundleIdentifier</key><string>{bundle}</string><key>CFBundleShortVersionString</key><string>1.0</string><key>CFBundleVersion</key><string>1</string><key>UIApplicationSceneManifest</key><dict><key>UIApplicationSupportsMultipleScenes</key><false/><key>UISceneConfigurations</key><dict><key>UIWindowSceneSessionRoleApplication</key><array><dict><key>UISceneConfigurationName</key><string>Default Configuration</string><key>UISceneDelegateClassName</key><string>SceneDelegate</string></dict></array></dict></dict></dict></plist>')
             projects.append((project,platform,bundle))
     before=snapshot(cache)
     for project,platform,bundle in projects:run('restore-'+project.name,['dotnet','restore',str(project/'Probe.csproj'),'--force','--configfile',str(work/'NuGet.config')])
     assert snapshot(cache)==before,'Restore acquired native SDK files'
+    package_hashes = {}
     for p in m['packages']:
         version=p['version'].removesuffix('.0')
         restored=work/'nuget'/p['package'].lower()/version/(p['package'].lower()+'.'+version+'.nupkg')
         if restored.exists():
             assert digest(restored)==digest(feed/(p['package']+'.'+version+'.nupkg')), 'Restored package differs from current candidate; rerun in a fresh workspace: '+p['package']
-    if args.with_signin:
+            package_hashes[p['package']] = digest(restored)
+    if signin:
         restored = work/'nuget'/signin_package.lower()/signin_version/(signin_package.lower()+'.'+signin_version+'.nupkg')
         assert digest(restored) == digest(feed/(signin_package+'.'+signin_version+'.nupkg')), 'Restored Sign-In package differs from candidate'
+        package_hashes[signin_package] = digest(restored)
+        if args.signin_candidate:
+            candidate = json.loads((args.signin_candidate/'manifest.json').read_text())
+            expected = {p['id']: p['sha256'] for p in candidate['packages']}
+            assert all(package_hashes.get(k) == v for k, v in expected.items()), 'Consumer differs from staged Sign-In candidate'
+            assert candidate['sourceCommit'] == subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip()
     restored_packages=snapshot(work/'nuget')
     first=True;simulator=None
     for project,platform,bundle in projects:
@@ -165,14 +182,14 @@ def main():
                     assert any(p.exists() and digest(p)==digest(Path(source)) for p in candidates), 'Missing/altered privacy resource: '+logical
             bundles=[p.name for p in app.rglob('*.bundle')]
             assert len(bundles)==len(set(bundles)),'Duplicate logical bundles'
-            if args.with_signin:
+            if signin:
                 expected = {'GoogleSignIn_GoogleSignIn.bundle', 'AppAuth_AppAuth.bundle',
                             'AppAuth_AppAuthCore.bundle', 'GTMAppAuth_GTMAppAuth.bundle'}
                 assert expected <= set(bundles), 'Missing packed Sign-In resource bundle(s): ' + str(expected - set(bundles))
                 assert not any(p.is_dir() and p.name in {'GoogleSignIn.framework', 'AppAuth.framework',
                             'AppAuthCore.framework', 'GTMAppAuth.framework', 'AppCheckCore.framework',
                             'GTMSessionFetcher.framework'} for p in app.rglob('*.framework')), 'Unexpected dynamic framework'
-            if args.scope!='core':assert ('GoogleAdsOnDeviceConversion.xcframework' in '\n'.join(assets)) == (platform=='ios' and not args.without_ad_id)
+            if args.scope not in ('core','signin'):assert ('GoogleAdsOnDeviceConversion.xcframework' in '\n'.join(assets)) == (platform=='ios' and not args.without_ad_id)
             if args.without_ad_id:assert 'GoogleAppMeasurementIdentitySupport.xcframework' not in '\n'.join(assets)
             if first:simulator=(app,bundle)
             first=False
@@ -191,12 +208,22 @@ def main():
     subprocess.run(['xcrun','simctl','install',device,str(app)],check=True)
     subprocess.run(['xcrun','simctl','launch',device,bundle],check=True)
     container=Path(subprocess.check_output(['xcrun','simctl','get_app_container',device,bundle,'data']).decode().strip())
-    result=container/'Documents/firebase13-result.txt'
+    result=container/'Documents'/('signin-result.txt' if signin else 'firebase13-result.txt')
     for _ in range(30):
         if result.exists():break
         time.sleep(1)
     text=result.read_text() if result.exists() else 'timeout'
-    assert text.startswith('PASS Firebase 13.'),text
+    assert text.startswith('PASS classes=' if signin else 'PASS Firebase 13.'),text
+    if args.signin_candidate:
+        lane = 'combined' if args.with_signin else 'consumers'
+        evidence = ROOT/'output/signin-results'/f'{lane}.json'
+        evidence.parent.mkdir(parents=True, exist_ok=True)
+        checks.append(text)
+        evidence.write_text(json.dumps({
+            'Success': True, 'Cases': [{'Success': True, 'Name': check} for check in checks],
+            'Checks': checks, 'Lane': lane, 'sourceCommit': candidate['sourceCommit'],
+            'packageHashes': package_hashes,
+        }, indent=2))
     (results/(label+'-result.json')).write_text(json.dumps({'success':True,'runtime':text,'workspace':str(work),'sourceCommit':subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT).decode().strip(),'scope':args.scope,'quick':args.quick},indent=2))
     print(text,flush=True)
 
